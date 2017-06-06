@@ -1,0 +1,36 @@
+{
+  "name": "eosjs",
+  "version": "1.0.0",
+  "description": "General purpose library for the EOS blockchain.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha index.test.js",
+    "coverage": "istanbul cover _mocha -- -R spec index.test.js",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eosjs/eosjs.git"
+  },
+  "keywords": [
+    "EOS",
+    "Blockchain"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eosjs/eosjs/issues"
+  },
+  "homepage": "https://github.com/eosjs/eosjs#readme",
+  "devDependencies": {
+    "coveralls": "^2.13.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.4.2"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "co": "^4.6.0",
+    "eosapi": "eosjs/api",
+    "eosjson": "eosjs/json"
+  }
+}
