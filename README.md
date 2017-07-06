@@ -1,49 +1,57 @@
 [![Build Status](https://travis-ci.org/eosjs/eosjs.svg?branch=master)](https://travis-ci.org/eosjs/eosjs)
 [![Coverage Status](https://coveralls.io/repos/github/eosjs/eosjs/badge.svg?branch=master)](https://coveralls.io/github/eosjs/eosjs?branch=master)
+[![NPM](https://img.shields.io/npm/v/eosjs-general.svg)](https://www.npmjs.org/package/eosjs-general)
 
-# eosjs
+Status: Alpha (this is for eosjs library developers)
+
+# Eos Js
 
 General purpose library for the EOS blockchain.
-
-This will combine other libraries into a larger package to allow for easy programming of blockchain read and write operations.
-
-* [api](https://github.com/eosjs/api) - application programming interface to EOS blockchain nodes
-* [json](https://github.com/eosjs/json) - blockchain definitions (api method names, blockchain operations, etc)
-* [fcbuffer](https://github.com/jcalfee/fcbuffer) - binary serialization used by the blockchain
 
 ## Usage
 
 ```javascript
-const assert = require('assert')
-const Eos = require('.') // npm => eosjs
+Eos = require('eosjs') // Or Eos = require('.')
+callback = (err, res) => {err ? console.error(err) : console.log(res)}
 
-const eos = Eos()
+// API, note: testnet uses eosd at localhost (until there is a testnet)
+Testnet = require('eosjs-api/testnet')
 
-const callback = (err, res) => {err ? console.error(err) : console.log(res)}
+testnet = Testnet()
+testnet.getBlock(1, callback) // More at https://github.com/eosjs/api
 
+eos = Eos({network: testnet})
+
+// Transaction
+expireInSeconds = 60
 eos.transaction({
   messages: [
     {
       from: '',
       to: '',
+      cc: [],
       type: '',
       data: ''
     }
   ],
-  sign: [key1],
-  broadcast: true
+  sign: ['5KYZdUEo39z3FPrtuX2QbbwGnNP5zTd7yyr2SC1j299sBCnWjss'],
+  permissions: [],
 }, callback)
 
+// Exported libraries (see Related Libraries)
+let {ecc} = eos.modules
+let {json} = eos.modules
+let {fcbuffer} = eos.modules
 ```
 
-## Testnet
+# Related Libraries
 
-```javascript
-const Testnet = require('eosapi/testnet')
-const api = Testnet()
-const eos = Eos({api})
-```
+This library breaks down into more specific purpose libraries:
+
+* [api](https://github.com/eosjs/api) - application programming interface to EOS blockchain nodes
+* [json](https://github.com/eosjs/json) - blockchain definitions (api method names, blockchain operations, etc)
+* [fcbuffer](https://github.com/jcalfee/fcbuffer) - binary serialization used by the blockchain
 
 ## Environment
 
-Node 8+ and browser (browserify, webpack, etc)
+Node 6+ and browser (browserify, webpack, etc)

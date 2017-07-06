@@ -64,15 +64,25 @@ balanced-match@^0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-0.4.2.tgz#cb3f3e3c732dc0f01ee70b403f302e61d7709838"
 
+base-x@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/base-x/-/base-x-3.0.2.tgz#bf873861b7514279b7969f340929eab87c11d130"
+  dependencies:
+    safe-buffer "^5.0.1"
+
 bcrypt-pbkdf@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.1.tgz#63bc5dcb61331b92bc05fd528953c33462a06f8d"
   dependencies:
     tweetnacl "^0.14.3"
 
-bluebird@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
+bigi@^1.1.0, bigi@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/bigi/-/bigi-1.4.2.tgz#9c665a95f88b8b08fc05cfd731f561859d725825"
+
+bn.js@^4.11.6:
+  version "4.11.7"
+  resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.7.tgz#ddb048e50d9482790094c13eb3fcfc833ce7ab46"
 
 boom@2.x.x:
   version "2.10.1"
@@ -90,6 +100,32 @@ brace-expansion@^1.1.7:
 browser-stdout@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/browser-stdout/-/browser-stdout-1.3.0.tgz#f351d32969d32fa5d7a5567154263d928ae3bd1f"
+
+browserify-aes@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/browserify-aes/-/browserify-aes-1.0.6.tgz#5e7725dbdef1fd5930d4ebab48567ce451c48a0a"
+  dependencies:
+    buffer-xor "^1.0.2"
+    cipher-base "^1.0.0"
+    create-hash "^1.1.0"
+    evp_bytestokey "^1.0.0"
+    inherits "^2.0.1"
+
+bs58@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/bs58/-/bs58-4.0.1.tgz#be161e76c354f6f788ae4071f63f34e8c4f0a42a"
+  dependencies:
+    base-x "^3.0.2"
+
+buffer-xor@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/buffer-xor/-/buffer-xor-1.0.3.tgz#26e61ed1422fb70dd42e6e36729ed51d855fe8d9"
+
+bytebuffer@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/bytebuffer/-/bytebuffer-5.0.1.tgz#582eea4b1a873b6d020a48d58df85f0bba6cfddd"
+  dependencies:
+    long "~3"
 
 camel-case@^3.0.0:
   version "3.0.0"
@@ -123,6 +159,12 @@ chalk@^1.1.1:
     strip-ansi "^3.0.0"
     supports-color "^2.0.0"
 
+cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/cipher-base/-/cipher-base-1.0.3.tgz#eeabf194419ce900da3018c207d212f2a6df0a07"
+  dependencies:
+    inherits "^2.0.1"
+
 cliui@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-2.1.0.tgz#4b475760ff80264c762c3a1719032e91c7fea0d1"
@@ -130,10 +172,6 @@ cliui@^2.1.0:
     center-align "^0.1.1"
     right-align "^0.1.1"
     wordwrap "0.0.2"
-
-co@^4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
 
 combined-stream@^1.0.5, combined-stream@~1.0.5:
   version "1.0.5"
@@ -160,6 +198,26 @@ coveralls@^2.13.1:
     log-driver "1.2.5"
     minimist "1.2.0"
     request "2.79.0"
+
+create-hash@^1.1.0, create-hash@^1.1.1, create-hash@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/create-hash/-/create-hash-1.1.3.tgz#606042ac8b9262750f483caddab0f5819172d8fd"
+  dependencies:
+    cipher-base "^1.0.1"
+    inherits "^2.0.1"
+    ripemd160 "^2.0.0"
+    sha.js "^2.4.0"
+
+create-hmac@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/create-hmac/-/create-hmac-1.1.6.tgz#acb9e221a4e17bdb076e90657c42b93e3726cf06"
+  dependencies:
+    cipher-base "^1.0.3"
+    create-hash "^1.1.0"
+    inherits "^2.0.1"
+    ripemd160 "^2.0.0"
+    safe-buffer "^5.0.1"
+    sha.js "^2.4.8"
 
 cryptiles@2.x.x:
   version "2.0.5"
@@ -201,19 +259,44 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
 
+ecurve@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/ecurve/-/ecurve-1.0.5.tgz#d148e8fe50a674f983bb5bae09da0ea23e10535e"
+  dependencies:
+    bigi "^1.1.0"
+
 encoding@^0.1.11:
   version "0.1.12"
   resolved "https://registry.yarnpkg.com/encoding/-/encoding-0.1.12.tgz#538b66f3ee62cd1ab51ec323829d1f9480c74beb"
   dependencies:
     iconv-lite "~0.4.13"
 
-eosapi@eosjs/api:
-  version "1.0.0"
-  resolved "https://codeload.github.com/eosjs/api/tar.gz/3ca88c5fd46221f79e69d3049b6f69b147e50d7b"
+eosjs-api@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/eosjs-api/-/eosjs-api-1.0.2.tgz#2cacf1262b0c79332c6793ca93369c8ca23d511c"
   dependencies:
     camel-case "^3.0.0"
     eosjson eosjs/json
     isomorphic-fetch "^2.2.1"
+
+eosjs-ecc@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/eosjs-ecc/-/eosjs-ecc-1.0.3.tgz#e5306068d8de2a49f4b773510b09ebaa5caf7a56"
+  dependencies:
+    bigi "^1.4.2"
+    bn.js "^4.11.6"
+    browserify-aes "^1.0.6"
+    bs58 "^4.0.1"
+    bytebuffer "^5.0.1"
+    create-hash "^1.1.3"
+    create-hmac "^1.1.6"
+    ecurve "^1.0.5"
+    more-entropy "^0.0.7"
+    secure-random "^1.1.1"
+
+eosjs-json@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/eosjs-json/-/eosjs-json-1.0.2.tgz#0046fb778823d8ec7d3a06ffa706ec7ad03649d6"
 
 eosjson@eosjs/json:
   version "1.0.1"
@@ -246,6 +329,12 @@ esutils@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.2.tgz#0abf4f1caa5bcb1f7a9d8acc6dea4faaa04bac9b"
 
+evp_bytestokey@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/evp_bytestokey/-/evp_bytestokey-1.0.0.tgz#497b66ad9fef65cd7c08a6180824ba1476b66e53"
+  dependencies:
+    create-hash "^1.1.1"
+
 extend@~3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.1.tgz#a755ea7bc1adfcc5a31ce7e762dbaadc5e636444"
@@ -257,6 +346,13 @@ extsprintf@1.0.2:
 fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
+
+fcbuffer@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/fcbuffer/-/fcbuffer-1.0.1.tgz#f8d3e808079274a61d662540dba64cab955364e2"
+  dependencies:
+    bn.js "^4.11.6"
+    bytebuffer "^5.0.1"
 
 forever-agent@~0.6.1:
   version "0.6.1"
@@ -348,6 +444,12 @@ has-flag@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-1.0.0.tgz#9d9e793165ce017a00f00418c43f942a7b1d11fa"
 
+hash-base@^2.0.0:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/hash-base/-/hash-base-2.0.2.tgz#66ea1d856db4e8a5470cadf6fce23ae5244ef2e1"
+  dependencies:
+    inherits "^2.0.1"
+
 hawk@~3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/hawk/-/hawk-3.1.3.tgz#078444bd7c1640b0fe540d2c9b73d59678e8e1c4"
@@ -369,9 +471,13 @@ http-signature@~1.1.0:
     jsprim "^1.2.2"
     sshpk "^1.7.0"
 
+iced-runtime@>=0.0.1:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/iced-runtime/-/iced-runtime-1.0.3.tgz#2d4f4fb999ab7aa5430b193c77a7fce4118319ce"
+
 iconv-lite@~0.4.13:
-  version "0.4.17"
-  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.17.tgz#4fdaa3b38acbc2c031b045d0edcdfe1ecab18c8d"
+  version "0.4.18"
+  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.18.tgz#23d8656b16aae6742ac29732ea8f0336a4789cf2"
 
 inflight@^1.0.4:
   version "1.0.6"
@@ -380,7 +486,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2:
+inherits@2, inherits@^2.0.1:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
@@ -551,6 +657,10 @@ log-driver@1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/log-driver/-/log-driver-1.2.5.tgz#7ae4ec257302fd790d557cb10c97100d857b0056"
 
+long@~3:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/long/-/long-3.2.0.tgz#d821b7138ca1cb581c172990ef14db200b5c474b"
+
 longest@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/longest/-/longest-1.0.1.tgz#30a0b2da38f73770e8294a0d22e6625ed77d0097"
@@ -604,6 +714,12 @@ mocha@^3.4.2:
     lodash.create "3.1.1"
     mkdirp "0.5.1"
     supports-color "3.1.2"
+
+more-entropy@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/more-entropy/-/more-entropy-0.0.7.tgz#67bfc6f7a86f26fbc37aac83fd46d88c61d109b5"
+  dependencies:
+    iced-runtime ">=0.0.1"
 
 ms@0.7.2:
   version "0.7.2"
@@ -720,6 +836,27 @@ right-align@^0.1.1:
   resolved "https://registry.yarnpkg.com/right-align/-/right-align-0.1.3.tgz#61339b722fe6a3515689210d24e14c96148613ef"
   dependencies:
     align-text "^0.1.1"
+
+ripemd160@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-2.0.1.tgz#0f4584295c53a3628af7e6d79aca21ce57d1c6e7"
+  dependencies:
+    hash-base "^2.0.0"
+    inherits "^2.0.1"
+
+safe-buffer@^5.0.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
+
+secure-random@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/secure-random/-/secure-random-1.1.1.tgz#0880f2d8c5185f4bcb4684058c836b4ddb07145a"
+
+sha.js@^2.4.0, sha.js@^2.4.8:
+  version "2.4.8"
+  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.8.tgz#37068c2c476b6baf402d14a49c67f597921f634f"
+  dependencies:
+    inherits "^2.0.1"
 
 sntp@1.x.x:
   version "1.0.9"
