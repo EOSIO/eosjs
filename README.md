@@ -44,9 +44,10 @@ let {fcbuffer} = eos.modules
 
 # Related Libraries
 
-This library breaks down into more specific purpose libraries:
+This library combines more specific purpose libraries:
 
 * [api](https://github.com/eosjs/api) - application programming interface to EOS blockchain nodes
+* [ecc](https://github.com/eosjs/ecc) - Private Key, Public Key, Signature, AES, Encryption / Decryption
 * [json](https://github.com/eosjs/json) - blockchain definitions (api method names, blockchain operations, etc)
 * [fcbuffer](https://github.com/jcalfee/fcbuffer) - binary serialization used by the blockchain
 
