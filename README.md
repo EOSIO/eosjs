@@ -1,6 +1,5 @@
 [![Build Status](https://travis-ci.org/eosjs/eosjs.svg?branch=master)](https://travis-ci.org/eosjs/eosjs)
-[![Coverage Status](https://coveralls.io/repos/github/eosjs/eosjs/badge.svg?branch=master)](https://coveralls.io/github/eosjs/eosjs?branch=master)
-[![NPM](https://img.shields.io/npm/v/eosjs-general.svg)](https://www.npmjs.org/package/eosjs-general)
+[![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
 Status: Alpha (this is for eosjs library developers)
 
@@ -23,7 +22,6 @@ testnet.getBlock(1, callback) // More at https://github.com/eosjs/api
 eos = Eos({network: testnet})
 
 // Transaction
-expireInSeconds = 60
 eos.transaction({
   messages: [
     {
