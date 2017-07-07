@@ -11,45 +11,81 @@ General purpose library for the EOS blockchain.
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
-callback = (err, res) => {err ? console.error(err) : console.log(res)}
 
 // API, note: testnet uses eosd at localhost (until there is a testnet)
-Testnet = require('eosjs-api/testnet')
+testnet = Eos.Testnet()
 
-testnet = Testnet()
-testnet.getBlock(1, callback) // More at https://github.com/eosjs/api
+// For promises instead of callbacks, use something like npmjs 'sb-promisify'
+callback = (err, res) => {err ? console.error(err) : console.log(res)}
 
-eos = Eos({network: testnet})
+// All API methods print help when called with no-arguments.
+// More docs at https://github.com/eosjs/api
+testnet.getBlock()
+
+// Your going to need localhost:8888
+testnet.getBlock(1, callback)
 
 // Transaction
-eos.transaction({
+testnet.transaction({
   messages: [
     {
-      from: '',
-      to: '',
+      from: 'inita',
+      to: 'initb',
       cc: [],
-      type: '',
+      type: 'transfer',
       data: ''
     }
   ],
-  sign: ['5KYZdUEo39z3FPrtuX2QbbwGnNP5zTd7yyr2SC1j299sBCnWjss'],
+  sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
   permissions: [],
 }, callback)
 
-// Exported libraries (see Related Libraries)
-let {ecc} = eos.modules
-let {json} = eos.modules
-let {fcbuffer} = eos.modules
 ```
 
 # Related Libraries
 
-This library combines more specific purpose libraries:
+These lower level libraries are exported from `eosjs` or may be used separately.
 
-* [api](https://github.com/eosjs/api) - application programming interface to EOS blockchain nodes
-* [ecc](https://github.com/eosjs/ecc) - Private Key, Public Key, Signature, AES, Encryption / Decryption
-* [json](https://github.com/eosjs/json) - blockchain definitions (api method names, blockchain operations, etc)
-* [fcbuffer](https://github.com/jcalfee/fcbuffer) - binary serialization used by the blockchain
+## Used from this package
+
+```javascript
+let {api} = eos.modules
+let {ecc} = eos.modules
+let {json} = eos.modules
+// etc
+```
+
+## Used Separately
+
+```bash
+npm install eosjs-api
+npm install eosjs-ecc
+npm install eosjs-json
+# etc
+```
+
+## About
+
+* [eosjs-api](https://github.com/eosjs/api)
+  * Remote API to an EOS blockchain node (eosd)
+  * Use this library directly if you need read-only access to the blockchain
+    (don't need to sign transactions).
+
+* [eosjs-ecc](https://github.com/eosjs/ecc)
+  * Private Key, Public Key, Signature, AES, Encryption / Decryption
+  * Validate public or private keys
+  * Encrypt or decrypt with EOS compatible checksums
+  * Calculate a shared secret
+
+* [eosjs-json](https://github.com/eosjs/json)
+  * Blockchain definitions (api method names, blockchain operations, etc)
+  * Maybe used by any language that can parse json
+  * Kept up-to-date
+
+* [fcbuffer](https://github.com/jcalfee/fcbuffer)
+  * Binary serialization used by the blockchain
+  * Clients sign the binary form of the transaction
+  * Essential so the client knows what it is signing
 
 ## Environment
 

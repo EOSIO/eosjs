@@ -2,6 +2,8 @@ const ecc = require('eosjs-ecc')
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const createHash = require('create-hash')
+const Testnet = require('eosjs-api/testnet')
+const api = require('eosjs-api')
 
 const {Signature} = ecc
 
@@ -10,7 +12,7 @@ const {Signature} = ecc
 
   @arg {object} [config.network = Mainnet()]
 */
-module.exports = (config = {}) => {
+const Eos = (config = {}) => {
 
   const network = config.network //|| Mainnet()
 
@@ -76,13 +78,23 @@ module.exports = (config = {}) => {
 
   return {
     transaction,
-    modules: {
-      ecc,
-      json,
-      Fcbuffer,
-    }
   }
 }
+
+Eos.Testnet = config => {
+  const testnet = Testnet(config)
+  const eos = Eos({network: testnet})
+  return Object.assign(testnet, eos)
+}
+
+Eos.modules = {
+  ecc,
+  json,
+  Fcbuffer,
+  api,
+}
+
+module.exports = Eos
 
 /**
   The transaction function signs already.  This is for signing other types
