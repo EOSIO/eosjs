@@ -16,9 +16,9 @@ const Eos = (config = {}) => {
 
   const network = config.network //|| Mainnet()
 
-  fcbuffer = Fcbuffer(json.schema.operations)
-  if(!fcbuffer.errors.length === 0) {
-    throw new Error(fcbuffer.errors)
+  fcbuffer = Fcbuffer(json.schema)
+  if(fcbuffer.errors.length !== 0) {
+    throw new Error(JSON.stringify(fcbuffer.errors, null, 4))
   }
 
   /**

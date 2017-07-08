@@ -1,9 +1,8 @@
 /* eslint-env mocha */
 
-const Testnet = require('eosjs-api/testnet')
 const Eos = require('.')
 
-testnet = Testnet()
+testnet = Eos.Testnet()
 
 describe('networks', () => {
 

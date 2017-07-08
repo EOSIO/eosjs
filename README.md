@@ -28,13 +28,7 @@ testnet.getBlock(1, callback)
 // Transaction
 testnet.transaction({
   messages: [
-    {
-      from: 'inita',
-      to: 'initb',
-      cc: [],
-      type: 'transfer',
-      data: ''
-    }
+    //... TODO
   ],
   sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
   permissions: [],
@@ -49,10 +43,7 @@ These lower level libraries are exported from `eosjs` or may be used separately.
 ## Used from this package
 
 ```javascript
-let {api} = eos.modules
-let {ecc} = eos.modules
-let {json} = eos.modules
-// etc
+var {api, ecc, json, Fcbuffer} = Eos.modules
 ```
 
 ## Used Separately
@@ -61,6 +52,7 @@ let {json} = eos.modules
 npm install eosjs-api
 npm install eosjs-ecc
 npm install eosjs-json
+npm install Fcbuffer
 # etc
 ```
 
@@ -87,6 +79,20 @@ npm install eosjs-json
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
 
-## Environment
+# Example transactions
+
+```javascript
+var {api, ecc, json, Fcbuffer} = Eos.modules
+
+structs = Fcbuffer(json.schema, {defaults: true}).structs
+var {Message, newaccount, transfer} = structs
+
+// Example Transactions (print the returned object)
+Message.toObject()
+
+transfer.toObject()
+```
+
+# Environment
 
 Node 6+ and browser (browserify, webpack, etc)
