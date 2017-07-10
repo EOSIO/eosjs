@@ -13,12 +13,13 @@ const {Signature} = ecc
   @arg {object} [config.network = Mainnet()]
 */
 const Eos = (config = {}) => {
-
   const network = config.network //|| Mainnet()
 
-  fcbuffer = Fcbuffer(json.schema)
-  if(fcbuffer.errors.length !== 0) {
-    throw new Error(JSON.stringify(fcbuffer.errors, null, 4))
+  const structLookup = name => structs[name]
+  const override = Object.assign(messageDataOverride(structLookup), config.override)
+  const {structs, errors} = Fcbuffer(json.schema, Object.assign({override}, config))
+  if(errors.length !== 0) {
+    throw new Error(JSON.stringify(errors, null, 4))
   }
 
   /**
@@ -50,7 +51,7 @@ const Eos = (config = {}) => {
       tx.messages = args.messages
       tx.permissions = args.permissions
 
-      const {Transaction} = fcbuffer.structs
+      const {Transaction} = structs
       const buf = Fcbuffer.toBuffer(Transaction, tx)
       for(const key of args.sign) {
         tx.signatures.push(sign(buf, key))
@@ -78,23 +79,45 @@ const Eos = (config = {}) => {
 
   return {
     transaction,
+    structs
   }
 }
 
-Eos.Testnet = config => {
-  const testnet = Testnet(config)
-  const eos = Eos({network: testnet})
-  return Object.assign(testnet, eos)
-}
-
-Eos.modules = {
-  ecc,
-  json,
-  Fcbuffer,
-  api,
-}
-
-module.exports = Eos
+/**
+  Message.data is formatted using the struct mentioned in Message.type.
+*/
+const messageDataOverride = structLookup => ({
+  'Message.data.fromByteBuffer': ({fields, object, b, config}) => {
+    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type)
+    if(!ser) {
+      throw new TypeError(`Unknown Message.type ${object.type}`)
+    }
+    object.data = ser.fromByteBuffer(b, config)
+  },
+  'Message.data.appendByteBuffer': ({fields, object, b}) => {
+    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type)
+    if(!ser) {
+      throw new TypeError(`Unknown Message.type ${object.type}`)
+    }
+    ser.appendByteBuffer(b, object.data)
+  },
+  'Message.data.fromObject': ({fields, serializedObject, result}) => {
+    const {data, type} = serializedObject
+    const ser = (type || '') == '' ? fields.data : structLookup(type)
+    if(!ser) {
+      throw new TypeError(`Unknown Message.type ${type}`)
+    }
+    result.data = ser.fromObject(data)
+  },
+  'Message.data.toObject': ({fields, serializedObject, result, config}) => {
+    const {data, type} = serializedObject || {}
+    const ser = (type || '') == '' ? fields.data : structLookup(type)
+    if(!ser) {
+      throw new TypeError(`Unknown Message.type ${type}`)
+    }
+    result.data = ser.toObject(data, config)
+  }
+})
 
 /**
   The transaction function signs already.  This is for signing other types
@@ -121,3 +144,26 @@ const checkError = (parentErr, parrentRes) => (error, result) => {
     parrentRes(result)
   }
 }
+
+function throwOnDup(o1, o2, msg) {
+  for(const key in o1) {
+    if(o2[key]) {
+      throw new TypeError(msg + ': ' + key)
+    }
+  }
+}
+
+Eos.Testnet = config => {
+  const testnet = Testnet(config)
+  const eos = Eos({network: testnet})
+  throwOnDup(eos, testnet, 'Conflicting methods in Eos and Testnet')
+  return Object.assign(testnet, eos)
+}
+
+Eos.modules = {
+  json,
+  ecc,
+  api
+}
+
+module.exports = Eos

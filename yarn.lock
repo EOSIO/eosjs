@@ -294,11 +294,7 @@ eosjs-ecc@^1.0.3:
     more-entropy "^0.0.7"
     secure-random "^1.1.1"
 
-eosjs-json@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/eosjs-json/-/eosjs-json-1.0.2.tgz#0046fb778823d8ec7d3a06ffa706ec7ad03649d6"
-
-eosjs-json@^1.0.3:
+eosjs-json@^1.0.2, eosjs-json@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/eosjs-json/-/eosjs-json-1.0.3.tgz#858844c5c69827fc539852180b249028f8a6a6eb"
 
@@ -347,9 +343,9 @@ fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
-fcbuffer@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/fcbuffer/-/fcbuffer-1.0.1.tgz#f8d3e808079274a61d662540dba64cab955364e2"
+fcbuffer@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/fcbuffer/-/fcbuffer-1.0.2.tgz#9dbbb90b22180b5cf3df65aea7e349ddf19b001b"
   dependencies:
     bn.js "^4.11.6"
     bytebuffer "^5.0.1"

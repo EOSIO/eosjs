@@ -28,8 +28,18 @@ testnet.getBlock(1, callback)
 // Transaction
 testnet.transaction({
   messages: [
-    //... TODO
-
+    {
+      code: 'eos',
+      recipients: [ 'inita', 'initb' ],
+      authorization: [],
+      type: 'transfer',
+      data: {
+        from: 'inita',
+        to: 'initb',
+        amount: { amount: '1', symbol: 'EOS' },
+        memo: '爱'
+      }
+    }
   ],
   sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
   permissions: [],
@@ -41,10 +51,10 @@ testnet.transaction({
 
 These lower level libraries are exported from `eosjs` or may be used separately.
 
-## From this package
+## Exported modules
 
 ```javascript
-var {api, ecc, json, Fcbuffer} = Eos.modules
+var {json, api, ecc} = Eos.modules
 ```
 
 ## About
@@ -65,7 +75,7 @@ var {api, ecc, json, Fcbuffer} = Eos.modules
   * Maybe used by any language that can parse json
   * Kept up-to-date
 
-* fcbuffer [[Github](https://github.com/eosjs/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
+* structs [[Github](https://github.com/eosjs/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
@@ -73,13 +83,14 @@ var {api, ecc, json, Fcbuffer} = Eos.modules
 # Example Transactions
 
 ```javascript
-var {json, Fcbuffer} = Eos.modules
+var {json} = Eos.modules
 
-// Example Transactions
-json.schema.Message // with docs
+// The node console will print more documentation and other example messages
+json.schema.Message
+json.schema.transfer
 
-// More complex structures
-structs = Fcbuffer(json.schema, {defaults: true}).structs
+// Another view of this data, for structure oriented
+var {structs} = Eos({defaults: true})
 structs.newaccount.toObject()
 structs.newaccount.toObject().owner
 ```
