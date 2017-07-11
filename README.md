@@ -75,7 +75,7 @@ var {json, api, ecc} = Eos.modules
   * Maybe used by any language that can parse json
   * Kept up-to-date
 
-* structs [[Github](https://github.com/jcalfee/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
+* fcbuffer [[Github](https://github.com/jcalfee/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
@@ -85,11 +85,11 @@ var {json, api, ecc} = Eos.modules
 ```javascript
 var {json} = Eos.modules
 
-// The node console will print more documentation and other example messages
+// The node console will print more documentation and message structure
 json.schema.Message
 json.schema.transfer
 
-// Another view of this data, structure oriented
+// Includes data types
 var {structs} = Eos({defaults: true})
 structs.newaccount.toObject()
 structs.newaccount.toObject().owner
