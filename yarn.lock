@@ -271,12 +271,12 @@ encoding@^0.1.11:
   dependencies:
     iconv-lite "~0.4.13"
 
-eosjs-api@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/eosjs-api/-/eosjs-api-1.0.4.tgz#8ba0214981236ac97a7f4e09758f07e4c6babca2"
+eosjs-api@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/eosjs-api/-/eosjs-api-1.0.6.tgz#1c1e180edcb5a4dffed98495ab1d6b64c2f7a5d4"
   dependencies:
     camel-case "^3.0.0"
-    eosjs-json "^1.0.2"
+    eosjs-json "^1.0.3"
     isomorphic-fetch "^2.2.1"
 
 eosjs-ecc@^1.0.3:
@@ -294,7 +294,7 @@ eosjs-ecc@^1.0.3:
     more-entropy "^0.0.7"
     secure-random "^1.1.1"
 
-eosjs-json@^1.0.2, eosjs-json@^1.0.3:
+eosjs-json@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/eosjs-json/-/eosjs-json-1.0.3.tgz#858844c5c69827fc539852180b249028f8a6a6eb"
 
@@ -343,9 +343,9 @@ fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
-fcbuffer@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/fcbuffer/-/fcbuffer-1.0.2.tgz#9dbbb90b22180b5cf3df65aea7e349ddf19b001b"
+fcbuffer@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/fcbuffer/-/fcbuffer-1.0.3.tgz#87803614eac6b78b186176acacba26aedffaa72c"
   dependencies:
     bn.js "^4.11.6"
     bytebuffer "^5.0.1"

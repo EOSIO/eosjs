@@ -2,12 +2,9 @@
 
 const Eos = require('.')
 
-testnet = Eos.Testnet()
-
 describe('networks', () => {
-
   it('testnet', (done) => {
-    eos = Eos({network: testnet})
+    eos = Eos.Testnet()
     // testnet.getBlock(1, (err, block) => {
     //   if(err) {
     //     throw err
@@ -19,28 +16,37 @@ describe('networks', () => {
 
 })
 
-// describe('transaction', () => {
-//
-//   it('create', (done) => {
-//     eos = Eos({network: testnet})
-//     eos.transaction({
-//       messages: [
-//         {
-//           from: '',
-//           to: '',
-//           cc: [],
-//           type: '',
-//           data: ''
-//         }
-//       ],
-//       sign: ['5KYZdUEo39z3FPrtuX2QbbwGnNP5zTd7yyr2SC1j299sBCnWjss'],
-//       permissions: [],
-//     }, (err, tx) => {
-//       if(err) {
-//         throw err
-//       }
-//       done()
-//     })
-//   })
-//
-// })
+if(process.env['NODE_ENV'] === 'dev') {
+  describe('transaction', () => {
+    it('transfer', (done) => {
+      testnet = Eos.Testnet()
+      callback = (err, res) => {err ? console.error(err) : console.log(res)}
+      testnet.transaction({
+        messages: [
+          {
+            code: 'eos',
+            recipients: [ 'inita', 'initb' ],
+            authorization: [],
+            type: 'transfer',
+            data: {
+              from: 'inita',
+              to: 'initb',
+              amount: { amount: '1', symbol: 'EOS' },
+              memo: '爱'
+            }
+          }
+        ],
+        sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
+        permissions: [],
+      }, (err, result) => {
+        if(err) {
+          done(JSON.stringify(err, null, 4))
+          return
+        }
+        console.log('success', result)
+        done()
+      })
+    })
+
+  })
+}

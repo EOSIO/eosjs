@@ -28,7 +28,7 @@ testnet.getBlock(1, callback)
 // Transaction
 testnet.transaction({
   messages: [
-    {
+    {// work-in-progress - transaction error 'Bad Cast'
       code: 'eos',
       recipients: [ 'inita', 'initb' ],
       authorization: [],
@@ -75,7 +75,7 @@ var {json, api, ecc} = Eos.modules
   * Maybe used by any language that can parse json
   * Kept up-to-date
 
-* structs [[Github](https://github.com/eosjs/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
+* structs [[Github](https://github.com/jcalfee/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
@@ -89,7 +89,7 @@ var {json} = Eos.modules
 json.schema.Message
 json.schema.transfer
 
-// Another view of this data, for structure oriented
+// Another view of this data, structure oriented
 var {structs} = Eos({defaults: true})
 structs.newaccount.toObject()
 structs.newaccount.toObject().owner

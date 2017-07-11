@@ -5,6 +5,8 @@ const createHash = require('create-hash')
 const Testnet = require('eosjs-api/testnet')
 const api = require('eosjs-api')
 
+const Structs = require('./structs')
+
 const {Signature} = ecc
 
 /**
@@ -15,12 +17,7 @@ const {Signature} = ecc
 const Eos = (config = {}) => {
   const network = config.network //|| Mainnet()
 
-  const structLookup = name => structs[name]
-  const override = Object.assign(messageDataOverride(structLookup), config.override)
-  const {structs, errors} = Fcbuffer(json.schema, Object.assign({override}, config))
-  if(errors.length !== 0) {
-    throw new Error(JSON.stringify(errors, null, 4))
-  }
+  const structs = Structs(config)
 
   /**
     @args {object} args - {
@@ -64,10 +61,8 @@ const Eos = (config = {}) => {
           if(!error) {
             callback(null, tx)
           } else {
-            callback({
-              error,
-              digest: buf.toString('hex')
-            })
+            console.error(`[eosjs] transaction error '${error.message}', digest '${buf.toString('hex')}'`)
+            callback(error.message)
           }
         })
       }
@@ -82,42 +77,6 @@ const Eos = (config = {}) => {
     structs
   }
 }
-
-/**
-  Message.data is formatted using the struct mentioned in Message.type.
-*/
-const messageDataOverride = structLookup => ({
-  'Message.data.fromByteBuffer': ({fields, object, b, config}) => {
-    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type)
-    if(!ser) {
-      throw new TypeError(`Unknown Message.type ${object.type}`)
-    }
-    object.data = ser.fromByteBuffer(b, config)
-  },
-  'Message.data.appendByteBuffer': ({fields, object, b}) => {
-    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type)
-    if(!ser) {
-      throw new TypeError(`Unknown Message.type ${object.type}`)
-    }
-    ser.appendByteBuffer(b, object.data)
-  },
-  'Message.data.fromObject': ({fields, serializedObject, result}) => {
-    const {data, type} = serializedObject
-    const ser = (type || '') == '' ? fields.data : structLookup(type)
-    if(!ser) {
-      throw new TypeError(`Unknown Message.type ${type}`)
-    }
-    result.data = ser.fromObject(data)
-  },
-  'Message.data.toObject': ({fields, serializedObject, result, config}) => {
-    const {data, type} = serializedObject || {}
-    const ser = (type || '') == '' ? fields.data : structLookup(type)
-    if(!ser) {
-      throw new TypeError(`Unknown Message.type ${type}`)
-    }
-    result.data = ser.toObject(data, config)
-  }
-})
 
 /**
   The transaction function signs already.  This is for signing other types
@@ -139,6 +98,7 @@ function sign(data, key) {
 
 const checkError = (parentErr, parrentRes) => (error, result) => {
   if (error) {
+    console.log('error', error)
     parentErr(error)
   } else {
     parrentRes(result)
