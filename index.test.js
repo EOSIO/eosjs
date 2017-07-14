@@ -22,16 +22,20 @@ if(process.env['NODE_ENV'] === 'dev') {
       testnet = Eos.Testnet()
       callback = (err, res) => {err ? console.error(err) : console.log(res)}
       testnet.transaction({
+        scope: ['inita', 'initb'],
         messages: [
           {
-            code: 'eos',
-            recipients: [ 'inita', 'initb' ],
-            authorization: [],
+            code: 'currency',
             type: 'transfer',
+            recipients: [ 'inita', 'currency' ],
+            authorization: [{
+              account: 'currency',
+              permission: 'active'
+            }],
             data: {
-              from: 'inita',
-              to: 'initb',
-              amount: { amount: '1', symbol: 'EOS' },
+              from: 'currency',
+              to: 'inita',
+              amount: { amount: '1', symbol: '1397703944' },
               memo: '爱'
             }
           }

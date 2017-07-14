@@ -27,12 +27,16 @@ testnet.getBlock(1, callback)
 
 // Transaction
 testnet.transaction({
+  scope: ['inita', 'initb'],
   messages: [
     {// work-in-progress - transaction error 'Bad Cast'
-      code: 'eos',
-      recipients: [ 'inita', 'initb' ],
-      authorization: [],
+      code: 'currency',
       type: 'transfer',
+      recipients: [ 'inita', 'initb' ],
+      authorization: [{
+        account: 'inita',
+        permission: 'active'
+      }],
       data: {
         from: 'inita',
         to: 'initb',

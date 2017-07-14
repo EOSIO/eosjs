@@ -45,6 +45,7 @@ const Eos = (config = {}) => {
     args = Object.assign(argsDefaults, args)
 
     network.createTransaction(args.expireInSeconds, checkError(callback, tx => {
+      tx.scope = args.scope
       tx.messages = args.messages
       tx.permissions = args.permissions
 
@@ -123,7 +124,8 @@ Eos.Testnet = config => {
 Eos.modules = {
   json,
   ecc,
-  api
+  api,
+  Fcbuffer
 }
 
 module.exports = Eos
