@@ -1,6 +1,7 @@
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const {encodeName, decodeName} = require('./utils/format')
+const ByteBuffer = require('bytebuffer')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}) => {
@@ -52,6 +53,7 @@ const messageDataOverride = structLookup => ({
     if(!ser) {
       throw new TypeError(`Unknown Message.type ${object.type}`)
     }
+    b.readVarint32() // length prefix (usefull if object.type is unknown)
     object.data = ser.fromByteBuffer(b, config)
   },
   'Message.data.appendByteBuffer': ({fields, object, b}) => {
@@ -59,7 +61,10 @@ const messageDataOverride = structLookup => ({
     if(!ser) {
       throw new TypeError(`Unknown Message.type ${object.type}`)
     }
-    ser.appendByteBuffer(b, object.data)
+    const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
+    ser.appendByteBuffer(b2, object.data)
+    b.writeVarint32(b2.offset)
+    b.append(b2.copy(0, b2.offset), 'binary')
   },
   'Message.data.fromObject': ({fields, serializedObject, result}) => {
     const {data, type} = serializedObject
