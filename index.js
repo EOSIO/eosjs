@@ -47,7 +47,7 @@ const Eos = (config = {}) => {
     network.createTransaction(args.expireInSeconds, checkError(callback, tx => {
       tx.scope = args.scope
       tx.messages = args.messages
-      tx.permissions = args.permissions
+      tx.authorizations = args.authorizations
 
       const {Transaction} = structs
       const buf = Fcbuffer.toBuffer(Transaction, tx)
@@ -62,7 +62,8 @@ const Eos = (config = {}) => {
           if(!error) {
             callback(null, tx)
           } else {
-            console.error(`[eosjs] transaction error '${error.message}', digest '${buf.toString('hex')}'`)
+            const sbuf = Fcbuffer.toBuffer(structs.SignedTransaction, tx)
+            console.error(`[eosjs] transaction error '${error.message}', digest '${sbuf.toString('hex')}'`)
             callback(error.message)
           }
         })

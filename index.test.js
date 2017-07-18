@@ -40,6 +40,10 @@ if(process.env['NODE_ENV'] === 'dev') {
             }
           }
         ],
+        authorizations: [{
+          account: 'currency',
+          permission: 'active'
+        }],
         sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
         permissions: [],
       }, (err, result) => {
