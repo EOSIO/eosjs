@@ -58,7 +58,7 @@ These lower level libraries are exported from `eosjs` or may be used separately.
 ## Exported modules
 
 ```javascript
-var {json, api, ecc} = Eos.modules
+var {json, api, ecc, Fcbuffer} = Eos.modules
 ```
 
 ## About
@@ -79,7 +79,7 @@ var {json, api, ecc} = Eos.modules
   * Maybe used by any language that can parse json
   * Kept up-to-date
 
-* fcbuffer [[Github](https://github.com/jcalfee/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
+* Fcbuffer [[Github](https://github.com/jcalfee/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
