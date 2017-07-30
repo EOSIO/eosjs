@@ -1,51 +1,43 @@
 /* eslint-env mocha */
-
 const Eos = require('.')
 
-describe('networks', () => {
-  it('testnet', (done) => {
-    eos = Eos.Testnet()
-    // testnet.getBlock(1, (err, block) => {
-    //   if(err) {
-    //     throw err
-    //   }
-    //   done()
-    // })
-    done()
+if(process.env['NODE_ENV'] === 'dev') {
+  describe('networks', () => {
+    it('testnet', (done) => {
+      testnet = Eos.Testnet()
+      testnet.getBlock(1, (err, block) => {
+        if(err) {
+          throw err
+        }
+        done()
+      })
+    })
   })
-
-})
+}
 
 if(process.env['NODE_ENV'] === 'dev') {
   describe('transaction', () => {
     it('transfer', (done) => {
-      testnet = Eos.Testnet()
+      testnet = Eos.Testnet({debug: true})
       callback = (err, res) => {err ? console.error(err) : console.log(res)}
       testnet.transaction({
-        scope: ['inita', 'initb'],
+        scope: ['eos', 'inita'],
         messages: [
           {
-            code: 'currency',
+            code: 'eos',
             type: 'transfer',
-            recipients: [ 'inita', 'currency' ],
-            authorization: [{
-              account: 'currency',
-              permission: 'active'
-            }],
             data: {
-              from: 'currency',
+              from: 'eos',
               to: 'inita',
-              amount: { amount: '1', symbol: '1397703944' },
-              memo: '爱'
+              amount: '13'
             }
           }
         ],
         authorizations: [{
-          account: 'currency',
+          account: 'eos',
           permission: 'active'
         }],
-        sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
-        permissions: [],
+        sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3']
       }, (err, result) => {
         if(err) {
           done(JSON.stringify(err, null, 4))

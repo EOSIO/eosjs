@@ -115,9 +115,10 @@ function throwOnDup(o1, o2, msg) {
   }
 }
 
-Eos.Testnet = config => {
+Eos.Testnet = (config = {}) => {
   const testnet = Testnet(config)
-  const eos = Eos({network: testnet})
+  config = Object.assign(config, {network: testnet})
+  const eos = Eos(config)
   throwOnDup(eos, testnet, 'Conflicting methods in Eos and Testnet')
   return Object.assign(testnet, eos)
 }

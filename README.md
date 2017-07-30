@@ -30,23 +30,20 @@ testnet.transaction({
   scope: ['inita', 'initb'],
   messages: [
     {// work-in-progress - transaction error 'Bad Cast'
-      code: 'currency',
+      code: 'eos',
       type: 'transfer',
-      recipients: [ 'inita', 'initb' ],
-      authorization: [{
-        account: 'inita',
-        permission: 'active'
-      }],
       data: {
-        from: 'inita',
-        to: 'initb',
-        amount: { amount: '1', symbol: 'EOS' },
-        memo: '爱'
+        from: 'eos',
+        to: 'inita',
+        amount: 13
       }
     }
   ],
-  sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'],
-  permissions: [],
+  authorizations: [{
+    account: 'eos',
+    permission: 'active'
+  }],
+  sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3']
 }, callback)
 
 ```

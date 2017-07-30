@@ -27,10 +27,17 @@ module.exports = (config = {}) => {
 const Name = (validation) => {
   return {
     fromByteBuffer (b) {
-      return decodeName(b.readUint64())
+      const n = decodeName(b.readUint64(), false) // b is already in littleEndian
+      if(validation.debug) {
+        console.error(`${n}`)
+      }
+      return n
     },
     appendByteBuffer (b, value) {
-      b.writeUint64(encodeName(value))
+      if(validation.debug) {
+        console.error(`${value}`)
+      }
+      b.writeUint64(encodeName(value, false)) // b is already in littleEndian
     },
     fromObject (value) {
       return value
