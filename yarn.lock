@@ -298,6 +298,10 @@ eosjs-json@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/eosjs-json/-/eosjs-json-1.0.6.tgz#4f5fba05d90ca64a590fda19e0ad958c776a738a"
 
+eosjs-json@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/eosjs-json/-/eosjs-json-1.0.7.tgz#4febccba5a542eddc0b6b009f07bc4c4bf1c9525"
+
 escape-string-regexp@1.0.5, escape-string-regexp@^1.0.2:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
