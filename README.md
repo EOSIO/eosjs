@@ -13,20 +13,20 @@ General purpose library for the EOS blockchain.
 Eos = require('eosjs') // Or Eos = require('.')
 
 // API, note: testnet uses eosd at localhost (until there is a testnet)
-testnet = Eos.Testnet()
+eos = Eos.Testnet()
 
 // For promises instead of callbacks, use something like npmjs 'sb-promisify'
 callback = (err, res) => {err ? console.error(err) : console.log(res)}
 
 // All API methods print help when called with no-arguments.
 // More docs at https://github.com/eosjs/api
-testnet.getBlock()
+eos.getBlock()
 
 // Your going to need localhost:8888
-testnet.getBlock(1, callback)
+eos.getBlock(1, callback)
 
 // Transaction
-testnet.transaction({
+eos.transaction({
   scope: ['inita', 'initb'],
   messages: [
     {// work-in-progress - transaction error 'Bad Cast'

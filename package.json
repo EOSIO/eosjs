@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "General purpose library for the EOS blockchain.",
   "main": "index.js",
   "scripts": {
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "create-hash": "^1.1.3",
-    "eosjs-api": "^1.0.7",
+    "eosjs-api": "^1.0.9",
     "eosjs-ecc": "^1.0.3",
     "eosjs-json": "^1.0.7",
     "fcbuffer": "^1.0.5"
