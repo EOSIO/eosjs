@@ -271,12 +271,12 @@ encoding@^0.1.11:
   dependencies:
     iconv-lite "~0.4.13"
 
-eosjs-api@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/eosjs-api/-/eosjs-api-1.0.7.tgz#1059f1a636401f25bb9db1fe35d89ab1353aab74"
+eosjs-api@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/eosjs-api/-/eosjs-api-1.0.9.tgz#99c7fdb5917f3ff6be71a66484778efc163481de"
   dependencies:
     camel-case "^3.0.0"
-    eosjs-json "^1.0.6"
+    eosjs-json "^1.0.7"
     isomorphic-fetch "^2.2.1"
 
 eosjs-ecc@^1.0.3:
@@ -293,10 +293,6 @@ eosjs-ecc@^1.0.3:
     ecurve "^1.0.5"
     more-entropy "^0.0.7"
     secure-random "^1.1.1"
-
-eosjs-json@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/eosjs-json/-/eosjs-json-1.0.6.tgz#4f5fba05d90ca64a590fda19e0ad958c776a738a"
 
 eosjs-json@^1.0.7:
   version "1.0.7"
