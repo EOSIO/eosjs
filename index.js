@@ -5,7 +5,7 @@ const createHash = require('create-hash')
 const Testnet = require('eosjs-api/testnet')
 const api = require('eosjs-api')
 
-const Structs = require('./structs')
+const Structs = require('./src/structs')
 
 const {Signature} = ecc
 
@@ -44,13 +44,18 @@ const Eos = (config = {}) => {
     const argsDefaults = {expireInSeconds: 60, broadcast: true}
     args = Object.assign(argsDefaults, args)
 
-    network.createTransaction(args.expireInSeconds, checkError(callback, tx => {
-      tx.scope = args.scope
-      tx.messages = args.messages
-      tx.authorizations = args.authorizations
+    network.createTransaction(args.expireInSeconds, checkError(callback, rawTx => {
+      rawTx.scope = args.scope
+      rawTx.messages = args.messages
+      rawTx.authorizations = args.authorizations
 
       const {Transaction} = structs
-      const buf = Fcbuffer.toBuffer(Transaction, tx)
+      const buf = Fcbuffer.toBuffer(Transaction, rawTx)
+
+      // Broadcast what is signed (instead of rawTx)
+      const tx = Fcbuffer.fromBuffer(Transaction, buf)
+
+      tx.signatures = []
       for(const key of args.sign) {
         tx.signatures.push(sign(buf, key))
       }
@@ -62,7 +67,12 @@ const Eos = (config = {}) => {
           if(!error) {
             callback(null, tx)
           } else {
-            const sbuf = Fcbuffer.toBuffer(structs.SignedTransaction, tx)
+            let sbuf = buf
+            try {
+              sbuf = Fcbuffer.toBuffer(structs.SignedTransaction, tx)
+            } catch(error) {
+              console.log(error)
+            }
             console.error(`[eosjs] transaction error '${error.message}', digest '${sbuf.toString('hex')}'`)
             callback(error.message)
           }
