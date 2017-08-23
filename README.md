@@ -3,7 +3,7 @@
 
 Status: Alpha (this is for eosjs library developers)
 
-# Eos Js
+# Eosjs
 
 General purpose library for the EOS blockchain.
 
@@ -58,7 +58,7 @@ eos = Eos.Testnet({
 // arguments to print usage.
 eos.transfer()
 
-// Object or positional args may be used
+// Object or ordered args may be used
 eos.transfer({from: 'inita', to: 'initb', amount: 1})
 eos.transfer('inita', 'initb', 1)
 
