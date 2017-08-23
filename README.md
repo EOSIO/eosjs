@@ -111,23 +111,23 @@ var {api, ecc, json, Fcbuffer} = Eos.modules
 
 ## About
 
-* eosjs-api [[Github](https://github.com/eosjs/api), [NPM](https://www.npmjs.org/package/eosjs-api)]
+* eosjs-api [[Github](https://github.com/eosio/eosjs-api), [NPM](https://www.npmjs.org/package/eosjs-api)]
   * Remote API to an EOS blockchain node (eosd)
   * Use this library directly if you need read-only access to the blockchain
     (don't need to sign transactions).
 
-* eosjs-ecc [[Github](https://github.com/eosjs/ecc), [NPM](https://www.npmjs.org/package/eosjs-ecc)]
+* eosjs-ecc [[Github](https://github.com/eosio/eosjs-ecc), [NPM](https://www.npmjs.org/package/eosjs-ecc)]
   * Private Key, Public Key, Signature, AES, Encryption / Decryption
   * Validate public or private keys
   * Encrypt or decrypt with EOS compatible checksums
   * Calculate a shared secret
 
-* eosjs-json [[Github](https://github.com/eosjs/json), [NPM](https://www.npmjs.org/package/eosjs-json)]
+* eosjs-json [[Github](https://github.com/eosio/eosjs-json), [NPM](https://www.npmjs.org/package/eosjs-json)]
   * Blockchain definitions (api method names, blockchain operations, etc)
   * Maybe used by any language that can parse json
   * Kept up-to-date
 
-* Fcbuffer [[Github](https://github.com/jcalfee/fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
+* Fcbuffer [[Github](https://github.com/eosio/eosjs-fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
