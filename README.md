@@ -38,8 +38,8 @@ eos.getInfo({}).then(result => {console.log(result)})
 
 ### Usage (read/write)
 
-Status, API is reasonably stable.  However all transactions fail to
-verify in eosd: tx_missing_sigs.
+Status: API is reasonably stable, however, all transactions fail to
+verify in eosd: tx_missing_sigs..
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
@@ -58,8 +58,14 @@ eos = Eos.Testnet({
 // arguments to print usage.
 eos.transfer()
 
+// Object or positional args may be used
 eos.transfer({from: 'inita', to: 'initb', amount: 1})
+eos.transfer('inita', 'initb', 1)
 
+// A broadcast boolean may be provided allowing any transaction to be created
+// but not sent.
+eos.transfer({from: 'inita', to: 'initb', amount: 1, broadcast: false})
+eos.transfer('inita', 'initb', 1, false)
 
 ```
 
@@ -97,12 +103,10 @@ eos.transaction({
 
 # Related Libraries
 
-These lower level libraries are exported from `eosjs` or may be used separately.
-
-## Exported modules
+These libraries are exported from `eosjs` or may be used separately.
 
 ```javascript
-var {json, api, ecc, Fcbuffer} = Eos.modules
+var {api, ecc, json, Fcbuffer} = Eos.modules
 ```
 
 ## About
@@ -128,21 +132,9 @@ var {json, api, ecc, Fcbuffer} = Eos.modules
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
 
-# Example Transactions
-
-```javascript
-var {json} = Eos.modules
-
-// The node console will print more documentation and message structure
-json.schema.Message
-json.schema.transfer
-
-// Includes data types
-var {structs} = Eos({defaults: true})
-structs.newaccount.toObject()
-structs.newaccount.toObject().owner
-```
 
 # Environment
 
 Node 6+ and browser (browserify, webpack, etc)
+
+React Native should work, create an issue if you find a bug.
