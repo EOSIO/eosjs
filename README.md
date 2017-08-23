@@ -7,7 +7,7 @@ Status: Alpha (this is for eosjs library developers)
 
 General purpose library for the EOS blockchain.
 
-## Usage
+### Usage (read-only)
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
@@ -15,36 +15,83 @@ Eos = require('eosjs') // Or Eos = require('.')
 // API, note: testnet uses eosd at localhost (until there is a testnet)
 eos = Eos.Testnet()
 
-// For promises instead of callbacks, use something like npmjs 'sb-promisify'
-callback = (err, res) => {err ? console.error(err) : console.log(res)}
-
 // All API methods print help when called with no-arguments.
-// More docs at https://github.com/eosjs/api
 eos.getBlock()
 
-// Your going to need localhost:8888
-eos.getBlock(1, callback)
+// Next, your going to need eosd running on localhost:8888
 
-// Transaction
+// If a callback is not provided, a Promise is returned
+eos.getBlock(1).then(result => {console.log(result)})
+
+// Parameters can be sequential or an object
+eos.getBlock({block_num_or_id: 1}).then(result => console.log(result))
+
+// Callbacks are similar
+callback = (err, res) => {err ? console.error(err) : console.log(res)}
+eos.getBlock(1, callback)
+eos.getBlock({block_num_or_id: 1}, callback)
+
+// Provide an empty object or a callback if an API call has no arguments
+eos.getInfo({}).then(result => {console.log(result)})
+
+```
+
+### Usage (read/write)
+
+Status, API is reasonably stable.  However all transactions fail to
+verify in eosd: tx_missing_sigs.
+
+```javascript
+Eos = require('eosjs') // Or Eos = require('.')
+
+eos = Eos.Testnet({
+  signProvider: ({authorization, buf, sign}) => {
+    // Example: account === 'inita' && permission === 'active'
+    const {account, permission} = authorization
+
+    // 'sign' returns a hex string. A Promise resolving to a Hex string works too.
+    return sign(buf, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
+  }
+})
+
+// All Eos transactions as of the last update are available.  Run with no
+// arguments to print usage.
+eos.transfer()
+
+eos.transfer({from: 'inita', to: 'initb', amount: 1})
+
+
+```
+
+### Usage (manual)
+
+A manual transaction provides for more flexibility.
+
+* tweak the transaction in a way this API does not provide
+* run multiple messages in a single transaction (all or none)
+
+```javascript
+
+// eos = Eos.Testnet({signProvider: ...})
+
 eos.transaction({
   scope: ['inita', 'initb'],
   messages: [
-    {// work-in-progress - transaction error 'Bad Cast'
+    {
       code: 'eos',
       type: 'transfer',
+      authorization: [{
+        account: 'inita',
+        permission: 'active'
+      }],
       data: {
-        from: 'eos',
-        to: 'inita',
-        amount: 13
+        from: 'inita',
+        to: 'initb',
+        amount: 7
       }
     }
-  ],
-  authorizations: [{
-    account: 'eos',
-    permission: 'active'
-  }],
-  sign: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3']
-}, callback)
+  ]
+})
 
 ```
 

@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "create-hash": "^1.1.3",
-    "eosjs-api": "^1.0.9",
+    "eosjs-api": "^1.0.10",
     "eosjs-ecc": "^1.0.3",
     "eosjs-json": "^1.0.7",
     "fcbuffer": "^1.0.6"

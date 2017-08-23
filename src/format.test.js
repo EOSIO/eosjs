@@ -3,7 +3,9 @@ const assert = require('assert')
 const {encodeName, decodeName, encodeNameHex, decodeNameHex, isName} = require('./format')
 
 describe('format', () => {
-
+  // todo: names are 13 characters
+  // valid: 555555555555p
+  // invalid: 555555555555q
   describe('name', () => {
     const nameFixture = {
       isname: ['isname11111a', 'isname111115', 'a', '1', '5', 'sam5', 'sam', 'adam.apple'],
