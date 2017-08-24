@@ -1,19 +1,13 @@
 /* eslint-env mocha */
 const Eos = require('.')
-const callback = (err, res) => {err ? console.error(err) : console.log(res)}
+const callback = done => (err, res) => {if(err) {console.error(err)} else {console.log(res); done()}}
 const signProvider = ({sign, buf}) => sign(buf, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
 const promiseSigner = (args) => Promise.resolve(signProvider(args))
 
-describe('transaction no broadcast', () => {
-  it('transfer', () => {
-    eos = Eos.Testnet({debug: false, signProvider})
-    return eos.transfer('inita', 'initb', 1, false)
-  })
-})
+if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
 
-if(process.env['NODE_ENV'] === 'development') {
   describe('networks', () => {
-    it('eos', (done) => {
+    it('testnet', (done) => {
       eos = Eos.Testnet()
       eos.getBlock(1, (err, block) => {
         if(err) {
@@ -23,39 +17,32 @@ if(process.env['NODE_ENV'] === 'development') {
       })
     })
   })
-}
 
-// const cb = done => (err, result) => {
-//   if(err) {
-//     done(JSON.stringify(err, null, 4))
-//     return
-//   }
-//   console.log('success', result)
-//   done()
-// }
+  describe('transactions', () => {
+    it('transfer (no broadcast)', () => {
+      eos = Eos.Testnet({debug: false, signProvider})
+      return eos.transfer('inita', 'initb', 1, false)
+    })
 
-if(process.env['NODE_ENV'] === 'development') {
+    it('transfer sign promise (no broadcast)', () => {
+      eos = Eos.Testnet({debug: false, signProvider: promiseSigner})
+      return eos.transfer('inita', 'initb', 1, false)
+    })
 
-  describe('transaction', () => {
+    it('transfer callback (no broadcast)', (done) => {
+      eos = Eos.Testnet({debug: false, signProvider})
+      return eos.transfer('inita', 'initb', 1, false, callback(done))
+    })
+
     it('transfer', () => {
       eos = Eos.Testnet({debug: false, signProvider})
-      return eos.transfer('inita', 'initb', 1)
-    })
-
-    it('transfer callback', () => {
-      eos = Eos.Testnet({debug: false, signProvider})
-      return eos.transfer('inita', 'initb', 1, callback)
-    })
-
-    it('transfer sign promise', () => {
-      eos = Eos.Testnet({debug: false, signProvider: promiseSigner})
       return eos.transfer('inita', 'initb', 1)
     })
 
     it('custom transfer', () => {
       eos = Eos.Testnet({debug: false, signProvider})
       return eos.transaction({
-        scope: ['inita', 'inita'],
+        scope: ['inita', 'initb'],
         messages: [
           {
             code: 'eos',
@@ -70,13 +57,10 @@ if(process.env['NODE_ENV'] === 'development') {
               permission: 'active'
             }]
           }
-        ]
+        ],
+        broadcast: false
       })
-
     })
-
-  // it(..
-
   })
 
 }

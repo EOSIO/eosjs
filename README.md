@@ -38,8 +38,8 @@ eos.getInfo({}).then(result => {console.log(result)})
 
 ### Usage (read/write)
 
-Status: API is reasonably stable, however, all transactions fail to
-verify in eosd: tx_missing_sigs..
+Status: all transactions fail to verify in eosd: tx_missing_sigs..  To work-around,
+run ./eosd with the `--skip-transaction-signatures` parameter.
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')

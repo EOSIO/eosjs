@@ -97,6 +97,7 @@ function encodeName(name, littleEndian = true) {
 function decodeName(value, littleEndian = true) {
   value = ULong(value)
 
+  // convert from LITTLE_ENDIAN
   let beHex = ''
   const bytes = littleEndian ? value.toBytesLE() : value.toBytesBE()
   for(const b of bytes) {
