@@ -64,7 +64,7 @@ eos.transfer('inita', 'initb', 1)
 
 // A broadcast boolean may be provided allowing any transaction to be created
 // but not sent.
-eos.transfer({from: 'inita', to: 'initb', amount: 1, broadcast: false})
+eos.transfer({from: 'inita', to: 'initb', amount: 1}, {broadcast: false})
 eos.transfer('inita', 'initb', 1, false)
 
 ```

@@ -1,6 +1,7 @@
 const ecc = require('eosjs-ecc')
 const Fcbuffer = require('fcbuffer')
 const createHash = require('create-hash')
+const {processArgs} = require('eosjs-api')
 
 module.exports = writeApiGen
 
@@ -39,22 +40,32 @@ function genMethod(type, definition, struct, transactionArg, Network) {
       return
     }
 
-    const {returnPromise, callParams, callback} = processArgs(args)
-    const params = genParams(callParams, definition.fields, type)
+    // Normalize the extra optional options argument
+    const optionsFormatter = option => {
+      if(typeof option === 'object') {
+        return option // {debug, broadcast, scope, etc} (scope, etc my overwrite tx below)
+      }
+      if(typeof option === 'boolean') {
+        // broadcast argument as a true false value, back-end cli will use this shorthand
+        return {broadcast: option}
+      }
+    }
 
-    const tx = {
-      scope: [],
+    const {params, options, returnPromise, callback} =
+      processArgs(args, Object.keys(definition.fields), type, optionsFormatter)
+
+    const tx = Object.assign({
       messages: [{
         code: 'eos',
         type,
         data: params,
         authorization: []
-      }],
-      broadcast: params.broadcast != null ? params.broadcast : true
-    }
+      }]
+    }, options)
 
-    {// FIXME Hack, until an API call is available
+    if(!tx.scope) {// FIXME Hack, until an API call is available
       const fields = Object.keys(definition.fields)
+      tx.scope = []
 
       const f1 = fields[0]
       if(definition.fields[f1] === 'AccountName') {
@@ -77,6 +88,7 @@ function genMethod(type, definition, struct, transactionArg, Network) {
     return returnPromise
   }
 }
+
 const Structs = require('./structs')
 
 function usage (type, definition, Network) {
@@ -98,59 +110,6 @@ function usage (type, definition, Network) {
   out(`${JSON.stringify(struct.toObject(), null, 4)}`)
 
   return usage
-}
-
-function processArgs(args) {
-  let returnPromise
-  let callParams = args.slice(0, args.length - 1)
-  let callback = args[args.length - 1]
-  if (typeof callback !== 'function') {
-    returnPromise = new Promise((resolve, reject) => {
-      callback = function(err, result) {
-        if(err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      }
-    })
-    callParams = args
-  } else {
-    callParams = args.slice(0, args.length - 1)
-  }
-  return {returnPromise, callParams, callback}
-}
-
-function genParams (callParams, defParams, methodName) {
-  let apiParams
-  // Parameteters can be ordered or an object
-  if (callParams.length === 1 && typeof callParams[0] === 'object') {
-    apiParams = callParams[0]
-  } else {
-    // ordered params
-    const defLen = defParams ? Object.keys(defParams).length : 0
-    apiParams = {}
-    if (callParams.length > defLen) {
-      // console.log('typeof defParams[defLen]', callParams)
-      if(callParams.length === defLen + 1 && typeof callParams[defLen] === 'boolean') {
-        apiParams.broadcast = callParams[defLen]
-      } else {
-        throw new TypeError(`${methodName} is expecting ${defLen === 0 ? 'no' : defLen} parameters but ${callParams.length} where provided`)
-      }
-    }
-
-    if (defParams) {
-      let pos = 0
-      for (const defParam in defParams) {
-        if (callParams.length === pos) {
-          break
-        }
-        apiParams[defParam] = callParams[pos]
-        pos++
-      }
-    }
-  }
-  return apiParams
 }
 
 /**

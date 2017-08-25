@@ -19,24 +19,25 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
   })
 
   describe('transactions', () => {
+
+    it('usage', () => {
+      eos = Eos.Testnet({signProvider})
+      eos.transfer()
+    })
+
+    it('transfer (broadcast)', () => {
+      eos = Eos.Testnet({signProvider})
+      return eos.transfer('inita', 'initb', 1)
+    })
+
     it('transfer (no broadcast)', () => {
-      eos = Eos.Testnet({debug: false, signProvider})
-      return eos.transfer('inita', 'initb', 1, false)
+      eos = Eos.Testnet({signProvider})
+      return eos.transfer('inita', 'initb', 1, {broadcast: false})
     })
 
     it('transfer sign promise (no broadcast)', () => {
-      eos = Eos.Testnet({debug: false, signProvider: promiseSigner})
+      eos = Eos.Testnet({signProvider: promiseSigner})
       return eos.transfer('inita', 'initb', 1, false)
-    })
-
-    it('transfer callback (no broadcast)', (done) => {
-      eos = Eos.Testnet({debug: false, signProvider})
-      return eos.transfer('inita', 'initb', 1, false, callback(done))
-    })
-
-    it('transfer', () => {
-      eos = Eos.Testnet({debug: false, signProvider})
-      return eos.transfer('inita', 'initb', 1)
     })
 
     it('custom transfer', () => {
