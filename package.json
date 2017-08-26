@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eosjs/eosjs.git"
+    "url": "git+https://github.com/EOSIO/eosjs.git"
   },
   "keywords": [
     "EOS",
@@ -19,9 +19,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/eosjs/eosjs/issues"
+    "url": "https://github.com/EOSIO/eosjs/issues"
   },
-  "homepage": "https://github.com/eosjs/eosjs#readme",
+  "homepage": "https://github.com/EOSIO/eosjs#readme",
   "devDependencies": {
     "coveralls": "^2.13.1",
     "istanbul": "^0.4.5",

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/eosjs/eosjs.svg?branch=master)](https://travis-ci.org/eosjs/eosjs)
+[![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
 Status: Alpha (this is for eosjs library developers)
@@ -78,7 +78,7 @@ For example:
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
 
-const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 eos = Eos.Testnet({signProvider: ({sign, buf}) => sign(buf, wif)})
 
 eos.newaccount({
