@@ -1,25 +1,38 @@
+const {PublicKey} = require('eosjs-ecc')
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
+const assert = require('assert')
 
+const {isName} = require('./format')
 const {encodeName, decodeName} = require('./format')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}) => {
 
-  const customTypes = Object.assign({Name: ()=> [Name]}, config.customTypes)
-
   const structLookup = name => structs[name]
-  const override = Object.assign(messageDataOverride(structLookup), config.override)
 
+  const override = Object.assign({},
+    assetOverride,
+    authorityOverride,
+    messageDataOverride(structLookup),
+    config.override
+  )
+
+  const eosTypes = {
+    Name: ()=> [Name],
+    PublicKey: () => [PublicKeyType],
+  }
+
+  const customTypes = Object.assign({}, eosTypes, config.customTypes)
   config = Object.assign({override}, {customTypes}, config)
 
-  const {structs, errors} = Fcbuffer(json.schema, config)
+  const {structs, types, errors} = Fcbuffer(json.schema, config)
   if(errors.length !== 0) {
     throw new Error(JSON.stringify(errors, null, 4))
   }
 
-  return structs
+  return {structs, types}
 }
 
 /**
@@ -51,6 +64,61 @@ const Name = (validation) => {
     }
   }
 }
+
+const PublicKeyType = (validation) => {
+  return {
+    fromByteBuffer (b) {
+      const bcopy = b.copy(b.offset, b.offset + 33)
+      b.skip(33)
+      const pubbuf = Buffer.from(bcopy.toBinary(), 'binary')
+      return PublicKey.fromBuffer(pubbuf).toString()
+    },
+    appendByteBuffer (b, value) {
+      if(validation.debug) {
+        console.error(`${value}`)
+      }
+      const buf = PublicKey.fromStringOrThrow(value).toBuffer()
+      b.append(buf.toString('binary'), 'binary')
+    },
+    fromObject (value) {
+      return value
+    },
+    toObject (value) {
+      if (validation.defaults && value == null) {
+        return 'EOS6MRy..'
+      }
+      return value
+    }
+  }
+}
+
+const assetOverride = ({
+  /** shorthand `1 EOS` for `{amount: 1, symbol: 'EOS'}` */
+  'Asset.fromObject': (value) => {
+    if(typeof value === 'string') {
+      const val = value.trim().split(/ +/)
+      assert.equal(val.length, 2, 'invalid asset')
+      const [amount, symbol] = val
+      assert(/^\d+\.?\d*$/.test(amount), 'amount should be digits')
+      assert(typeof symbol, 'string', 'symbol should be a string')
+      assert(isName(symbol.toLowerCase()), 'symbol should be a valid name')
+      return {amount, symbol}
+    }
+  }
+})
+
+const authorityOverride = ({
+  /** shorthand `EOS6MRyAj..` */
+  'Authority.fromObject': (value) => {
+    if(PublicKey.fromString(value)) {
+      return {
+        threshold: 1,
+        keys: [{key: value, weight: 1}],
+        accounts: []
+      }
+    }
+  }
+})
 
 /**
   Message.data is formatted using the struct mentioned in Message.type.

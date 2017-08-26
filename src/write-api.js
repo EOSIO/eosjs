@@ -76,7 +76,7 @@ function genMethod(type, definition, struct, transactionArg, Network) {
         })
       }
 
-      if(fields.length > 1) {
+      if(fields.length > 1 && !/newaccount/.test(type)) {
         const f2 = fields[1]
         if(definition.fields[f2] === 'AccountName') {
           tx.scope.push(params[f2])
@@ -92,8 +92,12 @@ function genMethod(type, definition, struct, transactionArg, Network) {
 const Structs = require('./structs')
 
 function usage (type, definition, Network) {
-  const structs = Structs({defaults: true, network: Network})
+  const {structs} = Structs({defaults: true, network: Network})
   const struct = structs[type]
+
+  if(struct == null) {
+    throw TypeError('Unknown type: ' + type)
+  }
 
   let usage = ''
   const out = (str = '') => {

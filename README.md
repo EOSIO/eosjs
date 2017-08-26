@@ -69,6 +69,29 @@ eos.transfer('inita', 'initb', 1, false)
 
 ```
 
+Shorthand is available for some types such as Asset and Authority.
+
+For example:
+* deposit: `'10 EOS'` is shorthand for `{amount: 10, symbol: 'EOS'}`
+* owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
+
+```javascript
+Eos = require('eosjs') // Or Eos = require('.')
+
+const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+eos = Eos.Testnet({signProvider: ({sign, buf}) => sign(buf, wif)})
+
+eos.newaccount({
+  creator: 'inita',
+  name: 'mynewacct',
+  owner: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+  active: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+  recovery: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+  deposit: '10 EOS'
+})
+
+```
+
 ### Usage (manual)
 
 A manual transaction provides for more flexibility.

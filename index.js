@@ -16,12 +16,22 @@ const writeApiGen = require('./src/write-api')
 const Eos = (config = {}) => {
   const network = config.network //|| Mainnet()
 
-  const structs = Structs(config)
-
-  return {
-    structs
-  }
+  const {structs, types} = Structs(config)
+  return {structs, types}
 }
+
+module.exports = Eos
+
+Eos.Testnet = config => mergeWriteFunctions(config, Testnet)
+// Eos.Mainnet = config => mergeWriteFunctions(config, Mainnet(config))
+
+Eos.modules = {
+  json,
+  ecc,
+  api,
+  Fcbuffer
+}
+
 
 function throwOnDuplicate(o1, o2, msg) {
   for(const key in o1) {
@@ -60,15 +70,3 @@ function mergeWriteFunctions(config = {}, Network) {
 
   return merge
 }
-
-Eos.Testnet = config => mergeWriteFunctions(config, Testnet)
-// Eos.Mainnet = config => mergeWriteFunctions(config, Mainnet(config))
-
-Eos.modules = {
-  json,
-  ecc,
-  api,
-  Fcbuffer
-}
-
-module.exports = Eos

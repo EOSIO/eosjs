@@ -1,8 +1,5 @@
 /* eslint-env mocha */
 const Eos = require('.')
-const callback = done => (err, res) => {if(err) {console.error(err)} else {console.log(res); done()}}
-const signProvider = ({sign, buf}) => sign(buf, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
-const promiseSigner = (args) => Promise.resolve(signProvider(args))
 
 if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
 
@@ -20,9 +17,30 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
 
   describe('transactions', () => {
 
+    const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+
+    const signProvider = ({sign, buf}) => sign(buf, wif)
+    const promiseSigner = (args) => Promise.resolve(signProvider(args))
+
     it('usage', () => {
       eos = Eos.Testnet({signProvider})
       eos.transfer()
+    })
+
+    it('newaccount', () => {
+      eos = Eos.Testnet({signProvider})
+      const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+      const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
+      const name = 'acct' + String(Math.round(Math.random() * 100000)).replace(/[0,6-9]/g, '')
+
+      return eos.newaccount({
+        creator: 'inita',
+        name,
+        owner: pubkey,
+        active: pubkey,
+        recovery: pubkey,
+        deposit: '10 EOS'
+      })
     })
 
     it('transfer (broadcast)', () => {
@@ -41,7 +59,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
     })
 
     it('custom transfer', () => {
-      eos = Eos.Testnet({debug: false, signProvider})
+      eos = Eos.Testnet({signProvider})
       return eos.transaction({
         scope: ['inita', 'initb'],
         messages: [
@@ -62,6 +80,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
         broadcast: false
       })
     })
+
   })
 
-}
+} // if development
