@@ -29,9 +29,9 @@
   },
   "dependencies": {
     "create-hash": "^1.1.3",
-    "eosjs-api": "^1.0.14",
-    "eosjs-ecc": "^1.0.3",
-    "eosjs-json": "^1.0.8",
+    "eosjs-api": "^1.0.15",
+    "eosjs-ecc": "^1.1.0",
+    "eosjs-json": "^1.1.0",
     "fcbuffer": "^1.0.7"
   }
 }

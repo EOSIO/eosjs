@@ -45,17 +45,17 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
 
     it('transfer (broadcast)', () => {
       eos = Eos.Testnet({signProvider})
-      return eos.transfer('inita', 'initb', 1)
+      return eos.transfer('inita', 'initb', 1, '')
     })
 
     it('transfer (no broadcast)', () => {
       eos = Eos.Testnet({signProvider})
-      return eos.transfer('inita', 'initb', 1, {broadcast: false})
+      return eos.transfer('inita', 'initb', 1, '', {broadcast: false})
     })
 
     it('transfer sign promise (no broadcast)', () => {
       eos = Eos.Testnet({signProvider: promiseSigner})
-      return eos.transfer('inita', 'initb', 1, false)
+      return eos.transfer('inita', 'initb', 1, '', false)
     })
 
     it('custom transfer', () => {
@@ -69,7 +69,8 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
             data: {
               from: 'inita',
               to: 'initb',
-              amount: '13'
+              amount: '13',
+              memo: '爱'
             },
             authorization: [{
               account: 'inita',

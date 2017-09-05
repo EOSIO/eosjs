@@ -166,7 +166,7 @@ function transaction(args, network, structs, signProvider, callback) {
   network.createTransaction(args.expireInSeconds, checkError(callback, rawTx => {
     rawTx.scope = args.scope
     rawTx.messages = args.messages
-    rawTx.authorization = args.authorization
+    rawTx.readscope = args.readscope || []
 
     const {Transaction} = structs
     const buf = Fcbuffer.toBuffer(Transaction, rawTx)
