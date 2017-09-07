@@ -169,7 +169,9 @@ function transaction(args, network, structs, signProvider, callback) {
     rawTx.readscope = args.readscope || []
 
     const {Transaction} = structs
-    const buf = Fcbuffer.toBuffer(Transaction, rawTx)
+    const txObject = Transaction.fromObject(rawTx)// resolve shorthand
+    const buf = Fcbuffer.toBuffer(Transaction, txObject)
+    // console.log('txObject', JSON.stringify(txObject,null,4))
 
     // Broadcast what is signed (instead of rawTx)
     const tx = Fcbuffer.fromBuffer(Transaction, buf)
