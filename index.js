@@ -62,11 +62,9 @@ function mergeWriteFunctions(config = {}, Network) {
   throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
   merge = Object.assign(merge, network)
 
-  if(signProvider) {
-    const writeApi = writeApiGen(Network, network, eos.structs, signProvider)
-    throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
-    merge = Object.assign(merge, writeApi)
-  }
+  const writeApi = writeApiGen(Network, network, eos.structs, signProvider)
+  throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
+  merge = Object.assign(merge, writeApi)
 
   return merge
 }

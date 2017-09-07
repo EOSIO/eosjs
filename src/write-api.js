@@ -156,12 +156,12 @@ function transaction(args, network, structs, signProvider, callback) {
     }
   })
 
-  if(typeof signProvider !== 'function') {
-    throw new TypeError('Expecting signProvider function')
-  }
-
-  const argsDefaults = {expireInSeconds: 60, broadcast: true}
+  const argsDefaults = {expireInSeconds: 60, broadcast: true, sign: true}
   args = Object.assign(argsDefaults, args)
+
+  if(args.sign && typeof signProvider !== 'function') {
+    throw new TypeError('Expecting signProvider function (disable using {sign: false})')
+  }
 
   network.createTransaction(args.expireInSeconds, checkError(callback, rawTx => {
     rawTx.scope = args.scope
@@ -176,15 +176,17 @@ function transaction(args, network, structs, signProvider, callback) {
 
     tx.signatures = []
 
-    for(const message of args.messages) {
-      for(const authorization of message.authorization) {
-        const sig = signProvider({authorization, tx, message, buf, sign})
-        if(typeof sig !== 'string' &&
-          (typeof sig !== 'object' || typeof sig.then !== 'function')
-        ) {
-          throw new Error('signProvider should return a Promise or signature hex')
+    if(args.sign) {
+      for(const message of args.messages) {
+        for(const authorization of message.authorization) {
+          const sig = signProvider({authorization, tx, message, buf, sign})
+          if(typeof sig !== 'string' &&
+            (typeof sig !== 'object' || typeof sig.then !== 'function')
+          ) {
+            throw new Error('signProvider should return a Promise or signature hex')
+          }
+          tx.signatures.push(sig)
         }
-        tx.signatures.push(sig)
       }
     }
 

@@ -1,4 +1,6 @@
 /* eslint-env mocha */
+const assert = require('assert')
+
 const Eos = require('.')
 
 if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
@@ -28,7 +30,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
     })
 
     it('newaccount', () => {
-      eos = Eos.Testnet({signProvider})
+      eos = Eos.Testnet({signProvider, debug: false})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
       const name = 'acct' + String(Math.round(Math.random() * 100000)).replace(/[0,6-9]/g, '')
@@ -51,6 +53,14 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
     it('transfer (no broadcast)', () => {
       eos = Eos.Testnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '', {broadcast: false})
+    })
+
+    it('transfer (no broadcast, no sign)', () => {
+      eos = Eos.Testnet({signProvider})
+      const opts = {broadcast: false, sign: false}
+      return eos.transfer('inita', 'initb', 1, '', opts).then(tr => 
+        assert.deepEqual(tr.signatures, [])
+      )
     })
 
     it('transfer sign promise (no broadcast)', () => {
