@@ -246,12 +246,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
       ser.appendByteBuffer(b2, data)
       
-      // const b2len = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-      // b2len.writeVarint32(b2.offset)
-      
-      result.data =
-        // b2len.copy(0, b2len.offset).toString('hex') +
-        b2.copy(0, b2.offset).toString('hex')
+      result.data = b2.copy(0, b2.offset).toString('hex')
 
       // console.log('result.data', result.data)
       return
