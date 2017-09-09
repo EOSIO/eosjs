@@ -18,10 +18,14 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
   })
 
   describe('transactions', () => {
-
     const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+    const chainId = new Buffer('\0'.repeat(32))
 
-    const signProvider = ({sign, buf}) => sign(buf, wif)
+    const signProvider = ({sign, buf}) => {
+      buf = Buffer.concat([chainId, buf])
+      return sign(buf, wif)
+    }
+
     const promiseSigner = (args) => Promise.resolve(signProvider(args))
 
     it('usage', () => {
