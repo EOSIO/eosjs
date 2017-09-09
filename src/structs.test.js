@@ -44,7 +44,7 @@ describe('shorthand', () => {
 
     const obj = type.fromObject(value) // tests fromObject
     const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
-    assert.equal(buf.toString('hex'), '04454f53000000')
+    assert.equal(buf.toString('hex'), '0004454f53000000')
 
     const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
     const obj3 = type.toObject(obj) // tests toObject

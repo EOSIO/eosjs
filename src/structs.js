@@ -107,18 +107,18 @@ const AssetSymbol = (validation) => {
       throw new TypeError(`Asset symbol is 7 characters or less`)
     }
   }
-  const prefix = '\u0004'
+  const prefix = '\0\u0004'
   return {
     fromByteBuffer (b) {
       const bcopy = b.copy(b.offset, b.offset + 7)
       b.skip(7)
 
       const bin = bcopy.toBinary()
-      if(bin.slice(0, 1) !== prefix) {
+      if(bin.slice(0, 2) !== prefix) {
         throw new TypeError(`Asset symbol prefix does not jive`)
       }
       let symbol = ''
-      for(code of bin.slice(1))  {
+      for(code of bin.slice(2))  {
         if(code == '\0') {
           break
         }
