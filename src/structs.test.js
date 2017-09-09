@@ -36,6 +36,23 @@ describe('shorthand', () => {
     assertSerializer(PublicKeyType, pubkey)
   })
 
+  it('AssetSymbol', () => {
+    const eos = Eos.Testnet()
+    const {types} = eos
+    const type = types.AssetSymbol()
+    const value = 'EOS'
+
+    const obj = type.fromObject(value) // tests fromObject
+    const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
+    assert.equal(buf.toString('hex'), '04454f53000000')
+
+    const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
+    const obj3 = type.toObject(obj) // tests toObject
+
+    assert.deepEqual(value, obj3, 'serialize object')
+    assert.deepEqual(obj3, obj2, 'serialize buffer')
+  })
+
 })
 
 describe('Message.data', () => {

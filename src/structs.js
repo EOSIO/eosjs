@@ -14,7 +14,8 @@ module.exports = (config = {}) => {
 
   // Default to forceMessageDataHex until native ABIs are added, convert Message.data to hex
   // https://github.com/EOSIO/eos/issues/215
-  const forceMessageDataHex = config.forceMessageDataHex != null ? config.forceMessageDataHex : true
+  const forceMessageDataHex = config.forceMessageDataHex != null ?
+    config.forceMessageDataHex : true
 
   const override = Object.assign({},
     assetOverride,
@@ -26,6 +27,7 @@ module.exports = (config = {}) => {
   const eosTypes = {
     Name: ()=> [Name],
     PublicKey: () => [PublicKeyType],
+    AssetSymbol: () => [AssetSymbol]
   }
 
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
@@ -96,10 +98,56 @@ const PublicKeyType = (validation) => {
   }
 }
 
+const AssetSymbol = (validation) => {
+  function valid(value) {
+    if(typeof value !== 'string') {
+      throw new TypeError(`Asset symbol should be a string`)
+    }
+    if(value.length > 7) {
+      throw new TypeError(`Asset symbol is 7 characters or less`)
+    }
+  }
+  const prefix = '\u0004'
+  return {
+    fromByteBuffer (b) {
+      const bcopy = b.copy(b.offset, b.offset + 7)
+      b.skip(7)
+
+      const bin = bcopy.toBinary()
+      if(bin.slice(0, 1) !== prefix) {
+        throw new TypeError(`Asset symbol prefix does not jive`)
+      }
+      let symbol = ''
+      for(code of bin.slice(1))  {
+        if(code == '\0') {
+          break
+        }
+        symbol += code
+      }
+      return symbol
+    },
+    appendByteBuffer (b, value) {
+      valid(value)
+      value += '\0'.repeat(6 - value.length)
+      b.append(prefix + value)
+    },
+    fromObject (value) {
+      valid(value)
+      return value
+    },
+    toObject (value) {
+      if (validation.defaults && value == null) {
+        return 'SYMBOL'
+      }
+      valid(value)
+      return value
+    }
+  }
+}
+
 const assetOverride = ({
   /** shorthand `1 EOS` for `{amount: 1, symbol: 'EOS'}` */
   'Asset.fromObject': (value) => {
-    console.log('value', value)
     if(typeof value === 'string') {
       const val = value.trim().split(/ +/)
       assert.equal(val.length, 2, 'invalid asset')
@@ -161,8 +209,8 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
     }
   },
 
-  'Message.data.fromObject': ({fields, serializedObject, result}) => {
-    const {data, type} = serializedObject
+  'Message.data.fromObject': ({fields, object, result}) => {
+    const {data, type} = object
     const ser = (type || '') == '' ? fields.data : structLookup(type)
     if(ser) {
       if(typeof data === 'object') {
@@ -180,8 +228,8 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
     }
   },
 
-  'Message.data.toObject': ({fields, serializedObject, result, config}) => {
-    const {data, type} = serializedObject || {}
+  'Message.data.toObject': ({fields, object, result, config}) => {
+    const {data, type} = object || {}
     const ser = (type || '') == '' ? fields.data : structLookup(type)
     if(!ser) {
       // Types without an ABI will accept hex

@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 const assert = require('assert')
-const {encodeName, decodeName, encodeNameHex, decodeNameHex, isName} = require('./format')
+const {
+  encodeName, decodeName, encodeNameHex, decodeNameHex,
+  isName
+} = require('./format')
 
 describe('format', () => {
   // todo: names are 13 characters
@@ -41,7 +44,6 @@ describe('format', () => {
       throws(() => decodeName({}), /Long, Number or String/)
     })
   })
-
 })
 
 /* istanbul ignore next */

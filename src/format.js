@@ -6,7 +6,8 @@ module.exports = {
   encodeName, // encode human readable name to uint64 (number string)
   decodeName, // decode from uint64 to human readable
   encodeNameHex: name => Long.fromString(encodeName(name), true).toString(16),
-  decodeNameHex: (hex, littleEndian = true) => decodeName(Long.fromString(hex, true, 16).toString(), littleEndian)
+  decodeNameHex: (hex, littleEndian = true) =>
+    decodeName(Long.fromString(hex, true, 16).toString(), littleEndian)
 }
 
 function ULong(value, unsigned = true, radix = 10) {
