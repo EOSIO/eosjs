@@ -47,10 +47,18 @@ function throwOnDuplicate(o1, o2, msg) {
   @throw {TypeError} if a funciton name conflicts
 */
 function mergeWriteFunctions(config = {}, Network) {
-
-  // limit signProvider's scope as much as possible
-  const signProvider = config.signProvider
   config = Object.assign({}, config)
+
+  if(!config.chainId) {
+    config.chainId = '00'.repeat(32)
+  }
+
+  const signProvider = config.signProvider ? config.signProvider : ({sign, buf}) => {
+    if(!config.privateKey) {
+      throw new TypeError('This transaction requires signing.  Provide a config.privateKey string (wif) or config.signProvider function')
+    }
+    return sign(buf, config.privateKey)
+  }
   delete config.signProvider
 
   const network = Network(config)
@@ -62,7 +70,7 @@ function mergeWriteFunctions(config = {}, Network) {
   throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
   merge = Object.assign(merge, network)
 
-  const writeApi = writeApiGen(Network, network, eos.structs, signProvider)
+  const writeApi = writeApiGen(Network, network, eos.structs, signProvider, config.chainId)
   throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
   merge = Object.assign(merge, writeApi)
 

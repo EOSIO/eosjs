@@ -7,12 +7,16 @@ module.exports = writeApiGen
 
 const {Signature} = ecc
 
-function writeApiGen(Network, network, structs, signProvider) {
+function writeApiGen(Network, network, structs, signProvider, chainId) {
 
   let merge = {}
 
+  if(typeof chainId !== 'string') {
+    throw new TypeError('chainId is required')
+  }
+
   merge.transaction = (args, callback) =>
-    transaction(args, network, structs, signProvider, callback)
+    transaction(args, network, structs, signProvider, chainId, callback)
 
   for(let type in Network.schema) {
     if(!/^[a-z]/.test(type)) {
@@ -43,7 +47,7 @@ function genMethod(type, definition, struct, transactionArg, Network) {
     // Normalize the extra optional options argument
     const optionsFormatter = option => {
       if(typeof option === 'object') {
-        return option // {debug, broadcast, scope, etc} (scope, etc my overwrite tx below)
+        return option // {debug, broadcast, scope, etc} (scope, etc my overwrite tr below)
       }
       if(typeof option === 'boolean') {
         // broadcast argument as a true false value, back-end cli will use this shorthand
@@ -54,7 +58,7 @@ function genMethod(type, definition, struct, transactionArg, Network) {
     const {params, options, returnPromise, callback} =
       processArgs(args, Object.keys(definition.fields), type, optionsFormatter)
 
-    const tx = Object.assign({
+    const tr = Object.assign({
       messages: [{
         code: 'eos',
         type,
@@ -63,14 +67,14 @@ function genMethod(type, definition, struct, transactionArg, Network) {
       }]
     }, options)
 
-    if(!tx.scope) {// FIXME Hack, until an API call is available
+    if(!tr.scope) {// FIXME Hack, until an API call is available
       const fields = Object.keys(definition.fields)
-      tx.scope = []
+      tr.scope = []
 
       const f1 = fields[0]
       if(definition.fields[f1] === 'AccountName') {
-        tx.scope.push(params[f1])
-        tx.messages[0].authorization.push({
+        tr.scope.push(params[f1])
+        tr.messages[0].authorization.push({
           account: params[f1],
           permission: 'active'
         })
@@ -79,12 +83,12 @@ function genMethod(type, definition, struct, transactionArg, Network) {
       if(fields.length > 1 && !/newaccount/.test(type)) {
         const f2 = fields[1]
         if(definition.fields[f2] === 'AccountName') {
-          tx.scope.push(params[f2])
+          tr.scope.push(params[f2])
         }
       }
     }
 
-    transactionArg(tx, callback)
+    transactionArg(tr, callback)
     return returnPromise
   }
 }
@@ -125,7 +129,7 @@ function usage (type, definition, Network) {
     [broadcast = true]
   }
 */
-function transaction(args, network, structs, signProvider, callback) {
+function transaction(args, network, structs, signProvider, chainId, callback) {
   if(typeof args !== 'object') {
     throw new TypeError('Expecting args object')
   }
@@ -171,41 +175,36 @@ function transaction(args, network, structs, signProvider, callback) {
     const {Transaction} = structs
     const txObject = Transaction.fromObject(rawTx)// resolve shorthand
     const buf = Fcbuffer.toBuffer(Transaction, txObject)
+
     // console.log('txObject', JSON.stringify(txObject,null,4))
 
     // Broadcast what is signed (instead of rawTx)
-    const tx = Fcbuffer.fromBuffer(Transaction, buf)
+    const tr = Fcbuffer.fromBuffer(Transaction, buf)
 
-    tx.signatures = []
-
-    if(args.sign) {
-      for(const message of args.messages) {
-        for(const authorization of message.authorization) {
-          const sig = signProvider({authorization, tx, message, buf, sign})
-          if(typeof sig !== 'string' &&
-            (typeof sig !== 'object' || typeof sig.then !== 'function')
-          ) {
-            throw new Error('signProvider should return a Promise or signature hex')
-          }
-          tx.signatures.push(sig)
-        }
+    let sigs = []
+    if(args.sign){
+      const chainIdBuf = new Buffer(chainId, 'hex')
+      const signBuf = Buffer.concat([chainIdBuf, buf])
+      sigs = signProvider({transaction: tr, buf: signBuf, sign})
+      if(!Array.isArray(sigs)) {
+        sigs = [sigs]
       }
     }
 
-    // tx.signatures can be just strings or Promises
-    Promise.all(tx.signatures).then(sigs => {
-      tx.signatures = sigs
-      if(!args.broadcast) {
-        callback(null, tx)
+    // tr.signatures can be just strings or Promises
+    Promise.all(sigs).then(sigs => {
+      tr.signatures = sigs
+      if(!args.broadcast || !args.sign) {
+        callback(null, tr)
       } else {
-        network.pushTransaction(tx, error => {
+        network.pushTransaction(tr, error => {
           if(!error) {
-            callback(null, tx)
+            callback(null, tr)
           } else {
             let sbuf = buf
             // try {
             //   // FIXME - Error: Required UInt64 transfer.amount Message.data Transaction.messages
-            //   sbuf = Fcbuffer.toBuffer(structs.SignedTransaction, tx)
+            //   sbuf = Fcbuffer.toBuffer(structs.SignedTransaction, tr)
             // } catch(error) {
             //   console.log(error)
             // }

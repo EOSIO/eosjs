@@ -40,31 +40,26 @@ eos.getInfo({}).then(result => {console.log(result)})
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
-
-eos = Eos.Testnet({
-  signProvider: ({authorization, buf, sign}) => {
-    // Example: account === 'inita' && permission === 'active'
-    const {account, permission} = authorization
-
-    // 'sign' returns a hex string. A Promise resolving to a Hex string works too.
-    return sign(buf, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3')
-  }
-})
+eos = Eos.Testnet({privateKey: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 // All Eos transactions as of the last update are available.  Run with no
 // arguments to print usage.
 eos.transfer()
 
 // Object or ordered args may be used
-eos.transfer({from: 'inita', to: 'initb', amount: 1})
-eos.transfer('inita', 'initb', 1)
+eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''})
+eos.transfer('inita', 'initb', 1, 'memo')
 
 // A broadcast boolean may be provided allowing any transaction to be created
 // but not sent.
-eos.transfer({from: 'inita', to: 'initb', amount: 1}, {broadcast: false})
-eos.transfer('inita', 'initb', 1, false)
+eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, {broadcast: false})
+eos.transfer('inita', 'initb', 1, '', false)
 
 ```
+
+For more advanced signing, see `signProvider` in the [unit test](./index.test.js).
+
+### Shorthand
 
 Shorthand is available for some types such as Asset and Authority.
 
@@ -74,9 +69,7 @@ For example:
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
-
-wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
-eos = Eos.Testnet({signProvider: ({sign, buf}) => sign(buf, wif)})
+eos = Eos.Testnet({privateKey: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 eos.newaccount({
   creator: 'inita',
@@ -97,8 +90,8 @@ A manual transaction provides for more flexibility.
 * run multiple messages in a single transaction (all or none)
 
 ```javascript
-
-// eos = Eos.Testnet({signProvider: ...})
+Eos = require('eosjs') // Or Eos = require('.')
+eos = Eos.Testnet({privateKey: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 eos.transaction({
   scope: ['inita', 'initb'],
@@ -113,7 +106,8 @@ eos.transaction({
       data: {
         from: 'inita',
         to: 'initb',
-        amount: 7
+        amount: 7,
+        memo: ''
       }
     }
   ]

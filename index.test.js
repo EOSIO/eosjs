@@ -19,13 +19,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
 
   describe('transactions', () => {
     const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
-    const chainId = new Buffer('\0'.repeat(32))
-
-    const signProvider = ({sign, buf}) => {
-      buf = Buffer.concat([chainId, buf])
-      return sign(buf, wif)
-    }
-
+    const signProvider = ({sign, buf}) => sign(buf, wif)
     const promiseSigner = (args) => Promise.resolve(signProvider(args))
 
     it('usage', () => {
@@ -37,7 +31,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
       eos = Eos.Testnet({signProvider, debug: false})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
-      const name = 'acct' + String(Math.round(Math.random() * 100000)).replace(/[0,6-9]/g, '')
+      const name = 'act' + String(Math.round(Math.random() * 10000000)).replace(/[0,6-9]/g, '')
 
       return eos.newaccount({
         creator: 'inita',
@@ -52,6 +46,18 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
     it('transfer (broadcast)', () => {
       eos = Eos.Testnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '')
+    })
+
+    it('transfer (get_required_keys)', () => {
+      const keySigner = ({buf, sign, transaction}) => {
+        const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+        return eos.getRequiredKeys(transaction, [pubkey]).then(res => {
+          assert.deepEqual(res.required_keys, [pubkey])
+          return sign(buf, wif) // return hex string signature or array of signatures
+        })
+      }
+      eos = Eos.Testnet({signProvider: keySigner})
+      return eos.transfer('inita', 'initb', 2, '')
     })
 
     it('transfer (no broadcast)', () => {
