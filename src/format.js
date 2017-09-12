@@ -26,11 +26,14 @@ function ULong(value, unsigned = true, radix = 10) {
   return value
 }
 
-function isName(str) {
+function isName(str, err) {
   try {
     encodeName(str)
     return true
   } catch(error) {
+    if(err) {
+      err(error)
+    }
     return false
   }
 }
@@ -62,14 +65,17 @@ function encodeName(name, littleEndian = true) {
   if(typeof name !== 'string')
     throw new TypeError('name parameter is a required string')
 
-  if(name.length > 12)
-    throw new TypeError('A name can be up to 12 characters long')
+  if(name.length > 13)
+    throw new TypeError('A name can be up to 13 characters long')
 
   let bitstr = ''
   for(let i = 0; i <= 12; i++) { // process all 64 bits (even if name is short)
     const c = i < name.length ? charidx(name[i]) : 0
     const bitlen = i < 12 ? 5 : 4
     let bits = Number(c).toString(2)
+    if(bits.length > bitlen) {
+      throw new TypeError('Invalid name ' + name)
+    }
     bits = '0'.repeat(bitlen - bits.length) + bits
     bitstr += bits
   }

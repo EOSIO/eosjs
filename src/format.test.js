@@ -6,18 +6,16 @@ const {
 } = require('./format')
 
 describe('format', () => {
-  // todo: names are 13 characters
-  // valid: 555555555555p
-  // invalid: 555555555555q
+  // valid: 555555555555o, invalid: 555555555555p 'p' overflows the last 4 bits of the name
   describe('name', () => {
     const nameFixture = {
-      isname: ['isname11111a', 'isname111115', 'a', '1', '5', 'sam5', 'sam', 'adam.apple'],
-      noname: ['noname1111111', undefined, null, 1, '6', 'a6', ' ']
+      isname: ['555555555555o', 'isname11111a', 'isname111115', 'a', '1', '5', 'sam5', 'sam', 'adam.apple'],
+      noname: ['555555555555p', 'noname1111111', undefined, null, 1, '6', 'a6', ' ']
     }
 
     it('isName', () => {
       for(let name of nameFixture.isname) {
-        assert(isName(name), name)
+        assert(isName(name, err => console.log(err)), name)
       }
       for(let name of nameFixture.noname) {
         assert(!isName(name), name)
