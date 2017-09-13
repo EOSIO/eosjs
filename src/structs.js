@@ -174,7 +174,7 @@ const authorityOverride = ({
 })
 
 /**
-  Message.data is formatted using the struct mentioned in Message.type.
+  Nested serialized structure.  Nested struct may be in HEX or object format.
 */
 const messageDataOverride = (structLookup, forceMessageDataHex) => ({
   'Message.data.fromByteBuffer': ({fields, object, b, config}) => {
