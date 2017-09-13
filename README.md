@@ -57,7 +57,7 @@ eos.transfer('inita', 'initb', 1, '', false)
 
 ```
 
-For more advanced signing, see `signProvider` in the [unit test](./index.test.js).
+For more advanced signing, see `get_required_keys` in the [unit test](./index.test.js).
 
 ### Shorthand
 

@@ -50,9 +50,13 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
 
     it('transfer (get_required_keys)', () => {
       const keySigner = ({buf, sign, transaction}) => {
-        const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
-        return eos.getRequiredKeys(transaction, [pubkey]).then(res => {
-          assert.deepEqual(res.required_keys, [pubkey])
+
+        // All potential keys (EOS6MRy.. is the pubkey for 'wif')
+        const pubkeys = ['EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV']
+
+        return eos.getRequiredKeys(transaction, pubkeys).then(res => {
+          // Just the required_keys need to sign 
+          assert.deepEqual(res.required_keys, pubkeys)
           return sign(buf, wif) // return hex string signature or array of signatures
         })
       }
