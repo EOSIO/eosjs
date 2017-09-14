@@ -22,8 +22,8 @@ const Eos = (config = {}) => {
 
 module.exports = Eos
 
-Eos.Testnet = config => mergeWriteFunctions(config, Testnet)
-// Eos.Mainnet = config => mergeWriteFunctions(config, Mainnet(config))
+Eos.Testnet = config => createEos(config, Testnet)
+// Eos.Mainnet = config => createEos(config, Mainnet(config))
 
 Eos.modules = {
   json,
@@ -32,6 +32,44 @@ Eos.modules = {
   Fcbuffer
 }
 
+function createEos(config = {}, Network) {
+  config = Object.assign({}, config)
+
+  if(!config.chainId) {
+    config.chainId = '00'.repeat(32)
+  }
+
+  const eos = mergeWriteFunctions(config, Network)
+
+  let signProvider = config.signProvider
+  if(!signProvider) {
+    config.signProvider = defaultSignProvider(eos, config)
+  }
+
+  return eos
+}
+
+/**
+  @arg {object} network - all read-only api calls
+  @return {object} - read-only api calls and write method calls (create and sign transactions)
+  @throw {TypeError} if a funciton name conflicts
+*/
+function mergeWriteFunctions(config, Network) {
+  const network = Network(config)
+  Object.assign(config, {network})
+
+  const eos = Eos(config)
+  let merge = Object.assign({}, eos)
+  
+  throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
+  merge = Object.assign(merge, network)
+
+  const writeApi = writeApiGen(Network, network, eos.structs, config)
+  throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
+  merge = Object.assign(merge, writeApi)
+
+  return merge
+}
 
 function throwOnDuplicate(o1, o2, msg) {
   for(const key in o1) {
@@ -41,38 +79,40 @@ function throwOnDuplicate(o1, o2, msg) {
   }
 }
 
-/**
-  @arg {object} network - all read-only api calls
-  @return {object} - read-only api calls and write method calls (create and sign transactions)
-  @throw {TypeError} if a funciton name conflicts
-*/
-function mergeWriteFunctions(config = {}, Network) {
-  config = Object.assign({}, config)
-
-  if(!config.chainId) {
-    config.chainId = '00'.repeat(32)
+const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
+  let keyProvider = config.keyProvider
+  if(typeof keyProvider === 'function') {
+    keyProvider = keyProvider({transaction})
   }
+  if(keyProvider) {
+    return Promise.resolve(keyProvider).then(keys => {
+      if(!Array.isArray(keys)) {
+        keys = [keys]
+      }
 
-  const signProvider = config.signProvider ? config.signProvider : ({sign, buf}) => {
-    if(!config.privateKey) {
-      throw new TypeError('This transaction requires signing.  Provide a config.privateKey string (wif) or config.signProvider function')
-    }
-    return sign(buf, config.privateKey)
+      if(!keys.length) {
+        throw new Error('missing private key(s), check your keyProvider')
+      }
+
+      // Public to private key map -> maps server's required public keys
+      // back to signing keys.
+      const keyMap = keys.reduce((map, wif) => {
+        map[ecc.privateToPublic(wif)] = wif
+        return map
+      }, {})
+
+      return eos.getRequiredKeys(transaction, Object.keys(keyMap))
+      .then(({required_keys}) => {
+        if(!required_keys.length) {
+          throw new Error('missing required keys ')
+        }
+        const sigs = []
+        for(const key of required_keys) {
+          sigs.push(sign(buf, keyMap[key]))
+        }
+        return sigs
+      })
+    })
   }
-  delete config.signProvider
-
-  const network = Network(config)
-  config = Object.assign(config, {network})
-
-  const eos = Eos(config)
-  let merge = Object.assign({}, eos)
-
-  throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
-  merge = Object.assign(merge, network)
-
-  const writeApi = writeApiGen(Network, network, eos.structs, signProvider, config.chainId)
-  throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
-  merge = Object.assign(merge, writeApi)
-
-  return merge
+  throw new TypeError('This transaction requires a config.keyProvider for signing')
 }

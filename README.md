@@ -40,7 +40,7 @@ eos.getInfo({}).then(result => {console.log(result)})
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
-eos = Eos.Testnet({privateKey: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
+eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 // All Eos transactions as of the last update are available.  Run with no
 // arguments to print usage.
@@ -57,7 +57,7 @@ eos.transfer('inita', 'initb', 1, '', false)
 
 ```
 
-For more advanced signing, see `get_required_keys` in the [unit test](./index.test.js).
+For more advanced signing, see `keyProvider` in the [unit test](./index.test.js).
 
 ### Shorthand
 
@@ -69,16 +69,55 @@ For example:
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
-eos = Eos.Testnet({privateKey: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
+
+initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+initaPublic = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+keyProvider = initaPrivate
+
+eos = Eos.Testnet({keyProvider})
 
 eos.newaccount({
   creator: 'inita',
   name: 'mynewacct',
-  owner: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
-  active: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
-  recovery: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
-  deposit: '10 EOS'
+  owner: initaPublic,
+  active: initaPublic,
+  recovery: 'inita',
+  deposit: '1 EOS'
 })
+
+```
+
+### Contract
+
+```javascript
+Eos = require('eosjs') // Or Eos = require('.')
+let {ecc} = Eos.modules
+
+initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+
+// New deterministic key for the currency account.  Only use a simple
+// seedPrivate in production if you want to give away money.
+currencyPrivate = ecc.seedPrivate('currency')
+currencyPublic = ecc.privateToPublic(currencyPrivate)
+
+keyProvider = [initaPrivate, currencyPrivate]
+
+eos = Eos.Testnet({keyProvider})
+
+eos.newaccount({
+  creator: 'inita',
+  name: 'currency',
+  owner: currencyPublic,
+  active: currencyPublic,
+  recovery: 'inita',
+  deposit: '1 EOS'
+})
+
+contractDir = `${process.env.HOME}/eosio/eos/build/contracts/currency`
+wast = fs.readFileSync(`${contractDir}/currency.wast`)
+abi = fs.readFileSync(`${contractDir}/currency.abi`)
+
+eos.setcode('currency', 0, 0, wast, abi)
 
 ```
 
@@ -91,7 +130,8 @@ A manual transaction provides for more flexibility.
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('.')
-eos = Eos.Testnet({privateKey: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
+
+eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 eos.transaction({
   scope: ['inita', 'initb'],

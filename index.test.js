@@ -27,29 +27,25 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
       eos.transfer()
     })
 
-    it('newaccount', () => {
-      eos = Eos.Testnet({signProvider, debug: false})
-      const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
-      const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
-      const name = 'act' + String(Math.round(Math.random() * 10000000)).replace(/[0,6-9]/g, '')
+    it('keyProvider', () => {
+      // Ultimatly keyProvider should return a string or array of private keys.
+      // Optionally use a function and(or) return a promise if needed.
+      // This is the more advanced case.
+      const keyProvider = ({transaction}) => {
+        assert.equal(transaction.messages[0].type, 'transfer')
+        return Promise.resolve(wif)
+      }
 
-      return eos.newaccount({
-        creator: 'inita',
-        name,
-        owner: pubkey,
-        active: pubkey,
-        recovery: pubkey,
-        deposit: '10 EOS'
+      eos = Eos.Testnet({keyProvider})
+
+      return eos.transfer('inita', 'initb', 1, '', false).then(tr => {
+        assert.equal(tr.signatures.length, 1)
+        assert.equal(typeof tr.signatures[0], 'string')
       })
     })
 
-    it('transfer (broadcast)', () => {
-      eos = Eos.Testnet({signProvider})
-      return eos.transfer('inita', 'initb', 1, '')
-    })
-
-    it('transfer (get_required_keys)', () => {
-      const keySigner = ({buf, sign, transaction}) => {
+    it('signProvider', () => {
+      const customSignProvider = ({buf, sign, transaction}) => {
 
         // All potential keys (EOS6MRy.. is the pubkey for 'wif')
         const pubkeys = ['EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV']
@@ -60,8 +56,29 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
           return sign(buf, wif) // return hex string signature or array of signatures
         })
       }
-      eos = Eos.Testnet({signProvider: keySigner})
-      return eos.transfer('inita', 'initb', 2, '')
+      eos = Eos.Testnet({signProvider: customSignProvider})
+      return eos.transfer('inita', 'initb', 2, '', false)
+    })
+
+    it('newaccount', () => {
+      eos = Eos.Testnet({signProvider, debug: false})
+      const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+      // const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
+      const name = 'act' + String(Math.round(Math.random() * 10000000)).replace(/[0,6-9]/g, '')
+
+      return eos.newaccount({
+        creator: 'inita',
+        name,
+        owner: pubkey,
+        active: pubkey,
+        recovery: 'inita',
+        deposit: '1 EOS'
+      })
+    })
+
+    it('transfer (broadcast)', () => {
+      eos = Eos.Testnet({signProvider})
+      return eos.transfer('inita', 'initb', 1, '')
     })
 
     it('transfer (no broadcast)', () => {

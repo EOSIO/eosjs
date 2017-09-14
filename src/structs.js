@@ -3,6 +3,7 @@ const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
 const assert = require('assert')
+const binaryen = require('binaryen')
 
 const {isName} = require('./format')
 const {encodeName, decodeName} = require('./format')
@@ -20,6 +21,8 @@ module.exports = (config = {}) => {
   const override = Object.assign({},
     assetOverride,
     authorityOverride,
+    abiOverride,
+    wasmCodeOverride,
     messageDataOverride(structLookup, forceMessageDataHex),
     config.override
   )
@@ -154,7 +157,7 @@ const assetOverride = ({
       const [amount, symbol] = val
       assert(/^\d+\.?\d*$/.test(amount), 'amount should be digits')
       assert(typeof symbol, 'string', 'symbol should be a string')
-      assert(isName(symbol.toLowerCase()), 'symbol should be a valid name')
+      assert(isName(symbol.toLowerCase()), 'invalid symbol')
       return {amount, symbol}
     }
   }
@@ -169,6 +172,48 @@ const authorityOverride = ({
         keys: [{key: value, weight: 1}],
         accounts: []
       }
+    }
+    if(isName(value)) {
+      const [account, permission = 'active'] = value.split('@')
+      return {
+        threshold: 1,
+        keys: [],
+        accounts: [{
+          permission: {
+            account,
+            permission
+          },
+          weight: 1
+        }]
+      }
+    }
+  }
+})
+
+const abiOverride = ({
+  'Abi.fromObject': (value) => {
+    if(typeof value === 'string') {
+      return JSON.parse(value)
+    }
+    if(Buffer.isBuffer(value)) {
+      return JSON.parse(value.toString())
+    }
+  }
+})
+
+const wasmCodeOverride = ({
+  'setcode.code.fromObject': ({object, result}) => {
+    try {
+      const code = object.code.toString()
+      if(/^\s*\(module/.test(code)) {
+        console.log('Assembling WASM...')
+        const wasm = Buffer.from(binaryen.parseText(code).emitBinary())
+        result.code = wasm
+      } else {
+        result.code = object.code
+      }
+    } catch(error) {
+      console.error(error, object.code)
     }
   }
 })

@@ -7,16 +7,16 @@ module.exports = writeApiGen
 
 const {Signature} = ecc
 
-function writeApiGen(Network, network, structs, signProvider, chainId) {
+function writeApiGen(Network, network, structs, config) {
 
   let merge = {}
 
-  if(typeof chainId !== 'string') {
-    throw new TypeError('chainId is required')
+  if(typeof config.chainId !== 'string') {
+    throw new TypeError('config.chainId is required')
   }
 
   merge.transaction = (args, callback) =>
-    transaction(args, network, structs, signProvider, chainId, callback)
+    transaction(args, network, structs, config, callback)
 
   for(let type in Network.schema) {
     if(!/^[a-z]/.test(type)) {
@@ -87,7 +87,7 @@ function genMethod(type, definition, struct, transactionArg, Network) {
         }
       }
     }
-
+    tr.scope = tr.scope.sort()
     transactionArg(tr, callback)
     return returnPromise
   }
@@ -114,7 +114,7 @@ function usage (type, definition, Network) {
   out(`${JSON.stringify(definition, null, 4)}`)
   out()
 
-  out(`EXAMPLE`)
+  out(`EXAMPLE STRUCTURE`)
   out(`${JSON.stringify(struct.toObject(), null, 4)}`)
 
   return usage
@@ -129,7 +129,7 @@ function usage (type, definition, Network) {
     [broadcast = true]
   }
 */
-function transaction(args, network, structs, signProvider, chainId, callback) {
+function transaction(args, network, structs, config, callback) {
   if(typeof args !== 'object') {
     throw new TypeError('Expecting args object')
   }
@@ -155,16 +155,16 @@ function transaction(args, network, structs, signProvider, chainId, callback) {
   }
 
   args.messages.forEach(message => {
-    if(!Array.isArray(message.authorization)) {
-      throw new TypeError('Expecting message.authorization array in ' + message)
+    if(!Array.isArray(message.authorization) || message.authorization.length === 0) {
+      throw new TypeError('Expecting message.authorization array', message)
     }
   })
 
   const argsDefaults = {expireInSeconds: 60, broadcast: true, sign: true}
   args = Object.assign(argsDefaults, args)
 
-  if(args.sign && typeof signProvider !== 'function') {
-    throw new TypeError('Expecting signProvider function (disable using {sign: false})')
+  if(args.sign && typeof config.signProvider !== 'function') {
+    throw new TypeError('Expecting config.signProvider function (disable using {sign: false})')
   }
 
   network.createTransaction(args.expireInSeconds, checkError(callback, rawTx => {
@@ -183,17 +183,21 @@ function transaction(args, network, structs, signProvider, chainId, callback) {
 
     let sigs = []
     if(args.sign){
-      const chainIdBuf = new Buffer(chainId, 'hex')
+      const chainIdBuf = new Buffer(config.chainId, 'hex')
       const signBuf = Buffer.concat([chainIdBuf, buf])
-      sigs = signProvider({transaction: tr, buf: signBuf, sign})
+      sigs = config.signProvider({transaction: tr, buf: signBuf, sign})
       if(!Array.isArray(sigs)) {
         sigs = [sigs]
       }
     }
 
-    // tr.signatures can be just strings or Promises
+    // sigs can be strings or Promises
     Promise.all(sigs).then(sigs => {
+      sigs = [].concat.apply([], sigs) //flatten arrays in array
       tr.signatures = sigs
+
+      console.log(JSON.stringify(tr, null, 4))// DEBUG
+
       if(!args.broadcast || !args.sign) {
         callback(null, tr)
       } else {
@@ -201,19 +205,15 @@ function transaction(args, network, structs, signProvider, chainId, callback) {
           if(!error) {
             callback(null, tr)
           } else {
-            let sbuf = buf
-            // try {
-            //   // FIXME - Error: Required UInt64 transfer.amount Message.data Transaction.messages
-            //   sbuf = Fcbuffer.toBuffer(structs.SignedTransaction, tr)
-            // } catch(error) {
-            //   console.log(error)
-            // }
-            console.error(`[eosjs] transaction error '${error.message}', digest '${sbuf.toString('hex')}'`)
+            console.error(`[push_transaction error] '${error.message}', digest '${buf.toString('hex')}'`)
             callback(error.message)
           }
         })
       }
-    }).catch(error => {callback(error)})
+    }).catch(error => {
+      console.error(error)
+      callback(error)
+    })
   }))
   return returnPromise
 }
