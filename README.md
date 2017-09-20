@@ -36,6 +36,8 @@ eos.getInfo({}).then(result => {console.log(result)})
 
 ```
 
+Read-only API methods and documentation are generated from  [chain.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/chain.json).
+
 ### Usage (read/write)
 
 ```javascript
@@ -56,6 +58,8 @@ eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, {broadcast: fals
 eos.transfer('inita', 'initb', 1, '', false)
 
 ```
+
+Read-write API methods and documentation are generated from this [schema](https://github.com/EOSIO/eosjs-json/blob/master/schema/generated.json).
 
 For more advanced signing, see `keyProvider` in the [unit test](./index.test.js).
 
