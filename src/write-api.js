@@ -5,7 +5,7 @@ const {processArgs} = require('eosjs-api')
 
 module.exports = writeApiGen
 
-const {Signature} = ecc
+const {sign} = ecc
 
 function writeApiGen(Network, network, structs, config) {
 
@@ -216,24 +216,6 @@ function transaction(args, network, structs, config, callback) {
     })
   }))
   return returnPromise
-}
-
-/**
-  The transaction function signs already.  This is for signing other types
-  of data.
-
-  @arg {string|Buffer} data - Never sign anything without 100% validation or
-    unless prefixing with a string constant.
-
-  @arg {string|ecc.PrivateKey} key - string must be a valid WIF format
-
-  @return {string} hex signature
-*/
-function sign(data, key) {
-  const privateKey = key.d ? key : ecc.PrivateKey.fromWif(key)
-  const h = createHash('sha256').update(data).digest();
-  const sig = Signature.signBufferSha256(h, privateKey)
-  return sig.toHex()
 }
 
 const checkError = (parentErr, parrentRes) => (error, result) => {
