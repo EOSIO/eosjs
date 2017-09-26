@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-Status: Alpha (this is for eosjs library developers)
+Status: Alpha (this is for eosjs developers)
 
 # Eosjs
 
