@@ -2,7 +2,7 @@
 const assert = require('assert')
 const Fcbuffer = require('fcbuffer')
 
-const Eos = require('..')
+const Eos = require('.')
 
 describe('shorthand', () => {
 

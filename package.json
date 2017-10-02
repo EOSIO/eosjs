@@ -2,11 +2,13 @@
   "name": "eosjs",
   "version": "1.4.3",
   "description": "General purpose library for the EOS blockchain.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "mocha index.test.js **/*.test.js",
-    "coverage": "istanbul cover _mocha -- -R spec index.test.js **/*.test.js",
-    "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+    "test": "mocha src/*.test.js",
+    "coverage": "istanbul cover _mocha -- -R spec src/*.test.js",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "build": "node_modules/babel-cli/bin/babel.js src --out-dir lib",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -23,6 +25,9 @@
   },
   "homepage": "https://github.com/EOSIO/eosjs#readme",
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
     "coveralls": "^2.13.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.4.2"
@@ -34,5 +39,10 @@
     "eosjs-ecc": "^1.3.2",
     "eosjs-json": "^1.4.0",
     "fcbuffer": "^1.2.0"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
   }
 }

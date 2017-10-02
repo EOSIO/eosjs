@@ -5,8 +5,8 @@ const Fcbuffer = require('fcbuffer')
 const Testnet = require('eosjs-api/testnet')
 const api = require('eosjs-api')
 
-const Structs = require('./src/structs')
-const writeApiGen = require('./src/write-api')
+const Structs = require('./structs')
+const writeApiGen = require('./write-api')
 
 /**
   config.network = Testnet() must be supplied until Mainnet is available..
