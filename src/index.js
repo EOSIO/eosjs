@@ -2,7 +2,6 @@ const ecc = require('eosjs-ecc')
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 
-const Testnet = require('eosjs-api/testnet')
 const api = require('eosjs-api')
 
 const Structs = require('./structs')
@@ -22,7 +21,7 @@ const Eos = (config = {}) => {
 
 module.exports = Eos
 
-Eos.Testnet = config => createEos(config, Testnet)
+Eos.Testnet = config => createEos(config, api.Testnet)
 // Eos.Mainnet = config => createEos(config, Mainnet(config))
 
 Eos.modules = {
