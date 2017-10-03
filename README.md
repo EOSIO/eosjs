@@ -10,7 +10,7 @@ General purpose library for the EOS blockchain.
 ### Usage (read-only)
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('.')
+Eos = require('eosjs') // Or Eos = require('./src')
 
 // API, note: testnet uses eosd at localhost (until there is a testnet)
 eos = Eos.Testnet()
@@ -41,7 +41,7 @@ Read-only API methods and documentation are generated from  [chain.json](https:/
 ### Usage (read/write)
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('.')
+Eos = require('eosjs') // Or Eos = require('./src')
 eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 // All Eos transactions as of the last update are available.  Run with no
@@ -72,7 +72,7 @@ For example:
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('.')
+Eos = require('eosjs') // Or Eos = require('./src')
 
 initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 initaPublic = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
@@ -94,7 +94,7 @@ eos.newaccount({
 ### Contract
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('.')
+Eos = require('eosjs') // Or Eos = require('./src')
 let {ecc} = Eos.modules
 
 initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
@@ -133,7 +133,7 @@ A manual transaction provides for more flexibility.
 * run multiple messages in a single transaction (all or none)
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('.')
+Eos = require('eosjs') // Or Eos = require('./src')
 
 eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
