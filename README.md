@@ -167,7 +167,7 @@ These libraries are exported from `eosjs` or may be used separately.
 var {api, ecc, json, Fcbuffer} = Eos.modules
 ```
 
-## About
+# About
 
 * eosjs-api [[Github](https://github.com/eosio/eosjs-api), [NPM](https://www.npmjs.org/package/eosjs-api)]
   * Remote API to an EOS blockchain node (eosd)
@@ -190,6 +190,23 @@ var {api, ecc, json, Fcbuffer} = Eos.modules
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
 
+# Browser
+
+```bash
+git clone https://github.com/EOSIO/eosjs.git
+cd eosjs
+npm install
+npm run build
+# builds: ./dist/eos.js
+```
+
+```html
+<script src="eos.js"></script>
+<script>
+var eos = Eos.Testnet()
+//...
+</script>
+```
 
 # Environment
 
