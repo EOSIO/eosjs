@@ -144,7 +144,7 @@ eos = Eos.Testnet({keyProvider})
 eos.transaction(tr =>
   {
     tr.transfer('inita', 'initb', 1, '')
-    tr.transfer({from: 'inita', to: 'initc', amount: 1, memo: ''})
+    tr.transfer('inita', 'initc', 1, '')
 
     // A returned promise or thrown error is handled as expected
   }
