@@ -3,6 +3,8 @@ const assert = require('assert')
 
 const Eos = require('.')
 
+const forceMessageDataHex = true, debug = true
+
 if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
 
   describe('networks', () => {
@@ -61,7 +63,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
     })
 
     it('newaccount', () => {
-      eos = Eos.Testnet({signProvider, debug: false})
+      eos = Eos.Testnet({signProvider})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       // const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
       const name = 'act' + String(Math.round(Math.random() * 10000000)).replace(/[0,6-9]/g, '')
@@ -99,28 +101,69 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
       return eos.transfer('inita', 'initb', 1, '', false)
     })
 
+    it('multi-message transaction (broadcast)', () => {
+      eos = Eos.Testnet({signProvider})
+      return eos.transaction(tr =>
+        {
+          tr.transfer('inita', 'initb', 1, '')
+          tr.transfer({from: 'inita', to: 'initc', amount: 1, memo: ''})
+        }
+      )
+    })
+
+    it('multi-message transaction no inner callback', () => {
+      eos = Eos.Testnet({signProvider})
+      eos.transaction(tr => {
+        tr.okproducer('inita', 'inita', 1, cb => {})
+      })
+      .then(() => {throw 'expecting rollback'})
+      .catch(error => {
+        assert(/Callback during a transaction/.test(error), error)
+      })
+    })
+
+    it('multi-message transaction error rollback', () => {
+      eos = Eos.Testnet({signProvider})
+      return eos.transaction(tr => {throw 'rollback'})
+      .then(() => {throw 'expecting rollback'})
+      .catch(error => {
+        assert(/rollback/.test(error), error)
+      })
+    })
+
+    it('multi-message transaction Promise.reject rollback', () => {
+      eos = Eos.Testnet({signProvider})
+      eos.transaction(tr => Promise.reject('rollback'))
+      .then(() => {throw 'expecting rollback'})
+      .catch(error => {
+        assert(/rollback/.test(error), error)
+      })
+    })
+
     it('custom transfer', () => {
       eos = Eos.Testnet({signProvider})
-      return eos.transaction({
-        scope: ['inita', 'initb'],
-        messages: [
-          {
-            code: 'eos',
-            type: 'transfer',
-            data: {
-              from: 'inita',
-              to: 'initb',
-              amount: '13',
-              memo: '爱'
-            },
-            authorization: [{
-              account: 'inita',
-              permission: 'active'
-            }]
-          }
-        ],
-        broadcast: false
-      })
+      return eos.transaction(
+        {
+          scope: ['inita', 'initb'],
+          messages: [
+            {
+              code: 'eos',
+              type: 'transfer',
+              data: {
+                from: 'inita',
+                to: 'initb',
+                amount: '13',
+                memo: '爱'
+              },
+              authorization: [{
+                account: 'inita',
+                permission: 'active'
+              }]
+            }
+          ]
+        },
+        {broadcast: false}
+      )
     })
 
   })

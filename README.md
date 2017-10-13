@@ -38,6 +38,10 @@ eos.getInfo({}).then(result => {console.log(result)})
 
 Read-only API methods and documentation are generated from  [chain.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/chain.json).
 
+### Transaction Options
+
+`options = {broadcast: true, sign: true, expireInSeconds: N, debug: false}`
+
 ### Usage (read/write)
 
 ```javascript
@@ -125,6 +129,30 @@ eos.setcode('currency', 0, 0, wast, abi)
 
 ```
 
+### Atomic Operations
+
+Blockchain level atomic operations.  All will pass or fail.
+
+```javascript
+Eos = require('eosjs') // Or Eos = require('./src')
+
+keyProvider = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+
+eos = Eos.Testnet({keyProvider})
+
+eos.transaction(tr =>
+  {
+    tr.transfer('inita', 'initb', 1, '')
+    tr.transfer({from: 'inita', to: 'initc', amount: 1, memo: ''})
+
+    // A returned promise or thrown error is handled as expected
+  }
+  // options,
+  // callback
+)
+
+```
+
 ### Usage (manual)
 
 A manual transaction provides for more flexibility.
@@ -158,6 +186,22 @@ eos.transaction({
 })
 
 ```
+
+# Development
+
+From time-to-time the eosjs and eosd binary format will change between releases
+so you may need to start `eosd` with the `--skip-transaction-signatures` parameter
+to get your transactions to pass.
+
+Note, `packagge.json` has a "main" pointing to `./lib`.  The `./lib` folder is for
+es2015 code built in a separate step.  If your changing and testing code,
+import from `./src` instead.
+
+```javascript
+Eos = require('./src')
+```
+
+Use Node v8+ to `package-lock.json`.
 
 # Related Libraries
 
