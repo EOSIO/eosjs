@@ -21,7 +21,12 @@ const Eos = (config = {}) => {
 
 module.exports = Eos
 
-Eos.Testnet = config => createEos(config, api.Testnet)
+Eos.Testnet = config => {
+  const defaultConfig = {transactionLog: consoleObjCallbackLog}
+  config = Object.assign({}, defaultConfig, config)
+  return createEos(config, api.Testnet)
+}
+
 // Eos.Mainnet = config => createEos(config, Mainnet(config))
 
 Eos.modules = {
@@ -46,6 +51,14 @@ function createEos(config = {}, Network) {
   }
 
   return eos
+}
+
+function consoleObjCallbackLog(error, result) {
+  if(error) {
+    console.error(error);
+  } else {
+    console.log(JSON.stringify(result, null, 4))
+  }
 }
 
 /**

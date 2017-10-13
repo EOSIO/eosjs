@@ -32,7 +32,9 @@ function writeApiGen(Network, network, structs, config) {
     }
 
     assert.equal(args.length, 1, 'Transaction args: transaction, [options], [callback]')
-    return transaction(args[0], options, network, structs, config, merge, callback)
+    const arg = args[0]
+
+    return transaction(arg, options, network, structs, config, merge, callback)
   }
 
   for(let type in Network.schema) {
@@ -178,6 +180,19 @@ function transaction(arg, options, network, structs, config, merge, callback) {
     throw new TypeError('Expecting messages array')
   }
 
+  if(config.transactionLog) {
+    // wrap the callback with the logger
+    const superCallback = callback
+    callback = (error, tr) => {
+      if(error) {
+        config.transactionLog(error)
+      } else {
+        config.transactionLog(null, tr)
+      }
+      superCallback(error, tr)
+    }
+  }
+
   arg.messages.forEach(message => {
     if(!Array.isArray(message.authorization) || message.authorization.length === 0) {
       throw new TypeError('Expecting message.authorization array', message)
@@ -202,6 +217,8 @@ function transaction(arg, options, network, structs, config, merge, callback) {
     // Broadcast what is signed (instead of rawTx)
     const tr = Fcbuffer.fromBuffer(Transaction, buf)
 
+    const transactionId  = createHash('sha256').update(buf).digest().toString('hex')
+
     let sigs = []
     if(options.sign){
       const chainIdBuf = new Buffer(config.chainId, 'hex')
@@ -217,14 +234,20 @@ function transaction(arg, options, network, structs, config, merge, callback) {
       sigs = [].concat.apply([], sigs) //flatten arrays in array
       tr.signatures = sigs
 
-      console.log(JSON.stringify(tr, null, 4))// DEBUG
-
       if(!options.broadcast) {
-        callback(null, tr)
+        callback(null, {
+          transaction_id: transactionId,
+          broadcast: false,
+          transaction: tr
+        })
       } else {
         network.pushTransaction(tr, error => {
           if(!error) {
-            callback(null, tr)
+            callback(null, {
+              transaction_id: transactionId,
+              broadcast: true,
+              transaction: tr
+            })
           } else {
             console.error(`[push_transaction error] '${error.message}', digest '${buf.toString('hex')}'`)
             callback(error.message)
@@ -289,7 +312,6 @@ function atomicTransaction(tr, options, merge, callback) {
       trObject.scope = Array.from(scopes).sort()
       trObject.messages = messages
       merge.transaction(trObject, options, callback)
-
     })
   }).catch(error => {
     // console.error(error)

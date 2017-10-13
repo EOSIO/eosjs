@@ -41,8 +41,8 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
       eos = Eos.Testnet({keyProvider})
 
       return eos.transfer('inita', 'initb', 1, '', false).then(tr => {
-        assert.equal(tr.signatures.length, 1)
-        assert.equal(typeof tr.signatures[0], 'string')
+        assert.equal(tr.transaction.signatures.length, 1)
+        assert.equal(typeof tr.transaction.signatures[0], 'string')
       })
     })
 
@@ -92,7 +92,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
       eos = Eos.Testnet({signProvider})
       const opts = {broadcast: false, sign: false}
       return eos.transfer('inita', 'initb', 1, '', opts).then(tr => 
-        assert.deepEqual(tr.signatures, [])
+        assert.deepEqual(tr.transaction.signatures, [])
       )
     })
 
