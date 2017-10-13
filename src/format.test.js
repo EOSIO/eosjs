@@ -6,11 +6,11 @@ const {
 } = require('./format')
 
 describe('format', () => {
-  // valid: 555555555555o, invalid: 555555555555p 'p' overflows the last 4 bits of the name
+  // In isname111111k, 'k' overflows the last 4 bits of the name
   describe('name', () => {
     const nameFixture = {
-      isname: ['555555555555o', 'isname11111a', 'isname111115', 'a', '1', '5', 'sam5', 'sam', 'adam.apple'],
-      noname: ['555555555555p', 'noname1111111', undefined, null, 1, '6', 'a6', ' ']
+      isname: ['isname111111j', 'a', '1', '5', 'sam5', 'sam', 'adam.applejjj'],
+      noname: ['isname111111k', undefined, null, 1, '6', 'a6', ' ']
     }
 
     it('isName', () => {
@@ -23,12 +23,12 @@ describe('format', () => {
     })
 
     it('encode / decode', () => {
-      assert.equal(encodeName('eos'), '58923', 'encode')
-      assert.equal(encodeNameHex('eos'), 'e62b', 'encode hex')
+      assert.equal('12373', encodeName('eos'), 'encode')
+      assert.equal('3055', encodeNameHex('eos'), 'encode hex')
       assert.equal(decodeName(encodeName('eos')), 'eos', 'decode')
 
-      assert.equal(encodeNameHex('transfer'), 'b298e982a4', 'encode')
-      assert.equal(decodeNameHex('b298e982a4'), 'transfer', 'decode')
+      assert.equal('572d3ccdcd', encodeNameHex('transfer'), 'encode')
+      assert.equal(decodeNameHex('572d3ccdcd'), 'transfer', 'decode')
 
       for(let name of nameFixture.isname) {
         assert.equal(decodeName(encodeName(name)), name)

@@ -38,7 +38,7 @@ function isName(str, err) {
   }
 }
 
-const charmap = '.abcdefghijklmnopqrstuvwxyz12345'
+const charmap = '.12345abcdefghijklmnopqrstuvwxyz'
 const charidx = ch => {
   const idx = charmap.indexOf(ch)
   if(idx === -1)
