@@ -46,21 +46,22 @@ Read-only API methods and documentation are generated from  [chain.json](https:/
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('./src')
+
 eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 // All Eos transactions as of the last update are available.  Run with no
 // arguments to print usage.
 eos.transfer()
 
-// Object or ordered args may be used
-eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''})
+// Usage with options
+options = {broadcast: false}
+eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, options)
+
+// Object or ordered args may be used.  Options are optional.
 eos.transfer('inita', 'initb', 1, 'memo')
 
-// A broadcast boolean may be provided allowing any transaction to be created
-// but not sent.
-eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, {broadcast: false})
+// A broadcast boolean may be provided as a shortcut for {broadcast: false}
 eos.transfer('inita', 'initb', 1, '', false)
-
 ```
 
 Read-write API methods and documentation are generated from this [schema](https://github.com/EOSIO/eosjs-json/blob/master/schema/generated.json).
@@ -193,7 +194,7 @@ From time-to-time the eosjs and eosd binary format will change between releases
 so you may need to start `eosd` with the `--skip-transaction-signatures` parameter
 to get your transactions to pass.
 
-Note, `packagge.json` has a "main" pointing to `./lib`.  The `./lib` folder is for
+Note, `package.json` has a "main" pointing to `./lib`.  The `./lib` folder is for
 es2015 code built in a separate step.  If your changing and testing code,
 import from `./src` instead.
 
