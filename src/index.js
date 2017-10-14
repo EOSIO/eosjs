@@ -1,26 +1,24 @@
 const ecc = require('eosjs-ecc')
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
-
 const api = require('eosjs-api')
 
 const Structs = require('./structs')
 const writeApiGen = require('./write-api')
 const assert = require('assert')
 
-/**
-  config.network = Testnet() must be supplied until Mainnet is available..
-
-  @arg {object} [config.network = Mainnet()]
-*/
-const Eos = (config = {}) => {
-  const network = config.network //|| Mainnet()
-
-  const {structs, types} = Structs(config)
-  return {structs, types}
-}
+const Eos = {}
 
 module.exports = Eos
+
+Eos.modules = {
+  json,
+  ecc,
+  api,
+  Fcbuffer
+}
+
+// Eos.Mainnet = config => ..
 
 Eos.Testnet = config => {
   const Network = api.Testnet
@@ -30,15 +28,6 @@ Eos.Testnet = config => {
   config = Object.assign({}, defaultConfig, config, {network})
 
   return createEos(config, Network)
-}
-
-// Eos.Mainnet = config => ..
-
-Eos.modules = {
-  json,
-  ecc,
-  api,
-  Fcbuffer
 }
 
 function createEos(config, Network) {
@@ -78,14 +67,13 @@ function mergeWriteFunctions(config, Network) {
   assert(config.network, 'network instance required')
 
   const {network} = config
+  const {structs, types} = Structs(config)
+  const merge = Object.assign({}, {fc: {structs, types}})
 
-  const eos = Eos(config)
-  const merge = Object.assign({}, eos)
-  
   throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
   Object.assign(merge, network)
 
-  const writeApi = writeApiGen(Network, network, eos.structs, config)
+  const writeApi = writeApiGen(Network, network, structs, config)
   throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
   Object.assign(merge, writeApi)
 

@@ -1,42 +1,25 @@
+const assert = require('assert')
 const ecc = require('eosjs-ecc')
 const Fcbuffer = require('fcbuffer')
 const createHash = require('create-hash')
 const {processArgs} = require('eosjs-api')
 const Structs = require('./structs')
-const assert = require('assert')
+const {abiToFcSchema} = require('./format')
 
 module.exports = writeApiGen
 
 const {sign} = ecc
 
 function writeApiGen(Network, network, structs, config) {
-  let merge = {}
 
   if(typeof config.chainId !== 'string') {
     throw new TypeError('config.chainId is required')
   }
 
-  /**
-    @arg {object} transaction
-    @arg {object} [options]
-    @arg {function} [callback]
-  */
-  merge.transaction = (...args) => {
-    let options, callback
-    if(args.length > 1 && typeof args[args.length - 1] === 'function') {
-      callback = args.pop()
-    }
+  const reserveFunctions = new Set(['transaction', 'contract'])
 
-    if(args.length > 1 && typeof args[args.length - 1] === 'object') {
-      options = args.pop()
-    }
-
-    assert.equal(args.length, 1, 'Transaction args: transaction, [options], [callback]')
-    const arg = args[0]
-
-    return transaction(arg, options, network, structs, config, merge, callback)
-  }
-
+  const merge = {}
+  merge.transaction = genTransaction(structs, merge, network, config)
   for(let type in Network.schema) {
     if(!/^[a-z]/.test(type)) {
       // Only lower case structs will work in a transaction message
@@ -44,8 +27,8 @@ function writeApiGen(Network, network, structs, config) {
       continue
     }
 
-    if(type === 'transaction') {
-      new TypeError('Conflicting Api function: transaction')
+    if(reserveFunctions.has(type)) {
+      new TypeError('Conflicting Api function: ' + type)
     }
 
     const struct = structs[type]
@@ -53,87 +36,49 @@ function writeApiGen(Network, network, structs, config) {
     merge[type] = genMethod(type, definition, struct, merge.transaction, Network)
   }
 
+  
+  merge.contract = (code, ...args) => network.getCode(code).then(({abi}) => {
+    assert(Array.isArray(abi.actions) && abi.actions.length, 'No actions')
+
+    const abiSchema = abiToFcSchema(abi)
+    const contractStructs = Structs(config, abiSchema)
+
+    const contractMerge = {}
+    contractMerge.transaction =
+      genTransaction(contractStructs.structs, contractMerge, network, config)
+
+    abi.actions.forEach(({action, type}) => {
+      const definition = abiSchema[type]
+      const struct = contractStructs.structs[type]
+
+      contractMerge[action] =
+        genMethod(type, definition, struct, contractMerge.transaction, Network, code)
+    })
+    return contractMerge.transaction(...args)
+  })
+
   return merge
 }
 
-function genMethod(type, definition, struct, transactionArg, Network) {
-  return function (...args) {
-    if (args.length === 0) {
-      console.error(usage(type, definition, Network))
-      return
-    }
-
-    // Special case like multi-message transactions where this lib needs
-    // to be sure the broadcast is off.
-    const optionOverrides = {}
-    const lastArg = args[args.length - 1]
-    if(typeof lastArg === 'object' && typeof lastArg.__optionOverrides === 'object') {
-      // pop() fixes the args.length
-      Object.assign(optionOverrides, args.pop().__optionOverrides)
-    }
-
-    // Normalize the extra optional options argument
-    const optionsFormatter = option => {
-      if(typeof option === 'object') {
-        return option // {debug, broadcast, scope, etc} (scope, etc my overwrite tr below)
-      }
-      if(typeof option === 'boolean') {
-        // broadcast argument as a true false value, back-end cli will use this shorthand
-        return {broadcast: option}
-      }
-    }
-    const {params, options, returnPromise, callback} =
-      processArgs(args, Object.keys(definition.fields), type, optionsFormatter)
-
-    // internal options (ex: multi-message transaction)
-    Object.assign(options, optionOverrides)
-
-    if(optionOverrides.noCallback && !returnPromise) {
-      throw new Error('Callback during a transaction are not supported')
-    }
-
-    const tr = Object.assign(
-      {
-        messages: [{
-          code: 'eos',
-          type,
-          data: params,
-          authorization: []
-        }]
-      }
-    )
-
-    if(!tr.scope) {// FIXME Hack, until an API call is available
-      const fields = Object.keys(definition.fields)
-      tr.scope = []
-
-      const f1 = fields[0]
-      if(definition.fields[f1] === 'AccountName') {
-        tr.scope.push(params[f1])
-        tr.messages[0].authorization.push({
-          account: params[f1],
-          permission: 'active'
-        })
-      }
-
-      if(fields.length > 1 && !/newaccount/.test(type)) {
-        const f2 = fields[1]
-        if(definition.fields[f2] === 'AccountName') {
-          tr.scope.push(params[f2])
-        }
-      }
-    }
-    tr.scope = tr.scope.sort()
-
-    // multi-message transaction support
-    if(!optionOverrides.messageOnly) {
-      transactionArg(tr, options, callback)
-    } else {
-      callback(null, tr)
-    }
-
-    return returnPromise
+/**
+  @arg {object} args.transaction
+  @arg {object} [args.options]
+  @arg {function} [args.callback]
+*/
+const genTransaction = (structs, merge, network, config) => (...args) => {
+  let options, callback
+  if(args.length > 1 && typeof args[args.length - 1] === 'function') {
+    callback = args.pop()
   }
+
+  if(args.length > 1 && typeof args[args.length - 1] === 'object') {
+    options = args.pop()
+  }
+
+  assert.equal(args.length, 1, 'Transaction args: transaction, [options], [callback]')
+  const arg = args[0]
+
+  return transaction(arg, options, network, structs, config, merge, callback)
 }
 
 /**
@@ -264,8 +209,8 @@ function transaction(arg, options, network, structs, config, merge, callback) {
 
 
 function atomicTransaction(tr, options, merge, callback) {
-  assert.equal(typeof tr, 'function', 'tr')
-  assert.equal(typeof options, 'object', 'options')
+  assert.equal('function', typeof tr, 'tr')
+  assert.equal('object', typeof options, 'options')
 
   const scope = {}
   const messageList = []
@@ -291,15 +236,15 @@ function atomicTransaction(tr, options, merge, callback) {
     }
   }
 
-  let collectorPromise
+  let promiseCollector
   try {
     // caller will load this up with messages
-    collectorPromise = tr(messageCollector)
+    promiseCollector = tr(messageCollector)
   } catch(error) {
-    collectorPromise = Promise.reject(error)
+    promiseCollector = Promise.reject(error)
   }
 
-  Promise.resolve(collectorPromise).then(() => {
+  Promise.resolve(promiseCollector).then(() => {
     return Promise.all(messageList).then(resolvedMessageList => {
       const scopes = new Set()
       const messages = []
@@ -317,6 +262,84 @@ function atomicTransaction(tr, options, merge, callback) {
     // console.error(error)
     callback(error)
   })
+}
+
+function genMethod(type, definition, struct, transactionArg, Network, code = 'eos') {
+  return function (...args) {
+    if (args.length === 0) {
+      console.error(usage(type, definition, Network))
+      return
+    }
+
+    // Special case like multi-message transactions where this lib needs
+    // to be sure the broadcast is off.
+    const optionOverrides = {}
+    const lastArg = args[args.length - 1]
+    if(typeof lastArg === 'object' && typeof lastArg.__optionOverrides === 'object') {
+      // pop() fixes the args.length
+      Object.assign(optionOverrides, args.pop().__optionOverrides)
+    }
+
+    // Normalize the extra optional options argument
+    const optionsFormatter = option => {
+      if(typeof option === 'object') {
+        return option // {debug, broadcast, scope, etc} (scope, etc my overwrite tr below)
+      }
+      if(typeof option === 'boolean') {
+        // broadcast argument as a true false value, back-end cli will use this shorthand
+        return {broadcast: option}
+      }
+    }
+    const {params, options, returnPromise, callback} =
+      processArgs(args, Object.keys(definition.fields), type, optionsFormatter)
+
+    // internal options (ex: multi-message transaction)
+    Object.assign(options, optionOverrides)
+
+    if(optionOverrides.noCallback && !returnPromise) {
+      throw new Error('Callback during a transaction are not supported')
+    }
+
+    const tr = {
+      messages: [{
+        code,
+        type,
+        data: params,
+        authorization: []
+      }]
+    }
+
+    if(!tr.scope) {// FIXME Hack, until an API call is available
+      const fields = Object.keys(definition.fields)
+      tr.scope = []
+
+      const f1 = fields[0]
+      if(definition.fields[f1] === 'AccountName') {
+        tr.scope.push(params[f1])
+        tr.messages[0].authorization.push({
+          account: params[f1],
+          permission: 'active'
+        })
+      }
+
+      if(fields.length > 1 && !/newaccount/.test(type)) {
+        const f2 = fields[1]
+        if(definition.fields[f2] === 'AccountName') {
+          tr.scope.push(params[f2])
+        }
+      }
+    }
+    tr.scope = tr.scope.sort()
+
+    // multi-message transaction support
+    if(!optionOverrides.messageOnly) {
+      transactionArg(tr, options, callback)
+    } else {
+      callback(null, tr)
+    }
+
+    return returnPromise
+  }
 }
 
 function usage (type, definition, Network) {
@@ -343,7 +366,6 @@ function usage (type, definition, Network) {
 
   return usage
 }
-
 
 const checkError = (parentErr, parrentRes) => (error, result) => {
   if (error) {

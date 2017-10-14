@@ -9,7 +9,7 @@ const {isName} = require('./format')
 const {encodeName, decodeName} = require('./format')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
-module.exports = (config = {}) => {
+module.exports = (config = {}, extendedSchema) => {
 
   const structLookup = name => structs[name]
 
@@ -36,12 +36,13 @@ module.exports = (config = {}) => {
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
   config = Object.assign({override}, {customTypes}, config)
 
-  const {structs, types, errors} = Fcbuffer(json.schema, config)
+  const schema = Object.assign({}, json.schema, extendedSchema)
+  const {structs, types, errors, extend} = Fcbuffer(schema, config)
   if(errors.length !== 0) {
     throw new Error(JSON.stringify(errors, null, 4))
   }
 
-  return {structs, types}
+  return {structs, types, extend}
 }
 
 /**

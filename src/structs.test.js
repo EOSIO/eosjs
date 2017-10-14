@@ -8,7 +8,7 @@ describe('shorthand', () => {
 
   it('Asset', () => {
     const eos = Eos.Testnet()
-    const {Asset} = eos.structs
+    const {Asset} = eos.fc.structs
     const obj = Asset.fromObject('1 EOS')
     assert.deepEqual(obj, {amount: '1', symbol: 'EOS'})
 
@@ -18,7 +18,7 @@ describe('shorthand', () => {
 
   it('Authority', () => {
     const eos = Eos.Testnet()
-    const {Authority} = eos.structs
+    const {Authority} = eos.fc.structs
 
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
     const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
@@ -29,7 +29,7 @@ describe('shorthand', () => {
 
   it('PublicKey', () => {
     const eos = Eos.Testnet()
-    const {structs, types} = eos
+    const {structs, types} = eos.fc
     const PublicKeyType = types.PublicKey()
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
     // 02c0ded2bc1f1305fb0faac5e6c03ee3a1924234985427b6167ca569d13df435cf
@@ -38,7 +38,7 @@ describe('shorthand', () => {
 
   it('AssetSymbol', () => {
     const eos = Eos.Testnet()
-    const {types} = eos
+    const {types} = eos.fc
     const type = types.AssetSymbol()
     const value = 'EOS'
 
@@ -58,7 +58,7 @@ describe('shorthand', () => {
 describe('Message.data', () => {
   it('json', () => {
     const eos = Eos.Testnet({forceMessageDataHex: false})
-    const {structs, types} = eos
+    const {structs, types} = eos.fc
     const value = {
       code: 'eos',
       type: 'transfer',
@@ -75,7 +75,7 @@ describe('Message.data', () => {
 
   it('hex', () => {
     const eos = Eos.Testnet({forceMessageDataHex: false, debug: false})
-    const {structs, types} = eos
+    const {structs, types} = eos.fc
 
     const tr = {from: 'inita', to: 'initb', amount: '1', memo: ''}
     const hex = Fcbuffer.toBuffer(structs.transfer, tr).toString('hex')
@@ -100,7 +100,7 @@ describe('Message.data', () => {
 
   it('force hex', () => {
     const eos = Eos.Testnet({forceMessageDataHex: true})
-    const {structs, types} = eos
+    const {structs, types} = eos.fc
     const value = {
       code: 'eos',
       type: 'transfer',
@@ -128,7 +128,7 @@ describe('Message.data', () => {
 
   it('unknown type', () => {
     const eos = Eos.Testnet({forceMessageDataHex: false})
-    const {structs, types} = eos
+    const {structs, types} = eos.fc
     const value = {
       code: 'eos',
       type: 'mytype',

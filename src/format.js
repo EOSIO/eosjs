@@ -7,7 +7,8 @@ module.exports = {
   decodeName, // decode from uint64 to human readable
   encodeNameHex: name => Long.fromString(encodeName(name), true).toString(16),
   decodeNameHex: (hex, littleEndian = true) =>
-    decodeName(Long.fromString(hex, true, 16).toString(), littleEndian)
+    decodeName(Long.fromString(hex, true, 16).toString(), littleEndian),
+  abiToFcSchema
 }
 
 function ULong(value, unsigned = true, radix = 10) {
@@ -130,4 +131,29 @@ function decodeName(value, littleEndian = true) {
   // console.log('decodeName', str, beValue.toString(), value.toString(), JSON.stringify(beValue.toString(2).split(/(.....)/).slice(1)))
 
   return str
+}
+
+function abiToFcSchema(abi) {
+  // customTypes
+  // For FcBuffer
+  const abiSchema = {}
+
+  // convert abi types to Fcbuffer schema
+  if(abi.types) {
+    abi.types.forEach(e => {
+      abiSchema[e.newTypeName] = e.type
+    })
+  }
+
+  if(abi.structs) {
+    abi.structs.forEach(e => {
+      const {base, fields} = e
+      abiSchema[e.name] = {base, fields}
+      if(base === '') {
+        delete abiSchema[e.name].base
+      }
+    })
+  }
+
+  return abiSchema
 }

@@ -126,7 +126,17 @@ contractDir = `${process.env.HOME}/eosio/eos/build/contracts/currency`
 wast = fs.readFileSync(`${contractDir}/currency.wast`)
 abi = fs.readFileSync(`${contractDir}/currency.abi`)
 
+// Publish contract to the blockchain
 eos.setcode('currency', 0, 0, wast, abi)
+
+eos.contract('currency', currency =>
+  {
+    // Transfer is one of any action from the currency.abi "actions" section 
+    currency.transfer('currency', 'inita', 1)
+  }
+  // [options],
+  // [callback]
+)
 
 ```
 

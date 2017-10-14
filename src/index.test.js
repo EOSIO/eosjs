@@ -5,7 +5,9 @@ const Eos = require('.')
 
 const forceMessageDataHex = true, debug = true
 
-if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
+// even transactions that don't broadcast require Api lookups
+//  no testnet yet, avoid breaking travis-ci
+if(process.env['NODE_ENV'] === 'development') {
 
   describe('networks', () => {
     it('testnet', (done) => {
@@ -66,7 +68,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
       eos = Eos.Testnet({signProvider})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       // const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
-      const name = 'act' + String(Math.round(Math.random() * 10000000)).replace(/[0,6-9]/g, '')
+      const name = randomName()
 
       return eos.newaccount({
         creator: 'inita',
@@ -99,6 +101,22 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
     it('transfer sign promise (no broadcast)', () => {
       eos = Eos.Testnet({signProvider: promiseSigner})
       return eos.transfer('inita', 'initb', 1, '', false)
+    })
+
+    it('message to contract', () => {
+      // eos is a bad test case, but it was the only native contract
+      const name = 'eos'
+      return Eos.Testnet({signProvider}).contract(name, eos => {
+        eos.transfer('inita', 'initd', 1, '')
+        eos.transfer('inita', 'inite', 1, '')
+      })
+    })
+
+    it('message to unknown contract', () => {
+      const name = randomName()
+      return Eos.Testnet({signProvider}).contract(name).catch(error => {
+        assert.equal('unknown key', error.message)
+      })
     })
 
     it('multi-message transaction (broadcast)', () => {
@@ -169,3 +187,7 @@ if(process.env['NODE_ENV'] === 'development') {// avoid breaking travis-ci
   })
 
 } // if development
+
+const randomName = () => 'a' +
+  String(Math.round(Math.random() * 1000000000)).replace(/[0,6-9]/g, '')
+
