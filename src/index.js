@@ -6,6 +6,7 @@ const api = require('eosjs-api')
 
 const Structs = require('./structs')
 const writeApiGen = require('./write-api')
+const assert = require('assert')
 
 /**
   config.network = Testnet() must be supplied until Mainnet is available..
@@ -22,12 +23,16 @@ const Eos = (config = {}) => {
 module.exports = Eos
 
 Eos.Testnet = config => {
+  const Network = api.Testnet
+  const network = Network(Object.assign({}, {debug: false}, config))
+
   const defaultConfig = {transactionLog: consoleObjCallbackLog}
-  config = Object.assign({}, defaultConfig, config)
-  return createEos(config, api.Testnet)
+  config = Object.assign({}, defaultConfig, config, {network})
+
+  return createEos(config, Network)
 }
 
-// Eos.Mainnet = config => createEos(config, Mainnet(config))
+// Eos.Mainnet = config => ..
 
 Eos.modules = {
   json,
@@ -36,7 +41,7 @@ Eos.modules = {
   Fcbuffer
 }
 
-function createEos(config = {}, Network) {
+function createEos(config, Network) {
   config = Object.assign({}, config)
 
   if(!config.chainId) {
@@ -45,8 +50,7 @@ function createEos(config = {}, Network) {
 
   const eos = mergeWriteFunctions(config, Network)
 
-  let signProvider = config.signProvider
-  if(!signProvider) {
+  if(!config.signProvider) {
     config.signProvider = defaultSignProvider(eos, config)
   }
 
@@ -62,23 +66,28 @@ function consoleObjCallbackLog(error, result) {
 }
 
 /**
-  @arg {object} network - all read-only api calls
-  @return {object} - read-only api calls and write method calls (create and sign transactions)
+  Merge in write functions (operations).  Tested against existing methods for
+  name conflicts.
+
+  @arg {object} config.network - read-only api calls
+  @arg {object} Network - api[Network] read-only api calls
+  @return {object} - read and write method calls (create and sign transactions)
   @throw {TypeError} if a funciton name conflicts
 */
 function mergeWriteFunctions(config, Network) {
-  const network = Network(config)
-  Object.assign(config, {network})
+  assert(config.network, 'network instance required')
+
+  const {network} = config
 
   const eos = Eos(config)
-  let merge = Object.assign({}, eos)
+  const merge = Object.assign({}, eos)
   
   throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
-  merge = Object.assign(merge, network)
+  Object.assign(merge, network)
 
   const writeApi = writeApiGen(Network, network, eos.structs, config)
   throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
-  merge = Object.assign(merge, writeApi)
+  Object.assign(merge, writeApi)
 
   return merge
 }
