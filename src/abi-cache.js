@@ -13,7 +13,7 @@ function AbiCache(network, config) {
     return network.getCode(code).then(({abi}) => {
       const schema = abiToFcSchema(abi)
       const structs = Structs(config, schema)
-      return cache[code] = {abi, schema, ...structs}
+      return cache[code] = Object.assign({abi, schema}, structs)
     })
   }
 
