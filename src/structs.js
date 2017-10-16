@@ -11,7 +11,13 @@ const {encodeName, decodeName} = require('./format')
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
 
-  const structLookup = name => structs[name]
+  const structLookup = (name, code) => {
+    if(code === 'eos') {
+      return structs[name]
+    }
+    const abi = config.abiCache.abi(code)
+    return abi.structs[name]
+  }
 
   // Default to forceMessageDataHex until native ABIs are added, convert Message.data to hex
   // https://github.com/EOSIO/eos/issues/215
@@ -37,12 +43,12 @@ module.exports = (config = {}, extendedSchema) => {
   config = Object.assign({override}, {customTypes}, config)
 
   const schema = Object.assign({}, json.schema, extendedSchema)
-  const {structs, types, errors, extend} = Fcbuffer(schema, config)
+  const {structs, types, errors} = Fcbuffer(schema, config)
   if(errors.length !== 0) {
     throw new Error(JSON.stringify(errors, null, 4))
   }
 
-  return {structs, types, extend}
+  return {structs, types}
 }
 
 /**
@@ -224,7 +230,7 @@ const wasmCodeOverride = ({
 */
 const messageDataOverride = (structLookup, forceMessageDataHex) => ({
   'Message.data.fromByteBuffer': ({fields, object, b, config}) => {
-    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type)
+    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type, object.code)
     if(ser) {
       b.readVarint32() // length prefix (usefull if object.type is unknown)
       object.data = ser.fromByteBuffer(b, config)
@@ -238,7 +244,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
   },
 
   'Message.data.appendByteBuffer': ({fields, object, b}) => {
-    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type)
+    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type, object.code)
     if(ser) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
       ser.appendByteBuffer(b2, object.data)
@@ -257,7 +263,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
 
   'Message.data.fromObject': ({fields, object, result}) => {
     const {data, type} = object
-    const ser = (type || '') == '' ? fields.data : structLookup(type)
+    const ser = (type || '') == '' ? fields.data : structLookup(type, object.code)
     if(ser) {
       if(typeof data === 'object') {
         result.data = ser.fromObject(data) // resolve shorthand
@@ -276,7 +282,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
 
   'Message.data.toObject': ({fields, object, result, config}) => {
     const {data, type} = object || {}
-    const ser = (type || '') == '' ? fields.data : structLookup(type)
+    const ser = (type || '') == '' ? fields.data : structLookup(type, object.code)
     if(!ser) {
       // Types without an ABI will accept hex
       // const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)

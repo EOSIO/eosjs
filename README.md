@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-Status: Alpha (this is for eosjs developers)
+Status: Alpha
 
 # Eosjs
 
@@ -131,14 +131,11 @@ abi = fs.readFileSync(`${contractDir}/currency.abi`)
 // Publish contract to the blockchain
 eos.setcode('currency', 0, 0, wast, abi)
 
-eos.contract('currency', currency =>
-  {
-    // Transfer is one of any action from the currency.abi "actions" section 
-    currency.transfer('currency', 'inita', 1)
-  }
-  // [options],
-  // [callback]
-)
+// eos.contract(code<string>, [options], [callback])
+eos.contract('currency').then(currency => {
+  // Transfer is one of the actions in currency.abi 
+  currency.transfer('currency', 'inita', 10)
+})
 
 ```
 
@@ -149,29 +146,52 @@ Blockchain level atomic operations.  All will pass or fail.
 ```javascript
 Eos = require('eosjs') // Or Eos = require('./src')
 
-keyProvider = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+keyProvider = [
+  '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3',
+  Eos.modules.ecc.seedPrivate('currency')
+]
 
-eos = Eos.Testnet({keyProvider})
+testnet = Eos.Testnet({keyProvider})
 
-eos.transaction(tr =>
+// if either transfer fails, both will fail (1 transaction, 2 messages)
+testnet.transaction(eos =>
   {
-    tr.transfer('inita', 'initb', 1, '')
-    tr.transfer('inita', 'initc', 1, '')
-
-    // A returned promise or thrown error is handled as expected
+    eos.transfer('inita', 'initb', 1, '')
+    eos.transfer('inita', 'initc', 1, '')
+    // Returning a promise is optional (but handled as expected)
   }
-  // options,
-  // callback
+  // [options],
+  // [callback]
 )
+
+// transaction on a single contract
+testnet.transaction('currency', currency => {
+  currency.transfer('inita', 'initd', 1)
+})
+
+// mix contracts in the same transaction
+testnet.transaction(['currency', 'eos'], ({currency, eos}) => {
+  currency.transfer('inita', 'initd', 1)
+  eos.transfer('inita', 'initd', 1, '')
+})
+
+// contract lookups then transactions
+testnet.contract('currency').then(currency => {
+  currency.transaction(tr => {
+    tr.transfer('inita', 'initd', 1)
+    tr.transfer('initd', 'inita', 1)
+  })
+  currency.transfer('inita', 'inite', 1)
+})
+
+// Note, the contract method does not take an array.  Just use Await or yield
+// if multiple contracts are needed outside of a transaction.
 
 ```
 
 ### Usage (manual)
 
 A manual transaction provides for more flexibility.
-
-* tweak the transaction in a way this API does not provide
-* run multiple messages in a single transaction (all or none)
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('./src')

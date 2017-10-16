@@ -103,30 +103,67 @@ if(process.env['NODE_ENV'] === 'development') {
       return eos.transfer('inita', 'initb', 1, '', false)
     })
 
-    it('message to contract', () => {
-      // eos is a bad test case, but it was the only native contract
-      const name = 'eos'
-      return Eos.Testnet({signProvider}).contract(name, eos => {
-        eos.transfer('inita', 'initd', 1, '')
-        eos.transfer('inita', 'inite', 1, '')
+    it('message to unknown contract', () => {
+      const name = randomName()
+      return Eos.Testnet({signProvider}).contract(name)
+      .then(() => {throw 'expecting error'})
+      .catch(error => {
+        assert.equal('unknown key', error.message)
       })
     })
 
-    it('message to unknown contract', () => {
-      const name = randomName()
-      return Eos.Testnet({signProvider}).contract(name).catch(error => {
-        assert.equal('unknown key', error.message)
+    it('message to contract', () => {
+      // initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+      // eos is a bad test case, but it was the only native contract
+      const name = 'eos'
+      return Eos.Testnet({signProvider}).contract(name).then(contract => {
+        contract.transfer('inita', 'initd', 1, '')
+          // transaction sent on each command
+          .then(tr => {assert.equal(1, tr.transaction.messages.length)})
+
+        contract.transfer('initd', 'inita', 1, '')
+          .then(tr => {assert.equal(1, tr.transaction.messages.length)})
+
+      }).then(r => {assert(r == undefined)})
+    })
+
+    it('message to contract atomic', () => {
+      let amt = 1 // for unique transactions
+      const testnet = Eos.Testnet({signProvider})
+
+      const trTest = eos => {
+        assert(eos.transfer('inita', 'initf', amt, '') == null)
+        assert(eos.transfer('initf', 'inita', amt++, '') == null)
+      }
+
+      const assertTr = test =>
+        test.then(tr => {assert.equal(2, tr.transaction.messages.length)})
+        
+      //  contracts can be a string or array
+      assertTr(testnet.transaction(['eos'], ({eos}) => trTest(eos)))
+      assertTr(testnet.transaction('eos', eos => trTest(eos)))
+    })
+
+    it('message to contract (contract tr nesting)', () => {
+      const tn = Eos.Testnet({signProvider})
+      return tn.contract('eos').then(eos => {
+        eos.transaction(tr => {
+          tr.transfer('inita', 'initd', 1, '')
+          tr.transfer('inita', 'inite', 1, '')
+        })
+        eos.transfer('inita', 'initf', 1, '')
       })
     })
 
     it('multi-message transaction (broadcast)', () => {
       eos = Eos.Testnet({signProvider})
-      return eos.transaction(tr =>
-        {
-          tr.transfer('inita', 'initb', 1, '')
-          tr.transfer({from: 'inita', to: 'initc', amount: 1, memo: ''})
-        }
-      )
+      return eos.transaction(tr => {
+        assert(tr.transfer('inita', 'initb', 1, '') == null)
+        assert(tr.transfer({from: 'inita', to: 'initc', amount: 1, memo: ''}) == null)
+      })
+      .then(tr => {
+        assert.equal(2, tr.transaction.messages.length)
+      })
     })
 
     it('multi-message transaction no inner callback', () => {

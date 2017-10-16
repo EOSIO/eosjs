@@ -4,6 +4,7 @@ const Fcbuffer = require('fcbuffer')
 const api = require('eosjs-api')
 
 const Structs = require('./structs')
+const AbiCache = require('./abi-cache')
 const writeApiGen = require('./write-api')
 const assert = require('assert')
 
@@ -25,13 +26,14 @@ Eos.Testnet = config => {
   const network = Network(Object.assign({}, {debug: false}, config))
 
   const defaultConfig = {transactionLog: consoleObjCallbackLog}
-  config = Object.assign({}, defaultConfig, config, {network})
+  config = Object.assign({}, defaultConfig, config)
 
-  return createEos(config, Network)
+  return createEos(config, Network, network)
 }
 
-function createEos(config, Network) {
-  config = Object.assign({}, config)
+function createEos(config, Network, network) {
+  abiCache = AbiCache(network, config)
+  config = Object.assign({}, config, {network, abiCache})
 
   if(!config.chainId) {
     config.chainId = '00'.repeat(32)
