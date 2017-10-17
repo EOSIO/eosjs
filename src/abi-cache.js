@@ -1,5 +1,5 @@
-const {abiToFcSchema} = require('./format')
 const Structs = require('./structs')
+const {abiToFcSchema} = require('./format')
 
 module.exports = AbiCache
  
@@ -26,8 +26,8 @@ function AbiCache(network, config) {
   }
 
   return {
-    abi,
-    abiAsync
+    abiAsync,
+    abi
   }
 }
 

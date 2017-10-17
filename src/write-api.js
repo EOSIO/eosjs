@@ -62,15 +62,6 @@ function writeApiGen(Network, network, structs, config) {
   return merge
 }
 
-// Special case like multi-message transactions
-// const optionOverrides = {}
-// const lastArg = args[args.lenth - 1]
-// if(typeof lastArg === 'object' && typeof lastArg.__optionOverrides === 'object') {
-//   // pop() fixes the args.length
-//   // Object.assign(optionOverrides, args.pop().__optionOverrides)
-//   throw new Error('Specify contract(s) in the transaction function parameter')
-// }
-
 function WriteApi(Network, network, config, Transaction) {
   /**
     @arg {array} [args.contracts]
@@ -108,7 +99,7 @@ function WriteApi(Network, network, config, Transaction) {
 
     if(contracts) {
       assert(!callback, 'callback with contracts are not supported')
-      assert.equal('function', typeof arg, 'provide function collback following contracts array parameter')
+      assert.equal('function', typeof arg, 'provide function callback following contracts array parameter')
 
       const contractPromises = []
       for(const code of contracts) {
@@ -147,11 +138,6 @@ function WriteApi(Network, network, config, Transaction) {
       cache.abi.actions.forEach(({action, type}) => {
         const definition = cache.schema[type]
         const struct = cache.structs[type]
-
-        // contractMerge[action] = (...args) => {
-        //   const m = genMethod(type, definition, struct, contractMerge.transaction, Network, code)
-        //   return m(...args, optionOverrides)
-        // }
         contractMerge[action] = genMethod(type, definition, struct, contractMerge.transaction, code)
       })
 
@@ -416,8 +402,8 @@ function WriteApi(Network, network, config, Transaction) {
   // return WriteApi
   return {
     genTransaction,
-    genMethod,
-    genContractActions
+    genContractActions,
+    genMethod
   }
 }
 
