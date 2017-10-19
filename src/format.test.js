@@ -2,7 +2,7 @@
 const assert = require('assert')
 const {
   encodeName, decodeName, encodeNameHex, decodeNameHex,
-  isName
+  isName, UDecimalPad, UDecimalUnimply
 } = require('./format')
 
 describe('format', () => {
@@ -41,6 +41,69 @@ describe('format', () => {
       throws(() => decodeName(Number.MAX_SAFE_INTEGER + 1), /overflow/)
       throws(() => decodeName({}), /Long, Number or String/)
     })
+  })
+
+  it('UDecimalPad', () => {
+    assert.throws(() => UDecimalPad(), /value is required/)
+    assert.throws(() => UDecimalPad(1), /precision/)
+    assert.throws(() => UDecimalPad('$10', 0), /invalid decimal/)
+    assert.throws(() => UDecimalPad('1.1.', 0), /invalid decimal/)
+    assert.throws(() => UDecimalPad('1.1,1', 0), /invalid decimal/)
+    assert.throws(() => UDecimalPad('1.11', 1), /exceeds precision/)
+
+    const decFixtures = [
+      {value: 1, precision: 0, answer: '1'},
+      {value: '1', precision: 0, answer: '1'},
+      {value: '1.', precision: 0, answer: '1'},
+      {value: '1.0', precision: 0, answer: '1'},
+      {value: '1456.0', precision: 0, answer: '1456'},
+      {value: '1,456.0', precision: 0, answer: '1,456'},
+
+      // does not validate commas
+      {value: '1,4,5,6', precision: 0, answer: '1,4,5,6'},
+      {value: '1,4,5,6.0', precision: 0, answer: '1,4,5,6'},
+
+      {value: 1, precision: 1, answer: '1.0'},
+      {value: '1', precision: 1, answer: '1.0'},
+      {value: '1.', precision: 1, answer: '1.0'},
+      {value: '1.0', precision: 1, answer: '1.0'},
+      {value: '1.10', precision: 1, answer: '1.1'},
+
+      {value: '1.1', precision: 2, answer: '1.10'},
+      {value: '1.10', precision: 2, answer: '1.10'},
+      {value: '1.01', precision: 2, answer: '1.01'},
+
+      {value: '1', precision: 3, answer: '1.000'},
+
+    ]
+    for(const test of decFixtures) {
+      const {answer, value, precision} = test
+      assert.equal(UDecimalPad(value, precision), answer, JSON.stringify(test))
+    }
+  })
+
+  it('UDecimalUnimply', () => {
+    assert.throws(() => UDecimalUnimply('1.', 1), /invalid whole number/)
+    assert.throws(() => UDecimalUnimply('.1', 1), /invalid whole number/)
+    assert.throws(() => UDecimalUnimply('1.1', 1), /invalid whole number/)
+  
+    const decFixtures = [
+      {value: 1, precision: 0, answer: '1'},
+      {value: '1', precision: 0, answer: '1'},
+      {value: '10', precision: 0, answer: '10'},
+  
+      {value: 1, precision: 1, answer: '0.1'},
+      {value: '10', precision: 1, answer: '1'},
+  
+      {value: '11', precision: 2, answer: '0.11'},
+      {value: '110', precision: 2, answer: '1.1'},
+      {value: '101', precision: 2, answer: '1.01'},
+      {value: '0101', precision: 2, answer: '1.01'},
+    ]
+    for(const test of decFixtures) {
+      const {answer, value, precision} = test
+      assert.equal(UDecimalUnimply(value, precision), answer, JSON.stringify(test))
+    }
   })
 })
 

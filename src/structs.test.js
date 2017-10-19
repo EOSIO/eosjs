@@ -8,12 +8,16 @@ describe('shorthand', () => {
 
   it('Asset', () => {
     const eos = Eos.Testnet()
-    const {Asset} = eos.fc.structs
-    const obj = Asset.fromObject('1 EOS')
-    assert.deepEqual(obj, {amount: '1', symbol: 'EOS'})
+    const {types} = eos.fc
+    const AssetType = types.Asset()
 
-    const obj2 = Asset.fromObject({amount: 1, symbol: 'EOS'})
-    assert.deepEqual(obj2, {amount: '1', symbol: 'EOS'})
+    assertSerializer(AssetType, '1.0000 EOS')
+
+    const obj = AssetType.fromObject('1 EOS')
+    assert.equal(obj, '1.0000 EOS')
+
+    const obj2 = AssetType.fromObject({amount: 10000, symbol: 'EOS'})
+    assert.equal(obj, '1.0000 EOS')
   })
 
   it('Authority', () => {
@@ -39,18 +43,13 @@ describe('shorthand', () => {
   it('AssetSymbol', () => {
     const eos = Eos.Testnet()
     const {types} = eos.fc
-    const type = types.AssetSymbol()
-    const value = 'EOS'
+    const AssetSymbolType = types.AssetSymbol()
 
-    const obj = type.fromObject(value) // tests fromObject
-    const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
+    assertSerializer(AssetSymbolType, 'EOS')
+
+    const obj = AssetSymbolType.fromObject('EOS')
+    const buf = Fcbuffer.toBuffer(AssetSymbolType, obj)
     assert.equal(buf.toString('hex'), '0004454f53000000')
-
-    const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
-    const obj3 = type.toObject(obj) // tests toObject
-
-    assert.deepEqual(value, obj3, 'serialize object')
-    assert.deepEqual(obj3, obj2, 'serialize buffer')
   })
 
 })

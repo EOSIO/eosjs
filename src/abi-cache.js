@@ -1,5 +1,4 @@
 const Structs = require('./structs')
-const {abiToFcSchema} = require('./format')
 
 module.exports = AbiCache
  
@@ -31,3 +30,28 @@ function AbiCache(network, config) {
   }
 }
 
+
+function abiToFcSchema(abi) {
+  // customTypes
+  // For FcBuffer
+  const abiSchema = {}
+
+  // convert abi types to Fcbuffer schema
+  if(abi.types) {
+    abi.types.forEach(e => {
+      abiSchema[e.newTypeName] = e.type
+    })
+  }
+
+  if(abi.structs) {
+    abi.structs.forEach(e => {
+      const {base, fields} = e
+      abiSchema[e.name] = {base, fields}
+      if(base === '') {
+        delete abiSchema[e.name].base
+      }
+    })
+  }
+
+  return abiSchema
+}

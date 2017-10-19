@@ -39,7 +39,7 @@
     "eosjs-api": "^1.2.7",
     "eosjs-ecc": "^1.3.2",
     "eosjs-json": "^1.4.1",
-    "fcbuffer": "^1.2.3"
+    "fcbuffer": "^1.2.4"
   },
   "babel": {
     "presets": [

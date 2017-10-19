@@ -5,8 +5,8 @@ const ByteBuffer = require('bytebuffer')
 const assert = require('assert')
 const binaryen = require('binaryen')
 
-const {isName} = require('./format')
-const {encodeName, decodeName} = require('./format')
+const {isName, encodeName, decodeName,
+  UDecimalPad, UDecimalImply, UDecimalUnimply} = require('./format')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
@@ -25,7 +25,6 @@ module.exports = (config = {}, extendedSchema) => {
     config.forceMessageDataHex : true
 
   const override = Object.assign({},
-    assetOverride,
     authorityOverride,
     abiOverride,
     wasmCodeOverride,
@@ -36,7 +35,8 @@ module.exports = (config = {}, extendedSchema) => {
   const eosTypes = {
     Name: ()=> [Name],
     PublicKey: () => [PublicKeyType],
-    AssetSymbol: () => [AssetSymbol]
+    AssetSymbol: () => [AssetSymbol],
+    Asset: () => [Asset], // must come after AssetSymbol
   }
 
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
@@ -63,15 +63,18 @@ const Name = (validation) => {
       // }
       return n
     },
+
     appendByteBuffer (b, value) {
       // if(validation.debug) {
       //   console.error(`${value}`, (Name.appendByteBuffer))
       // }
       b.writeUint64(encodeName(value, false)) // b is already in littleEndian
     },
+
     fromObject (value) {
       return value
     },
+
     toObject (value) {
       if (validation.defaults && value == null) {
         return ''
@@ -89,6 +92,7 @@ const PublicKeyType = (validation) => {
       const pubbuf = Buffer.from(bcopy.toBinary(), 'binary')
       return PublicKey.fromBuffer(pubbuf).toString()
     },
+
     appendByteBuffer (b, value) {
       // if(validation.debug) {
       //   console.error(`${value}`, 'PublicKeyType.appendByteBuffer')
@@ -96,9 +100,11 @@ const PublicKeyType = (validation) => {
       const buf = PublicKey.fromStringOrThrow(value).toBuffer()
       b.append(buf.toString('binary'), 'binary')
     },
+
     fromObject (value) {
       return value
     },
+
     toObject (value) {
       if (validation.defaults && value == null) {
         return 'EOS6MRy..'
@@ -117,15 +123,21 @@ const AssetSymbol = (validation) => {
       throw new TypeError(`Asset symbol is 7 characters or less`)
     }
   }
+
   const prefix = '\0\u0004'
+
   return {
     fromByteBuffer (b) {
       const bcopy = b.copy(b.offset, b.offset + 7)
       b.skip(7)
 
+      // assert(bcopy.readUint8() === 0, 'unknown asset symbol format')
+      // const precision = bcopy.readUint8()
+      // console.log('precision', precision)
+
       const bin = bcopy.toBinary()
       if(bin.slice(0, 2) !== prefix) {
-        throw new TypeError(`Asset symbol prefix does not jive`)
+        throw new TypeError(`Asset symbol prefix does not match`)
       }
       let symbol = ''
       for(code of bin.slice(2))  {
@@ -136,15 +148,18 @@ const AssetSymbol = (validation) => {
       }
       return symbol
     },
+
     appendByteBuffer (b, value) {
       valid(value)
       value += '\0'.repeat(6 - value.length)
       b.append(prefix + value)
     },
+
     fromObject (value) {
       valid(value)
       return value
     },
+
     toObject (value) {
       if (validation.defaults && value == null) {
         return 'SYMBOL'
@@ -155,20 +170,50 @@ const AssetSymbol = (validation) => {
   }
 }
 
-const assetOverride = ({
-  /** shorthand `1 EOS` for `{amount: 1, symbol: 'EOS'}` */
-  'Asset.fromObject': (value) => {
+const Asset = (validation, baseTypes, customTypes) => {
+  const amountType = baseTypes.Int64(validation)
+  const symbolType = customTypes.AssetSymbol(validation)
+
+  const symbolCache = symbol => ({precision: 4})
+  const precision = symbol => symbolCache(symbol).precision
+
+  function toAssetString(value) {
     if(typeof value === 'string') {
-      const val = value.trim().split(/ +/)
-      assert.equal(val.length, 2, 'invalid asset')
-      const [amount, symbol] = val
-      assert(/^\d+\.?\d*$/.test(amount), 'amount should be digits')
-      assert(typeof symbol, 'string', 'symbol should be a string')
-      assert(isName(symbol.toLowerCase()), 'invalid symbol')
-      return {amount, symbol}
+      const [amount, symbol] = value.split(' ')
+      return `${UDecimalPad(amount, precision(symbol))} ${symbol}`
+    }
+    if(typeof value === 'object') {
+      const {amount, symbol} = value
+      return `${UDecimalUnimply(amount, precision(symbol))} ${symbol}`
+    }
+    return value
+  }
+
+  return {
+    fromByteBuffer (b) {
+      const amount = amountType.fromByteBuffer(b)
+      const symbol = symbolType.fromByteBuffer(b)
+      return `${UDecimalUnimply(amount, precision(symbol))} ${symbol}`
+    },
+
+    appendByteBuffer (b, value) {
+      const [amount, symbol] = value.split(' ')
+      amountType.appendByteBuffer(b, UDecimalImply(amount, precision(symbol)))
+      symbolType.appendByteBuffer(b, symbol)
+    },
+
+    fromObject (value) {
+      return toAssetString(value)
+    },
+
+    toObject (value) {
+      if (validation.defaults && value == null) {
+        return '0.0001 SYMBOL'
+      }
+      return toAssetString(value)
     }
   }
-})
+}
 
 const authorityOverride = ({
   /** shorthand `EOS6MRyAj..` */

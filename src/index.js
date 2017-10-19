@@ -23,12 +23,9 @@ Eos.modules = {
 
 Eos.Testnet = config => {
   const Network = api.Testnet
-  const network = Network(Object.assign({}, {debug: false}, config))
-
-  const defaultConfig = {transactionLog: consoleObjCallbackLog}
-  config = Object.assign({}, defaultConfig, config)
-
-  return createEos(config, Network, network)
+  const network = Network(Object.assign({}, {apiLog: consoleObjCallbackLog}, config))
+  const eosConfig = Object.assign({}, {transactionLog: consoleObjCallbackLog}, config)
+  return createEos(eosConfig, Network, network)
 }
 
 function createEos(config, Network, network) {
@@ -48,10 +45,16 @@ function createEos(config, Network, network) {
   return eos
 }
 
-function consoleObjCallbackLog(error, result) {
+function consoleObjCallbackLog(error, result, name) {
   if(error) {
+    if(name) {
+      console.error(name, 'error')
+    }
     console.error(error);
   } else {
+    if(name) {
+      console.log(name, 'reply:')
+    }
     console.log(JSON.stringify(result, null, 4))
   }
 }

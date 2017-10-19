@@ -3,8 +3,6 @@ const assert = require('assert')
 
 const Eos = require('.')
 
-const forceMessageDataHex = true, debug = true
-
 // even transactions that don't broadcast require Api lookups
 //  no testnet yet, avoid breaking travis-ci
 if(process.env['NODE_ENV'] === 'development') {
@@ -76,7 +74,7 @@ if(process.env['NODE_ENV'] === 'development') {
         owner: pubkey,
         active: pubkey,
         recovery: 'inita',
-        deposit: '1 EOS'
+        deposit: '.0001 EOS'
       })
     })
 

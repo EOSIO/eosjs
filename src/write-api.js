@@ -347,11 +347,13 @@ function WriteApi(Network, network, config, Transaction) {
       rawTx.messages = arg.messages
       rawTx.readscope = arg.readscope || []
 
-      const txObject = Transaction.fromObject(rawTx)// resolve shorthand
-      const buf = Fcbuffer.toBuffer(Transaction, txObject)
+      // resolve shorthand
+      // const txObject = Transaction.toObject(Transaction.fromObject(rawTx))
+      const txObject = Transaction.fromObject(rawTx)
       // console.log('txObject', JSON.stringify(txObject,null,4))
 
       // Broadcast what is signed (instead of rawTx)
+      const buf = Fcbuffer.toBuffer(Transaction, txObject)
       const tr = Fcbuffer.fromBuffer(Transaction, buf)
 
       const transactionId  = createHash('sha256').update(buf).digest().toString('hex')

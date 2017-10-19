@@ -1,3 +1,4 @@
+const assert = require('assert')
 const {Long} = require('bytebuffer')
 
 module.exports = {
@@ -8,7 +9,10 @@ module.exports = {
   encodeNameHex: name => Long.fromString(encodeName(name), true).toString(16),
   decodeNameHex: (hex, littleEndian = true) =>
     decodeName(Long.fromString(hex, true, 16).toString(), littleEndian),
-  abiToFcSchema
+  UDecimalString,
+  UDecimalPad,
+  UDecimalImply,
+  UDecimalUnimply
 }
 
 function ULong(value, unsigned = true, radix = 10) {
@@ -133,27 +137,97 @@ function decodeName(value, littleEndian = true) {
   return str
 }
 
-function abiToFcSchema(abi) {
-  // customTypes
-  // For FcBuffer
-  const abiSchema = {}
+/**
+  Normalize and validate decimal string (potentially large values).  Should
+  avoid internationalization issues if possible but will be safe and
+  throw an error for an invalid number.
 
-  // convert abi types to Fcbuffer schema
-  if(abi.types) {
-    abi.types.forEach(e => {
-      abiSchema[e.newTypeName] = e.type
-    })
+  Normalization removes extra zeros or decimal.
+  
+  @return {string} value
+*/
+function UDecimalString(value) {
+  assert(value != null, 'value is required')
+  value = value === 'object' && value.toString ? value.toString() : String(value)
+
+
+  if(value[0] === '.') {
+    value = `0${value}`
   }
 
-  if(abi.structs) {
-    abi.structs.forEach(e => {
-      const {base, fields} = e
-      abiSchema[e.name] = {base, fields}
-      if(base === '') {
-        delete abiSchema[e.name].base
-      }
-    })
+  const part = value.split('.')
+  assert(part.length <= 2, `invalid decimal ${value}`)
+  assert(/^\d+(,?\d)*\d*$/.test(part[0]), `invalid decimal ${value}`)
+
+  if(part.length === 2) {
+    assert(/^\d*$/.test(part[1]), `invalid decimal ${value}`)
+    part[1] = part[1].replace(/0+$/, '')// remove suffixing zeros
+    if(part[1] === '') {
+      part.pop()
+    }
   }
 
-  return abiSchema
+  part[0] = part[0].replace(/^0*/, '')// remove leading zeros
+  if(part[0] === '') {
+    part[0] = '0'
+  }
+  return part.join('.')
+}
+
+/**
+  Ensure a fixed number of decimal places.  Safe for large numbers.
+
+  @see ./format.test.js
+  @example UDecimalString(10, 3) === '10.300'
+
+  @arg {number|string|object.toString} value
+  @arg {number} precision - number of decimal places
+  @return {string} decimal part is added and zero padded to match precision
+*/
+function UDecimalPad(num, precision) {
+  const value = UDecimalString(num)
+  assert.equal('number', typeof precision, 'precision')
+
+  const part = value.split('.')
+
+  if(precision === 0 && part.length === 1) {
+    return part[0]
+  }
+
+  if(part.length === 1) {
+    return `${part[0]}.${'0'.repeat(precision)}`
+  } else {
+    const pad = precision - part[1].length
+    assert(pad >= 0, `decimal '${value}' exceeds precision ${precision}`)
+    return `${part[0]}.${part[1]}${'0'.repeat(pad)}`
+  }
+}
+
+/** Ensures proper trailing zeros then removes decimal place. */
+function UDecimalImply(value, precision) {
+  return UDecimalPad(value, precision).replace('.', '')
+}
+
+/**
+  Put the decimal place back in its position and return the normalized number
+  string (with any unnecessary zeros or an unnecessary decimal removed).
+
+  @arg {string|number|value.toString} value 10000
+  @arg {number} precision 4
+  @return {number} 1.0000
+*/
+function UDecimalUnimply(value, precision) {
+  assert(value != null, 'value is required')
+  value = value === 'object' && value.toString ? value.toString() : String(value)
+  assert(/^\d+$/.test(value), `invalid whole number ${value}`)
+
+  // Ensure minimum length
+  const pad = precision - value.length
+  if(pad > 0) {
+    value = `${'0'.repeat(pad)}${value}`
+  }
+
+  const dotIdx = value.length - precision
+  value = `${value.slice(0, dotIdx)}.${value.slice(dotIdx)}`
+  return UDecimalString(value) // Normalize
 }
