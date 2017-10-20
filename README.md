@@ -97,8 +97,12 @@ For more advanced signing, see `keyProvider` in the [unit test](./index.test.js)
 Shorthand is available for some types such as Asset and Authority.
 
 For example:
-* deposit: `'1 EOS'` is shorthand for `{amount: 10000, symbol: 'EOS'}`
+* deposit: `'1 EOS'` is shorthand for `1.0000 EOS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
+* recovery: `inita` or `inita@active` is shorthand
+  * `{{threshold: 1, accounts: [..account: inita, permission: active, weight: 1]}}`
+  * `inita@other` would replace the permission `active` with `other`
+
 
 ```javascript
 Eos = require('eosjs') // Or Eos = require('./src')

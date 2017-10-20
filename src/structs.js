@@ -225,7 +225,7 @@ const authorityOverride = ({
         accounts: []
       }
     }
-    if(isName(value)) {
+    if(typeof value === 'string') {
       const [account, permission = 'active'] = value.split('@')
       return {
         threshold: 1,
