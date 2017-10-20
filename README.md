@@ -42,7 +42,29 @@ API methods and documentation are generated from:
 
 ### Transaction Options
 
-`options = {broadcast: true, sign: true, expireInSeconds: N, debug: false}`
+`options = {
+  expireInSeconds: 60,
+  broadcast: true,
+  debug: false,
+  sign: true,
+  scope,
+  authorization
+}`
+
+* **scope** `{array<string>|string}` - account name or names that may
+  undergo a change in state.
+  * If missing default scopes will be calculated.
+  * If provided additional scopes will not be added.
+  * Sorting is always performed.
+
+
+* **authorization** `{array<auth>|auth}` - identifies the
+  signing account and permission typically in a multi-sig
+  configuration.  Authorization may be a string formatted as
+  `account@permission` or an `object<{account, permission}>`.
+  * If missing default authorizations will be calculated.
+  * If provided additional authorizations will not be added.
+  * Sorting is always performed (by account name).
 
 ### Usage (read/write)
 
@@ -55,12 +77,12 @@ eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zk
 // arguments to print usage.
 eos.transfer()
 
-// Usage with options
+// Usage with options (options are always optional)
 options = {broadcast: false}
 eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, options)
 
-// Object or ordered args may be used.  Options are optional.
-eos.transfer('inita', 'initb', 1, 'memo')
+// Object or ordered args may be used.
+eos.transfer('inita', 'initb', 1, 'memo', options)
 
 // A broadcast boolean may be provided as a shortcut for {broadcast: false}
 eos.transfer('inita', 'initb', 1, '', false)
@@ -75,7 +97,7 @@ For more advanced signing, see `keyProvider` in the [unit test](./index.test.js)
 Shorthand is available for some types such as Asset and Authority.
 
 For example:
-* deposit: `'10 EOS'` is shorthand for `{amount: 10, symbol: 'EOS'}`
+* deposit: `'1 EOS'` is shorthand for `{amount: 10000, symbol: 'EOS'}`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
 
 ```javascript

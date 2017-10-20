@@ -83,6 +83,39 @@ if(process.env['NODE_ENV'] === 'development') {
       return eos.transfer('inita', 'initb', 1, '')
     })
 
+    it('transfer custom authorization (broadcast)', () => {
+      eos = Eos.Testnet({signProvider})
+      return eos.transfer('inita', 'initb', 1, '', {authorization: 'inita@owner'})
+    })
+
+    it('transfer custom authorization sorting (no broadcast)', () => {
+      eos = Eos.Testnet({signProvider})
+      return eos.transfer('inita', 'initb', 1, '',
+        {authorization: ['initb@owner', 'inita@owner'], broadcast: false}
+      ).then(({transaction}) => {
+        const ans = [
+          {account: 'inita', permission: 'owner'},
+          {account: 'initb', permission: 'owner'}
+        ]
+        assert.deepEqual(transaction.messages[0].authorization, ans)
+      })
+    })
+
+    it('transfer custom scope (broadcast)', () => {
+      eos = Eos.Testnet({signProvider})
+      // To pass: initb, inita must get sorted to: inita, initb
+      return eos.transfer('inita', 'initb', 2, '', {scope: ['initb', 'inita']})
+    })
+
+    it('transfer custom scope array (no broadcast)', () => {
+      eos = Eos.Testnet({signProvider})
+      // To pass: scopes must get sorted
+      return eos.transfer('inita', 'initb', 1, '',
+        {scope: ['joe', 'billy'], broadcast: false}).then(({transaction}) => {
+          assert.deepEqual(transaction.scope, ['billy', 'joe'])
+        })
+    })
+
     it('transfer (no broadcast)', () => {
       eos = Eos.Testnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '', {broadcast: false})

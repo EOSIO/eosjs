@@ -171,36 +171,71 @@ function WriteApi(Network, network, config, Transaction) {
         throw new Error('Callback during a transaction are not supported')
       }
 
+      const addDefaultScope = options.scope == null
+      const addDefaultAuths = options.authorization == null
+
+      if(typeof options.scope === 'string') {
+        options.scope = [options.scope]
+      }
+
+      const authorization = []
+      if(options.authorization) {
+        if(typeof options.authorization === 'string') {
+          options.authorization = [options.authorization]
+        }
+        options.authorization.forEach(auth => {
+          if(typeof auth === 'string') {
+            const [account, permission = 'active'] = auth.split('@')
+            authorization.push({account, permission})
+          } else if(typeof auth === 'object') {
+            authorization.push(auth)
+          }
+        })
+        assert.equal(authorization.length, options.authorization.length,
+          'invalid authorization in: ' + JSON.stringify(options.authorization))
+      }
+
       const tr = {
+        scope: options.scope || [],
         messages: [{
           code,
           type,
           data: params,
-          authorization: []
+          authorization
         }]
       }
 
-      if(!tr.scope) {// FIXME Hack, until an API call is available
+      if(addDefaultScope || addDefaultAuths) {
         const fields = Object.keys(definition.fields)
-        tr.scope = []
-
         const f1 = fields[0]
+
         if(definition.fields[f1] === 'AccountName') {
-          tr.scope.push(params[f1])
-          tr.messages[0].authorization.push({
-            account: params[f1],
-            permission: 'active'
-          })
+          if(addDefaultScope) {
+            // Make a simple guess based on ABI conventions.
+            tr.scope.push(params[f1])
+          }
+          if(addDefaultAuths) {
+            // Default authorization (since user did not provide one)
+            tr.messages[0].authorization.push({
+              account: params[f1],
+              permission: 'active'
+            })
+          }
         }
 
-        if(fields.length > 1 && !/newaccount/.test(type)) {
-          const f2 = fields[1]
-          if(definition.fields[f2] === 'AccountName') {
-            tr.scope.push(params[f2])
+        if(addDefaultScope) {
+          if(fields.length > 1 && !/newaccount/.test(type)) {
+            const f2 = fields[1]
+            if(definition.fields[f2] === 'AccountName') {
+              tr.scope.push(params[f2])
+            }
           }
         }
       }
+
       tr.scope = tr.scope.sort()
+      tr.messages[0].authorization.sort((a, b) =>
+        a.account > b.account ? 1 : a.account < b.account ? -1 : 0)
 
       // multi-message transaction support
       if(!optionOverrides.messageOnly) {
