@@ -74,7 +74,7 @@ if(process.env['NODE_ENV'] === 'development') {
         owner: pubkey,
         active: pubkey,
         recovery: 'inita',
-        deposit: '.0001 EOS'
+        deposit: '1.0000 EOS'
       })
     })
 

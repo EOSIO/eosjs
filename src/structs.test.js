@@ -49,7 +49,7 @@ describe('shorthand', () => {
 
     const obj = AssetSymbolType.fromObject('EOS')
     const buf = Fcbuffer.toBuffer(AssetSymbolType, obj)
-    assert.equal(buf.toString('hex'), '0004454f53000000')
+    assert.equal(buf.toString('hex'), '04454f5300000000')
   })
 
 })

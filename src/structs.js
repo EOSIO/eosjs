@@ -19,8 +19,9 @@ module.exports = (config = {}, extendedSchema) => {
     return abi.structs[name]
   }
 
-  // Default to forceMessageDataHex until native ABIs are added, convert Message.data to hex
-  // https://github.com/EOSIO/eos/issues/215
+  // If eosd does not have an ABI setup for a certain message.type, it will throw
+  // an error: `Invalid cast from object_type to string` .. forceMessageDataHex
+  // may be used to until native ABI is added or fixed.
   const forceMessageDataHex = config.forceMessageDataHex != null ?
     config.forceMessageDataHex : true
 
@@ -124,23 +125,22 @@ const AssetSymbol = (validation) => {
     }
   }
 
-  const prefix = '\0\u0004'
+  const prefix = '\u0004'
 
   return {
     fromByteBuffer (b) {
       const bcopy = b.copy(b.offset, b.offset + 7)
       b.skip(7)
 
-      // assert(bcopy.readUint8() === 0, 'unknown asset symbol format')
       // const precision = bcopy.readUint8()
       // console.log('precision', precision)
 
       const bin = bcopy.toBinary()
-      if(bin.slice(0, 2) !== prefix) {
-        throw new TypeError(`Asset symbol prefix does not match`)
+      if(bin.slice(0, 1) !== prefix) {
+        throw new TypeError(`Asset precision does not match`)
       }
       let symbol = ''
-      for(code of bin.slice(2))  {
+      for(code of bin.slice(1))  {
         if(code == '\0') {
           break
         }
@@ -151,7 +151,7 @@ const AssetSymbol = (validation) => {
 
     appendByteBuffer (b, value) {
       valid(value)
-      value += '\0'.repeat(6 - value.length)
+      value += '\0'.repeat(7 - value.length)
       b.append(prefix + value)
     },
 
