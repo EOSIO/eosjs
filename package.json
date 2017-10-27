@@ -8,7 +8,8 @@
     "coverage": "istanbul cover _mocha -- -R spec src/*.test.js",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "prepublish": "node_modules/babel-cli/bin/babel.js src --out-dir lib",
-    "build": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js"
+    "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js",
+    "build": "npm run prepublish && npm run browserify"
   },
   "repository": {
     "type": "git",
