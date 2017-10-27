@@ -368,7 +368,7 @@ function WriteApi(Network, network, config, Transaction) {
     }
 
     arg.messages.forEach(message => {
-      if(!Array.isArray(message.authorization) || message.authorization.length === 0) {
+      if(!Array.isArray(message.authorization)) {
         throw new TypeError('Expecting message.authorization array', message)
       }
     })
