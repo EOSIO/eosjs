@@ -1,8 +1,6 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-Status: Alpha
-
 # Eosjs
 
 General purpose library for the EOS blockchain.
@@ -40,23 +38,42 @@ API methods and documentation are generated from:
 * [chain.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/chain.json)
 * [account_history.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/account_history.json)
 
-### Transaction Options
+### Configuration
 
-`options = {
+```js
+Eos = require('eosjs') // Or Eos = require('./src')
+
+config = {
+  httpEndpoint: 'http://127.0.0.1:8888',
   expireInSeconds: 60,
   broadcast: true,
   debug: false,
+  sign: true
+}
+
+eos = Eos.Testnet(config)
+```
+
+### Options
+
+Options may be provided immediately after parameters.
+
+Example: `eos.transfer(params, options)`
+
+```js
+options = {
+  broadcast: true,
   sign: true,
-  scope,
-  authorization
-}`
+  scope: null,
+  authorization: null
+}
+```
 
 * **scope** `{array<string>|string}` - account name or names that may
   undergo a change in state.
   * If missing default scopes will be calculated.
   * If provided additional scopes will not be added.
   * Sorting is always performed.
-
 
 * **authorization** `{array<auth>|auth}` - identifies the
   signing account and permission typically in a multi-sig
