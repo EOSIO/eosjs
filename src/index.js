@@ -29,7 +29,7 @@ Eos.Testnet = config => {
 }
 
 function createEos(config, Network, network) {
-  abiCache = AbiCache(network, config)
+  const abiCache = AbiCache(network, config)
   config = Object.assign({}, config, {network, abiCache})
 
   if(!config.chainId) {
