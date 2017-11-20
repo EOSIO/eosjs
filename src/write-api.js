@@ -382,12 +382,14 @@ function WriteApi(Network, network, config, Transaction) {
     network.createTransaction(options.expireInSeconds, checkError(callback, rawTx => {
       rawTx.scope = arg.scope
       rawTx.messages = arg.messages
-      rawTx.read_scope = arg.read_scope || []
+      // rawTx.read_scope = arg.read_scope || []
+
       // console.log('rawTx', JSON.stringify(rawTx,null,4))
 
       // resolve shorthand
       // const txObject = Transaction.toObject(Transaction.fromObject(rawTx))
       const txObject = Transaction.fromObject(rawTx)
+
       // console.log('txObject', JSON.stringify(txObject,null,4))
 
       // Broadcast what is signed (instead of rawTx)

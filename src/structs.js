@@ -23,7 +23,7 @@ module.exports = (config = {}, extendedSchema) => {
   // an error: `Invalid cast from object_type to string` .. forceMessageDataHex
   // may be used to until native ABI is added or fixed.
   const forceMessageDataHex = config.forceMessageDataHex != null ?
-    config.forceMessageDataHex : true
+    config.forceMessageDataHex : false
 
   const override = Object.assign({},
     authorityOverride,
@@ -341,8 +341,9 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
 
     if(forceMessageDataHex) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-      ser.appendByteBuffer(b2, data)
-      
+      if(data) {
+        ser.appendByteBuffer(b2, data)
+      }
       result.data = b2.copy(0, b2.offset).toString('hex')
 
       // console.log('result.data', result.data)

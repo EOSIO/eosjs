@@ -62,7 +62,7 @@ if(process.env['NODE_ENV'] === 'development') {
       return eos.transfer('inita', 'initb', 2, '', false)
     })
 
-    it('newaccount', () => {
+    it('newaccount (broadcast)', () => {
       eos = Eos.Testnet({signProvider})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       // const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
