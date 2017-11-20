@@ -6,10 +6,10 @@ const Eos = require('.')
 
 describe('shorthand', () => {
 
-  it('Asset', () => {
+  it('asset', () => {
     const eos = Eos.Testnet()
     const {types} = eos.fc
-    const AssetType = types.Asset()
+    const AssetType = types.asset()
 
     assertSerializer(AssetType, '1.0000 EOS')
 
@@ -20,30 +20,30 @@ describe('shorthand', () => {
     assert.equal(obj, '1.0000 EOS')
   })
 
-  it('Authority', () => {
+  it('authority', () => {
     const eos = Eos.Testnet()
-    const {Authority} = eos.fc.structs
+    const {authority} = eos.fc.structs
 
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
     const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
 
-    assert.deepEqual(Authority.fromObject(pubkey), auth)
-    assert.deepEqual(Authority.fromObject(auth), auth)
+    assert.deepEqual(authority.fromObject(pubkey), auth)
+    assert.deepEqual(authority.fromObject(auth), auth)
   })
 
-  it('PublicKey', () => {
+  it('public_key', () => {
     const eos = Eos.Testnet()
     const {structs, types} = eos.fc
-    const PublicKeyType = types.PublicKey()
+    const PublicKeyType = types.public_key()
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
     // 02c0ded2bc1f1305fb0faac5e6c03ee3a1924234985427b6167ca569d13df435cf
     assertSerializer(PublicKeyType, pubkey)
   })
 
-  it('AssetSymbol', () => {
+  it('asset_symbol', () => {
     const eos = Eos.Testnet()
     const {types} = eos.fc
-    const AssetSymbolType = types.AssetSymbol()
+    const AssetSymbolType = types.asset_symbol()
 
     assertSerializer(AssetSymbolType, 'EOS')
 
@@ -69,7 +69,7 @@ describe('Message.data', () => {
       },
       authorization: []
     }
-    assertSerializer(structs.Message, value)
+    assertSerializer(structs.message, value)
   })
 
   it('hex', () => {
@@ -87,7 +87,7 @@ describe('Message.data', () => {
       authorization: []
     }
     
-    const type = structs.Message
+    const type = structs.message
     const obj = type.fromObject(value) // tests fromObject
     const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
     const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
@@ -111,7 +111,7 @@ describe('Message.data', () => {
       },
       authorization: []
     }
-    const type = structs.Message
+    const type = structs.message
     const obj = type.fromObject(value) // tests fromObject
     const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
     const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
@@ -134,7 +134,7 @@ describe('Message.data', () => {
       data: '030a0b0c',
       authorization: []
     }
-    assertSerializer(structs.Message, value)
+    assertSerializer(structs.message, value)
   })
 })
 

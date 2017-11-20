@@ -90,8 +90,7 @@ Eos = require('eosjs') // Or Eos = require('./src')
 
 eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
-// All Eos transactions as of the last update are available.  Run with no
-// arguments to print usage.
+// Run with no arguments to print usage.
 eos.transfer()
 
 // Usage with options (options are always optional)

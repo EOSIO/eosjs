@@ -139,7 +139,7 @@ if(process.env['NODE_ENV'] === 'development') {
       return Eos.Testnet({signProvider}).contract(name)
       .then(() => {throw 'expecting error'})
       .catch(error => {
-        assert.equal('unknown key', error.message)
+        assert(/unknown key/.test(error.message))
       })
     })
 

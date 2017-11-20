@@ -15,11 +15,11 @@ function writeApiGen(Network, network, structs, config) {
     throw new TypeError('config.chainId is required')
   }
 
-  const writeApi = WriteApi(Network, network, config, structs.Transaction)
+  const writeApi = WriteApi(Network, network, config, structs.transaction)
   const reserveFunctions = new Set(['transaction', 'contract'])
   const merge = {}
 
-  // sends transactions; message collecting wrapper for native or contract actions 
+  // sends transactions, also a message collecting wrapper functions 
   merge.transaction = writeApi.genTransaction(structs, merge)
 
   // Immediate send operations automatically calls merge.transaction
@@ -29,9 +29,11 @@ function writeApiGen(Network, network, structs, config) {
       // See eosjs-json generated.json
       continue
     }
-
+    if(type === 'transaction') {
+      continue // https://github.com/EOSIO/eos/issues/730
+    }
     if(reserveFunctions.has(type)) {
-      new TypeError('Conflicting Api function: ' + type)
+      throw new TypeError('Conflicting Api function: ' + type)
     }
 
     const struct = structs[type]
@@ -135,10 +137,10 @@ function WriteApi(Network, network, config, Transaction) {
       contractMerge.transaction = transaction ? transaction :
         genTransaction(cache.structs, contractMerge)
 
-      cache.abi.actions.forEach(({action, type}) => {
+      cache.abi.actions.forEach(({action_name, type}) => {
         const definition = cache.schema[type]
         const struct = cache.structs[type]
-        contractMerge[action] = genMethod(type, definition, struct, contractMerge.transaction, code)
+        contractMerge[action_name] = genMethod(type, definition, struct, contractMerge.transaction, code)
       })
 
       return contractMerge
@@ -209,7 +211,7 @@ function WriteApi(Network, network, config, Transaction) {
         const fields = Object.keys(definition.fields)
         const f1 = fields[0]
 
-        if(definition.fields[f1] === 'AccountName') {
+        if(definition.fields[f1] === 'account_name') {
           if(addDefaultScope) {
             // Make a simple guess based on ABI conventions.
             tr.scope.push(params[f1])
@@ -226,7 +228,7 @@ function WriteApi(Network, network, config, Transaction) {
         if(addDefaultScope) {
           if(fields.length > 1 && !/newaccount/.test(type)) {
             const f2 = fields[1]
-            if(definition.fields[f2] === 'AccountName') {
+            if(definition.fields[f2] === 'account_name') {
               tr.scope.push(params[f2])
             }
           }
@@ -380,7 +382,8 @@ function WriteApi(Network, network, config, Transaction) {
     network.createTransaction(options.expireInSeconds, checkError(callback, rawTx => {
       rawTx.scope = arg.scope
       rawTx.messages = arg.messages
-      rawTx.readscope = arg.readscope || []
+      rawTx.read_scope = arg.read_scope || []
+      // console.log('rawTx', JSON.stringify(rawTx,null,4))
 
       // resolve shorthand
       // const txObject = Transaction.toObject(Transaction.fromObject(rawTx))

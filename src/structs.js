@@ -34,10 +34,10 @@ module.exports = (config = {}, extendedSchema) => {
   )
 
   const eosTypes = {
-    Name: ()=> [Name],
-    PublicKey: () => [PublicKeyType],
-    AssetSymbol: () => [AssetSymbol],
-    Asset: () => [Asset], // must come after AssetSymbol
+    name: ()=> [Name],
+    public_key: () => [PublicKeyType],
+    asset_symbol: () => [AssetSymbol],
+    asset: () => [Asset], // must come after AssetSymbol
   }
 
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
@@ -171,8 +171,8 @@ const AssetSymbol = (validation) => {
 }
 
 const Asset = (validation, baseTypes, customTypes) => {
-  const amountType = baseTypes.Int64(validation)
-  const symbolType = customTypes.AssetSymbol(validation)
+  const amountType = baseTypes.int64(validation)
+  const symbolType = customTypes.asset_symbol(validation)
 
   const symbolCache = symbol => ({precision: 4})
   const precision = symbol => symbolCache(symbol).precision
@@ -217,7 +217,7 @@ const Asset = (validation, baseTypes, customTypes) => {
 
 const authorityOverride = ({
   /** shorthand `EOS6MRyAj..` */
-  'Authority.fromObject': (value) => {
+  'authority.fromObject': (value) => {
     if(PublicKey.fromString(value)) {
       return {
         threshold: 1,
@@ -243,7 +243,7 @@ const authorityOverride = ({
 })
 
 const abiOverride = ({
-  'Abi.fromObject': (value) => {
+  'abi.fromObject': (value) => {
     if(typeof value === 'string') {
       return JSON.parse(value)
     }
@@ -274,7 +274,7 @@ const wasmCodeOverride = ({
   Nested serialized structure.  Nested struct may be in HEX or object format.
 */
 const messageDataOverride = (structLookup, forceMessageDataHex) => ({
-  'Message.data.fromByteBuffer': ({fields, object, b, config}) => {
+  'message.data.fromByteBuffer': ({fields, object, b, config}) => {
     const ser = (object.type || '') == '' ? fields.data : structLookup(object.type, object.code)
     if(ser) {
       b.readVarint32() // length prefix (usefull if object.type is unknown)
@@ -288,7 +288,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
     }
   },
 
-  'Message.data.appendByteBuffer': ({fields, object, b}) => {
+  'message.data.appendByteBuffer': ({fields, object, b}) => {
     const ser = (object.type || '') == '' ? fields.data : structLookup(object.type, object.code)
     if(ser) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
@@ -306,7 +306,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
     }
   },
 
-  'Message.data.fromObject': ({fields, object, result}) => {
+  'message.data.fromObject': ({fields, object, result}) => {
     const {data, type} = object
     const ser = (type || '') == '' ? fields.data : structLookup(type, object.code)
     if(ser) {
@@ -325,7 +325,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
     }
   },
 
-  'Message.data.toObject': ({fields, object, result, config}) => {
+  'message.data.toObject': ({fields, object, result, config}) => {
     const {data, type} = object || {}
     const ser = (type || '') == '' ? fields.data : structLookup(type, object.code)
     if(!ser) {
