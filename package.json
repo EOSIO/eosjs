@@ -4,11 +4,11 @@
   "description": "General purpose library for the EOS blockchain.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha src/*.test.js",
+    "test": "mocha --use_strict src/*.test.js",
     "coverage": "istanbul cover _mocha -- -R spec src/*.test.js",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "prepublish": "npm run prepublish_lib && npm run prepublish_test",
-    "prepublish_lib": "node_modules/babel-cli/bin/babel.js src --out-dir lib",
+    "prepublish_lib": "babel src --out-dir lib",
     "prepublish_test": "mocha lib/*.test.js",
     "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js",
     "build": "npm run prepublish && npm run browserify"
