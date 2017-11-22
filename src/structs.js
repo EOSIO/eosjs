@@ -140,7 +140,7 @@ const AssetSymbol = (validation) => {
         throw new TypeError(`Asset precision does not match`)
       }
       let symbol = ''
-      for(code of bin.slice(1))  {
+      for(const code of bin.slice(1))  {
         if(code == '\0') {
           break
         }

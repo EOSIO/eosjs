@@ -2,6 +2,7 @@
 const assert = require('assert')
 
 const Eos = require('.')
+let eos
 
 // even transactions that don't broadcast require Api lookups
 //  no testnet yet, avoid breaking travis-ci
