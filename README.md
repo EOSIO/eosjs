@@ -8,10 +8,10 @@ General purpose library for the EOS blockchain.
 ### Usage (read-only)
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('./src')
+Eos = require('eosjs') // Eos = require('./src')
 
 // API, note: testnet uses eosd at localhost (until there is a testnet)
-eos = Eos.Testnet()
+let eos = Eos.Testnet()
 
 // All API methods print help when called with no-arguments.
 eos.getBlock()
@@ -41,7 +41,7 @@ API methods and documentation are generated from:
 ### Configuration
 
 ```js
-Eos = require('eosjs') // Or Eos = require('./src')
+Eos = require('eosjs') // Eos = require('./src')
 
 config = {
   httpEndpoint: 'http://127.0.0.1:8888',
@@ -86,7 +86,7 @@ options = {
 ### Usage (read/write)
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('./src')
+Eos = require('eosjs') // Eos = require('./src')
 
 eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
@@ -121,7 +121,7 @@ For example:
 
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('./src')
+Eos = require('eosjs') // Eos = require('./src')
 
 initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 initaPublic = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
@@ -143,7 +143,7 @@ eos.newaccount({
 ### Contract
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('./src')
+Eos = require('eosjs') // Eos = require('./src')
 let {ecc} = Eos.modules
 
 initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
@@ -186,7 +186,7 @@ eos.contract('currency').then(currency => {
 Blockchain level atomic operations.  All will pass or fail.
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('./src')
+Eos = require('eosjs') // Eos = require('./src')
 
 keyProvider = [
   '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3',
@@ -236,7 +236,7 @@ testnet.contract('currency').then(currency => {
 A manual transaction provides for more flexibility.
 
 ```javascript
-Eos = require('eosjs') // Or Eos = require('./src')
+Eos = require('eosjs') // Eos = require('./src')
 
 eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
