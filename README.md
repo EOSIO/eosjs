@@ -146,6 +146,26 @@ eos.newaccount({
 
 ### Contract
 
+Deploy a smart contract.
+
+The `setcode` command accepts WASM text and converts this to binary before
+signing and broadcasting.  For this, the Binaryen library is used.  Because
+this is a large library it is not included in `eosjs` by default.
+
+Add binaryen to your project:
+```bash
+npm i binaryen
+```
+
+Import and include the library when you configure Eos:
+
+```javascript
+const binaryen = require('binaryen')
+eos = Eos.Testnet({..., binaryen})
+```
+
+Complete example:
+
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 let {ecc} = Eos.modules
@@ -159,7 +179,11 @@ currencyPublic = ecc.privateToPublic(currencyPrivate)
 
 keyProvider = [initaPrivate, currencyPrivate]
 
-eos = Eos.Localnet({keyProvider})
+//  Requires a large library, separate from the eosjs bundle
+// $ npm install binaryen
+binaryen = require('binaryen')
+
+eos = Eos.Localnet({keyProvider, binaryen})
 
 eos.newaccount({
   creator: 'inita',
