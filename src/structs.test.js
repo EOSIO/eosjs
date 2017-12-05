@@ -7,7 +7,7 @@ const Eos = require('.')
 describe('shorthand', () => {
 
   it('asset', () => {
-    const eos = Eos.Testnet()
+    const eos = Eos.Localnet()
     const {types} = eos.fc
     const AssetType = types.asset()
 
@@ -21,7 +21,7 @@ describe('shorthand', () => {
   })
 
   it('authority', () => {
-    const eos = Eos.Testnet()
+    const eos = Eos.Localnet()
     const {authority} = eos.fc.structs
 
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
@@ -32,7 +32,7 @@ describe('shorthand', () => {
   })
 
   it('public_key', () => {
-    const eos = Eos.Testnet()
+    const eos = Eos.Localnet()
     const {structs, types} = eos.fc
     const PublicKeyType = types.public_key()
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
@@ -41,7 +41,7 @@ describe('shorthand', () => {
   })
 
   it('asset_symbol', () => {
-    const eos = Eos.Testnet()
+    const eos = Eos.Localnet()
     const {types} = eos.fc
     const AssetSymbolType = types.asset_symbol()
 
@@ -56,7 +56,7 @@ describe('shorthand', () => {
 
 describe('Message.data', () => {
   it('json', () => {
-    const eos = Eos.Testnet({forceMessageDataHex: false})
+    const eos = Eos.Localnet({forceMessageDataHex: false})
     const {structs, types} = eos.fc
     const value = {
       code: 'eos',
@@ -73,7 +73,7 @@ describe('Message.data', () => {
   })
 
   it('hex', () => {
-    const eos = Eos.Testnet({forceMessageDataHex: false, debug: false})
+    const eos = Eos.Localnet({forceMessageDataHex: false, debug: false})
     const {structs, types} = eos.fc
 
     const tr = {from: 'inita', to: 'initb', amount: '1', memo: ''}
@@ -98,7 +98,7 @@ describe('Message.data', () => {
   })
 
   it('force hex', () => {
-    const eos = Eos.Testnet({forceMessageDataHex: true})
+    const eos = Eos.Localnet({forceMessageDataHex: true})
     const {structs, types} = eos.fc
     const value = {
       code: 'eos',
@@ -126,7 +126,7 @@ describe('Message.data', () => {
   })
 
   it('unknown type', () => {
-    const eos = Eos.Testnet({forceMessageDataHex: false})
+    const eos = Eos.Localnet({forceMessageDataHex: false})
     const {structs, types} = eos.fc
     const value = {
       code: 'eos',

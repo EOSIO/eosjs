@@ -9,7 +9,7 @@ if(process.env['NODE_ENV'] === 'development') {
 
   describe('networks', () => {
     it('testnet', (done) => {
-      const eos = Eos.Testnet()
+      const eos = Eos.Localnet()
       eos.getBlock(1, (err, block) => {
         if(err) {
           throw err
@@ -25,7 +25,7 @@ if(process.env['NODE_ENV'] === 'development') {
     const promiseSigner = (args) => Promise.resolve(signProvider(args))
 
     it('usage', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       eos.transfer()
     })
 
@@ -38,7 +38,7 @@ if(process.env['NODE_ENV'] === 'development') {
         return Promise.resolve(wif)
       }
 
-      const eos = Eos.Testnet({keyProvider})
+      const eos = Eos.Localnet({keyProvider})
 
       return eos.transfer('inita', 'initb', 1, '', false).then(tr => {
         assert.equal(tr.transaction.signatures.length, 1)
@@ -58,12 +58,12 @@ if(process.env['NODE_ENV'] === 'development') {
           return sign(buf, wif) // return hex string signature or array of signatures
         })
       }
-      const eos = Eos.Testnet({signProvider: customSignProvider})
+      const eos = Eos.Localnet({signProvider: customSignProvider})
       return eos.transfer('inita', 'initb', 2, '', false)
     })
 
     it('newaccount (broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       // const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
       const name = randomName()
@@ -79,17 +79,17 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('transfer (broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '')
     })
 
     it('transfer custom authorization (broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '', {authorization: 'inita@owner'})
     })
 
     it('transfer custom authorization sorting (no broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '',
         {authorization: ['initb@owner', 'inita@owner'], broadcast: false}
       ).then(({transaction}) => {
@@ -102,13 +102,13 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('transfer custom scope (broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       // To pass: initb, inita must get sorted to: inita, initb
       return eos.transfer('inita', 'initb', 2, '', {scope: ['initb', 'inita']})
     })
 
     it('transfer custom scope array (no broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       // To pass: scopes must get sorted
       return eos.transfer('inita', 'initb', 1, '',
         {scope: ['joe', 'billy'], broadcast: false}).then(({transaction}) => {
@@ -117,12 +117,12 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('transfer (no broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '', {broadcast: false})
     })
 
     it('transfer (no broadcast, no sign)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       const opts = {broadcast: false, sign: false}
       return eos.transfer('inita', 'initb', 1, '', opts).then(tr => 
         assert.deepEqual(tr.transaction.signatures, [])
@@ -130,13 +130,13 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('transfer sign promise (no broadcast)', () => {
-      const eos = Eos.Testnet({signProvider: promiseSigner})
+      const eos = Eos.Localnet({signProvider: promiseSigner})
       return eos.transfer('inita', 'initb', 1, '', false)
     })
 
     it('message to unknown contract', () => {
       const name = randomName()
-      return Eos.Testnet({signProvider}).contract(name)
+      return Eos.Localnet({signProvider}).contract(name)
       .then(() => {throw 'expecting error'})
       .catch(error => {
         assert(/unknown key/.test(error.message))
@@ -147,7 +147,7 @@ if(process.env['NODE_ENV'] === 'development') {
       // initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
       // eos is a bad test case, but it was the only native contract
       const name = 'eos'
-      return Eos.Testnet({signProvider}).contract(name).then(contract => {
+      return Eos.Localnet({signProvider}).contract(name).then(contract => {
         contract.transfer('inita', 'initd', 1, '')
           // transaction sent on each command
           .then(tr => {assert.equal(1, tr.transaction.messages.length)})
@@ -160,7 +160,7 @@ if(process.env['NODE_ENV'] === 'development') {
 
     it('message to contract atomic', () => {
       let amt = 1 // for unique transactions
-      const testnet = Eos.Testnet({signProvider})
+      const testnet = Eos.Localnet({signProvider})
 
       const trTest = eos => {
         assert(eos.transfer('inita', 'initf', amt, '') == null)
@@ -176,7 +176,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('message to contract (contract tr nesting)', () => {
-      const tn = Eos.Testnet({signProvider})
+      const tn = Eos.Localnet({signProvider})
       return tn.contract('eos').then(eos => {
         eos.transaction(tr => {
           tr.transfer('inita', 'initd', 1, '')
@@ -187,7 +187,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('multi-message transaction (broadcast)', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       return eos.transaction(tr => {
         assert(tr.transfer('inita', 'initb', 1, '') == null)
         assert(tr.transfer({from: 'inita', to: 'initc', amount: 1, memo: ''}) == null)
@@ -198,7 +198,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('multi-message transaction no inner callback', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       eos.transaction(tr => {
         tr.okproducer('inita', 'inita', 1, cb => {})
       })
@@ -209,7 +209,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('multi-message transaction error rollback', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       return eos.transaction(tr => {throw 'rollback'})
       .then(() => {throw 'expecting rollback'})
       .catch(error => {
@@ -218,7 +218,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('multi-message transaction Promise.reject rollback', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       eos.transaction(tr => Promise.reject('rollback'))
       .then(() => {throw 'expecting rollback'})
       .catch(error => {
@@ -227,7 +227,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('custom transfer', () => {
-      const eos = Eos.Testnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
       return eos.transaction(
         {
           scope: ['inita', 'initb'],

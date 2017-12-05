@@ -19,14 +19,18 @@ Eos.modules = {
   Fcbuffer
 }
 
-// Eos.Mainnet = config => ..
 
-Eos.Testnet = config => {
-  const Network = api.Testnet
-  const network = Network(Object.assign({}, {apiLog: consoleObjCallbackLog}, config))
-  const eosConfig = Object.assign({}, {transactionLog: consoleObjCallbackLog}, config)
-  return createEos(eosConfig, Network, network)
+function development(Network) {
+  return config => {
+    const network = Network(Object.assign({}, {apiLog: consoleObjCallbackLog}, config))
+    const eosConfig = Object.assign({}, {transactionLog: consoleObjCallbackLog}, config)
+    return createEos(eosConfig, Network, network)
+  }
 }
+
+Eos.Testnet = development(api.Testnet)
+Eos.Localnet = development(api.Localnet)
+// Eos.Mainnet = config => ..
 
 function createEos(config, Network, network) {
   const abiCache = AbiCache(network, config)

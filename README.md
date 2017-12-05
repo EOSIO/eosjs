@@ -51,7 +51,9 @@ config = {
   sign: true
 }
 
-eos = Eos.Testnet(config)
+eos = Eos.Localnet(config)
+eos.getBlock(1)
+
 ```
 
 ### Options
@@ -85,10 +87,12 @@ options = {
 
 ### Usage (read/write)
 
+If you use the Testnet, you'll need to replace the private key in keyProvider.
+
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 
-eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
+eos = Eos.Localnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 // Run with no arguments to print usage.
 eos.transfer()
@@ -127,7 +131,7 @@ initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 initaPublic = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
 keyProvider = initaPrivate
 
-eos = Eos.Testnet({keyProvider})
+eos = Eos.Localnet({keyProvider})
 
 eos.newaccount({
   creator: 'inita',
@@ -155,7 +159,7 @@ currencyPublic = ecc.privateToPublic(currencyPrivate)
 
 keyProvider = [initaPrivate, currencyPrivate]
 
-eos = Eos.Testnet({keyProvider})
+eos = Eos.Localnet({keyProvider})
 
 eos.newaccount({
   creator: 'inita',
@@ -176,7 +180,7 @@ eos.setcode('currency', 0, 0, wast, abi)
 // eos.contract(code<string>, [options], [callback])
 eos.contract('currency').then(currency => {
   // Transfer is one of the actions in currency.abi 
-  currency.transfer('currency', 'inita', 10)
+  currency.transfer('currency', 'inita', 100)
 })
 
 ```
@@ -193,7 +197,7 @@ keyProvider = [
   Eos.modules.ecc.seedPrivate('currency')
 ]
 
-testnet = Eos.Testnet({keyProvider})
+testnet = Eos.Localnet({keyProvider})
 
 // if either transfer fails, both will fail (1 transaction, 2 messages)
 testnet.transaction(eos =>
@@ -238,7 +242,7 @@ A manual transaction provides for more flexibility.
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 
-eos = Eos.Testnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
+eos = Eos.Localnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 eos.transaction({
   scope: ['inita', 'initb'],
