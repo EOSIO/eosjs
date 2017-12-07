@@ -19,7 +19,6 @@ Eos.modules = {
   Fcbuffer
 }
 
-
 function development(Network) {
   return config => {
     const network = Network(Object.assign({}, {apiLog: consoleObjCallbackLog}, config))
@@ -98,39 +97,75 @@ function throwOnDuplicate(o1, o2, msg) {
 }
 
 const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
-  let keyProvider = config.keyProvider
+  const {keyProvider} = config
+
+  if(!keyProvider) {
+    throw new TypeError('This transaction requires a config.keyProvider for signing')
+  }
+
+  let keys = keyProvider
   if(typeof keyProvider === 'function') {
-    keyProvider = keyProvider({transaction})
+    keys = keyProvider({transaction})
   }
-  if(keyProvider) {
-    return Promise.resolve(keyProvider).then(keys => {
-      if(!Array.isArray(keys)) {
-        keys = [keys]
-      }
 
-      if(!keys.length) {
-        throw new Error('missing private key(s), check your keyProvider')
-      }
-
-      // Public to private key map -> maps server's required public keys
-      // back to signing keys.
-      const keyMap = keys.reduce((map, wif) => {
-        map[ecc.privateToPublic(wif)] = wif
-        return map
-      }, {})
-
-      return eos.getRequiredKeys(transaction, Object.keys(keyMap))
-      .then(({required_keys}) => {
-        if(!required_keys.length) {
-          throw new Error('missing required keys ')
-        }
-        const sigs = []
-        for(const key of required_keys) {
-          sigs.push(sign(buf, keyMap[key]))
-        }
-        return sigs
-      })
-    })
+  if(!Array.isArray(keys)) {
+    keys = [keys]
   }
-  throw new TypeError('This transaction requires a config.keyProvider for signing')
+
+  if(!keys.length) {
+    throw new Error('missing key, check your keyProvider')
+  }
+
+  const keyMap = new Map()
+
+  // keys are either public or private keys
+  for(const key of keys) {
+    const isPrivate = ecc.isValidPrivate(key)
+    const isPublic = ecc.isValidPublic(key)
+
+    assert(
+      isPrivate || isPublic,
+      'expecting public or private keys from keyProvider'
+    )
+
+    if(isPrivate) {
+      keyMap.set(ecc.privateToPublic(key), key)
+    } else {
+      keyMap.set(key, null)
+    }
+  }
+
+  const pubkeys = Array.from(keyMap.keys())
+
+  return eos.getRequiredKeys(transaction, pubkeys).then(({required_keys}) => {
+    if(!required_keys.length) {
+      throw new Error('missing required keys ')
+    }
+
+    const wifs = [], missingKeys = []
+
+    for(const requiredKey of required_keys) {
+      const wif = keyMap.get(requiredKey)
+      if(wif) {
+        wifs.push(wif)
+      } else {
+        missingKeys.push(requiredKey)
+      }
+    }
+
+    if(missingKeys.length !== 0) {
+      assert(typeof keyProvider === 'function',
+        'keyProvider function is needed for private key lookup')
+
+      keyProvider({pubkeys: missingKeys})
+        .forEach(wif => { wifs.push(wif) })
+    }
+
+    const sigs = []
+    for(const wif of wifs) {
+      sigs.push(sign(buf, wif))
+    }
+
+    return sigs
+  })
 }

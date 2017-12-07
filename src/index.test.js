@@ -2,6 +2,8 @@
 const assert = require('assert')
 
 const Eos = require('.')
+const {ecc} = Eos.modules
+const {Keystore} = require('eosjs-keygen')
 
 // even transactions that don't broadcast require Api lookups
 //  no testnet yet, avoid breaking travis-ci
@@ -29,13 +31,12 @@ if(process.env['NODE_ENV'] === 'development') {
       eos.transfer()
     })
 
-    it('keyProvider', () => {
-      // Ultimatly keyProvider should return a string or array of private keys.
-      // Optionally use a function and(or) return a promise if needed.
-      // This is the more advanced case.
-      const keyProvider = ({transaction}) => {
-        assert.equal(transaction.messages[0].type, 'transfer')
-        return Promise.resolve(wif)
+    // A keyProvider can return private keys directly..
+    it('keyProvider private key', () => {
+
+      // keyProvider should return an array of keys
+      const keyProvider = () => {
+        return [wif]
       }
 
       const eos = Eos.Localnet({keyProvider})
@@ -44,6 +45,40 @@ if(process.env['NODE_ENV'] === 'development') {
         assert.equal(tr.transaction.signatures.length, 1)
         assert.equal(typeof tr.transaction.signatures[0], 'string')
       })
+    })
+
+    // If a keystore is used, the keyProvider should return available
+    // public keys first then respond with private keys next.
+    it('keyProvider public keys then private key', () => {
+      const pubkey = ecc.privateToPublic(wif)
+
+      // keyProvider should return a string or array of keys.
+      const keyProvider = ({transaction, pubkeys}) => {
+        if(!pubkeys) {
+          assert.equal(transaction.messages[0].type, 'transfer')
+          return [pubkey]
+        }
+
+        if(pubkeys) {
+          assert.deepEqual(pubkeys, [pubkey])
+          return [wif]
+        }
+        assert(false, 'unexpected keyProvider callback')
+      }
+
+      const eos = Eos.Localnet({keyProvider})
+
+      return eos.transfer('inita', 'initb', 1, '', false).then(tr => {
+        assert.equal(tr.transaction.signatures.length, 1)
+        assert.equal(typeof tr.transaction.signatures[0], 'string')
+      })
+    })
+
+    it('keyProvider from eosjs-keygen', () => {
+      const keystore = Keystore('uid')
+      keystore.deriveKeys({parent: wif})
+      const eos = Eos.Localnet({keyProvider: keystore.keyProvider})
+      return eos.transfer('inita', 'initb', 12, '', true)
     })
 
     it('signProvider', () => {

@@ -33,6 +33,7 @@
     "babel-preset-es2015": "^6.24.1",
     "browserify": "^14.4.0",
     "coveralls": "^2.13.1",
+    "eosjs-keygen": "^1.2.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.4.2"
   },
