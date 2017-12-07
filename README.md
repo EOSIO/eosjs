@@ -110,7 +110,9 @@ eos.transfer('inita', 'initb', 1, '', false)
 
 Read-write API methods and documentation are generated from this [schema](https://github.com/EOSIO/eosjs-json/blob/master/schema/generated.json).
 
-For more advanced signing, see `keyProvider` in the [unit test](./index.test.js).
+For more advanced signing, see `keyProvider` in
+[eosjs-keygen](https://www.npmjs.com/package/eosjs-keygen) or
+[unit test](https://github.com/EOSIO/eosjs/blob/master/src/index.test.js).
 
 ### Shorthand
 
@@ -314,8 +316,6 @@ These libraries are exported from `eosjs` or may be used separately.
 var {api, ecc, json, Fcbuffer} = Eos.modules
 ```
 
-# About
-
 * eosjs-api [[Github](https://github.com/eosio/eosjs-api), [NPM](https://www.npmjs.org/package/eosjs-api)]
   * Remote API to an EOS blockchain node (eosd)
   * Use this library directly if you need read-only access to the blockchain
@@ -332,10 +332,14 @@ var {api, ecc, json, Fcbuffer} = Eos.modules
   * Maybe used by any language that can parse json
   * Kept up-to-date
 
+* eosjs-keygen [[Github](https://github.com/eosio/eosjs-keygen), [NPM](https://www.npmjs.org/package/eosjs-keygen)]
+  * private key storage and key management
+
 * Fcbuffer [[Github](https://github.com/eosio/eosjs-fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
   * Essential so the client knows what it is signing
+
 
 # Browser
 
