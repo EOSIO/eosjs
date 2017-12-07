@@ -3,7 +3,6 @@ const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
 const assert = require('assert')
-const binaryen = require('binaryen')
 
 const {isName, encodeName, decodeName,
   UDecimalPad, UDecimalImply, UDecimalUnimply} = require('./format')
@@ -28,7 +27,7 @@ module.exports = (config = {}, extendedSchema) => {
   const override = Object.assign({},
     authorityOverride,
     abiOverride,
-    wasmCodeOverride,
+    wasmCodeOverride(config),
     messageDataOverride(structLookup, forceMessageDataHex),
     config.override
   )
@@ -253,8 +252,10 @@ const abiOverride = ({
   }
 })
 
-const wasmCodeOverride = ({
+const wasmCodeOverride = config => ({
   'setcode.code.fromObject': ({object, result}) => {
+    const {binaryen} = config
+    assert(binaryen != null, 'required: config.binaryen = require("binaryen")')
     try {
       const code = object.code.toString()
       if(/^\s*\(module/.test(code)) {
@@ -266,6 +267,7 @@ const wasmCodeOverride = ({
       }
     } catch(error) {
       console.error(error, object.code)
+      throw error
     }
   }
 })
