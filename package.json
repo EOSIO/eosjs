@@ -11,7 +11,8 @@
     "prepublish_lib": "babel src --out-dir lib",
     "prepublish_test": "mocha --use_strict lib/*.test.js",
     "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js",
-    "build": "npm run prepublish && npm run browserify"
+    "build": "npm run prepublish && npm run browserify",
+    "build_browser_test": "mkdir -p dist && browserify -o dist/mocha-test.js src/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -41,7 +42,7 @@
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
     "eosjs-api": "^3.0.0",
-    "eosjs-ecc": "^1.6.3",
+    "eosjs-ecc": "^2.0.1",
     "eosjs-json": "^2.0.2",
     "fcbuffer": "^2.0.0"
   },
