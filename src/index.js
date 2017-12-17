@@ -58,7 +58,7 @@ function consoleObjCallbackLog(error, result, name) {
     if(name) {
       console.log(name, 'reply:')
     }
-    console.log(JSON.stringify(result, null, 4))
+    //console.log(JSON.stringify(result, null, 4))
   }
 }
 
