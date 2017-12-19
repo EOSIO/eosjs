@@ -20,9 +20,15 @@ Eos.modules = {
 }
 
 function development(Network) {
-  return config => {
-    const network = Network(Object.assign({}, {apiLog: consoleObjCallbackLog}, config))
-    const eosConfig = Object.assign({}, {transactionLog: consoleObjCallbackLog}, config)
+  return (config = {}) => {
+    const network = Network(Object.assign({}, {
+      apiLog: consoleObjCallbackLog(config.verbose)},
+      config
+    ))
+    const eosConfig = Object.assign({}, {
+      transactionLog: consoleObjCallbackLog(config.verbose)},
+      config
+    )
     return createEos(eosConfig, Network, network)
   }
 }
@@ -48,17 +54,19 @@ function createEos(config, Network, network) {
   return eos
 }
 
-function consoleObjCallbackLog(error, result, name) {
-  if(error) {
-    if(name) {
-      console.error(name, 'error')
+function consoleObjCallbackLog(verbose = false) {
+  return (error, result, name) => {
+    if(error) {
+      if(name) {
+        console.error(name, 'error')
+      }
+      console.error(error);
+    } else if(verbose) {
+      if(name) {
+        console.log(name, 'reply:')
+      }
+      console.log(JSON.stringify(result, null, 4))
     }
-    console.error(error);
-  } else {
-    if(name) {
-      console.log(name, 'reply:')
-    }
-    console.log(JSON.stringify(result, null, 4))
   }
 }
 

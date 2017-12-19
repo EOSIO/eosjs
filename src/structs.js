@@ -9,7 +9,6 @@ const {isName, encodeName, decodeName,
 
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
-
   const structLookup = (name, code) => {
     if(code === 'eos') {
       return structs[name]
@@ -41,6 +40,10 @@ module.exports = (config = {}, extendedSchema) => {
 
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
   config = Object.assign({override}, {customTypes}, config)
+
+  // Do not sort transaction messages
+  config.nosort = Object.assign({}, config.nosort)
+  config.nosort['transaction.message'] = true
 
   const schema = Object.assign({}, json.schema, extendedSchema)
   const {structs, types, errors} = Fcbuffer(schema, config)
