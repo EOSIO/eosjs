@@ -31,6 +31,29 @@ describe('shorthand', () => {
     assert.deepEqual(authority.fromObject(auth), auth)
   })
 
+  it('PublicKey sorting', () => {
+    const eos = Eos.Localnet()
+    const {authority} = eos.fc.structs
+
+    const pubkeys = [
+      'EOS7wBGPvBgRVa4wQN2zm5CjgBF6S7tP7R3JavtSa2unHUoVQGhey',
+      'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+    ]
+
+    const authSorted = {threshold: 1, keys: [
+      {key: pubkeys[1], weight: 1},
+      {key: pubkeys[0], weight: 1}
+    ], accounts: []}
+
+    const authUnsorted = {threshold: 1, keys: [
+      {key: pubkeys[0], weight: 1},
+      {key: pubkeys[1], weight: 1}
+    ], accounts: []}
+
+    // assert.deepEqual(authority.fromObject(pubkey), auth)
+    assert.deepEqual(authority.fromObject(authUnsorted), authSorted)
+  })
+
   it('public_key', () => {
     const eos = Eos.Localnet()
     const {structs, types} = eos.fc
@@ -53,6 +76,23 @@ describe('shorthand', () => {
   })
 
 })
+
+if(process.env['CONTRACT_ABI'] != null) {
+  describe('Contract Abi', () => {
+    it('Messages do not sort', async function() {
+      const local = Eos.Localnet()
+      const opts = {sign: false, broadcast: false}
+      const tx = await local.transaction(['currency', 'eos'], ({currency, eos}) => {
+        eos.transfer('inita', 'initd', 1, '') // make sure {code: 'eos', ..} remains first 
+        currency.transfer('inita', 'initd', 1) // {code: 'currency', ..} remains second
+      }, opts)
+      assert.equal(tx.transaction.messages[0].code, 'eos')
+      assert.equal(tx.transaction.messages[1].code, 'currency')
+    })
+  })
+} else {
+  console.log('Deploy "contract" smart contract then: export CONTRACT_ABI=');
+}
 
 describe('Message.data', () => {
   it('json', () => {
