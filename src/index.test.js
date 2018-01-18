@@ -113,6 +113,20 @@ if(process.env['NODE_ENV'] === 'development') {
       })
     })
 
+    it('mockTransactions pass', () => {
+      const eos = Eos.Localnet({signProvider, mockTransactions: 'pass'})
+      return eos.transfer('inita', 'initb', 1, '').then(transfer => {
+        assert(transfer.mockTransaction, 'transfer.mockTransaction')
+      })
+    })
+
+    it('mockTransactions fail', () => {
+      const eos = Eos.Localnet({signProvider, mockTransactions: 'fail'})
+      return eos.transfer('inita', 'initb', 1, '').catch(error => {
+        assert(error.indexOf('fake error') !== -1, 'expecting: fake error')
+      })
+    })
+
     it('transfer (broadcast)', () => {
       const eos = Eos.Localnet({signProvider})
       return eos.transfer('inita', 'initb', 1, '')

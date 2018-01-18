@@ -413,6 +413,24 @@ function WriteApi(Network, network, config, Transaction) {
         sigs = [].concat.apply([], sigs) //flatten arrays in array
         tr.signatures = sigs
 
+        const mock = config.mockTransactions ? config.mockTransactions() : null
+        if(mock != null) {
+          assert(/pass|fail/.test(mock), 'mockTransactions should return a string: pass or fail')
+          if(mock === 'pass') {
+            callback(null, {
+              transaction_id: transactionId,
+              mockTransaction: true,
+              broadcast: false,
+              transaction: tr
+            })
+          }
+          if(mock === 'fail') {
+            console.error(`[push_transaction mock error] 'fake error', digest '${buf.toString('hex')}'`)
+            callback('fake error')
+          }
+          return
+        }
+
         if(!options.broadcast) {
           callback(null, {
             transaction_id: transactionId,

@@ -46,6 +46,14 @@ function createEos(config, Network, network) {
     config.chainId = '00'.repeat(32)
   }
 
+  if(config.mockTransactions != null) {
+    if(typeof config.mockTransactions === 'string') {
+      const mock = config.mockTransactions
+      config.mockTransactions = () => mock
+    }
+    assert.equal(typeof config.mockTransactions, 'function', 'config.mockTransactions')
+  }
+
   const eos = mergeWriteFunctions(config, Network)
 
   if(!config.signProvider) {

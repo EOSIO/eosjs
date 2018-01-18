@@ -45,6 +45,7 @@ Eos = require('eosjs') // Eos = require('./src')
 
 config = {
   httpEndpoint: 'http://127.0.0.1:8888',
+  mockTransactions: () => 'pass',
   expireInSeconds: 60,
   broadcast: true,
   debug: false,
@@ -52,7 +53,11 @@ config = {
 }
 
 eos = Eos.Localnet(config)
-eos.getBlock(1)
+
+* mockTransactions
+  * `pass` - do not broadcast, always pretend that the transaction worked
+  * `fail` - do not broadcast, pretend the transaction failed
+  * `null|undefined` - broadcast as usual
 
 ```
 
