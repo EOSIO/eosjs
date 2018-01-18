@@ -7,7 +7,7 @@ const Structs = require('./structs')
 const AbiCache = require('./abi-cache')
 const writeApiGen = require('./write-api')
 const assert = require('assert')
-
+const format = require('./format')
 const Eos = {}
 
 module.exports = Eos
@@ -16,7 +16,8 @@ Eos.modules = {
   json,
   ecc,
   api,
-  Fcbuffer
+  Fcbuffer,
+  format
 }
 
 function development(Network) {

@@ -313,8 +313,11 @@ Use Node v8+ to `package-lock.json`.
 These libraries are exported from `eosjs` or may be used separately.
 
 ```javascript
-var {api, ecc, json, Fcbuffer} = Eos.modules
+var {api, ecc, json, Fcbuffer, format} = Eos.modules
 ```
+* format [./format.md](./docs/format.md)
+  * Blockchain name validation
+  * Asset string formatting
 
 * eosjs-api [[Github](https://github.com/eosio/eosjs-api), [NPM](https://www.npmjs.org/package/eosjs-api)]
   * Remote API to an EOS blockchain node (eosd)

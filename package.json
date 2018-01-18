@@ -7,12 +7,13 @@
     "test": "mocha --use_strict src/*.test.js",
     "coverage": "istanbul cover _mocha -- -R spec src/*.test.js",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "prepublish": "npm run prepublish_lib && npm run prepublish_test",
+    "prepublish": "npm run prepublish_lib && npm run prepublish_test && npm run docs",
     "prepublish_lib": "babel src --out-dir lib",
     "prepublish_test": "mocha --use_strict lib/*.test.js",
     "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js",
     "build": "npm run prepublish && npm run browserify",
-    "build_browser_test": "mkdir -p dist && browserify -o dist/mocha-test.js src/*.test.js"
+    "build_browser_test": "mkdir -p dist && browserify -o dist/mocha-test.js src/*.test.js",
+    "docs": "jsdoc2md src/format.js > docs/format.md"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "coveralls": "^2.13.1",
     "eosjs-keygen": "^1.2.0",
     "istanbul": "^0.4.5",
+    "jsdoc-to-markdown": "^3.0.4",
     "mocha": "^3.4.2"
   },
   "dependencies": {
