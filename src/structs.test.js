@@ -91,7 +91,7 @@ if(process.env['CONTRACT_ABI'] != null) {
     })
   })
 } else {
-  console.log('Deploy "contract" smart contract then: export CONTRACT_ABI=');
+  console.log('To run the Contract Abi test: deploy the "contract" smart contract, set the CONTRACT_ABI environment variable.');
 }
 
 describe('Message.data', () => {

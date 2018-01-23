@@ -163,12 +163,18 @@ function WriteApi(Network, network, config, Transaction) {
         Object.assign(optionOverrides, args.pop().__optionOverrides)
       }
 
-      const {params, options, returnPromise, callback} =
-        processArgs(args, Object.keys(definition.fields), type, optionsFormatter)
+      const processedArgs = processArgs(args, Object.keys(definition.fields), type, optionsFormatter)
+
+      let {options} = processedArgs
+      const {params, returnPromise, callback} = processedArgs
+
+      const optionDefaults = { // From config and configDefaults
+        broadcast: config.broadcast,
+        sign: config.sign
+      }
 
       // internal options (ex: multi-message transaction)
-      Object.assign(options, optionOverrides)
-
+      options = Object.assign({}, optionDefaults, options, optionOverrides)
       if(optionOverrides.noCallback && !returnPromise) {
         throw new Error('Callback during a transaction are not supported')
       }
@@ -379,10 +385,23 @@ function WriteApi(Network, network, config, Transaction) {
       throw new TypeError('Expecting config.signProvider function (disable using {sign: false})')
     }
 
-    network.createTransaction(options.expireInSeconds, checkError(callback, rawTx => {
+    const headers = config.transactionHeaders ?
+      config.transactionHeaders :
+      network.createTransaction
+
+    headers(options.expireInSeconds, checkError(callback, rawTx => {
+      assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
+      assert.equal(typeof rawTx.ref_block_num, 'number', 'expecting ref_block_num number')
+      assert.equal(typeof rawTx.ref_block_prefix, 'number', 'expecting ref_block_prefix number')
+      assert.equal(typeof rawTx.expiration, 'string', 'expecting expiration: iso date time string')
+
+      rawTx = Object.assign({}, rawTx, {
+        read_scope: [],
+        signatures: []
+      })
+
       rawTx.scope = arg.scope
       rawTx.messages = arg.messages
-      // rawTx.read_scope = arg.read_scope || []
 
       // console.log('rawTx', JSON.stringify(rawTx,null,4))
 

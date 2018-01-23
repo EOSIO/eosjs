@@ -11,6 +11,40 @@ describe('version', () => {
   })
 })
 
+describe('offline', () => {
+  const headers = {
+    ref_block_num: 1,
+    ref_block_prefix: 452435776,
+    expiration: new Date().toISOString().split('.')[0]
+  }
+
+  it('transaction', async function() {
+    const privateKey = await ecc.unsafeRandomKey()
+
+    const eos = Eos.Localnet({
+      signProvider: ({sign, buf}) => sign(buf, privateKey),
+      httpEndpoint: 'https://doesnotexist.example.org',
+      transactionHeaders: (expireInSeconds, callback) => {
+        callback(null/*error*/, headers)
+      },
+      broadcast: false,
+      sign: true
+    })
+
+    const memo = ''
+    // const options = {sign: true, broadcast: false}
+    const trx = await eos.transfer('bankers', 'people', 1000000000000, memo)
+
+    assert.deepEqual({
+      ref_block_num: trx.transaction.ref_block_num,
+      ref_block_prefix: trx.transaction.ref_block_prefix,
+      expiration: trx.transaction.expiration
+    }, headers)
+
+    assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
+  })
+})
+
 // even transactions that don't broadcast require Api lookups
 //  no testnet yet, avoid breaking travis-ci
 if(process.env['NODE_ENV'] === 'development') {
@@ -74,7 +108,7 @@ if(process.env['NODE_ENV'] === 'development') {
 
       const eos = Eos.Localnet({keyProvider})
 
-      return eos.transfer('inita', 'initb', 1, '', false).then(tr => {
+      return eos.transfer('inita', 'initb', 9, '', false).then(tr => {
         assert.equal(tr.transaction.signatures.length, 1)
         assert.equal(typeof tr.transaction.signatures[0], 'string')
       })
@@ -190,11 +224,12 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('message to unknown contract', () => {
-      const name = randomName()
+      const name = 'acdef513521'
       return Eos.Localnet({signProvider}).contract(name)
       .then(() => {throw 'expecting error'})
       .catch(error => {
-        assert(/unknown key/.test(error.message))
+        assert(/unknown key/.test(error.toString()),
+          'expecting "unknown key" error message, instead got: ' + error)
       })
     })
 

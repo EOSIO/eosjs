@@ -24,8 +24,16 @@ Eos.modules = {
   format
 }
 
+const configDefaults = {
+  httpEndpoint: 'http://127.0.0.1:8888',
+  broadcast: true,
+  debug: false,
+  sign: true
+}
+
 function development(Network) {
   return (config = {}) => {
+    config = Object.assign({}, configDefaults, config)
     const network = Network(Object.assign({}, {
       apiLog: consoleObjCallbackLog(config.verbose)},
       config

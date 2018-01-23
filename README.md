@@ -43,9 +43,13 @@ API methods and documentation are generated from:
 ```js
 Eos = require('eosjs') // Eos = require('./src')
 
+// Optional configuration..
 config = {
   httpEndpoint: 'http://127.0.0.1:8888',
   mockTransactions: () => 'pass', // or 'fail'
+  transactionHeaders: (expireInSeconds, callback) => {
+    callback(null/*error*/, headers)
+  },
   expireInSeconds: 60,
   broadcast: true,
   debug: false,
@@ -53,13 +57,17 @@ config = {
 }
 
 eos = Eos.Localnet(config)
+```
 
-* mockTransactions (optional)
+* `mockTransactions` (optional)
   * `pass` - do not broadcast, always pretend that the transaction worked
   * `fail` - do not broadcast, pretend the transaction failed
   * `null|undefined` - broadcast as usual
 
-```
+* `transactionHeaders` (optional) - manually calculate transaction header.  This
+  may be provided so eosjs does not need to make header related API calls to
+  eosd.  This callback is called for every transaction.
+  Headers are documented here [eosjs-api#headers](https://github.com/EOSIO/eosjs-api/blob/HEAD/docs/index.md#headers--object).
 
 ### Options
 
