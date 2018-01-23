@@ -22,7 +22,7 @@ describe('offline', () => {
     const privateKey = await ecc.unsafeRandomKey()
 
     const eos = Eos.Localnet({
-      signProvider: ({sign, buf}) => sign(buf, privateKey),
+      keyProvider: privateKey,
       httpEndpoint: 'https://doesnotexist.example.org',
       transactionHeaders: (expireInSeconds, callback) => {
         callback(null/*error*/, headers)
@@ -32,7 +32,6 @@ describe('offline', () => {
     })
 
     const memo = ''
-    // const options = {sign: true, broadcast: false}
     const trx = await eos.transfer('bankers', 'people', 1000000000000, memo)
 
     assert.deepEqual({

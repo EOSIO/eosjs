@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha --use_strict src/*.test.js",
-    "coverage": "istanbul cover _mocha -- -R spec src/*.test.js",
+    "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "prepublish": "npm run prepublish_lib && npm run prepublish_test && npm run docs",
     "prepublish_lib": "babel src --out-dir lib",
@@ -36,9 +36,9 @@
     "browserify": "^14.4.0",
     "coveralls": "^2.13.1",
     "eosjs-keygen": "^1.2.0",
-    "istanbul": "^0.4.5",
     "jsdoc-to-markdown": "^3.0.4",
-    "mocha": "^3.4.2"
+    "mocha": "^3.4.2",
+    "nyc": "^11.4.1"
   },
   "dependencies": {
     "binaryen": "^37.0.0",

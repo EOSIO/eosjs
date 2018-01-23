@@ -125,6 +125,14 @@ function throwOnDuplicate(o1, o2, msg) {
   }
 }
 
+/**
+  The default sign provider is designed to interact with the available public
+  keys (maybe just one), the transaction, and the blockchain to figure out
+  the minimum set of signing keys.
+
+  If only one key is available, the blockchain API calls are skipped and that
+  key is used to sign the transaction.
+*/
 const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
   const {keyProvider} = config
 
@@ -143,6 +151,12 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
 
   if(!keys.length) {
     throw new Error('missing key, check your keyProvider')
+  }
+
+  // simplify default signing #17
+  if(keys.length === 1 && ecc.isValidPrivate(keys[0])) {
+    const wif = keys[0]
+    return sign(buf, wif)
   }
 
   const keyMap = new Map()
