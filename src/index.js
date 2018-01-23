@@ -8,7 +8,11 @@ const AbiCache = require('./abi-cache')
 const writeApiGen = require('./write-api')
 const assert = require('assert')
 const format = require('./format')
-const Eos = {}
+
+const pkg = require('../package.json')
+const Eos = {
+  version: pkg.version
+}
 
 module.exports = Eos
 

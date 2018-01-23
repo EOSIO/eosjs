@@ -5,6 +5,12 @@ const Eos = require('.')
 const {ecc} = Eos.modules
 const {Keystore} = require('eosjs-keygen')
 
+describe('version', () => {
+  it('exposes a version number', () => {
+    assert.ok(Eos.version)
+  })
+})
+
 // even transactions that don't broadcast require Api lookups
 //  no testnet yet, avoid breaking travis-ci
 if(process.env['NODE_ENV'] === 'development') {
