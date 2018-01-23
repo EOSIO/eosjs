@@ -10,7 +10,7 @@ General purpose library for the EOS blockchain.
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 
-// API, note: testnet uses eosd at localhost (until there is a testnet)
+// API, note: to use a local testnet, use Eos.Localnet()
 let eos = Eos.Testnet()
 
 // All API methods print help when called with no-arguments.
