@@ -49,6 +49,7 @@ module.exports = (config = {}, extendedSchema) => {
     public_key: () => [PublicKeyType],
     asset_symbol: () => [AssetSymbol],
     asset: () => [Asset], // must come after AssetSymbol
+    signature: () => [Signature]
   }
 
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
@@ -227,6 +228,39 @@ const Asset = (validation, baseTypes, customTypes) => {
         return '0.0001 SYMBOL'
       }
       return toAssetString(value)
+    }
+  }
+}
+
+const Signature = (validation, baseTypes, customTypes) => {
+  const signatureType = baseTypes.fixed_bytes65(validation)
+  return {
+    fromByteBuffer (b) {
+      console.log(1);
+      const signatureBuffer = signatureType.fromByteBuffer(b)
+      const signature = ecc.Signature.from(signatureBuffer)
+      return signature.toString()
+    },
+
+    appendByteBuffer (b, value) {
+      console.log(2);
+      const signature = ecc.Signature.from(value)
+      signatureType.appendByteBuffer(b, signature.toBuffer())
+    },
+
+    fromObject (value) {
+      console.log(3);
+      const signature = ecc.Signature.from(value)
+      return signature.toString()
+    },
+
+    toObject (value) {
+      console.log(4);
+      if (validation.defaults && value == null) {
+        return 'SIGnature..'
+      }
+      const signature = ecc.Signature.from(value)
+      return signature.toString()
     }
   }
 }

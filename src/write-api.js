@@ -456,6 +456,14 @@ function WriteApi(Network, network, config, Transaction) {
         sigs = [].concat.apply([], sigs) //flatten arrays in array
         tr.signatures = sigs
 
+        for(let i = 0; i < sigs.length; i++) {
+          const sig = sigs[i]
+          // convert from hex to base58 format
+          if(typeof sig === 'string' && sig.length === 130) {
+            sigs[i] = ecc.Signature.from(sig).toString()
+          }
+        }
+
         const mock = config.mockTransactions ? config.mockTransactions() : null
         if(mock != null) {
           assert(/pass|fail/.test(mock), 'mockTransactions should return a string: pass or fail')

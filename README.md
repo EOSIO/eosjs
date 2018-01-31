@@ -116,7 +116,7 @@ options = {broadcast: false}
 eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, options)
 
 // Object or ordered args may be used.
-eos.transfer('inita', 'initb', 1, 'memo', options)
+eos.transfer('inita', 'initb', 2, 'memo', options)
 
 // A broadcast boolean may be provided as a shortcut for {broadcast: false}
 eos.transfer('inita', 'initb', 1, '', false)
