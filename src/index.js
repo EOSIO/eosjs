@@ -182,7 +182,7 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
 
   return eos.getRequiredKeys(transaction, pubkeys).then(({required_keys}) => {
     if(!required_keys.length) {
-      throw new Error('missing required keys ')
+      throw new Error('missing required keys for ' + JSON.stringify(transaction))
     }
 
     const wifs = [], missingKeys = []

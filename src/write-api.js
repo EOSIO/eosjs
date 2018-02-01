@@ -10,7 +10,6 @@ module.exports = writeApiGen
 const {sign} = ecc
 
 function writeApiGen(Network, network, structs, config) {
-
   if(typeof config.chainId !== 'string') {
     throw new TypeError('config.chainId is required')
   }
@@ -30,15 +29,17 @@ function writeApiGen(Network, network, structs, config) {
       continue
     }
     if(type === 'transaction') {
-      continue // https://github.com/EOSIO/eos/issues/730
+      continue
     }
     if(reserveFunctions.has(type)) {
       throw new TypeError('Conflicting Api function: ' + type)
     }
-
     const struct = structs[type]
-    const definition = Network.schema[type]
-    merge[type] = writeApi.genMethod(type, definition, struct, merge.transaction)
+    if(struct == null || type === 'struct_t' || tmpRemoveSet.has(type)) {
+      continue
+    }
+    const definition = structDefinition(struct.fields)
+    merge[type] = writeApi.genMethod(type, definition, merge.transaction)
   }
 
   /**
@@ -63,6 +64,13 @@ function writeApiGen(Network, network, structs, config) {
 
   return merge
 }
+
+/** TODO: tag in the eosjs-json */
+const tmpRemoveSet = new Set(
+  'account_permission message account_permission_weight signed_transaction ' +
+  'key_permission_weight authority blockchain_configuration type_def action ' +
+  'table abi nonce'.split(' ')
+)
 
 function WriteApi(Network, network, config, Transaction) {
   /**
@@ -138,16 +146,15 @@ function WriteApi(Network, network, config, Transaction) {
         genTransaction(cache.structs, contractMerge)
 
       cache.abi.actions.forEach(({action_name, type}) => {
-        const definition = cache.schema[type]
-        const struct = cache.structs[type]
-        contractMerge[action_name] = genMethod(type, definition, struct, contractMerge.transaction, code)
+        const definition = structDefinition(cache.structs[type].fields)
+        contractMerge[action_name] = genMethod(type, definition, contractMerge.transaction, code)
       })
 
       return contractMerge
     })
   }
 
-  function genMethod(type, definition, struct, transactionArg, code = 'eos') {
+  function genMethod(type, definition, transactionArg, code = 'eos') {
     return function (...args) {
       if (args.length === 0) {
         console.error(usage(type, definition, Network))
@@ -163,7 +170,7 @@ function WriteApi(Network, network, config, Transaction) {
         Object.assign(optionOverrides, args.pop().__optionOverrides)
       }
 
-      const processedArgs = processArgs(args, Object.keys(definition.fields), type, optionsFormatter)
+      const processedArgs = processArgs(args, Object.keys(definition), type, optionsFormatter)
 
       let {options} = processedArgs
       const {params, returnPromise, callback} = processedArgs
@@ -214,10 +221,10 @@ function WriteApi(Network, network, config, Transaction) {
       }
 
       if(addDefaultScope || addDefaultAuths) {
-        const fields = Object.keys(definition.fields)
-        const f1 = fields[0]
+        const fieldKeys = Object.keys(definition)
+        const f1 = fieldKeys[0]
 
-        if(definition.fields[f1] === 'account_name') {
+        if(definition[f1] === 'name') {
           if(addDefaultScope) {
             // Make a simple guess based on ABI conventions.
             tr.scope.push(params[f1])
@@ -232,9 +239,9 @@ function WriteApi(Network, network, config, Transaction) {
         }
 
         if(addDefaultScope) {
-          if(fields.length > 1 && !/newaccount/.test(type)) {
-            const f2 = fields[1]
-            if(definition.fields[f2] === 'account_name') {
+          if(fieldKeys.length > 1 && !/newaccount/.test(type)) {
+            const f2 = fieldKeys[1]
+            if(definition[f2] === 'name') {
               tr.scope.push(params[f2])
             }
           }
@@ -257,6 +264,8 @@ function WriteApi(Network, network, config, Transaction) {
   }
 
   /**
+    Transaction Message Collector
+
     Wrap merge.functions adding optionOverrides that will suspend
     transaction broadcast.
   */
@@ -532,4 +541,14 @@ const checkError = (parentErr, parrentRes) => (error, result) => {
   } else {
     parrentRes(result)
   }
+}
+
+function structDefinition(structFields) {
+  return Object.keys(structFields).reduce(
+    (map, field) => {
+      map[field] = structFields[field].typeName
+      return map
+    },
+    {}
+  )
 }
