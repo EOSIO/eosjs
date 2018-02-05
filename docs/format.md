@@ -79,7 +79,7 @@ Ensure a fixed number of decimal places.  Safe for large numbers.
 
 **Example**  
 ```js
-UDecimalString(10, 3) === '10.300'
+UDecimalPad(10.2, 3) === '10.200'
 
   
 ```

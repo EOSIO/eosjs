@@ -143,7 +143,7 @@ function decodeName(value, littleEndian = true) {
   throw an error for an invalid number.
 
   Normalization removes extra zeros or decimal.
-  
+
   @return {string} value
 */
 function UDecimalString(value) {
@@ -178,7 +178,8 @@ function UDecimalString(value) {
   Ensure a fixed number of decimal places.  Safe for large numbers.
 
   @see ./format.test.js
-  @example UDecimalString(10, 3) === '10.300'
+
+  @example UDecimalPad(10.2, 3) === '10.200'
 
   @arg {number|string|object.toString} value
   @arg {number} precision - number of decimal places
