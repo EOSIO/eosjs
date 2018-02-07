@@ -3,6 +3,8 @@ const Structs = require('./structs')
 module.exports = AbiCache
  
 function AbiCache(network, config) {
+  // Help (or "usage") needs {defaults: true}
+  config = Object.assign({}, {defaults: true}, config)
   const cache = {}
 
   function abiAsync(code, force = false) {

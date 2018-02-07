@@ -157,7 +157,7 @@ function WriteApi(Network, network, config, Transaction) {
   function genMethod(type, definition, transactionArg, code = 'eos') {
     return function (...args) {
       if (args.length === 0) {
-        console.error(usage(type, definition, Network))
+        console.error(usage(type, definition, Network, code, config))
         return
       }
 
@@ -509,28 +509,32 @@ const optionsFormatter = option => {
   }
 }
 
-function usage (type, definition, Network) {
-  const {structs} = Structs({defaults: true, network: Network})
-  const struct = structs[type]
-
-  if(struct == null) {
-    throw TypeError('Unknown type: ' + type)
-  }
-
+function usage (type, definition, Network, code, config) {
   let usage = ''
   const out = (str = '') => {
     usage += str + '\n'
   }
-  out(`${type}`)
-  out()
+  out(`USAGE: ${type}`)
 
-  out(`USAGE`)
-  out(`${JSON.stringify(definition, null, 4)}`)
-  out()
+  let struct
+  if(code === 'eos') {
+    const {structs} = Structs({defaults: true, network: Network})
+    struct = structs[type]
 
-  out(`EXAMPLE STRUCTURE`)
-  out(`${JSON.stringify(struct.toObject(), null, 4)}`)
+    out(`${JSON.stringify(definition, null, 4)}`)
+    out()
 
+    out('EXAMPLE')
+    out(`${JSON.stringify(struct.toObject(), null, 4)}`)
+
+  } else {
+    const cache = config.abiCache.abi(code)
+    struct = cache.structs[type]
+    out(`${JSON.stringify(struct.toObject(), null, 4)}`)
+  }
+  if(struct == null) {
+    throw TypeError('Unknown type: ' + type)
+  }
   return usage
 }
 
