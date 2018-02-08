@@ -45,6 +45,7 @@ Eos = require('eosjs') // Eos = require('./src')
 
 // Optional configuration..
 config = {
+  keyProvider: ['PrivateKeys...'], // WIF string or array of keys..
   httpEndpoint: 'http://127.0.0.1:8888',
   mockTransactions: () => 'pass', // or 'fail'
   transactionHeaders: (expireInSeconds, callback) => {

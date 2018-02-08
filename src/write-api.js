@@ -38,7 +38,7 @@ function writeApiGen(Network, network, structs, config) {
     if(struct == null || type === 'struct_t' || tmpRemoveSet.has(type)) {
       continue
     }
-    const definition = structDefinition(struct.fields)
+    const definition = schemaFields(Network.schema, type)
     merge[type] = writeApi.genMethod(type, definition, merge.transaction)
   }
 
@@ -146,7 +146,7 @@ function WriteApi(Network, network, config, Transaction) {
         genTransaction(cache.structs, contractMerge)
 
       cache.abi.actions.forEach(({action_name, type}) => {
-        const definition = structDefinition(cache.structs[type].fields)
+        const definition = schemaFields(cache.schema, type)
         contractMerge[action_name] = genMethod(type, definition, contractMerge.transaction, code)
       })
 
@@ -224,7 +224,7 @@ function WriteApi(Network, network, config, Transaction) {
         const fieldKeys = Object.keys(definition)
         const f1 = fieldKeys[0]
 
-        if(definition[f1] === 'name') {
+        if(definition[f1] === 'account_name') {
           if(addDefaultScope) {
             // Make a simple guess based on ABI conventions.
             tr.scope.push(params[f1])
@@ -241,7 +241,7 @@ function WriteApi(Network, network, config, Transaction) {
         if(addDefaultScope) {
           if(fieldKeys.length > 1 && !/newaccount/.test(type)) {
             const f2 = fieldKeys[1]
-            if(definition[f2] === 'name') {
+            if(definition[f2] === 'account_name') {
               tr.scope.push(params[f2])
             }
           }
@@ -514,13 +514,20 @@ function usage (type, definition, Network, code, config) {
   const out = (str = '') => {
     usage += str + '\n'
   }
-  out(`USAGE: ${type}`)
+  out('CONTRACT')
+  out(`${code}`)
+  out()
+
+  out('FUNCTION')
+  out(type)
+  out()
 
   let struct
   if(code === 'eos') {
     const {structs} = Structs({defaults: true, network: Network})
     struct = structs[type]
 
+    out('PARAMETERS')
     out(`${JSON.stringify(definition, null, 4)}`)
     out()
 
@@ -529,7 +536,12 @@ function usage (type, definition, Network, code, config) {
 
   } else {
     const cache = config.abiCache.abi(code)
+    out('PARAMETERS')
+    out(JSON.stringify(schemaFields(cache.schema, type), null, 4))
+    out()
+
     struct = cache.structs[type]
+    out('EXAMPLE')
     out(`${JSON.stringify(struct.toObject(), null, 4)}`)
   }
   if(struct == null) {
@@ -547,12 +559,13 @@ const checkError = (parentErr, parrentRes) => (error, result) => {
   }
 }
 
-function structDefinition(structFields) {
-  return Object.keys(structFields).reduce(
-    (map, field) => {
-      map[field] = structFields[field].typeName
-      return map
-    },
-    {}
-  )
+function schemaFields(schema, type) {
+  assert(schema[type], type + ' ' + JSON.stringify(schema))
+  const {base, fields} = schema[type]
+  const def = {}
+  if(base && base !== '') {
+    Object.assign(def, schemaFields(schema, base))
+  }
+  Object.assign(def, fields)
+  return def
 }
