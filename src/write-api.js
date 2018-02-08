@@ -560,7 +560,6 @@ const checkError = (parentErr, parrentRes) => (error, result) => {
 }
 
 function schemaFields(schema, type) {
-  assert(schema[type], type + ' ' + JSON.stringify(schema))
   const {base, fields} = schema[type]
   const def = {}
   if(base && base !== '') {
