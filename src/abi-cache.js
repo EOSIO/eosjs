@@ -7,7 +7,11 @@ function AbiCache(network, config) {
   config = Object.assign({}, {defaults: true}, config)
   const cache = {}
 
-  function abiAsync(code, force = false) {
+  /**
+    @arg {boolean} force false when ABI is immutable.  When force is true, API
+    user is still free to cache the contract object returned by eosjs. 
+  */
+  function abiAsync(code, force = true) {
     if(force == false && cache[code] != null) {
       return Promise.resolve(cache[code])
     }
