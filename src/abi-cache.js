@@ -39,7 +39,7 @@ function abiToFcSchema(abi) {
   const abiSchema = {}
 
   // convert abi types to Fcbuffer schema
-  if(abi.types) {
+  if(abi.types) { // aliases
     abi.types.forEach(e => {
       abiSchema[e.new_type_name] = e.type
     })

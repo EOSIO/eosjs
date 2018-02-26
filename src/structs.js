@@ -14,7 +14,20 @@ module.exports = (config = {}, extendedSchema) => {
       return structs[name]
     }
     const abi = config.abiCache.abi(code)
-    return abi.structs[name]
+    const struct = abi.structs[name]
+    if(struct != null) {
+      return struct
+    }
+    for(const action of abi.abi.actions) {
+      const {action_name, type} = action
+      if(action_name === name) {
+        const struct = abi.structs[type]
+        if(struct != null) {
+          return struct
+        }
+      }
+    }
+    throw new Error(`Missing ABI struct or action: ${name}`)
   }
 
   // If eosd does not have an ABI setup for a certain message.type, it will throw
@@ -48,7 +61,8 @@ module.exports = (config = {}, extendedSchema) => {
   const schema = Object.assign({}, json.schema, extendedSchema)
   const {structs, types, errors} = Fcbuffer(schema, config)
   if(errors.length !== 0) {
-    throw new Error(JSON.stringify(errors, null, 4))
+    throw new Error(JSON.stringify(errors, null, 4) + '\nin\n' +
+      JSON.stringify(schema, null, 4))
   }
 
   return {structs, types}

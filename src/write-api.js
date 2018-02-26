@@ -147,14 +147,16 @@ function WriteApi(Network, network, config, Transaction) {
 
       cache.abi.actions.forEach(({action_name, type}) => {
         const definition = schemaFields(cache.schema, type)
-        contractMerge[action_name] = genMethod(type, definition, contractMerge.transaction, code)
+        contractMerge[action_name] = genMethod(type, definition, contractMerge.transaction, code, action_name)
       })
+
+      contractMerge.fc = cache
 
       return contractMerge
     })
   }
 
-  function genMethod(type, definition, transactionArg, code = 'eos') {
+  function genMethod(type, definition, transactionArg, code = 'eos', action_name = type) {
     return function (...args) {
       if (args.length === 0) {
         console.error(usage(type, definition, Network, code, config))
@@ -214,7 +216,7 @@ function WriteApi(Network, network, config, Transaction) {
         scope: options.scope || [],
         messages: [{
           code,
-          type,
+          type: action_name,
           data: params,
           authorization
         }]
