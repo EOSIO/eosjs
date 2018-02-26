@@ -77,7 +77,7 @@ describe('shorthand', () => {
 
 })
 
-if(process.env['CONTRACT_ABI'] != null) {
+if(process.env['CURRENCY_ABI'] != null) {
   describe('Contract Abi', () => {
     it('Messages do not sort', async function() {
       const local = Eos.Localnet()
@@ -91,7 +91,7 @@ if(process.env['CONTRACT_ABI'] != null) {
     })
   })
 } else {
-  console.log('To run the Contract Abi test: deploy the "contract" smart contract, set the CONTRACT_ABI environment variable.');
+  console.log('To run the currency Abi test: deploy the "currency" smart contract, set the CURRENCY_ABI environment variable.');
 }
 
 describe('Message.data', () => {

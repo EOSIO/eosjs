@@ -79,7 +79,7 @@ function WriteApi(Network, network, config, Transaction) {
     @arg {object} [args.options]
     @arg {function} [args.callback]
   */
-  const genTransaction = (structs, merge) => (...args) => {
+  const genTransaction = (structs, merge) => async function(...args) {
     let contracts, options, callback
 
     if(args[args.length - 1] == null) {
@@ -94,6 +94,19 @@ function WriteApi(Network, network, config, Transaction) {
     } else if(typeof args[0] === 'string') {
       contracts = [args[0]]
       args = args.slice(1)
+    } else if(typeof args[0] === 'object' && typeof Array.isArray(args[0].messages)) {
+      // full transaction, lookup ABIs used by each message
+      const codes = new Set() // make a unique list
+      for(const message of args[0].messages) {
+        codes.add(message.code)
+      }
+      const codePromises = []
+      codes.forEach(code => {
+        if(code !== 'eos') { // Eos contract operations are cached in eosjs-json (allows for offline transactions)
+          codePromises.push(config.abiCache.abiAsync(code))
+        }
+      })
+      await Promise.all(codePromises)
     }
 
     if(args.length > 1 && typeof args[args.length - 1] === 'function') {

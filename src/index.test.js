@@ -340,10 +340,42 @@ if(process.env['NODE_ENV'] === 'development') {
         {broadcast: false}
       )
     })
-
   })
 
+  if(process.env['CURRENCY_ABI'] != null) {
+    it('Transaction ABI lookup', async function() {
+      const eos = Eos.Localnet()
+      const tx = await eos.transaction(
+        {
+          scope: ['inita', 'initb'],
+          messages: [
+            {
+              code: 'currency',
+              type: 'transfer',
+              data: {
+                from: 'inita',
+                to: 'initb',
+                quantity: '13'
+              },
+              authorization: [{
+                account: 'inita',
+                permission: 'active'
+              }]
+            }
+          ]
+        },
+        {sign: false, broadcast: false}
+      )
+      console.log('tx', tx)
+      assert.equal(tx.transaction.messages[0].code, 'currency')
+    })
+  } else {
+    console.log('To run the currency Abi test: deploy the "currency" smart contract, set the CURRENCY_ABI environment variable.');
+  }
+
 } // if development
+
+
 
 const randomName = () => 'a' +
   String(Math.round(Math.random() * 1000000000)).replace(/[0,6-9]/g, '')
