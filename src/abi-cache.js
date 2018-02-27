@@ -1,3 +1,4 @@
+const assert = require('assert')
 const Structs = require('./structs')
 
 module.exports = AbiCache
@@ -11,21 +12,23 @@ function AbiCache(network, config) {
     @arg {boolean} force false when ABI is immutable.  When force is true, API
     user is still free to cache the contract object returned by eosjs. 
   */
-  function abiAsync(code, force = true) {
-    if(force == false && cache[code] != null) {
-      return Promise.resolve(cache[code])
+  function abiAsync(account, force = true) {
+    assert(account, 'required account')
+
+    if(force == false && cache[account] != null) {
+      return Promise.resolve(cache[account])
     }
-    return network.getCode(code).then(({abi}) => {
+    return network.getCode(account).then(({abi}) => {
       const schema = abiToFcSchema(abi)
       const structs = Structs(config, schema) // structs = {structs, types}
-      return cache[code] = Object.assign({abi, schema}, structs)
+      return cache[account] = Object.assign({abi, schema}, structs)
     })
   }
 
-  function abi(code) {
-    const c = cache[code]
+  function abi(account) {
+    const c = cache[account]
     if(c == null) {
-      throw new Error(`Abi '${code}' is not cached, call abiAsync('${code}')`)
+      throw new Error(`Abi '${account}' is not cached, call abiAsync('${account}')`)
     }
     return c
   }

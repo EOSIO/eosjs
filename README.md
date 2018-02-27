@@ -80,21 +80,14 @@ Example: `eos.transfer(params, options)`
 options = {
   broadcast: true,
   sign: true,
-  scope: null,
   authorization: null
 }
 ```
 
-* **scope** `{array<string>|string}` - account name or names that may
-  undergo a change in state.
-  * If missing default scopes will be calculated.
-  * If provided additional scopes will not be added.
-  * Sorting is always performed.
-
 * **authorization** `{array<auth>|auth}` - identifies the
   signing account and permission typically in a multi-sig
   configuration.  Authorization may be a string formatted as
-  `account@permission` or an `object<{account, permission}>`.
+  `account@permission` or an `object<{actor: account, permission}>`.
   * If missing default authorizations will be calculated.
   * If provided additional authorizations will not be added.
   * Sorting is always performed (by account name).
@@ -136,7 +129,7 @@ For example:
 * deposit: `'1 EOS'` is shorthand for `1.0000 EOS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
 * recovery: `inita` or `inita@active` is shorthand
-  * `{{threshold: 1, accounts: [..account: inita, permission: active, weight: 1]}}`
+  * `{{threshold: 1, accounts: [..actor: inita, permission: active, weight: 1]}}`
   * `inita@other` would replace the permission `active` with `other`
 
 
@@ -215,9 +208,10 @@ wast = fs.readFileSync(`${contractDir}/currency.wast`)
 abi = fs.readFileSync(`${contractDir}/currency.abi`)
 
 // Publish contract to the blockchain
-eos.setcode('currency', 0, 0, wast, abi)
+eos.setcode('currency', 0, 0, wast)
+eos.setabi('currency', abi)
 
-// eos.contract(code<string>, [options], [callback])
+// eos.contract(account<string>, [options], [callback])
 eos.contract('currency').then(currency => {
   // Transfer is one of the actions in currency.abi 
   currency.transfer('currency', 'inita', 100)
@@ -285,13 +279,12 @@ Eos = require('eosjs') // Eos = require('./src')
 eos = Eos.Localnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
 eos.transaction({
-  scope: ['inita', 'initb'],
-  messages: [
+  actions: [
     {
-      code: 'eos',
-      type: 'transfer',
+      account: 'eos',
+      name: 'transfer',
       authorization: [{
-        account: 'inita',
+        actor: 'inita',
         permission: 'active'
       }],
       data: {

@@ -9,38 +9,39 @@ const {isName, encodeName, decodeName,
 
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
-  const structLookup = (name, code) => {
-    if(code === 'eos') {
-      return structs[name]
+  const structLookup = (lookupName, account) => {
+    if(account === 'eos') {
+      return structs[lookupName]
     }
-    const abi = config.abiCache.abi(code)
-    const struct = abi.structs[name]
+    const abi = config.abiCache.abi(account)
+    const struct = abi.structs[lookupName]
     if(struct != null) {
       return struct
     }
+    // TODO: move up (before `const struct = abi.structs[lookupName]`)
     for(const action of abi.abi.actions) {
-      const {action_name, type} = action
-      if(action_name === name) {
+      const {name, type} = action
+      if(name === lookupName) {
         const struct = abi.structs[type]
         if(struct != null) {
           return struct
         }
       }
     }
-    throw new Error(`Missing ABI struct or action: ${name}`)
+    throw new Error(`Missing ABI struct or action: ${lookupName}`)
   }
 
-  // If eosd does not have an ABI setup for a certain message.type, it will throw
-  // an error: `Invalid cast from object_type to string` .. forceMessageDataHex
+  // If eosd does not have an ABI setup for a certain action.type, it will throw
+  // an error: `Invalid cast from object_type to string` .. forceActionDataHex
   // may be used to until native ABI is added or fixed.
-  const forceMessageDataHex = config.forceMessageDataHex != null ?
-    config.forceMessageDataHex : false
+  const forceActionDataHex = config.forceActionDataHex != null ?
+    config.forceActionDataHex : false
 
   const override = Object.assign({},
     authorityOverride,
     abiOverride,
     wasmCodeOverride(config),
-    messageDataOverride(structLookup, forceMessageDataHex),
+    actionDataOverride(structLookup, forceActionDataHex),
     config.override
   )
 
@@ -55,9 +56,9 @@ module.exports = (config = {}, extendedSchema) => {
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
   config = Object.assign({override}, {customTypes}, config)
 
-  // Do not sort transaction messages
+  // Do not sort transaction actions
   config.nosort = Object.assign({}, config.nosort)
-  config.nosort['transaction.message'] = true
+  config.nosort['transaction.action'] = true
 
   const schema = Object.assign({}, json.schema, extendedSchema)
   const {structs, types, errors} = Fcbuffer(schema, config)
@@ -282,7 +283,7 @@ const authorityOverride = ({
         keys: [],
         accounts: [{
           permission: {
-            account,
+            actor: account,
             permission
           },
           weight: 1
@@ -326,14 +327,14 @@ const wasmCodeOverride = config => ({
 /**
   Nested serialized structure.  Nested struct may be in HEX or object format.
 */
-const messageDataOverride = (structLookup, forceMessageDataHex) => ({
-  'message.data.fromByteBuffer': ({fields, object, b, config}) => {
-    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type, object.code)
+const actionDataOverride = (structLookup, forceActionDataHex) => ({
+  'action.data.fromByteBuffer': ({fields, object, b, config}) => {
+    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
-      b.readVarint32() // length prefix (usefull if object.type is unknown)
+      b.readVarint32() // length prefix (usefull if object.name is unknown)
       object.data = ser.fromByteBuffer(b, config)
     } else {
-      // console.log(`Unknown Message.type ${object.type}`)
+      // console.log(`Unknown Action.name ${object.name}`)
       const lenPrefix = b.readVarint32()
       const bCopy = b.copy(b.offset, b.offset + lenPrefix)
       b.skip(lenPrefix)
@@ -341,27 +342,27 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
     }
   },
 
-  'message.data.appendByteBuffer': ({fields, object, b}) => {
-    const ser = (object.type || '') == '' ? fields.data : structLookup(object.type, object.code)
+  'action.data.appendByteBuffer': ({fields, object, b}) => {
+    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
       ser.appendByteBuffer(b2, object.data)
       b.writeVarint32(b2.offset)
       b.append(b2.copy(0, b2.offset), 'binary')
     } else {
-      // console.log(`Unknown Message.type ${object.type}`)
+      // console.log(`Unknown Action.name ${object.name}`)
       const data = typeof object.data === 'string' ? new Buffer(object.data, 'hex') : object.data
       if(!Buffer.isBuffer(data)) {
-        throw new TypeError('Expecting hex string or buffer in message.data')
+        throw new TypeError('Expecting hex string or buffer in action.data')
       }
       b.writeVarint32(data.length)
       b.append(data.toString('binary'), 'binary')
     }
   },
 
-  'message.data.fromObject': ({fields, object, result}) => {
-    const {data, type} = object
-    const ser = (type || '') == '' ? fields.data : structLookup(type, object.code)
+  'action.data.fromObject': ({fields, object, result}) => {
+    const {data, name} = object
+    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
     if(ser) {
       if(typeof data === 'object') {
         result.data = ser.fromObject(data) // resolve shorthand
@@ -370,17 +371,17 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
         const buf = new Buffer(data, 'hex')
         result.data = Fcbuffer.fromBuffer(ser, buf)
       } else {
-        throw new TypeError('Expecting hex string or object in message.data')
+        throw new TypeError('Expecting hex string or object in action.data')
       }
     } else {
-      // console.log(`Unknown Message.type ${object.type}`)
+      // console.log(`Unknown Action.name ${object.name}`)
       result.data = data
     }
   },
 
-  'message.data.toObject': ({fields, object, result, config}) => {
-    const {data, type} = object || {}
-    const ser = (type || '') == '' ? fields.data : structLookup(type, object.code)
+  'action.data.toObject': ({fields, object, result, config}) => {
+    const {data, name} = object || {}
+    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
     if(!ser) {
       // Types without an ABI will accept hex
       // const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
@@ -392,7 +393,7 @@ const messageDataOverride = (structLookup, forceMessageDataHex) => ({
       return
     }
 
-    if(forceMessageDataHex) {
+    if(forceActionDataHex) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
       if(data) {
         ser.appendByteBuffer(b2, data)

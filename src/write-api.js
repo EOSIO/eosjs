@@ -18,13 +18,13 @@ function writeApiGen(Network, network, structs, config) {
   const reserveFunctions = new Set(['transaction', 'contract'])
   const merge = {}
 
-  // sends transactions, also a message collecting wrapper functions 
+  // sends transactions, also a action collecting wrapper functions 
   merge.transaction = writeApi.genTransaction(structs, merge)
 
   // Immediate send operations automatically calls merge.transaction
   for(let type in Network.schema) {
     if(!/^[a-z]/.test(type)) {
-      // Only lower case structs will work in a transaction message
+      // Only lower case structs will work in a transaction action
       // See eosjs-json generated.json
       continue
     }
@@ -35,7 +35,8 @@ function writeApiGen(Network, network, structs, config) {
       throw new TypeError('Conflicting Api function: ' + type)
     }
     const struct = structs[type]
-    if(struct == null || type === 'struct_t' || tmpRemoveSet.has(type)) {
+    // console.log('999 struct', type, Network.schema[type])
+    if(struct == null || type === 'struct_def' || tmpRemoveSet.has(type)) {
       continue
     }
     const definition = schemaFields(Network.schema, type)
@@ -50,12 +51,12 @@ function writeApiGen(Network, network, structs, config) {
   */
   merge.contract = (...args) => {
     const {params, options, returnPromise, callback} =
-      processArgs(args, ['code'], 'contract', optionsFormatter)
+      processArgs(args, ['account'], 'contract', optionsFormatter)
 
-    const {code} = params
+    const {account} = params
 
     // sends transactions via its own transaction function
-    writeApi.genContractActions(code)
+    writeApi.genContractActions(account)
       .then(r => {callback(null, r)})
       .catch(r => {callback(r)})
 
@@ -67,9 +68,9 @@ function writeApiGen(Network, network, structs, config) {
 
 /** TODO: tag in the eosjs-json */
 const tmpRemoveSet = new Set(
-  'account_permission message account_permission_weight signed_transaction ' +
-  'key_permission_weight authority blockchain_configuration type_def action ' +
-  'table abi nonce'.split(' ')
+  'permission_level action permission_level_weight signed_transaction ' +
+  'key_weight authority blockchain_configuration type_def action ' +
+  'table_def abi nonce'.split(' ')
 )
 
 function WriteApi(Network, network, config, Transaction) {
@@ -94,19 +95,19 @@ function WriteApi(Network, network, config, Transaction) {
     } else if(typeof args[0] === 'string') {
       contracts = [args[0]]
       args = args.slice(1)
-    } else if(typeof args[0] === 'object' && typeof Array.isArray(args[0].messages)) {
-      // full transaction, lookup ABIs used by each message
-      const codes = new Set() // make a unique list
-      for(const message of args[0].messages) {
-        codes.add(message.code)
+    } else if(typeof args[0] === 'object' && typeof Array.isArray(args[0].actions)) {
+      // full transaction, lookup ABIs used by each action
+      const accounts = new Set() // make a unique list
+      for(const action of args[0].actions) {
+        accounts.add(action.account)
       }
-      const codePromises = []
-      codes.forEach(code => {
-        if(code !== 'eos') { // Eos contract operations are cached in eosjs-json (allows for offline transactions)
-          codePromises.push(config.abiCache.abiAsync(code))
+      const abiPromises = []
+      accounts.forEach(account => {
+        if(account !== 'eos') { // Eos contract operations are cached in eosjs-json (allows for offline transactions)
+          abiPromises.push(config.abiCache.abiAsync(account))
         }
       })
-      await Promise.all(codePromises)
+      await Promise.all(abiPromises)
     }
 
     if(args.length > 1 && typeof args[args.length - 1] === 'function') {
@@ -125,9 +126,9 @@ function WriteApi(Network, network, config, Transaction) {
       assert.equal('function', typeof arg, 'provide function callback following contracts array parameter')
 
       const contractPromises = []
-      for(const code of contracts) {
+      for(const account of contracts) {
         // setup wrapper functions to collect contract api calls
-        contractPromises.push(genContractActions(code, merge.transaction))
+        contractPromises.push(genContractActions(account, merge.transaction))
       }
 
       return Promise.all(contractPromises).then(actions => {
@@ -150,17 +151,17 @@ function WriteApi(Network, network, config, Transaction) {
     throw new Error('first transaction argument unrecognized', arg)
   }
 
-  function genContractActions(code, transaction = null) {
-    return config.abiCache.abiAsync(code).then(cache => {
+  function genContractActions(account, transaction = null) {
+    return config.abiCache.abiAsync(account).then(cache => {
       assert(Array.isArray(cache.abi.actions) && cache.abi.actions.length, 'No actions')
 
       const contractMerge = {}
       contractMerge.transaction = transaction ? transaction :
         genTransaction(cache.structs, contractMerge)
 
-      cache.abi.actions.forEach(({action_name, type}) => {
+      cache.abi.actions.forEach(({name, type}) => {
         const definition = schemaFields(cache.schema, type)
-        contractMerge[action_name] = genMethod(type, definition, contractMerge.transaction, code, action_name)
+        contractMerge[name] = genMethod(type, definition, contractMerge.transaction, account, name)
       })
 
       contractMerge.fc = cache
@@ -169,14 +170,14 @@ function WriteApi(Network, network, config, Transaction) {
     })
   }
 
-  function genMethod(type, definition, transactionArg, code = 'eos', action_name = type) {
+  function genMethod(type, definition, transactionArg, account = 'eos', name = type) {
     return function (...args) {
       if (args.length === 0) {
-        console.error(usage(type, definition, Network, code, config))
+        console.error(usage(type, definition, Network, account, config))
         return
       }
 
-      // Special case like multi-message transactions where this lib needs
+      // Special case like multi-action transactions where this lib needs
       // to be sure the broadcast is off.
       const optionOverrides = {}
       const lastArg = args[args.length - 1]
@@ -195,18 +196,13 @@ function WriteApi(Network, network, config, Transaction) {
         sign: config.sign
       }
 
-      // internal options (ex: multi-message transaction)
+      // internal options (ex: multi-action transaction)
       options = Object.assign({}, optionDefaults, options, optionOverrides)
       if(optionOverrides.noCallback && !returnPromise) {
         throw new Error('Callback during a transaction are not supported')
       }
 
-      const addDefaultScope = options.scope == null
       const addDefaultAuths = options.authorization == null
-
-      if(typeof options.scope === 'string') {
-        options.scope = [options.scope]
-      }
 
       const authorization = []
       if(options.authorization) {
@@ -215,8 +211,8 @@ function WriteApi(Network, network, config, Transaction) {
         }
         options.authorization.forEach(auth => {
           if(typeof auth === 'string') {
-            const [account, permission = 'active'] = auth.split('@')
-            authorization.push({account, permission})
+            const [actor, permission = 'active'] = auth.split('@')
+            authorization.push({actor, permission})
           } else if(typeof auth === 'object') {
             authorization.push(auth)
           }
@@ -226,48 +222,31 @@ function WriteApi(Network, network, config, Transaction) {
       }
 
       const tr = {
-        scope: options.scope || [],
-        messages: [{
-          code,
-          type: action_name,
-          data: params,
-          authorization
+        actions: [{
+          account,
+          name,
+          authorization,
+          data: params
         }]
       }
 
-      if(addDefaultScope || addDefaultAuths) {
+      if(addDefaultAuths) {
         const fieldKeys = Object.keys(definition)
         const f1 = fieldKeys[0]
 
         if(definition[f1] === 'account_name') {
-          if(addDefaultScope) {
-            // Make a simple guess based on ABI conventions.
-            tr.scope.push(params[f1])
-          }
-          if(addDefaultAuths) {
-            // Default authorization (since user did not provide one)
-            tr.messages[0].authorization.push({
-              account: params[f1],
-              permission: 'active'
-            })
-          }
-        }
-
-        if(addDefaultScope) {
-          if(fieldKeys.length > 1 && !/newaccount/.test(type)) {
-            const f2 = fieldKeys[1]
-            if(definition[f2] === 'account_name') {
-              tr.scope.push(params[f2])
-            }
-          }
+          // Default authorization (since user did not provide one)
+          tr.actions[0].authorization.push({
+            actor: params[f1],
+            permission: 'active'
+          })
         }
       }
 
-      tr.scope = tr.scope.sort()
-      tr.messages[0].authorization.sort((a, b) =>
-        a.account > b.account ? 1 : a.account < b.account ? -1 : 0)
+      tr.actions[0].authorization.sort((a, b) =>
+        a.actor > b.actor ? 1 : a.actor < b.actor ? -1 : 0)
 
-      // multi-message transaction support
+      // multi-action transaction support
       if(!optionOverrides.messageOnly) {
         transactionArg(tr, options, callback)
       } else {
@@ -291,7 +270,6 @@ function WriteApi(Network, network, config, Transaction) {
     assert(!Array.isArray(merges), 'merges should not be an array')
     assert.equal('function', typeof transaction, 'transaction')
 
-    const scope = {}
     const messageList = []
     const messageCollector = {}
 
@@ -306,7 +284,7 @@ function WriteApi(Network, network, config, Transaction) {
       })      
       if(ret == null) {
         // double-check (code can change)
-        throw new Error('Callbacks can not be used when creating a multi-message transaction')
+        throw new Error('Callbacks can not be used when creating a multi-action transaction')
       }
       messageList.push(ret)
     }
@@ -335,7 +313,7 @@ function WriteApi(Network, network, config, Transaction) {
 
     let promiseCollector
     try {
-      // caller will load this up with messages
+      // caller will load this up with actions
       promiseCollector = trCallback(messageCollector)
     } catch(error) {
       promiseCollector = Promise.reject(error)
@@ -343,16 +321,13 @@ function WriteApi(Network, network, config, Transaction) {
 
     return Promise.resolve(promiseCollector).then(() =>
       Promise.all(messageList).then(resolvedMessageList => {
-        const scopes = new Set()
-        const messages = []
+        const actions = []
         for(let m of resolvedMessageList) {
-          const {scope, messages: [message]} = m
-          scope.forEach(s => {scopes.add(s)})
-          messages.push(message)
+          const {actions: [action]} = m
+          actions.push(action)
         }
         const trObject = {}
-        trObject.scope = Array.from(scopes).sort()
-        trObject.messages = messages
+        trObject.actions = actions
         return transaction(trObject, options)
       })
     )
@@ -379,11 +354,8 @@ function WriteApi(Network, network, config, Transaction) {
       throw new TypeError('First transaction argument should be an object or function')
     }
 
-    if(!Array.isArray(arg.scope)) {
-      throw new TypeError('Expecting scope array')
-    }
-    if(!Array.isArray(arg.messages)) {
-      throw new TypeError('Expecting messages array')
+    if(!Array.isArray(arg.actions)) {
+      throw new TypeError('Expecting actions array')
     }
 
     if(config.transactionLog) {
@@ -399,9 +371,9 @@ function WriteApi(Network, network, config, Transaction) {
       }
     }
 
-    arg.messages.forEach(message => {
-      if(!Array.isArray(message.authorization)) {
-        throw new TypeError('Expecting message.authorization array', message)
+    arg.actions.forEach(action => {
+      if(!Array.isArray(action.authorization)) {
+        throw new TypeError('Expecting action.authorization array', action)
       }
     })
 
@@ -414,18 +386,17 @@ function WriteApi(Network, network, config, Transaction) {
       network.createTransaction
 
     headers(options.expireInSeconds, checkError(callback, rawTx => {
+      // console.log('rawTx', rawTx)
       assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
-      assert.equal(typeof rawTx.ref_block_num, 'number', 'expecting ref_block_num number')
-      assert.equal(typeof rawTx.ref_block_prefix, 'number', 'expecting ref_block_prefix number')
       assert.equal(typeof rawTx.expiration, 'string', 'expecting expiration: iso date time string')
+      assert.equal(typeof rawTx.ref_block_num, 'number', 'expecting ref_block_num number')
+      assert.equal(typeof rawTx.ref_block_prefix, 'string', 'expecting ref_block_prefix string')
 
       rawTx = Object.assign({}, rawTx, {
-        read_scope: [],
         signatures: []
       })
 
-      rawTx.scope = arg.scope
-      rawTx.messages = arg.messages
+      rawTx.actions = arg.actions
 
       // console.log('rawTx', JSON.stringify(rawTx,null,4))
 
@@ -524,7 +495,7 @@ const isStringArray = o => Array.isArray(o) && o.length > 0 &&
 // Normalize the extra optional options argument
 const optionsFormatter = option => {
   if(typeof option === 'object') {
-    return option // {debug, broadcast, scope, etc} (scope, etc my overwrite tr below)
+    return option // {debug, broadcast, etc} (etc my overwrite tr below)
   }
   if(typeof option === 'boolean') {
     // broadcast argument as a true false value, back-end cli will use this shorthand
@@ -532,13 +503,13 @@ const optionsFormatter = option => {
   }
 }
 
-function usage (type, definition, Network, code, config) {
+function usage (type, definition, Network, account, config) {
   let usage = ''
   const out = (str = '') => {
     usage += str + '\n'
   }
   out('CONTRACT')
-  out(`${code}`)
+  out(`${account}`)
   out()
 
   out('FUNCTION')
@@ -546,7 +517,7 @@ function usage (type, definition, Network, code, config) {
   out()
 
   let struct
-  if(code === 'eos') {
+  if(account === 'eos') {
     const {structs} = Structs({defaults: true, network: Network})
     struct = structs[type]
 
@@ -558,7 +529,7 @@ function usage (type, definition, Network, code, config) {
     out(`${JSON.stringify(struct.toObject(), null, 4)}`)
 
   } else {
-    const cache = config.abiCache.abi(code)
+    const cache = config.abiCache.abi(account)
     out('PARAMETERS')
     out(JSON.stringify(schemaFields(cache.schema, type), null, 4))
     out()
