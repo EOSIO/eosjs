@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-### The current release of eos-js is built for the last stable eos build Dawn 2.x
+### The current release of eosjs is built for the last stable eos build Dawn 2.x
 You can find the current stable branch of eos here: https://github.com/EOSIO/eos/tree/dawn-2.x
 
 We are actively working on building a version compatible with Dawn 3.x (current master): https://github.com/EOSIO/eosjs/issues/25
