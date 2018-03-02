@@ -250,9 +250,9 @@ testnet.transaction('currency', currency => {
 })
 
 // mix contracts in the same transaction
-testnet.transaction(['currency', 'eos'], ({currency, eos}) => {
+testnet.transaction(['currency', 'eosio'], ({currency, eosio}) => {
   currency.transfer('inita', 'initd', 1)
-  eos.transfer('inita', 'initd', 1, '')
+  eosio.transfer('inita', 'initd', 1, '')
 })
 
 // contract lookups then transactions
@@ -281,7 +281,7 @@ eos = Eos.Localnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79z
 eos.transaction({
   actions: [
     {
-      account: 'eos',
+      account: 'eosio',
       name: 'transfer',
       authorization: [{
         actor: 'inita',

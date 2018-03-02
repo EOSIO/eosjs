@@ -220,7 +220,7 @@ if(process.env['NODE_ENV'] === 'development') {
     it('action to contract', () => {
       // initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
       // eos is a bad test case, but it was the only native contract
-      const name = 'eos'
+      const name = 'eosio'
       return Eos.Localnet({signProvider}).contract(name).then(contract => {
         contract.transfer('inita', 'initd', 1, '')
           // transaction sent on each command
@@ -245,18 +245,18 @@ if(process.env['NODE_ENV'] === 'development') {
         test.then(tr => {assert.equal(2, tr.transaction.actions.length)})
         
       //  contracts can be a string or array
-      assertTr(testnet.transaction(['eos'], ({eos}) => trTest(eos)))
-      assertTr(testnet.transaction('eos', eos => trTest(eos)))
+      assertTr(testnet.transaction(['eosio'], ({eosio}) => trTest(eosio)))
+      assertTr(testnet.transaction('eosio', eosio => trTest(eosio)))
     })
 
     it('action to contract (contract tr nesting)', () => {
       const tn = Eos.Localnet({signProvider})
-      return tn.contract('eos').then(eos => {
-        eos.transaction(tr => {
+      return tn.contract('eosio').then(eosio => {
+        eosio.transaction(tr => {
           tr.transfer('inita', 'initd', 1, '')
           tr.transfer('inita', 'inite', 1, '')
         })
-        eos.transfer('inita', 'initf', 1, '')
+        eosio.transfer('inita', 'initf', 1, '')
       })
     })
 
@@ -306,7 +306,7 @@ if(process.env['NODE_ENV'] === 'development') {
         {
           actions: [
             {
-              account: 'eos',
+              account: 'eosio',
               name: 'transfer',
               data: {
                 from: 'inita',

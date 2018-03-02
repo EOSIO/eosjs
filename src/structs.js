@@ -10,7 +10,7 @@ const {isName, encodeName, decodeName,
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
-    if(account === 'eos') {
+    if(account === 'eosio') {
       return structs[lookupName]
     }
     const abi = config.abiCache.abi(account)
@@ -45,10 +45,15 @@ module.exports = (config = {}, extendedSchema) => {
     config.override
   )
 
+  // eosTypes reconciled with:
+  //   eos::abi_serializer.cpp
+  //   eosjs-json::base.json
+  //   eosjs-json::generated.json
+
   const eosTypes = {
     name: ()=> [Name],
     public_key: () => [PublicKeyType],
-    asset_symbol: () => [AssetSymbol],
+    symbol: () => [AssetSymbol],
     asset: () => [Asset], // must come after AssetSymbol
     signature: () => [Signature]
   }
@@ -143,13 +148,14 @@ const AssetSymbol = (validation) => {
     }
   }
 
-  const prefix = '\u0004'
+  const prefix = '\u0004' // 4 decimals in EOS
 
   return {
     fromByteBuffer (b) {
       const bcopy = b.copy(b.offset, b.offset + 7)
       b.skip(7)
 
+      // TODO
       // const precision = bcopy.readUint8()
       // console.log('precision', precision)
 
@@ -190,7 +196,7 @@ const AssetSymbol = (validation) => {
 
 const Asset = (validation, baseTypes, customTypes) => {
   const amountType = baseTypes.int64(validation)
-  const symbolType = customTypes.asset_symbol(validation)
+  const symbolType = customTypes.symbol(validation)
 
   const symbolCache = symbol => ({precision: 4})
   const precision = symbol => symbolCache(symbol).precision

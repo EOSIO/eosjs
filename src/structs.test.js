@@ -63,10 +63,10 @@ describe('shorthand', () => {
     assertSerializer(PublicKeyType, pubkey)
   })
 
-  it('asset_symbol', () => {
+  it('symbol', () => {
     const eos = Eos.Localnet()
     const {types} = eos.fc
-    const AssetSymbolType = types.asset_symbol()
+    const AssetSymbolType = types.symbol()
 
     assertSerializer(AssetSymbolType, 'EOS')
 
@@ -82,11 +82,11 @@ if(process.env['CURRENCY_ABI'] != null) {
     it('Messages do not sort', async function() {
       const local = Eos.Localnet()
       const opts = {sign: false, broadcast: false}
-      const tx = await local.transaction(['currency', 'eos'], ({currency, eos}) => {
-        eos.transfer('inita', 'initd', 1, '') // make sure {account: 'eos', ..} remains first 
+      const tx = await local.transaction(['currency', 'eosio'], ({currency, eosio}) => {
+        eosio.transfer('inita', 'initd', 1, '') // make sure {account: 'eosio', ..} remains first 
         currency.transfer('inita', 'initd', 1) // {account: 'currency', ..} remains second
       }, opts)
-      assert.equal(tx.transaction.actions[0].account, 'eos')
+      assert.equal(tx.transaction.actions[0].account, 'eosio')
       assert.equal(tx.transaction.actions[1].account, 'currency')
     })
   })
@@ -99,7 +99,7 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
-      account: 'eos',
+      account: 'eosio',
       name: 'transfer',
       data: {
         from: 'inita',
@@ -121,8 +121,8 @@ describe('Message.data', () => {
     // const lenPrefixHex = Number(hex.length / 2).toString(16) + hex.toString('hex')
 
     const value = {
-      code: 'eos',
-      type: 'transfer',
+      account: 'eosio',
+      name: 'transfer',
       data: hex,
       authorization: []
     }
@@ -141,8 +141,8 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: true})
     const {structs, types} = eos.fc
     const value = {
-      code: 'eos',
-      type: 'transfer',
+      account: 'eosio',
+      name: 'transfer',
       data: {
         from: 'inita',
         to: 'initb',
@@ -169,8 +169,8 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
-      code: 'eos',
-      type: 'mytype',
+      account: 'eosio',
+      name: 'mytype',
       data: '030a0b0c',
       authorization: []
     }
