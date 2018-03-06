@@ -66,13 +66,13 @@ module.exports = (config = {}, extendedSchema) => {
   config.nosort['transaction.action'] = true
 
   const schema = Object.assign({}, json.schema, extendedSchema)
-  const {structs, types, errors} = Fcbuffer(schema, config)
+  const {structs, types, errors, fromBuffer, toBuffer} = Fcbuffer(schema, config)
   if(errors.length !== 0) {
     throw new Error(JSON.stringify(errors, null, 4) + '\nin\n' +
       JSON.stringify(schema, null, 4))
   }
 
-  return {structs, types}
+  return {structs, types, fromBuffer, toBuffer}
 }
 
 /**
@@ -161,7 +161,7 @@ const AssetSymbol = (validation) => {
 
       const bin = bcopy.toBinary()
       if(bin.slice(0, 1) !== prefix) {
-        throw new TypeError(`Asset precision does not match`)
+        throw new TypeError(`Asset precision does not match: ${bin.slice(0, 1)}`)
       }
       let symbol = ''
       for(const code of bin.slice(1))  {
