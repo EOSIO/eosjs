@@ -23,20 +23,17 @@ function writeApiGen(Network, network, structs, config) {
 
   // Immediate send operations automatically calls merge.transaction
   for(let type in Network.schema) {
-    if(!/^[a-z]/.test(type)) {
-      // Only lower case structs will work in a transaction action
-      // See eosjs-json generated.json
+    const schema = Network.schema[type]
+    if(schema.type !== 'action') {
       continue
     }
-    if(type === 'transaction') {
-      continue
-    }
+
     if(reserveFunctions.has(type)) {
       throw new TypeError('Conflicting Api function: ' + type)
     }
+
     const struct = structs[type]
-    // console.log('999 struct', type, Network.schema[type])
-    if(struct == null || type === 'struct_def' || tmpRemoveSet.has(type)) {
+    if(struct == null) {
       continue
     }
     const definition = schemaFields(Network.schema, type)
@@ -65,13 +62,6 @@ function writeApiGen(Network, network, structs, config) {
 
   return merge
 }
-
-/** TODO: tag in the eosjs-json */
-const tmpRemoveSet = new Set(
-  'permission_level action permission_level_weight signed_transaction ' +
-  'key_weight authority blockchain_configuration type_def action ' +
-  'table_def abi nonce'.split(' ')
-)
 
 function WriteApi(Network, network, config, Transaction) {
   /**
@@ -103,7 +93,7 @@ function WriteApi(Network, network, config, Transaction) {
       }
       const abiPromises = []
       accounts.forEach(account => {
-        if(account !== 'eos') { // Eos contract operations are cached in eosjs-json (allows for offline transactions)
+        if(account !== 'eosio') { // Eos contract operations are cached in eosjs-json (allows for offline transactions)
           abiPromises.push(config.abiCache.abiAsync(account))
         }
       })
@@ -170,7 +160,7 @@ function WriteApi(Network, network, config, Transaction) {
     })
   }
 
-  function genMethod(type, definition, transactionArg, account = 'eos', name = type) {
+  function genMethod(type, definition, transactionArg, account = 'eosio', name = type) {
     return function (...args) {
       if (args.length === 0) {
         console.error(usage(type, definition, Network, account, config))
@@ -390,11 +380,9 @@ function WriteApi(Network, network, config, Transaction) {
       assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
       assert.equal(typeof rawTx.expiration, 'string', 'expecting expiration: iso date time string')
       assert.equal(typeof rawTx.ref_block_num, 'number', 'expecting ref_block_num number')
-      assert.equal(typeof rawTx.ref_block_prefix, 'string', 'expecting ref_block_prefix string')
+      assert.equal(typeof rawTx.ref_block_prefix, 'number', 'expecting ref_block_prefix number')
 
-      rawTx = Object.assign({}, rawTx, {
-        signatures: []
-      })
+      rawTx = Object.assign({}, rawTx)
 
       rawTx.actions = arg.actions
 
@@ -403,6 +391,28 @@ function WriteApi(Network, network, config, Transaction) {
       // resolve shorthand
       // const txObject = Transaction.toObject(Transaction.fromObject(rawTx))
       const txObject = Transaction.fromObject(rawTx)
+
+      // if(txObject.context_free_cpu_bandwidth == null) {
+      //   // number of CPU usage units to bill transaction for
+      //   // eosiod getCpuEstimate does not exist, it will probably have another name
+      //   txObject.context_free_cpu_bandwidth = await eos.getCpuEstimate(txObject)
+      // }
+
+      if(
+        txObject.packed_bandwidth_words === 0 ||
+        txObject.packed_bandwidth_words == null
+      ) {
+        const txBandwidth = Object.assign({}, txObject)
+
+        // do not include context-free data
+        txBandwidth.context_free_actions = []
+
+        const size = Fcbuffer.toBuffer(Transaction, txBandwidth).length
+
+        // +2 extra bytes for uint16 packed_bandwidth_words
+        // number of 8 byte words this transaction can compress into
+        txObject.packed_bandwidth_words = Math.ceil((size + 2) / 8) // compression = none
+      }
 
       // console.log('txObject', JSON.stringify(txObject,null,4))
 
@@ -425,7 +435,7 @@ function WriteApi(Network, network, config, Transaction) {
       // sigs can be strings or Promises
       Promise.all(sigs).then(sigs => {
         sigs = [].concat.apply([], sigs) //flatten arrays in array
-        tr.signatures = sigs
+        // tr.signatures = sigs // replaced by packedTr
 
         for(let i = 0; i < sigs.length; i++) {
           const sig = sigs[i]
@@ -433,6 +443,12 @@ function WriteApi(Network, network, config, Transaction) {
           if(typeof sig === 'string' && sig.length === 130) {
             sigs[i] = ecc.Signature.from(sig).toString()
           }
+        }
+
+        const packedTr = {
+          compression: 'none',
+          data: tr,
+          signatures: sigs
         }
 
         const mock = config.mockTransactions ? config.mockTransactions() : null
@@ -443,7 +459,7 @@ function WriteApi(Network, network, config, Transaction) {
               transaction_id: transactionId,
               mockTransaction: true,
               broadcast: false,
-              transaction: tr
+              transaction: packedTr
             })
           }
           if(mock === 'fail') {
@@ -457,18 +473,18 @@ function WriteApi(Network, network, config, Transaction) {
           callback(null, {
             transaction_id: transactionId,
             broadcast: false,
-            transaction: tr
+            transaction: packedTr
           })
         } else {
-          network.pushTransaction(tr, error => {
+          network.pushTransaction(packedTr, error => {
             if(!error) {
               callback(null, {
                 transaction_id: transactionId,
                 broadcast: true,
-                transaction: tr
+                transaction: packedTr
               })
             } else {
-              console.error(`[push_transaction error] '${error.message}', digest '${buf.toString('hex')}'`)
+              console.error(`[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`)
               callback(error.message)
             }
           })
@@ -517,7 +533,7 @@ function usage (type, definition, Network, account, config) {
   out()
 
   let struct
-  if(account === 'eos') {
+  if(account === 'eosio') {
     const {structs} = Structs({defaults: true, network: Network})
     struct = structs[type]
 
