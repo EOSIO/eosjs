@@ -19,6 +19,7 @@ function AbiCache(network, config) {
       return Promise.resolve(cache[account])
     }
     return network.getCode(account).then(({abi}) => {
+      assert(abi, `Missing ABI for account: ${account}`)
       const schema = abiToFcSchema(abi)
       const structs = Structs(config, schema) // structs = {structs, types}
       return cache[account] = Object.assign({abi, schema}, structs)
@@ -54,9 +55,12 @@ function abiToFcSchema(abi) {
 
   if(abi.structs) {
     abi.structs.forEach(e => {
-      const {base, fields} = e
-      abiSchema[e.name] = {base, fields}
-      if(base === '') {
+      const fields = {}
+      for(const field of e.fields) {
+        fields[field.name] = field.type
+      }
+      abiSchema[e.name] = {base: e.base, fields}
+      if(e.base === '') {
         delete abiSchema[e.name].base
       }
     })

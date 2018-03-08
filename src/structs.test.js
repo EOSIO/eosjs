@@ -83,11 +83,11 @@ if(process.env['CURRENCY_ABI'] != null) {
       const local = Eos.Localnet()
       const opts = {sign: false, broadcast: false}
       const tx = await local.transaction(['currency', 'eosio'], ({currency, eosio}) => {
-        eosio.transfer('inita', 'initd', 1, '') // make sure {account: 'eosio', ..} remains first 
-        currency.transfer('inita', 'initd', 1) // {account: 'currency', ..} remains second
+        eosio.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio', ..} remains first
+        currency.transfer('inita', 'initd', '1 CUR', '') // {account: 'currency', ..} remains second
       }, opts)
-      assert.equal(tx.transaction.actions[0].account, 'eosio')
-      assert.equal(tx.transaction.actions[1].account, 'currency')
+      assert.equal(tx.transaction.data.actions[0].account, 'eosio')
+      assert.equal(tx.transaction.data.actions[1].account, 'currency')
     })
   })
 } else {
@@ -104,7 +104,7 @@ describe('Message.data', () => {
       data: {
         from: 'inita',
         to: 'initb',
-        amount: '1',
+        quantity: '1.0000 EOS',
         memo: ''
       },
       authorization: []
@@ -116,7 +116,7 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: false, debug: false})
     const {structs, types} = eos.fc
 
-    const tr = {from: 'inita', to: 'initb', amount: '1', memo: ''}
+    const tr = {from: 'inita', to: 'initb', quantity: '1.0000 EOS', memo: ''}
     const hex = Fcbuffer.toBuffer(structs.transfer, tr).toString('hex')
     // const lenPrefixHex = Number(hex.length / 2).toString(16) + hex.toString('hex')
 
@@ -146,7 +146,7 @@ describe('Message.data', () => {
       data: {
         from: 'inita',
         to: 'initb',
-        amount: '1',
+        quantity: '1 EOS',
         memo: ''
       },
       authorization: []

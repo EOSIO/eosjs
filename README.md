@@ -106,13 +106,13 @@ eos.transfer()
 
 // Usage with options (options are always optional)
 options = {broadcast: false}
-eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, options)
+eos.transfer({from: 'inita', to: 'initb', quantity: '1 EOS', memo: ''}, options)
 
 // Object or ordered args may be used.
-eos.transfer('inita', 'initb', 2, 'memo', options)
+eos.transfer('inita', 'initb', '2 EOS', 'memo', options)
 
 // A broadcast boolean may be provided as a shortcut for {broadcast: false}
-eos.transfer('inita', 'initb', 1, '', false)
+eos.transfer('inita', 'initb', '1 EOS', '', false)
 ```
 
 Read-write API methods and documentation are generated from this [schema](https://github.com/EOSIO/eosjs-json/blob/master/schema/generated.json).
@@ -147,8 +147,7 @@ eos.newaccount({
   name: 'mynewacct',
   owner: initaPublic,
   active: initaPublic,
-  recovery: 'inita',
-  deposit: '1 EOS'
+  recovery: 'inita'
 })
 
 ```
@@ -169,7 +168,7 @@ npm i binaryen
 Import and include the library when you configure Eos:
 
 ```javascript
-const binaryen = require('binaryen')
+binaryen = require('binaryen')
 eos = Eos.Testnet({..., binaryen})
 ```
 
@@ -199,23 +198,23 @@ eos.newaccount({
   name: 'currency',
   owner: currencyPublic,
   active: currencyPublic,
-  recovery: 'inita',
-  deposit: '1 EOS'
+  recovery: 'inita'
 })
 
-contractDir = `${process.env.HOME}/eosio/eos/build/contracts/currency`
+contractDir = `${process.env.HOME}/eosio/dawn3/build/contracts/currency`
 wast = fs.readFileSync(`${contractDir}/currency.wast`)
 abi = fs.readFileSync(`${contractDir}/currency.abi`)
 
 // Publish contract to the blockchain
 eos.setcode('currency', 0, 0, wast)
-eos.setabi('currency', abi)
+eos.setabi('currency', JSON.parse(abi))
 
+currency = null
 // eos.contract(account<string>, [options], [callback])
-eos.contract('currency').then(currency => {
-  // Transfer is one of the actions in currency.abi 
-  currency.transfer('currency', 'inita', 100)
-})
+eos.contract('currency').then(contract => currency = contract)
+
+// Issue is one of the actions in currency.abi
+currency.issue('inita', '1.0000 CUR', {authorization: 'currency'})
 
 ```
 
@@ -236,8 +235,8 @@ testnet = Eos.Localnet({keyProvider})
 // if either transfer fails, both will fail (1 transaction, 2 messages)
 testnet.transaction(eos =>
   {
-    eos.transfer('inita', 'initb', 1, '')
-    eos.transfer('inita', 'initc', 1, '')
+    eos.transfer('inita', 'initb', '1 EOS', '')
+    eos.transfer('inita', 'initc', '1 EOS', '')
     // Returning a promise is optional (but handled as expected)
   }
   // [options],
@@ -246,22 +245,22 @@ testnet.transaction(eos =>
 
 // transaction on a single contract
 testnet.transaction('currency', currency => {
-  currency.transfer('inita', 'initd', 1)
+  currency.transfer('inita', 'initb', '1 CUR', '')
 })
 
 // mix contracts in the same transaction
 testnet.transaction(['currency', 'eosio'], ({currency, eosio}) => {
-  currency.transfer('inita', 'initd', 1)
-  eosio.transfer('inita', 'initd', 1, '')
+  currency.transfer('inita', 'initb', '1 EOS', '')
+  eosio.transfer('inita', 'initb', '1 EOS', '')
 })
 
 // contract lookups then transactions
 testnet.contract('currency').then(currency => {
   currency.transaction(tr => {
-    tr.transfer('inita', 'initd', 1)
-    tr.transfer('initd', 'inita', 1)
+    tr.transfer('inita', 'initb', '1 EOS', '')
+    tr.transfer('initb', 'initc', '1 EOS', '')
   })
-  currency.transfer('inita', 'inite', 1)
+  currency.transfer('inita', 'initb', '1 CUR', '')
 })
 
 // Note, the contract method does not take an array.  Just use Await or yield
@@ -278,6 +277,7 @@ Eos = require('eosjs') // Eos = require('./src')
 
 eos = Eos.Localnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
+// returns Promise
 eos.transaction({
   actions: [
     {
@@ -290,7 +290,7 @@ eos.transaction({
       data: {
         from: 'inita',
         to: 'initb',
-        amount: 7,
+        quantity: '7 EOS',
         memo: ''
       }
     }
