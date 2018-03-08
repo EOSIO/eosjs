@@ -35,7 +35,7 @@ module.exports = (config = {}, extendedSchema) => {
   // an error: `Invalid cast from object_type to string` .. forceActionDataHex
   // may be used to until native ABI is added or fixed.
   const forceActionDataHex = config.forceActionDataHex != null ?
-    config.forceActionDataHex : false
+    config.forceActionDataHex : true
 
   const override = Object.assign({},
     authorityOverride,
@@ -66,6 +66,7 @@ module.exports = (config = {}, extendedSchema) => {
   config.nosort['transaction.action'] = true
 
   const schema = Object.assign({}, json.schema, extendedSchema)
+
   const {structs, types, errors, fromBuffer, toBuffer} = Fcbuffer(schema, config)
   if(errors.length !== 0) {
     throw new Error(JSON.stringify(errors, null, 4) + '\nin\n' +
@@ -108,7 +109,38 @@ const Name = (validation) => {
   }
 }
 
-const PublicKeyType = (validation) => {
+const PublicKeyType = (validation, baseTypes) => {
+  const staticVariant = baseTypes.static_variant([
+    PublicKeyEcc(validation),
+    // PublicKeyR1(validation)
+  ])
+
+  return {
+    fromByteBuffer (b) {
+      return staticVariant.fromByteBuffer(b)
+    },
+    appendByteBuffer (b, value) {
+      if(!Array.isArray(value)) {
+        value = [0, value]
+      }
+      staticVariant.appendByteBuffer(b, value)
+    },
+    fromObject (value) {
+      if(!Array.isArray(value)) {
+        value = [0, value]
+      }
+      return staticVariant.fromObject(value)[1]
+    },
+    toObject (value) {
+      if(!Array.isArray(value)) {
+        value = [0, value]
+      }
+      return staticVariant.toObject(value)[1]
+    }
+  }
+}
+
+const PublicKeyEcc = (validation) => {
   return {
     fromByteBuffer (b) {
       const bcopy = b.copy(b.offset, b.offset + 33)
@@ -152,8 +184,8 @@ const AssetSymbol = (validation) => {
 
   return {
     fromByteBuffer (b) {
-      const bcopy = b.copy(b.offset, b.offset + 7)
-      b.skip(7)
+      const bcopy = b.copy(b.offset, b.offset + 8)
+      b.skip(8)
 
       // TODO
       // const precision = bcopy.readUint8()
@@ -194,6 +226,7 @@ const AssetSymbol = (validation) => {
   }
 }
 
+/** @example '0.0001 CUR' */
 const Asset = (validation, baseTypes, customTypes) => {
   const amountType = baseTypes.int64(validation)
   const symbolType = customTypes.symbol(validation)
@@ -221,6 +254,7 @@ const Asset = (validation, baseTypes, customTypes) => {
     },
 
     appendByteBuffer (b, value) {
+      assert.equal(typeof value, 'string', 'value')
       const [amount, symbol] = value.split(' ')
       amountType.appendByteBuffer(b, UDecimalImply(amount, precision(symbol)))
       symbolType.appendByteBuffer(b, symbol)
