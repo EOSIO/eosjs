@@ -62,8 +62,11 @@ module.exports = (config = {}, extendedSchema) => {
   config = Object.assign({override}, {customTypes}, config)
 
   // Do not sort transaction actions
-  config.nosort = Object.assign({}, config.nosort)
-  config.nosort['transaction.action'] = true
+  config.sort = Object.assign({}, config.sort)
+  config.sort['action.authorization'] = true
+  config.sort['signed_transaction.signature'] = true
+  config.sort['authority.accounts'] = true
+  config.sort['authority.keys'] = true
 
   const schema = Object.assign({}, json.schema, extendedSchema)
 

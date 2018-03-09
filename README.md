@@ -214,7 +214,7 @@ currency = null
 eos.contract('currency').then(contract => currency = contract)
 
 // Issue is one of the actions in currency.abi
-currency.issue('inita', '1.0000 CUR', {authorization: 'currency'})
+currency.issue('inita', '1000.0000 CUR', {authorization: 'currency'})
 
 ```
 
@@ -230,10 +230,10 @@ keyProvider = [
   Eos.modules.ecc.seedPrivate('currency')
 ]
 
-testnet = Eos.Localnet({keyProvider})
+eos = Eos.Localnet({keyProvider})
 
 // if either transfer fails, both will fail (1 transaction, 2 messages)
-testnet.transaction(eos =>
+eos.transaction(eos =>
   {
     eos.transfer('inita', 'initb', '1 EOS', '')
     eos.transfer('inita', 'initc', '1 EOS', '')
@@ -244,21 +244,21 @@ testnet.transaction(eos =>
 )
 
 // transaction on a single contract
-testnet.transaction('currency', currency => {
+eos.transaction('currency', currency => {
   currency.transfer('inita', 'initb', '1 CUR', '')
 })
 
 // mix contracts in the same transaction
-testnet.transaction(['currency', 'eosio'], ({currency, eosio}) => {
-  currency.transfer('inita', 'initb', '1 EOS', '')
+eos.transaction(['currency', 'eosio'], ({currency, eosio}) => {
+  currency.transfer('inita', 'initb', '1 CUR', '')
   eosio.transfer('inita', 'initb', '1 EOS', '')
 })
 
 // contract lookups then transactions
-testnet.contract('currency').then(currency => {
-  currency.transaction(tr => {
-    tr.transfer('inita', 'initb', '1 EOS', '')
-    tr.transfer('initb', 'initc', '1 EOS', '')
+eos.contract('currency').then(currency => {
+  currency.transaction(cur => {
+    cur.transfer('inita', 'initb', '1 CUR', '')
+    cur.transfer('initb', 'initc', '1 CUR', '')
   })
   currency.transfer('inita', 'initb', '1 CUR', '')
 })

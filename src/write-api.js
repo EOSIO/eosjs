@@ -525,7 +525,7 @@ function usage (type, definition, Network, account, config) {
     usage += str + '\n'
   }
   out('CONTRACT')
-  out(`${account}`)
+  out(account)
   out()
 
   out('FUNCTION')
@@ -538,11 +538,11 @@ function usage (type, definition, Network, account, config) {
     struct = structs[type]
 
     out('PARAMETERS')
-    out(`${JSON.stringify(definition, null, 4)}`)
+    out(JSON.stringify(definition, null, 4))
     out()
 
     out('EXAMPLE')
-    out(`${JSON.stringify(struct.toObject(), null, 4)}`)
+    out(JSON.stringify(struct.toObject(), null, 4))
 
   } else {
     const cache = config.abiCache.abi(account)
@@ -552,7 +552,7 @@ function usage (type, definition, Network, account, config) {
 
     struct = cache.structs[type]
     out('EXAMPLE')
-    out(`${JSON.stringify(struct.toObject(), null, 4)}`)
+    out(JSON.stringify(struct.toObject(), null, 4))
   }
   if(struct == null) {
     throw TypeError('Unknown type: ' + type)
