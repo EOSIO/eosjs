@@ -1,3 +1,5 @@
+require("babel-polyfill")
+
 const ecc = require('eosjs-ecc')
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
