@@ -4,7 +4,10 @@
 ### The current release of eosjs is built for the last stable eos build Dawn 2.x
 You can find the current stable branch of eos here: https://github.com/EOSIO/eos/tree/dawn-2.x
 
-We are actively working on building a version compatible with Dawn 3.x (current master): https://github.com/EOSIO/eosjs/issues/25
+A Dawn 3.x pre-release version of eosjs is available:
+`npm i eosjs@dawn3`
+
+You can run the latest Dawn 3.x node from the default master branch at: http://github.com/eosio/eos
 
 # Eosjs
 
