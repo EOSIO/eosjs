@@ -311,6 +311,27 @@ import from `./src` instead.
 
 ```javascript
 Eos = require('./src')
+
+// Creating the instance `eos` means that common blockchain data-structures are
+// available for a given network (Testnet, Mainnet, etc).
+eos = Eos.Localnet()
+```
+
+* Fcbuffer
+
+The `eos` instance can provide more convenient serialization:
+
+```javascript
+// 'nonce' is a struct but could be any type or struct like: uint8 or transaction
+nonce = {value: '..'}
+nonceBuffer = eos.fc.toBuffer('nonce', nonce)
+assert.deepEqual(nonce, eos.fc.fromBuffer('nonce', nonceBuffer))
+
+// Serialization for a smart-contract's Abi:
+eos.contract('currency', (error, c) => currency = c)
+issue = {to: 'inita', quantity: '1.0000 CUR'}
+issueBuffer = currency.fc.toBuffer('issue', issue)
+assert.deepEqual(issue, eos.fc.fromBuffer('issue', issueBuffer))
 ```
 
 Use Node v8+ to `package-lock.json`.
