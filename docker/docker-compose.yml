@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  nodeos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${EOSIO_IMAGE-eosio/eos:latest}
+    command: /opt/eosio/bin/start_nodeos.sh
+    ports:
+      - 8888:8888
+      - 9876:9876
+    expose:
+      - "8888"
+    volumes:
+      - nodeos-data-volume:/opt/eosio/bin/data-dir
+
+  walletd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${EOSIO_IMAGE-eosio/eos:latest}
+    command: /opt/eosio/bin/eosiowd
+    links:
+      - nodeos
+    volumes:
+      - walletd-data-volume:/opt/eosio/bin/data-dir
+
+volumes:
+  nodeos-data-volume:
+  walletd-data-volume:

@@ -257,7 +257,8 @@ if(process.env['NODE_ENV'] === 'development') {
       assertTr(testnet.transaction('eosio', eosio => trTest(eosio)))
     })
 
-    it('action to contract (contract tr nesting)', () => {
+    it('action to contract (contract tr nesting)', function () {
+      this.timeout(4000)
       const tn = Eos.Localnet({signProvider})
       return tn.contract('eosio').then(eosio => {
         return eosio.transaction(tr => {

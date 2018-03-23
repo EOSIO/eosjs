@@ -1,17 +1,17 @@
 {
   "name": "eosjs",
-  "version": "7.0.2",
+  "version": "7.1.1",
   "description": "General purpose library for the EOS blockchain.",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha --use_strict src/*.test.js",
     "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "prepublish": "npm run prepublish_lib && npm run prepublish_test && npm run docs",
-    "prepublish_lib": "babel src --out-dir lib",
-    "prepublish_test": "mocha --use_strict lib/*.test.js",
+    "prepublishOnly": "npm run prepublishOnly_lib && npm run prepublishOnly_test && npm run docs",
+    "prepublishOnly_lib": "babel src --out-dir lib",
+    "prepublishOnly_test": "mocha --use_strict lib/*.test.js",
     "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js",
-    "build": "npm run prepublish && npm run browserify",
+    "build": "npm run browserify && npm run docs",
     "build_browser_test": "mkdir -p dist && browserify -o dist/mocha-test.js src/*.test.js",
     "docs": "jsdoc2md src/format.js > docs/format.md"
   },
@@ -47,9 +47,9 @@
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
     "eosjs-api": "^4.0.0",
-    "eosjs-ecc": "^3.0.1",
-    "eosjs-json": "^3.0.0",
-    "fcbuffer": "^2.1.1"
+    "eosjs-ecc": "^3.0.2",
+    "eosjs-json": "^3.0.1",
+    "fcbuffer": "^2.1.2"
   },
   "babel": {
     "presets": [
