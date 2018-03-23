@@ -7,6 +7,9 @@ cleos='docker-compose exec walletd /opt/eosio/bin/cleos -H nodeos'
 # Reset the volumes
 docker-compose down
 
+# Update image
+docker-compose pull
+
 # Start the server for testing
 docker-compose up -d
 docker-compose logs -f | egrep -v 'eosio generated block' &
