@@ -10,8 +10,8 @@
     "prepublishOnly": "npm run prepublishOnly_lib && npm run prepublishOnly_test && npm run docs",
     "prepublishOnly_lib": "babel src --out-dir lib",
     "prepublishOnly_test": "mocha --use_strict lib/*.test.js",
-    "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js",
-    "build": "npm run browserify && npm run docs",
+    "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos lib/index.js",
+    "build": "npm run prepublishOnly && npm run browserify",
     "build_browser_test": "mkdir -p dist && browserify -o dist/mocha-test.js src/*.test.js",
     "docs": "jsdoc2md src/format.js > docs/format.md"
   },
