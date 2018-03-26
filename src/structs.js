@@ -179,6 +179,7 @@ const AssetSymbol = (validation) => {
       throw new TypeError(`Asset symbol should be a string`)
     }
     if(value.length > 7) {
+      // 1st char is precision
       throw new TypeError(`Asset symbol is 7 characters or less`)
     }
   }

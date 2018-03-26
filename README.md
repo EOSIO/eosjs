@@ -329,9 +329,9 @@ assert.deepEqual(nonce, eos.fc.fromBuffer('nonce', nonceBuffer))
 
 // Serialization for a smart-contract's Abi:
 eos.contract('currency', (error, c) => currency = c)
-issue = {to: 'inita', quantity: '1.0000 CUR'}
+issue = {to: 'inita', quantity: '1.0000 CUR', memo: '心'}
 issueBuffer = currency.fc.toBuffer('issue', issue)
-assert.deepEqual(issue, eos.fc.fromBuffer('issue', issueBuffer))
+assert.deepEqual(issue, currency.fc.fromBuffer('issue', issueBuffer))
 ```
 
 Use Node v8+ to `package-lock.json`.
