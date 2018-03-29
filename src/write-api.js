@@ -324,7 +324,8 @@ function WriteApi(Network, network, config, Transaction) {
   }
 
   function transaction(arg, options, callback) {
-    const optionDefault = {expireInSeconds: 60, broadcast: true, sign: true}
+    const defaultExpiration = config.expireInSeconds ? config.expireInSeconds : 60
+    const optionDefault = {expireInSeconds: defaultExpiration, broadcast: true, sign: true}
     options = Object.assign({}/*clone*/, optionDefault, options)
 
     let returnPromise
