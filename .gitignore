@@ -6,3 +6,4 @@ dist
 lib
 .nyc_output
 .idea
+docker/.env

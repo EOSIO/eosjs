@@ -88,21 +88,14 @@ Example: `eos.transfer(params, options)`
 options = {
   broadcast: true,
   sign: true,
-  scope: null,
   authorization: null
 }
 ```
 
-* **scope** `{array<string>|string}` - account name or names that may
-  undergo a change in state.
-  * If missing default scopes will be calculated.
-  * If provided additional scopes will not be added.
-  * Sorting is always performed.
-
 * **authorization** `{array<auth>|auth}` - identifies the
   signing account and permission typically in a multi-sig
   configuration.  Authorization may be a string formatted as
-  `account@permission` or an `object<{account, permission}>`.
+  `account@permission` or an `object<{actor: account, permission}>`.
   * If missing default authorizations will be calculated.
   * If provided additional authorizations will not be added.
   * Sorting is always performed (by account name).
@@ -121,13 +114,13 @@ eos.transfer()
 
 // Usage with options (options are always optional)
 options = {broadcast: false}
-eos.transfer({from: 'inita', to: 'initb', amount: 1, memo: ''}, options)
+eos.transfer({from: 'inita', to: 'initb', quantity: '1 EOS', memo: ''}, options)
 
 // Object or ordered args may be used.
-eos.transfer('inita', 'initb', 1, 'memo', options)
+eos.transfer('inita', 'initb', '2 EOS', 'memo', options)
 
 // A broadcast boolean may be provided as a shortcut for {broadcast: false}
-eos.transfer('inita', 'initb', 1, '', false)
+eos.transfer('inita', 'initb', '1 EOS', '', false)
 ```
 
 Read-write API methods and documentation are generated from this [schema](https://github.com/EOSIO/eosjs-json/blob/master/schema/generated.json).
@@ -144,7 +137,7 @@ For example:
 * deposit: `'1 EOS'` is shorthand for `1.0000 EOS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
 * recovery: `inita` or `inita@active` is shorthand
-  * `{{threshold: 1, accounts: [..account: inita, permission: active, weight: 1]}}`
+  * `{{threshold: 1, accounts: [..actor: inita, permission: active, weight: 1]}}`
   * `inita@other` would replace the permission `active` with `other`
 
 
@@ -162,8 +155,7 @@ eos.newaccount({
   name: 'mynewacct',
   owner: initaPublic,
   active: initaPublic,
-  recovery: 'inita',
-  deposit: '1 EOS'
+  recovery: 'inita'
 })
 
 ```
@@ -184,7 +176,7 @@ npm i binaryen
 Import and include the library when you configure Eos:
 
 ```javascript
-const binaryen = require('binaryen')
+binaryen = require('binaryen')
 eos = Eos.Testnet({..., binaryen})
 ```
 
@@ -214,22 +206,23 @@ eos.newaccount({
   name: 'currency',
   owner: currencyPublic,
   active: currencyPublic,
-  recovery: 'inita',
-  deposit: '1 EOS'
+  recovery: 'inita'
 })
 
-contractDir = `${process.env.HOME}/eosio/eos/build/contracts/currency`
+contractDir = `${process.env.HOME}/eosio/dawn3/build/contracts/currency`
 wast = fs.readFileSync(`${contractDir}/currency.wast`)
 abi = fs.readFileSync(`${contractDir}/currency.abi`)
 
 // Publish contract to the blockchain
-eos.setcode('currency', 0, 0, wast, abi)
+eos.setcode('currency', 0, 0, wast)
+eos.setabi('currency', JSON.parse(abi))
 
-// eos.contract(code<string>, [options], [callback])
-eos.contract('currency').then(currency => {
-  // Transfer is one of the actions in currency.abi 
-  currency.transfer('currency', 'inita', 100)
-})
+currency = null
+// eos.contract(account<string>, [options], [callback])
+eos.contract('currency').then(contract => currency = contract)
+
+// Issue is one of the actions in currency.abi
+currency.issue('inita', '1000.0000 CUR', {authorization: 'currency'})
 
 ```
 
@@ -245,13 +238,13 @@ keyProvider = [
   Eos.modules.ecc.seedPrivate('currency')
 ]
 
-testnet = Eos.Localnet({keyProvider})
+eos = Eos.Localnet({keyProvider})
 
 // if either transfer fails, both will fail (1 transaction, 2 messages)
-testnet.transaction(eos =>
+eos.transaction(eos =>
   {
-    eos.transfer('inita', 'initb', 1, '')
-    eos.transfer('inita', 'initc', 1, '')
+    eos.transfer('inita', 'initb', '1 EOS', '')
+    eos.transfer('inita', 'initc', '1 EOS', '')
     // Returning a promise is optional (but handled as expected)
   }
   // [options],
@@ -259,23 +252,23 @@ testnet.transaction(eos =>
 )
 
 // transaction on a single contract
-testnet.transaction('currency', currency => {
-  currency.transfer('inita', 'initd', 1)
+eos.transaction('currency', currency => {
+  currency.transfer('inita', 'initb', '1 CUR', '')
 })
 
 // mix contracts in the same transaction
-testnet.transaction(['currency', 'eos'], ({currency, eos}) => {
-  currency.transfer('inita', 'initd', 1)
-  eos.transfer('inita', 'initd', 1, '')
+eos.transaction(['currency', 'eosio'], ({currency, eosio}) => {
+  currency.transfer('inita', 'initb', '1 CUR', '')
+  eosio.transfer('inita', 'initb', '1 EOS', '')
 })
 
 // contract lookups then transactions
-testnet.contract('currency').then(currency => {
-  currency.transaction(tr => {
-    tr.transfer('inita', 'initd', 1)
-    tr.transfer('initd', 'inita', 1)
+eos.contract('currency').then(currency => {
+  currency.transaction(cur => {
+    cur.transfer('inita', 'initb', '1 CUR', '')
+    cur.transfer('initb', 'initc', '1 CUR', '')
   })
-  currency.transfer('inita', 'inite', 1)
+  currency.transfer('inita', 'initb', '1 CUR', '')
 })
 
 // Note, the contract method does not take an array.  Just use Await or yield
@@ -292,20 +285,20 @@ Eos = require('eosjs') // Eos = require('./src')
 
 eos = Eos.Localnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
 
+// returns Promise
 eos.transaction({
-  scope: ['inita', 'initb'],
-  messages: [
+  actions: [
     {
-      code: 'eos',
-      type: 'transfer',
+      account: 'eosio',
+      name: 'transfer',
       authorization: [{
-        account: 'inita',
+        actor: 'inita',
         permission: 'active'
       }],
       data: {
         from: 'inita',
         to: 'initb',
-        amount: 7,
+        quantity: '7 EOS',
         memo: ''
       }
     }
@@ -326,6 +319,27 @@ import from `./src` instead.
 
 ```javascript
 Eos = require('./src')
+
+// Creating the instance `eos` means that common blockchain data-structures are
+// available for a given network (Testnet, Mainnet, etc).
+eos = Eos.Localnet()
+```
+
+* Fcbuffer
+
+The `eos` instance can provide more convenient serialization:
+
+```javascript
+// 'nonce' is a struct but could be any type or struct like: uint8 or transaction
+nonce = {value: '..'}
+nonceBuffer = eos.fc.toBuffer('nonce', nonce)
+assert.deepEqual(nonce, eos.fc.fromBuffer('nonce', nonceBuffer))
+
+// Serialization for a smart-contract's Abi:
+eos.contract('currency', (error, c) => currency = c)
+issue = {to: 'inita', quantity: '1.0000 CUR'}
+issueBuffer = currency.fc.toBuffer('issue', issue)
+assert.deepEqual(issue, eos.fc.fromBuffer('issue', issueBuffer))
 ```
 
 Use Node v8+ to `package-lock.json`.

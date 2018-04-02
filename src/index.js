@@ -73,7 +73,15 @@ function createEos(config, Network, network) {
     assert.equal(typeof config.mockTransactions, 'function', 'config.mockTransactions')
   }
 
-  const eos = mergeWriteFunctions(config, Network)
+  const {structs, types, fromBuffer, toBuffer} = Structs(config)
+  const eos = mergeWriteFunctions(config, Network, structs)
+
+  Object.assign(eos, {fc: {
+    structs,
+    types,
+    fromBuffer,
+    toBuffer
+  }})
 
   if(!config.signProvider) {
     config.signProvider = defaultSignProvider(eos, config)
@@ -107,18 +115,14 @@ function consoleObjCallbackLog(verbose = false) {
   @return {object} - read and write method calls (create and sign transactions)
   @throw {TypeError} if a funciton name conflicts
 */
-function mergeWriteFunctions(config, Network) {
+function mergeWriteFunctions(config, Network, structs) {
   assert(config.network, 'network instance required')
-
   const {network} = config
-  const {structs, types} = Structs(config)
-  const merge = Object.assign({}, {fc: {structs, types}})
 
-  throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
-  Object.assign(merge, network)
+  const merge = Object.assign({}, network)
 
   const writeApi = writeApiGen(Network, network, structs, config)
-  throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
+  throwOnDuplicate(merge, writeApi, 'Conflicting methods in Network Api and Transaction Api')
   Object.assign(merge, writeApi)
 
   return merge

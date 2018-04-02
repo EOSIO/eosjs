@@ -63,10 +63,10 @@ describe('shorthand', () => {
     assertSerializer(PublicKeyType, pubkey)
   })
 
-  it('asset_symbol', () => {
+  it('symbol', () => {
     const eos = Eos.Localnet()
     const {types} = eos.fc
-    const AssetSymbolType = types.asset_symbol()
+    const AssetSymbolType = types.symbol()
 
     assertSerializer(AssetSymbolType, 'EOS')
 
@@ -82,12 +82,12 @@ if(process.env['CURRENCY_ABI'] != null) {
     it('Messages do not sort', async function() {
       const local = Eos.Localnet()
       const opts = {sign: false, broadcast: false}
-      const tx = await local.transaction(['currency', 'eos'], ({currency, eos}) => {
-        eos.transfer('inita', 'initd', 1, '') // make sure {code: 'eos', ..} remains first 
-        currency.transfer('inita', 'initd', 1) // {code: 'currency', ..} remains second
+      const tx = await local.transaction(['currency', 'eosio'], ({currency, eosio}) => {
+        eosio.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio', ..} remains first
+        currency.transfer('inita', 'initd', '1 CUR', '') // {account: 'currency', ..} remains second
       }, opts)
-      assert.equal(tx.transaction.messages[0].code, 'eos')
-      assert.equal(tx.transaction.messages[1].code, 'currency')
+      assert.equal(tx.transaction.data.actions[0].account, 'eosio')
+      assert.equal(tx.transaction.data.actions[1].account, 'currency')
     })
   })
 } else {
@@ -96,38 +96,38 @@ if(process.env['CURRENCY_ABI'] != null) {
 
 describe('Message.data', () => {
   it('json', () => {
-    const eos = Eos.Localnet({forceMessageDataHex: false})
+    const eos = Eos.Localnet({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
-      code: 'eos',
-      type: 'transfer',
+      account: 'eosio',
+      name: 'transfer',
       data: {
         from: 'inita',
         to: 'initb',
-        amount: '1',
+        quantity: '1.0000 EOS',
         memo: ''
       },
       authorization: []
     }
-    assertSerializer(structs.message, value)
+    assertSerializer(structs.action, value)
   })
 
   it('hex', () => {
-    const eos = Eos.Localnet({forceMessageDataHex: false, debug: false})
+    const eos = Eos.Localnet({forceActionDataHex: false, debug: false})
     const {structs, types} = eos.fc
 
-    const tr = {from: 'inita', to: 'initb', amount: '1', memo: ''}
+    const tr = {from: 'inita', to: 'initb', quantity: '1.0000 EOS', memo: ''}
     const hex = Fcbuffer.toBuffer(structs.transfer, tr).toString('hex')
     // const lenPrefixHex = Number(hex.length / 2).toString(16) + hex.toString('hex')
 
     const value = {
-      code: 'eos',
-      type: 'transfer',
+      account: 'eosio',
+      name: 'transfer',
       data: hex,
       authorization: []
     }
     
-    const type = structs.message
+    const type = structs.action
     const obj = type.fromObject(value) // tests fromObject
     const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
     const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
@@ -138,20 +138,20 @@ describe('Message.data', () => {
   })
 
   it('force hex', () => {
-    const eos = Eos.Localnet({forceMessageDataHex: true})
+    const eos = Eos.Localnet({forceActionDataHex: true})
     const {structs, types} = eos.fc
     const value = {
-      code: 'eos',
-      type: 'transfer',
+      account: 'eosio',
+      name: 'transfer',
       data: {
         from: 'inita',
         to: 'initb',
-        amount: '1',
+        quantity: '1 EOS',
         memo: ''
       },
       authorization: []
     }
-    const type = structs.message
+    const type = structs.action
     const obj = type.fromObject(value) // tests fromObject
     const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
     const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
@@ -166,15 +166,15 @@ describe('Message.data', () => {
   })
 
   it('unknown type', () => {
-    const eos = Eos.Localnet({forceMessageDataHex: false})
+    const eos = Eos.Localnet({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
-      code: 'eos',
-      type: 'mytype',
+      account: 'eosio',
+      name: 'mytype',
       data: '030a0b0c',
       authorization: []
     }
-    assertSerializer(structs.message, value)
+    assertSerializer(structs.action, value)
   })
 })
 
