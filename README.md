@@ -9,6 +9,11 @@ A Dawn 3.x pre-release version of eosjs is available:
 
 You can run the latest Dawn 3.x node from the default master branch at: http://github.com/eosio/eos
 
+| Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker](https://hub.docker.com/r/eosio/eos/) | Node |
+| --- | --- | --- | --- | --- | --- |
+| dawn3 | branch: master | `npm install eosjs@dawn3` | branch: master | eosio/eos:20180322 | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
+| dawn2 | branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x | http or [https://t1readonly.eos.io](https://t1readonly.eos.io/v1/chain/get_info) |
+
 # Eosjs
 
 General purpose library for the EOS blockchain.
