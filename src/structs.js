@@ -55,6 +55,7 @@ module.exports = (config = {}, extendedSchema) => {
     public_key: () => [PublicKeyType],
     symbol: () => [AssetSymbol],
     asset: () => [Asset], // must come after AssetSymbol
+    extended_asset: () => [ExtendedAsset], // after Asset
     signature: () => [Signature]
   }
 
@@ -272,6 +273,43 @@ const Asset = (validation, baseTypes, customTypes) => {
         return '0.0001 SYMBOL'
       }
       return toAssetString(value)
+    }
+  }
+}
+
+const ExtendedAsset = (validation, baseTypes, customTypes) => {
+  const assetType = customTypes.asset(validation)
+  const contractName = customTypes.name(validation)
+
+  function toString(value) {
+    assert.equal(typeof value, 'string', 'extended_asset is expecting a string like: 9.9999 SBL@contract')
+    const [asset, contract = 'eosio'] = value.split('@')
+    return `${assetType.fromObject(asset)}@${contract}`
+  }
+
+  return {
+    fromByteBuffer (b) {
+      const asset = assetType.fromByteBuffer(b)
+      const contract = contractName.fromByteBuffer(b)
+      return `${asset}@${contract}`
+    },
+
+    appendByteBuffer (b, value) {
+      assert.equal(typeof value, 'string', 'value')
+      const [asset, contract] = value.split('@')
+      assetType.appendByteBuffer(b, asset)
+      contractName.appendByteBuffer(b, contract)
+    },
+
+    fromObject (value) {
+      return toString(value)
+    },
+
+    toObject (value) {
+      if (validation.defaults && value == null) {
+        return '0.0001 SYMBOL@contract'
+      }
+      return toString(value)
     }
   }
 }

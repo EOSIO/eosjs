@@ -63,6 +63,14 @@ describe('shorthand', () => {
     assertSerializer(PublicKeyType, pubkey)
   })
 
+  it('extended_asset', () => {
+    const eos = Eos.Localnet({defaults: true})
+    const eaType = eos.fc.types.extended_asset()
+    const eaString = eaType.toObject()
+    assertSerializer(eaType, eaString)
+    assert.equal(eaType.toObject('1 SBL'), '1.0000 SBL@eosio')
+  })
+
   it('symbol', () => {
     const eos = Eos.Localnet()
     const {types} = eos.fc
