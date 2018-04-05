@@ -5,15 +5,14 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha --use_strict src/*.test.js",
+    "test_lib": "mocha --use_strict lib/*.test.js",
     "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "prepublishOnly": "npm run prepublishOnly_lib && npm run prepublishOnly_test && npm run docs",
-    "prepublishOnly_lib": "babel src --out-dir lib",
-    "prepublishOnly_test": "mocha --use_strict lib/*.test.js",
-    "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos lib/index.js",
-    "build": "npm run prepublishOnly && npm run browserify",
-    "build_browser_test": "mkdir -p dist && browserify -o dist/mocha-test.js src/*.test.js",
-    "docs": "jsdoc2md src/format.js > docs/format.md"
+    "build": "babel src --out-dir lib",
+    "build_browser": "npm run build && mkdir -p dist && browserify -o dist/eos.js -s Eos lib/index.js",
+    "build_browser_test": "npm run build && mkdir -p dist && browserify -o dist/test.js lib/*.test.js",
+    "docs": "jsdoc2md src/format.js > docs/index.md",
+    "prepublishOnly": "npm run build_browser && npm run test_lib && npm run docs"
   },
   "repository": {
     "type": "git",
@@ -46,7 +45,7 @@
     "babel-polyfill": "^6.26.0",
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
-    "eosjs-api": "^4.0.0",
+    "eosjs-api": "^4.0.1",
     "eosjs-ecc": "^3.0.2",
     "eosjs-json": "^3.0.1",
     "fcbuffer": "^2.1.4"
