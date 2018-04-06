@@ -227,45 +227,46 @@ if(process.env['NODE_ENV'] === 'development') {
     it('action to contract', () => {
       // initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
       // eos is a bad test case, but it was the only native contract
-      const name = 'eosio'
+      const name = 'currency'
       return Eos.Localnet({signProvider}).contract(name).then(contract => {
-        contract.transfer('inita', 'initb', '1 EOS', '')
+        return contract.transfer('inita', 'initb', '1 CUR', '')
           // transaction sent on each command
           .then(tr => {
             assert.equal(1, tr.transaction.data.actions.length)
 
-            return contract.transfer('initb', 'inita', '1 EOS', '')
+            return contract.transfer('initb', 'inita', '1 CUR', '')
               .then(tr => {assert.equal(1, tr.transaction.data.actions.length)})
           })
       }).then(r => {assert(r == undefined)})
     })
 
-    it('action to contract atomic', () => {
+    it('action to contract atomic', async function() {
       let amt = 1 // for unique transactions
       const testnet = Eos.Localnet({signProvider})
 
-      const trTest = eos => {
-        assert(eos.transfer('inita', 'initb', amt + ' EOS', '') == null)
-        assert(eos.transfer('initb', 'inita', (amt++) + ' EOS', '') == null)
+      const trTest = currency => {
+        assert(currency.transfer('inita', 'initb', amt + ' CUR', '') == null)
+        assert(currency.transfer('initb', 'inita', (amt++) + ' CUR', '') == null)
       }
 
-      const assertTr = test =>
-        test.then(tr => {assert.equal(2, tr.transaction.data.actions.length)})
+      const assertTr = tr =>{
+        assert.equal(2, tr.transaction.data.actions.length)
+      }
         
       //  contracts can be a string or array
-      assertTr(testnet.transaction(['eosio'], ({eosio}) => trTest(eosio)))
-      assertTr(testnet.transaction('eosio', eosio => trTest(eosio)))
+      await assertTr(await testnet.transaction(['currency'], ({currency}) => trTest(currency)))
+      await assertTr(await testnet.transaction('currency', currency => trTest(currency)))
     })
 
     it('action to contract (contract tr nesting)', function () {
       this.timeout(4000)
       const tn = Eos.Localnet({signProvider})
-      return tn.contract('eosio').then(eosio => {
-        return eosio.transaction(tr => {
-          tr.transfer('inita', 'initb', '1 EOS', '')
-          tr.transfer('inita', 'initc', '2 EOS', '')
+      return tn.contract('currency').then(currency => {
+        return currency.transaction(tr => {
+          tr.transfer('inita', 'initb', '1 CUR', '')
+          tr.transfer('inita', 'initc', '2 CUR', '')
         }).then(() => {
-          return eosio.transfer('inita', 'initb', '3 EOS', '')
+          return currency.transfer('inita', 'initb', '3 CUR', '')
         })
       })
     })
@@ -336,35 +337,31 @@ if(process.env['NODE_ENV'] === 'development') {
   })
 
   // ./eosioc set contract currency build/contracts/currency/currency.wast build/contracts/currency/currency.abi
-  if(process.env['CURRENCY_ABI'] != null) {
-    it('Transaction ABI lookup', async function() {
-      const eos = Eos.Localnet()
-      const tx = await eos.transaction(
-        {
-          actions: [
-            {
-              account: 'currency',
-              name: 'transfer',
-              data: {
-                from: 'inita',
-                to: 'initb',
-                quantity: '13 CUR',
-                memo: ''
-              },
-              authorization: [{
-                actor: 'inita',
-                permission: 'active'
-              }]
-            }
-          ]
-        },
-        {sign: false, broadcast: false}
-      )
-      assert.equal(tx.transaction.data.actions[0].account, 'currency')
-    })
-  } else {
-    console.log('To run the currency Abi test: deploy the "currency" smart contract, set the CURRENCY_ABI environment variable.');
-  }
+  it('Transaction ABI lookup', async function() {
+    const eos = Eos.Localnet()
+    const tx = await eos.transaction(
+      {
+        actions: [
+          {
+            account: 'currency',
+            name: 'transfer',
+            data: {
+              from: 'inita',
+              to: 'initb',
+              quantity: '13 CUR',
+              memo: ''
+            },
+            authorization: [{
+              actor: 'inita',
+              permission: 'active'
+            }]
+          }
+        ]
+      },
+      {sign: false, broadcast: false}
+    )
+    assert.equal(tx.transaction.data.actions[0].account, 'currency')
+  })
 
 } // if development
 

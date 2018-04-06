@@ -108,7 +108,7 @@ function WriteApi(Network, network, config, Transaction) {
       options = args.pop()
     }
 
-    assert.equal(args.length, 1, 'transaction args: [contracts], transaction<callback|object>, [options], [callback]')
+    assert.equal(args.length, 1, 'transaction args: contracts<string|array>, transaction<callback|object>, [options], [callback]')
     const arg = args[0]
 
     if(contracts) {

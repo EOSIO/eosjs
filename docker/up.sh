@@ -3,7 +3,7 @@ set -o errexit
 set -o xtrace
 
 function cleos() {
-  docker-compose exec walletd /opt/eosio/bin/cleos -H nodeos "$@"
+  docker-compose exec nodeos /opt/eosio/bin/cleos -H nodeos "$@"
 }
 
 # Reset the volumes
@@ -34,6 +34,9 @@ cleos set contract exchange contracts/exchange/exchange.wast contracts/exchange/
 # issue new tokens
 cleos push action eosio issue '{"to":"eosio", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
 cleos push action currency create '{"issuer":"currency", "maximum_supply": "1000000000.0000 CUR", "can_freeze": 1, "can_recall": 1, "can_whitelist": 1}' -p currency@active
+cleos push action currency issue '{"to":"inita", "quantity": "1000000000.0000 CUR", "memo": ""}' -p currency@active
+cleos push action currency issue '{"to":"initb", "quantity": "1000000000.0000 CUR", "memo": ""}' -p currency@active
+
 
 cleos push action eosio issue '{"to":"inita", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
 cleos push action eosio issue '{"to":"initb", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active

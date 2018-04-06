@@ -15,4 +15,4 @@ trap finish ERR
 
 cd ..
 npm install
-NODE_ENV=development CURRENCY_ABI= npm run test 
+NODE_ENV=development npm run test
