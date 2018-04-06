@@ -85,7 +85,23 @@ describe('shorthand', () => {
 
 })
 
-if(process.env['DEVELOPMENT'] != null) {
+if(process.env['NODE_ENV'] === 'development') {
+
+  describe('Eosio Abi', () => {
+
+    it('Eosio contract parses', (done) => {
+      const eos = Eos.Localnet()
+
+      eos.contract('eosio', (error, eosio) => {
+        assert(!error, error)
+        assert(eosio.transfer, 'eosio contract')
+        assert(eosio.issue, 'eosio contract')
+        done()
+      })
+    })
+
+  })
+
   describe('Contract Abi', () => {
     it('Messages do not sort', async function() {
       const local = Eos.Localnet()
