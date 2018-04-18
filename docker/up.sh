@@ -16,8 +16,13 @@ docker-compose pull
 docker-compose up -d
 docker-compose logs -f | egrep -v 'eosio generated block' &
 
-cleos wallet create
-cleos wallet import 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+cleos wallet create -n test
+
+# Root key need not be imported
+# cleos wallet import 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+
+# Hack: publish main eosio smart contract
+cleos set contract eosio contracts/eosio.system -p eosio@active
 
 # create accounts
 cleos create account eosio currency EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
@@ -26,10 +31,9 @@ cleos create account eosio initb EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5
 cleos create account eosio initc EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio exchange EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
-# publish smart contracts
-cleos set contract currency contracts/currency/currency.wast contracts/currency/currency.abi
-cleos set contract eosio contracts/eosio.system/eosio.system.wast contracts/eosio.system/eosio.system.abi
-cleos set contract exchange contracts/exchange/exchange.wast contracts/exchange/exchange.abi
+# publish other smart contracts
+cleos set contract exchange contracts/exchange -p exchange@active
+cleos set contract currency contracts/currency -p currency@active
 
 # issue new tokens
 cleos push action eosio issue '{"to":"eosio", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active

@@ -45,10 +45,10 @@
     "babel-polyfill": "^6.26.0",
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
-    "eosjs-api": "^4.0.2",
+    "eosjs-api": "^4.0.3",
     "eosjs-ecc": "^3.0.2",
-    "eosjs-json": "^3.0.2",
-    "fcbuffer": "^2.1.4"
+    "eosjs-json": "^4.0.1",
+    "fcbuffer": "^2.1.5"
   },
   "babel": {
     "presets": [
