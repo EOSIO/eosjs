@@ -17,8 +17,9 @@ describe('offline', () => {
     region: 0,
     ref_block_num: 1,
     ref_block_prefix: 452435776,
-    context_free_cpu_bandwidth: 0,
-    packed_bandwidth_words: 0,
+    max_net_usage_words: 0,
+    max_kcpu_usage: 0,
+    delay_sec: 0,
     context_free_actions: []
   }
 
@@ -39,12 +40,13 @@ describe('offline', () => {
     const trx = await eos.transfer('bankers', 'people', '1000000 EOS', memo)
 
     assert.deepEqual({
-      expiration: trx.transaction.data.expiration,
+      expiration: trx.transaction.transaction.expiration,
       region: 0,
-      ref_block_num: trx.transaction.data.ref_block_num,
-      ref_block_prefix: trx.transaction.data.ref_block_prefix,
-      context_free_cpu_bandwidth: 0,
-      packed_bandwidth_words: 0,
+      ref_block_num: trx.transaction.transaction.ref_block_num,
+      ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
+      max_net_usage_words: 0,
+      max_kcpu_usage: 0,
+      delay_sec: 0,
       context_free_actions: []
     }, headers)
 
@@ -192,7 +194,7 @@ if(process.env['NODE_ENV'] === 'development') {
           {actor: 'inita', permission: 'owner'},
           {actor: 'initb', permission: 'owner'}
         ]
-        assert.deepEqual(transaction.data.actions[0].authorization, ans)
+        assert.deepEqual(transaction.transaction.actions[0].authorization, ans)
       })
     })
 
@@ -232,10 +234,10 @@ if(process.env['NODE_ENV'] === 'development') {
         return contract.transfer('inita', 'initb', '1 CUR', '')
           // transaction sent on each command
           .then(tr => {
-            assert.equal(1, tr.transaction.data.actions.length)
+            assert.equal(1, tr.transaction.transaction.actions.length)
 
             return contract.transfer('initb', 'inita', '1 CUR', '')
-              .then(tr => {assert.equal(1, tr.transaction.data.actions.length)})
+              .then(tr => {assert.equal(1, tr.transaction.transaction.actions.length)})
           })
       }).then(r => {assert(r == undefined)})
     })
@@ -250,7 +252,7 @@ if(process.env['NODE_ENV'] === 'development') {
       }
 
       const assertTr = tr =>{
-        assert.equal(2, tr.transaction.data.actions.length)
+        assert.equal(2, tr.transaction.transaction.actions.length)
       }
         
       //  contracts can be a string or array
@@ -277,7 +279,7 @@ if(process.env['NODE_ENV'] === 'development') {
         assert(tr.transfer('inita', 'initb', '1 EOS', '') == null)
         assert(tr.transfer({from: 'inita', to: 'initc', quantity: '1 EOS', memo: ''}) == null)
       }).then(tr => {
-        assert.equal(2, tr.transaction.data.actions.length)
+        assert.equal(2, tr.transaction.transaction.actions.length)
       })
     })
 
@@ -360,7 +362,7 @@ if(process.env['NODE_ENV'] === 'development') {
       },
       {sign: false, broadcast: false}
     )
-    assert.equal(tx.transaction.data.actions[0].account, 'currency')
+    assert.equal(tx.transaction.transaction.actions[0].account, 'currency')
   })
 
 } // if development

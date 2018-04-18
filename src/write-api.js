@@ -27,7 +27,6 @@ function writeApiGen(Network, network, structs, config) {
     if(schema.type !== 'action') {
       continue
     }
-
     if(reserveFunctions.has(type)) {
       throw new TypeError('Conflicting Api function: ' + type)
     }

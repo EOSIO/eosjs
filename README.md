@@ -11,7 +11,7 @@ You can run the latest Dawn 3.x node from the default master branch at: http://g
 
 | Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker](https://hub.docker.com/r/eosio/eos/) | Node |
 | --- | --- | --- | --- | --- | --- |
-| dawn3 | branch: master | `npm install eosjs@dawn3` | branch: master | eosio/eos:20180328 | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
+| dawn3 | branch: master | `npm install eosjs@dawn3` | branch: master | eosio/eos:dawn3x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
 | dawn2 | branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x | http or [https://t1readonly.eos.io](https://t1readonly.eos.io/v1/chain/get_info) |
 
 # Eosjs
