@@ -342,7 +342,7 @@ assert.deepEqual(nonce, eos.fc.fromBuffer('nonce', nonceBuffer))
 
 // Serialization for a smart-contract's Abi:
 eos.contract('currency', (error, c) => currency = c)
-issue = {to: 'inita', quantity: '1.0000 CUR'}
+issue = {to: 'inita', quantity: '1.0000 CUR', memo: 'memo'}
 issueBuffer = currency.fc.toBuffer('issue', issue)
 assert.deepEqual(issue, eos.fc.fromBuffer('issue', issueBuffer))
 ```
@@ -391,7 +391,7 @@ var {api, ecc, json, Fcbuffer, format} = Eos.modules
 git clone https://github.com/EOSIO/eosjs.git
 cd eosjs
 npm install
-npm run build
+npm run build_browser
 # builds: ./dist/eos.js
 ```
 
