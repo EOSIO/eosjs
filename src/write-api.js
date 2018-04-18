@@ -399,6 +399,7 @@ function WriteApi(Network, network, config, Transaction) {
       //   txObject.context_free_cpu_bandwidth = await eos.getCpuEstimate(txObject)
       // }
 
+      /* TODO: update for dawn-v3.0.0
       if(
         txObject.packed_bandwidth_words === 0 ||
         txObject.packed_bandwidth_words == null
@@ -414,6 +415,7 @@ function WriteApi(Network, network, config, Transaction) {
         // number of 8 byte words this transaction can compress into
         txObject.packed_bandwidth_words = Math.ceil((size + 2) / 8) // compression = none
       }
+      */
 
       // console.log('txObject', JSON.stringify(txObject,null,4))
 
@@ -448,7 +450,7 @@ function WriteApi(Network, network, config, Transaction) {
 
         const packedTr = {
           compression: 'none',
-          data: tr,
+          transaction: tr,
           signatures: sigs
         }
 
