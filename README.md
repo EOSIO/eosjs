@@ -344,7 +344,7 @@ assert.deepEqual(nonce, eos.fc.fromBuffer('nonce', nonceBuffer))
 eos.contract('currency', (error, c) => currency = c)
 issue = {to: 'inita', quantity: '1.0000 CUR', memo: 'memo'}
 issueBuffer = currency.fc.toBuffer('issue', issue)
-assert.deepEqual(issue, eos.fc.fromBuffer('issue', issueBuffer))
+assert.deepEqual(issue, currency.fc.fromBuffer('issue', issueBuffer))
 ```
 
 Use Node v8+ to `package-lock.json`.
