@@ -463,7 +463,7 @@ class Api {
         let signatures = privateKeys.map(key => {
             let chainIdBuf = new Buffer(this.chainId, 'hex');
             let signBuf = Buffer.concat([chainIdBuf, new Buffer(tx)]);
-            return eos.ecc.Signature.sign(signBuf, key).toString();
+            return ecc.Signature.sign(signBuf, key).toString();
         });
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,

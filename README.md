@@ -17,7 +17,7 @@ Limitations:
 ```html
 <pre style="width: 100%; height: 100%; margin:0px; "></pre>
 
-<script src='https://cdn.rawgit.com/tbfleming/eos-altjs/5fbc143ee3c532abcdf57f4ef0574d4389f0b2f2/dist/eos-altjs-debug.js'></script>
+<script src='https://cdn.rawgit.com/tbfleming/eos-altjs/d11b3369349750e1944b373e48fedf1fd8969d7c/dist/eos-altjs-debug.js'></script>
 <script>
     let eos = window.eos_altjs;
     let pre = document.getElementsByTagName('pre')[0];
