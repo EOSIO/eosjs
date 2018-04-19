@@ -184,6 +184,14 @@ class EosBuffer {
     getBytes() {
         return this.getUint8Array(this.getVaruint32());
     }
+
+    pushString(v) {
+        this.pushBytes((new TextEncoder()).encode(v));
+    }
+
+    getString() {
+        return ((new TextDecoder('utf-8', { fatal: true })).decode(this.getBytes()));
+    }
 } // EosBuffer
 
 function dateToSec(date) {
@@ -268,13 +276,9 @@ function createType(attrs = {}) {
 function createInitialTypes() {
     return {
         action_name: createType({ name: 'action_name', aliasOfName: 'name' }),
+        field_name: createType({ name: 'field_name', aliasOfName: 'string' }),
         permission_name: createType({ name: 'permission_name', aliasOfName: 'name' }),
-
-        bytes: createType({
-            name: 'bytes',
-            serialize(buffer, data) { buffer.pushBytes(data); return buffer; },
-            deserialize(buffer) { return buffer.getBytes(); },
-        }),
+        type_name: createType({ name: 'type_name', aliasOfName: 'string' }),
 
         uint8: createType({
             name: 'uint8',
@@ -312,6 +316,16 @@ function createInitialTypes() {
             deserialize(buffer) { return buffer.getVaruint32(); },
         }),
 
+        bytes: createType({
+            name: 'bytes',
+            serialize(buffer, data) { buffer.pushBytes(data); return buffer; },
+            deserialize(buffer) { return buffer.getBytes(); },
+        }),
+        string: createType({
+            name: 'string',
+            serialize(buffer, data) { buffer.pushString(data); return buffer; },
+            deserialize(buffer) { return buffer.getString(); },
+        }),
         name: createType({
             name: 'name',
             serialize(buffer, data) { buffer.pushName(data); return buffer; },
@@ -325,14 +339,11 @@ function createInitialTypes() {
 
         // TODO: implement these types
         checksum256: createType({ name: 'checksum256' }),
-        field_name: createType({ name: 'field_name' }),
         int64: createType({ name: 'int64' }),
         producer_schedule: createType({ name: 'producer_schedule' }),
         public_key: createType({ name: 'public_key' }),
         signature: createType({ name: 'signature' }),
-        string: createType({ name: 'string' }),
         transaction_id_type: createType({ name: 'transaction_id_type' }),
-        type_name: createType({ name: 'type_name' }),
         uint128: createType({ name: 'uint128' }),
     };
 } // createInitialTypes()
