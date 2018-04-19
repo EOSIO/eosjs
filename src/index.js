@@ -447,18 +447,28 @@ class Api {
             });
     }
 
-    async loadContract(accountName) {
-        let code = await this.get_code(accountName);
-        let types = getTypesFromAbi(
-            accountName === 'eosio' ? createInitialTypes() : this.contracts.eosio.types,
-            code.abi);
+    async getContract(accountName, reload = false) {
+        if (!reload && this.contracts[accountName])
+            return this.contracts[accountName];
+        let initialTypes = accountName === 'eosio' ?
+            createInitialTypes() :
+            (await this.getContract('eosio')).types;
+        let abi = (await this.get_code(accountName)).abi;
+        let types = getTypesFromAbi(initialTypes, abi);
         let actions = {};
-        for (let { name, type } of code.abi.actions)
+        for (let { name, type } of abi.actions)
             actions[name] = getType(types, type);
-        this.contracts[accountName] = { types, actions };
+        return this.contracts[accountName] = { types, actions };
     }
 
-    async sendTransaction(privateKeys, transaction) {
+    // User doesn't have to call get_info() and get_block() ahead of time
+    async easyTransactionHeader(behind, expireSeconds) {
+        let info = await this.get_info();
+        let refBlock = await this.get_block(info.head_block_num - behind);
+        return transactionHeader(refBlock, expireSeconds);
+    };
+
+    async pushTransaction(privateKeys, transaction) {
         let tx = this.serializeTransaction(transaction).asUint8Array()
         let signatures = privateKeys.map(key => {
             let chainIdBuf = new Buffer(this.chainId, 'hex');
@@ -476,7 +486,7 @@ class Api {
     serializeActionData(accountName, actionName, data) {
         let contract = this.contracts[accountName];
         if (!contract)
-            throw new Error('Missing contract for ' + accountName + '; call loadContract() to fix')
+            throw new Error('Missing contract for ' + accountName + '; call getContract() to fix')
         let action = contract.actions[actionName];
         if (!action)
             throw new Error('Unknown action ' + actionName + ' in contract ' + accountName);
@@ -490,6 +500,12 @@ class Api {
             authorization,
             data: this.serializeActionData(accountName, actionName, data),
         };
+    }
+
+    // User doesn't have to call getContract() ahead of time
+    async easyCreateAction(accountName, actionName, authorization, data) {
+        await this.getContract(accountName);
+        return this.createAction(accountName, actionName, authorization, data);
     }
 
     serializeTransaction(transaction) {

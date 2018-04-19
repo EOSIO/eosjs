@@ -17,7 +17,7 @@ Limitations:
 ```html
 <pre style="width: 100%; height: 100%; margin:0px; "></pre>
 
-<script src='https://cdn.rawgit.com/tbfleming/eos-altjs/d11b3369349750e1944b373e48fedf1fd8969d7c/dist/eos-altjs-debug.js'></script>
+<script src='https://cdn.rawgit.com/tbfleming/eos-altjs/4fb0415d4d2835db9667291c520b3985e44b58d9/dist/eos-altjs-debug.js'></script>
 <script>
     let eos = window.eos_altjs;
     let pre = document.getElementsByTagName('pre')[0];
@@ -28,18 +28,11 @@ Limitations:
 
         try {
             let api = new eos.Api({ endpoint });
-            await api.loadContract('eosio');    // Required
-            await api.loadContract('test');     // Contract we're sending an action to
-
-            // Reference 3 blocks behind the head
-            let info = await api.get_info();
-            let refBlock = await api.get_block(info.head_block_num - 3);
-
-            let result = await api.sendTransaction(privateKeys, {
-                // Expire 10 seconds after refBlock
-                ...eos.transactionHeader(refBlock, 10),
+            let result = await api.pushTransaction(privateKeys, {
+                // Reference 3 blocks behind the head and expire 10 seconds after
+                ...await api.easyTransactionHeader(3, 10),
                 actions: [
-                    api.createAction('test', 'dosomething',
+                    await api.easyCreateAction('test', 'dosomething',
                         [{
                             actor: 'test',
                             permission: 'active',
