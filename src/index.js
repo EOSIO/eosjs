@@ -104,6 +104,17 @@ class EosBuffer {
         return v >>> 0;
     }
 
+    pushUint64(v) {
+        this.pushUint32(v >>> 0);
+        this.pushUint32(Math.floor(v / 0x100000000) >>> 0);
+    }
+
+    getUint64() {
+        let lo = this.getUint32();
+        let hi = this.getUint32();
+        return hi * 0x100000000 + lo;
+    }
+
     pushVaruint32(v) {
         while (true) {
             if (v >>> 7) {
@@ -305,6 +316,11 @@ function createInitialTypes() {
             serialize(buffer, data) { buffer.pushUint32(data); return buffer; },
             deserialize(buffer) { return buffer.getUint32(); },
         }),
+        uint64: createType({
+            name: 'uint64',
+            serialize(buffer, data) { buffer.pushUint64(data); return buffer; },
+            deserialize(buffer) { return buffer.getUint64(); },
+        }),
         int32: createType({
             name: 'int32',
             serialize(buffer, data) { buffer.pushUint32(data); return buffer; },
@@ -338,6 +354,7 @@ function createInitialTypes() {
         }),
 
         // TODO: implement these types
+        asset: createType({ name: 'asset' }),
         checksum256: createType({ name: 'checksum256' }),
         int64: createType({ name: 'int64' }),
         producer_schedule: createType({ name: 'producer_schedule' }),
