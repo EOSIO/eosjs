@@ -1,7 +1,7 @@
 Dockerized eosio instance for development and testing.  This container
 is designed to reset its blockchain and wallet state upon shutdown.
 
-# Configures
+# Configure
 
 This branch is already configured for a compatible docker:
 
@@ -12,6 +12,8 @@ egrep image docker-compose.yml
 # If you need to change the docker image
 echo "EOSIO_IMAGE=eosio/eos:dawn4x" > .env 
 ```
+
+See [./up.sh](./up.sh) for a private key and funded accounts. 
 
 # Localnet
 
