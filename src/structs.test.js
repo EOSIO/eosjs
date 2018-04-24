@@ -101,19 +101,6 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
   })
-
-  describe('Contract Abi', () => {
-    it('Messages do not sort', async function() {
-      const local = Eos.Localnet()
-      const opts = {sign: false, broadcast: false}
-      const tx = await local.transaction(['currency', 'eosio'], ({currency, eosio}) => {
-        eosio.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio', ..} remains first
-        currency.transfer('inita', 'initd', '1 CUR', '') // {account: 'currency', ..} remains second
-      }, opts)
-      assert.equal(tx.transaction.transaction.actions[0].account, 'eosio')
-      assert.equal(tx.transaction.transaction.actions[1].account, 'currency')
-    })
-  })
 }
 
 describe('Message.data', () => {

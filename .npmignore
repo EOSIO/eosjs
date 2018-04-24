@@ -4,5 +4,5 @@ sandbox
 docs
 src
 .nyc_output
-docker/.env
+docker
 dist

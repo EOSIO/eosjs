@@ -6,4 +6,5 @@ lib
 .nyc_output
 .idea
 docker/.env
+docker/contracts
 dist/*.js

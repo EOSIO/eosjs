@@ -1,9 +1,12 @@
 /* eslint-env mocha */
 const assert = require('assert')
+const fs = require('fs')
 
 const Eos = require('.')
 const {ecc} = Eos.modules
 const {Keystore} = require('eosjs-keygen')
+
+const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 
 describe('version', () => {
   it('exposes a version number', () => {
@@ -70,8 +73,41 @@ if(process.env['NODE_ENV'] === 'development') {
     })
   })
 
+  describe('Contracts', () => {
+    it('Messages do not sort', async function() {
+      const local = Eos.Localnet()
+      const opts = {sign: false, broadcast: false}
+      const tx = await local.transaction(['currency', 'eosio'], ({currency, eosio}) => {
+        eosio.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio', ..} remains first
+        currency.transfer('inita', 'initd', '1 CUR', '') // {account: 'currency', ..} remains second
+      }, opts)
+      assert.equal(tx.transaction.transaction.actions[0].account, 'eosio')
+      assert.equal(tx.transaction.transaction.actions[1].account, 'currency')
+    })
+
+    function deploy(name) {
+      it(`Deploy ${name}`, async function() {
+        this.timeout(4000)
+        const config = {binaryen: require("binaryen"), keyProvider: wif}
+        const eos = Eos.Localnet(config)
+
+        // When this test is ran multiple times, avoids same contract
+        // version re-deploy error.
+        const tmpWast = fs.readFileSync(`docker/contracts/proxy/proxy.wast`)
+        await eos.setcode(name, 0, 0, tmpWast)
+
+        const wast = fs.readFileSync(`docker/contracts/${name}/${name}.wast`)
+        const abi = fs.readFileSync(`docker/contracts/${name}/${name}.abi`)
+        await eos.setcode(name, 0, 0, wast)
+        await eos.setabi(name, JSON.parse(abi))
+      })
+    }
+    deploy('currency')
+    // deploy('exchange') // exceeds: max_transaction_net_usage
+
+  })
+
   describe('transactions', () => {
-    const wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
     const signProvider = ({sign, buf}) => sign(buf, wif)
     const promiseSigner = (args) => Promise.resolve(signProvider(args))
 
@@ -385,8 +421,5 @@ if(process.env['NODE_ENV'] === 'development') {
 
 } // if development
 
-
-
 const randomName = () => 'a' +
   String(Math.round(Math.random() * 1000000000)).replace(/[0,6-9]/g, '')
-
