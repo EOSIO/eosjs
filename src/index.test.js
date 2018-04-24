@@ -94,15 +94,16 @@ if(process.env['NODE_ENV'] === 'development') {
         // When this test is ran multiple times, avoids same contract
         // version re-deploy error.
         const tmpWast = fs.readFileSync(`docker/contracts/proxy/proxy.wast`)
-        await eos.setcode(name, 0, 0, tmpWast)
+        await eos.setcode('inita', 0, 0, tmpWast)
 
         const wast = fs.readFileSync(`docker/contracts/${name}/${name}.wast`)
         const abi = fs.readFileSync(`docker/contracts/${name}/${name}.abi`)
-        await eos.setcode(name, 0, 0, wast)
-        await eos.setabi(name, JSON.parse(abi))
+        await eos.setcode('inita', 0, 0, wast)
+        await eos.setabi('inita', JSON.parse(abi))
       })
     }
     deploy('currency')
+    deploy('eosio.token')
     // deploy('exchange') // exceeds: max_transaction_net_usage
 
   })
