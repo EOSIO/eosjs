@@ -96,6 +96,24 @@ if(process.env['NODE_ENV'] === 'development') {
       })
     })
 
+    it('keyProvider multiple private keys (get_required_keys)', () => {
+
+      // keyProvider should return an array of keys
+      const keyProvider = () => {
+        return [
+          '5K84n2nzRpHMBdJf95mKnPrsqhZq7bhUvrzHyvoGwceBHq8FEPZ',
+          wif
+        ]
+      }
+
+      const eos = Eos.Localnet({keyProvider})
+
+      return eos.transfer('inita', 'initb', '1.274 EOS', '', false).then(tr => {
+        assert.equal(tr.transaction.signatures.length, 1)
+        assert.equal(typeof tr.transaction.signatures[0], 'string')
+      })
+    })
+
     // If a keystore is used, the keyProvider should return available
     // public keys first then respond with private keys next.
     it('keyProvider public keys then private key', () => {
