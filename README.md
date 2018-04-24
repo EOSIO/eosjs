@@ -128,7 +128,7 @@ eos.transfer('inita', 'initb', '2 EOS', 'memo', options)
 eos.transfer('inita', 'initb', '1 EOS', '', false)
 ```
 
-Read-write API methods and documentation are generated from this [schema](https://github.com/EOSIO/eosjs-json/blob/master/schema/generated.json).
+Read-write API methods and documentation are generated from the [eosio](https://github.com/EOSIO/eosjs-json/blob/master/schema/eosio.json) schema.
 
 For more advanced signing, see `keyProvider` in
 [eosjs-keygen](https://www.npmjs.com/package/eosjs-keygen) or
