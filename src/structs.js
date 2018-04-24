@@ -47,8 +47,6 @@ module.exports = (config = {}, extendedSchema) => {
 
   // eosTypes reconciled with:
   //   eos::abi_serializer.cpp
-  //   eosjs-json::base.json
-  //   eosjs-json::generated.json
 
   const eosTypes = {
     name: ()=> [Name],
