@@ -174,9 +174,14 @@ signing and broadcasting.  For this, the Binaryen library is used.  Because
 this is a large library it is not included in `eosjs` by default.
 
 Add binaryen to your project:
+
 ```bash
-npm i binaryen
+npm i binaryen@37.0.0
 ```
+
+Although the EOS back-end does seek to be up-to-date and have
+binaryen backwards compatibility, new versions of binaryen may be
+[problematic](https://github.com/EOSIO/eos/issues/2187).
 
 Import and include the library when you configure Eos:
 
