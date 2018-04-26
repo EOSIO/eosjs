@@ -432,7 +432,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
       // console.log(`Unknown Action.name ${object.name}`)
       const data = typeof object.data === 'string' ? new Buffer(object.data, 'hex') : object.data
       if(!Buffer.isBuffer(data)) {
-        throw new TypeError('Expecting hex string or buffer in action.data')
+        throw new TypeError(`Unknown struct '${object.name}' for contract '${object.account}', locate this struct or provide serialized action.data`)
       }
       b.writeVarint32(data.length)
       b.append(data.toString('binary'), 'binary')
