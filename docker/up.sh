@@ -32,24 +32,24 @@ cleos create account eosio initc EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5
 # setup contracts
 function create_contract() {
   name=$1
+  contract=${2-$name}
 
   cleos create account eosio $name EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
   # publish smart contract
-  cleos set contract $name contracts/$name -p $name@active
+  cleos set contract $name contracts/$contract -p $name@active
 }
-create_contract currency
 create_contract exchange
-create_contract eosio.token
+create_contract currency eosio.token
 
 # issue new tokens
-cleos push action eosio issue '{"to":"eosio", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
-cleos push action eosio issue '{"to":"currency", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
-cleos push action eosio issue '{"to":"eosio.token", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
-cleos push action eosio issue '{"to":"inita", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
-cleos push action eosio issue '{"to":"initb", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
-cleos push action eosio issue '{"to":"initc", "quantity": "1000000000.0000 EOS", "memo": ""}' -p eosio@active
+cleos push action eosio issue '{"to":"eosio", "quantity": "1000.0000 EOS", "memo": ""}' -p eosio@active
+cleos push action eosio issue '{"to":"currency", "quantity": "1000.0000 EOS", "memo": ""}' -p eosio@active
+cleos push action eosio issue '{"to":"eosio.token", "quantity": "1000.0000 EOS", "memo": ""}' -p eosio@active
+cleos push action eosio issue '{"to":"inita", "quantity": "1000.0000 EOS", "memo": ""}' -p eosio@active
+cleos push action eosio issue '{"to":"initb", "quantity": "1000.0000 EOS", "memo": ""}' -p eosio@active
+cleos push action eosio issue '{"to":"initc", "quantity": "1000.0000 EOS", "memo": ""}' -p eosio@active
 
-cleos push action currency create '{"issuer":"currency", "maximum_supply": "1000000000.0000 CUR", "can_freeze": 1, "can_recall": 1, "can_whitelist": 1}' -p currency@active
-cleos push action currency issue '{"to":"inita", "quantity": "1000000000.0000 CUR", "memo": ""}' -p currency@active
-cleos push action currency issue '{"to":"initb", "quantity": "1000000000.0000 CUR", "memo": ""}' -p currency@active
+cleos push action currency create '{"issuer":"currency", "maximum_supply": "1000000.0000 CUR", "can_freeze": 1, "can_recall": 1, "can_whitelist": 1}' -p currency@active
+cleos push action currency issue '{"to":"inita", "quantity": "1000.0000 CUR", "memo": ""}' -p currency@active
+cleos push action currency issue '{"to":"initb", "quantity": "1000.0000 CUR", "memo": ""}' -p currency@active
