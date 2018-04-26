@@ -1,4 +1,4 @@
-const {PublicKey} = require('eosjs-ecc')
+const {ecc,PublicKey} = require('eosjs-ecc')
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
