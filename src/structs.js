@@ -51,11 +51,11 @@ module.exports = (config = {}, extendedSchema) => {
 
   const eosTypes = {
     name: ()=> [Name],
-    public_key: () => [PublicKeyType],
+    public_key: () => [variant(PublicKeyEcc)],
     symbol: () => [AssetSymbol],
     asset: () => [Asset], // must come after AssetSymbol
     extended_asset: () => [ExtendedAsset], // after Asset
-    signature: () => [Signature]
+    signature: () => [variant(Signature)]
   }
 
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
@@ -112,11 +112,15 @@ const Name = (validation) => {
   }
 }
 
-const PublicKeyType = (validation, baseTypes) => {
-  const staticVariant = baseTypes.static_variant([
-    PublicKeyEcc(validation),
-    // PublicKeyR1(validation)
-  ])
+/**
+  A variant is like having a version of an object.  A varint comes
+  first and identifies which type of object this is.
+
+  @arg {Array} variantArray array of types
+*/
+const variant = (...variantArray) => (validation, baseTypes, customTypes) => {
+  const variants = variantArray.map(Type => Type(validation, baseTypes, customTypes))
+  const staticVariant = baseTypes.static_variant(variants)
 
   return {
     fromByteBuffer (b) {
@@ -313,30 +317,26 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
   }
 }
 
-const Signature = (validation, baseTypes, customTypes) => {
+const Signature = (validation, baseTypes) => {
   const signatureType = baseTypes.fixed_bytes65(validation)
   return {
     fromByteBuffer (b) {
-      console.log(1);
       const signatureBuffer = signatureType.fromByteBuffer(b)
       const signature = ecc.Signature.from(signatureBuffer)
       return signature.toString()
     },
 
     appendByteBuffer (b, value) {
-      console.log(2);
       const signature = ecc.Signature.from(value)
       signatureType.appendByteBuffer(b, signature.toBuffer())
     },
 
     fromObject (value) {
-      console.log(3);
       const signature = ecc.Signature.from(value)
       return signature.toString()
     },
 
     toObject (value) {
-      console.log(4);
       if (validation.defaults && value == null) {
         return 'SIGnature..'
       }
