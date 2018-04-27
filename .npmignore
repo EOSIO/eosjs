@@ -6,3 +6,4 @@ src
 .nyc_output
 docker
 dist
+bin

@@ -8,3 +8,5 @@ lib
 docker/.env
 docker/contracts
 dist/*.js
+bin/eosio.system.abi
+docs/index.md
