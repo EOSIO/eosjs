@@ -32,7 +32,7 @@ module.exports = (config = {}, extendedSchema) => {
     throw new Error(`Missing ABI struct or action: ${lookupName}`)
   }
 
-  // If eosd does not have an ABI setup for a certain action.type, it will throw
+  // If nodeos does not have an ABI setup for a certain action.type, it will throw
   // an error: `Invalid cast from object_type to string` .. forceActionDataHex
   // may be used to until native ABI is added or fixed.
   const forceActionDataHex = config.forceActionDataHex != null ?
