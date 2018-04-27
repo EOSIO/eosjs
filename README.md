@@ -354,9 +354,9 @@ Use Node v8+ to `package-lock.json`.
 
 # Related Libraries
 
-These libraries are integrated into eosjs seemlessly so you probably do not
-need to use them directly.  They are exported here giving more API access
-from `eosjs` or may be used separately.
+These libraries are integrated into `eosjs` seamlessly so you probably do not
+need to use them directly.  They are exported here giving more API access or
+in some cases may be used standalone.
 
 ```javascript
 var {api, ecc, json, Fcbuffer, format} = Eos.modules
@@ -408,6 +408,4 @@ var eos = Eos.Testnet()
 
 # Environment
 
-Node 6+ and browser (browserify, webpack, etc)
-
-React Native should work, create an issue if you find a bug.
+Node and browser (es2015)
