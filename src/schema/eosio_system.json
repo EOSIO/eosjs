@@ -1,0 +1,201 @@
+{
+  "account": {
+    "base": "",
+    "fields": {
+      "currency": "uint64",
+      "balance": "uint64"
+    }
+  },
+  "claimrewards": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "owner": "account_name"
+    }
+  },
+  "currency_stats": {
+    "base": "",
+    "fields": {
+      "currency": "uint64",
+      "supply": "uint64"
+    }
+  },
+  "delegatebw": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "from": "account_name",
+      "receiver": "account_name",
+      "stake_net": "asset",
+      "stake_cpu": "asset",
+      "stake_storage": "asset"
+    }
+  },
+  "delegated_bandwidth": {
+    "base": "",
+    "fields": {
+      "from": "account_name",
+      "to": "account_name",
+      "net_weight": "asset",
+      "cpu_weight": "asset",
+      "storage_stake": "asset",
+      "storage_bytes": "uint64"
+    }
+  },
+  "eosio_global_state": {
+    "base": "eosio_parameters",
+    "fields": {
+      "total_storage_bytes_reserved": "uint64",
+      "total_storage_stake": "uint64",
+      "payment_per_block": "uint64"
+    }
+  },
+  "eosio_parameters": {
+    "base": "",
+    "fields": {
+      "base_per_transaction_net_usage": "uint32",
+      "base_per_transaction_cpu_usage": "uint32",
+      "base_per_action_cpu_usage": "uint32",
+      "base_setcode_cpu_usage": "uint32",
+      "per_signature_cpu_usage": "uint32",
+      "per_lock_net_usage": "uint32",
+      "context_free_discount_cpu_usage_num": "uint64",
+      "context_free_discount_cpu_usage_den": "uint64",
+      "max_transaction_cpu_usage": "uint32",
+      "max_transaction_net_usage": "uint32",
+      "max_block_cpu_usage": "uint64",
+      "target_block_cpu_usage_pct": "uint32",
+      "max_block_net_usage": "uint64",
+      "target_block_net_usage_pct": "uint32",
+      "max_transaction_lifetime": "uint32",
+      "max_transaction_exec_time": "uint32",
+      "max_authority_depth": "uint16",
+      "max_inline_depth": "uint16",
+      "max_inline_action_size": "uint32",
+      "max_generated_transaction_count": "uint32",
+      "max_transaction_delay": "uint32",
+      "max_storage_size": "uint64",
+      "percent_of_max_inflation_rate": "uint32",
+      "storage_reserve_ratio": "uint32"
+    }
+  },
+  "issue": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "to": "account_name",
+      "quantity": "asset"
+    }
+  },
+  "nonce": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "value": "string"
+    }
+  },
+  "producer_info": {
+    "base": "",
+    "fields": {
+      "owner": "account_name",
+      "total_votes": "uint128",
+      "prefs": "eosio_parameters",
+      "packed_key": "uint8[]",
+      "per_block_payments": "uint64",
+      "last_claim_time": "uint32"
+    }
+  },
+  "refund": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "owner": "account_name"
+    }
+  },
+  "regproducer": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "producer": "account_name",
+      "producer_key": "bytes",
+      "prefs": "eosio_parameters"
+    }
+  },
+  "regproxy": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "proxy": "account_name"
+    }
+  },
+  "total_resources": {
+    "base": "",
+    "fields": {
+      "owner": "account_name",
+      "net_weight": "asset",
+      "cpu_weight": "asset",
+      "storage_stake": "asset",
+      "storage_bytes": "uint64"
+    }
+  },
+  "transfer": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "from": "account_name",
+      "to": "account_name",
+      "quantity": "asset",
+      "memo": "string"
+    }
+  },
+  "undelegatebw": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "from": "account_name",
+      "receiver": "account_name",
+      "unstake_net": "asset",
+      "unstake_cpu": "asset",
+      "unstake_bytes": "uint64"
+    }
+  },
+  "unregprod": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "producer": "account_name"
+    }
+  },
+  "unregproxy": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "proxy": "account_name"
+    }
+  },
+  "voteproducer": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "voter": "account_name",
+      "proxy": "account_name",
+      "producers": "account_name[]"
+    }
+  },
+  "voter_info": {
+    "base": "",
+    "fields": {
+      "owner": "account_name",
+      "proxy": "account_name",
+      "last_update": "uint32",
+      "is_proxy": "uint32",
+      "staked": "asset",
+      "unstaking": "asset",
+      "unstake_per_week": "asset",
+      "proxied_votes": "uint128",
+      "producers": "account_name[]",
+      "deferred_trx_id": "uint32",
+      "last_unstake": "uint32"
+    }
+  }
+}

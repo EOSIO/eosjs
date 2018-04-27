@@ -1,8 +1,9 @@
 const {PublicKey} = require('eosjs-ecc')
-const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
 const assert = require('assert')
+
+const json = {schema: require('./schema')}
 
 const {isName, encodeName, decodeName,
   UDecimalPad, UDecimalImply, UDecimalUnimply} = require('./format')

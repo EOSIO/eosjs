@@ -92,7 +92,7 @@ function WriteApi(Network, network, config, Transaction) {
       }
       const abiPromises = []
       accounts.forEach(account => {
-        if(account !== 'eosio') { // Eos contract operations are cached in eosjs-json (allows for offline transactions)
+        if(account !== 'eosio') { // Eos contract operations are cached (allows for offline transactions)
           abiPromises.push(config.abiCache.abiAsync(account))
         }
       })

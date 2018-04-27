@@ -1,16 +1,14 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-### The current release of eosjs is built for the last stable eos build Dawn 2.x
+### The current public Testnet release of eosjs is built for Dawn 2.x
 You can find the current stable branch of eos here: https://github.com/EOSIO/eos/tree/dawn-2.x
 
-A Dawn 3.x pre-release version of eosjs is available:
-`npm i eosjs@dawn3`
-
-You can run the latest Dawn 3.x node from the default master branch at: http://github.com/eosio/eos
+Newer releases are available by running your own EOS node:
 
 | Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker](https://hub.docker.com/r/eosio/eos/) | Node |
 | --- | --- | --- | --- | --- | --- |
+| DAWN-2018-04-23-ALPHA | branch: DAWN-2018-04-23-ALPHA | `npm install eosjs@9` | branch: DAWN-2018-04-23-ALPHA | eosio/eos:DAWN-2018-04-23-ALPHA | [local docker](https://github.com/EOSIO/eosjs/tree/DAWN-2018-04-23-ALPHA/docker) |
 | dawn3 | branch: master | `npm install eosjs@dawn3` | branch: master | eosio/eos:dawn3x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
 | dawn2 | branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x | http or [https://t1readonly.eos.io](https://t1readonly.eos.io/v1/chain/get_info) |
 
@@ -48,8 +46,8 @@ eos.getInfo({}).then(result => {console.log(result)})
 ```
 
 API methods and documentation are generated from:
-* [chain.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/chain.json)
-* [account_history.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/account_history.json)
+* [chain.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/chain.json)
+* [account_history.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/account_history.json)
 
 ### Configuration
 
@@ -128,7 +126,7 @@ eos.transfer('inita', 'initb', '2 EOS', 'memo', options)
 eos.transfer('inita', 'initb', '1 EOS', '', false)
 ```
 
-Read-write API methods and documentation are generated from the [eosio](https://github.com/EOSIO/eosjs-json/blob/master/schema/eosio.json) schema.
+Read-write API methods and documentation are generated from the [eosio_system](https://github.com/EOSIO/eosjs/blob/master/schema/eosio_system.json) schema.
 
 For more advanced signing, see `keyProvider` in
 [eosjs-keygen](https://www.npmjs.com/package/eosjs-keygen) or
@@ -376,10 +374,8 @@ var {api, ecc, json, Fcbuffer, format} = Eos.modules
   * Encrypt or decrypt with EOS compatible checksums
   * Calculate a shared secret
 
-* eosjs-json [[Github](https://github.com/eosio/eosjs-json), [NPM](https://www.npmjs.org/package/eosjs-json)]
-  * Blockchain definitions (api method names, blockchain operations, etc)
-  * Maybe used by any language that can parse json
-  * Kept up-to-date
+* json {[api](https://github.com/EOSIO/eosjs-api/blob/master/src/api), [schema](https://github.com/EOSIO/eosjs/blob/master/src/schema)},
+  * Blockchain definitions (api method names, blockchain schema)
 
 * eosjs-keygen [[Github](https://github.com/eosio/eosjs-keygen), [NPM](https://www.npmjs.org/package/eosjs-keygen)]
   * private key storage and key management
