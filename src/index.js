@@ -105,14 +105,27 @@ class EosBuffer {
     }
 
     pushUint64(v) {
-        this.pushUint32(v >>> 0);
-        this.pushUint32(Math.floor(v / 0x100000000) >>> 0);
+        if (typeof v === 'number')
+            v = numberToUint64(v);
+        this.pushUint32(v.low);
+        this.pushUint32(v.high);
     }
 
     getUint64() {
-        let lo = this.getUint32();
-        let hi = this.getUint32();
-        return hi * 0x100000000 + lo;
+        let low = this.getUint32();
+        let high = this.getUint32();
+        return { low, high };
+    }
+
+    pushInt64(v) {
+        if (typeof v === 'number')
+            v = numberToInt64(v);
+        this.pushUint32(v.low);
+        this.pushUint32(v.high);
+    }
+
+    getInt64() {
+        return getUint64();
     }
 
     pushVaruint32(v) {
@@ -203,7 +216,81 @@ class EosBuffer {
     getString() {
         return ((new TextDecoder('utf-8', { fatal: true })).decode(this.getBytes()));
     }
+
+    pushSymbol({ name, precision }) {
+        let a = [precision & 0xff];
+        a.push(...(new TextEncoder()).encode(name));
+        while (a.length < 8)
+            a.push(0);
+        this.pushArray(a.slice(0, 8));
+    }
+
+    getSymbol() {
+        let precision = this.get();
+        let a = this.getUint8Array(7);
+        let len;
+        for (len = 0; len < a.length; ++len)
+            if (!a[len])
+                break;
+        let name = (new TextDecoder('utf-8', { fatal: true })).decode(new Uint8Array(a.buffer, 0, len));
+        return { name, precision };
+    }
+
+    pushAsset(s) {
+        // TODO: 56-bit precision loss
+        s = s.trim();
+        let pos = 0;
+        let sign = 1;
+        let amount = 0;
+        let precision = 0;
+        if (s[pos] === '-') {
+            sign = -1;
+            ++pos;
+        }
+        let foundDigit = false;
+        while (pos < s.length && s.charCodeAt(pos) >= '0'.charCodeAt(0) && s.charCodeAt(pos) <= '9'.charCodeAt(0)) {
+            foundDigit = true;
+            amount = amount * 10 + s.charCodeAt(pos) - '0'.charCodeAt(0);
+            ++pos;
+        }
+        if (!foundDigit)
+            throw new Error('Asset must begin with a number');
+        if (s[pos] === '.') {
+            ++pos;
+            while (pos < s.length && s.charCodeAt(pos) >= '0'.charCodeAt(0) && s.charCodeAt(pos) <= '9'.charCodeAt(0)) {
+                amount = amount * 10 + s.charCodeAt(pos) - '0'.charCodeAt(0);
+                ++precision;
+                ++pos;
+            }
+        }
+        let name = s.substr(pos).trim();
+        this.pushInt64(sign * amount);
+        this.pushSymbol({ name, precision });
+    }
+
+    getAsset() {
+        // TODO
+        throw new Error("Don't know how to deserialize asset");
+    }
 } // EosBuffer
+
+function numberToUint64(n) {
+    return {
+        low: n >>> 0,
+        high: Math.floor(n / 0x100000000) >>> 0
+    };
+}
+
+function uint64ToNumber({ low, high }) {
+    return (high | 0) * 0x100000000 + (low | 0);
+}
+
+function numberToInt64(n) {
+    // TODO
+    if (n < 0)
+        throw new Error("Don't know how to convert negative 64-bit integers")
+    return numberToUint64(n);
+}
 
 function dateToSec(date) {
     return Math.round(Date.parse(date + 'Z') / 1000);
@@ -321,6 +408,11 @@ function createInitialTypes() {
             serialize(buffer, data) { buffer.pushUint64(data); return buffer; },
             deserialize(buffer) { return buffer.getUint64(); },
         }),
+        int64: createType({
+            name: 'int64',
+            serialize(buffer, data) { buffer.pushInt64(data); return buffer; },
+            deserialize(buffer) { return buffer.getInt64(); },
+        }),
         int32: createType({
             name: 'int32',
             serialize(buffer, data) { buffer.pushUint32(data); return buffer; },
@@ -352,11 +444,19 @@ function createInitialTypes() {
             serialize(buffer, data) { buffer.pushUint32(dateToSec(data)); return buffer; },
             deserialize(buffer) { return secToDate(buffer.getUint32()); },
         }),
+        symbol: createType({
+            name: 'symbol',
+            serialize(buffer, data) { buffer.pushSymbol(data); return buffer; },
+            deserialize(buffer) { return buffer.getSymbol(); },
+        }),
+        asset: createType({
+            name: 'asset',
+            serialize(buffer, data) { buffer.pushAsset(data); return buffer; },
+            deserialize(buffer) { return buffer.getAsset(); },
+        }),
 
         // TODO: implement these types
-        asset: createType({ name: 'asset' }),
         checksum256: createType({ name: 'checksum256' }),
-        int64: createType({ name: 'int64' }),
         producer_schedule: createType({ name: 'producer_schedule' }),
         public_key: createType({ name: 'public_key' }),
         signature: createType({ name: 'signature' }),
@@ -437,11 +537,17 @@ class Api {
     }
 
     async fetch(path, body) {
-        let response = await fetch(this.endpoint + path, {
-            body: JSON.stringify(body),
-            method: 'POST',
-        });
-        let json = await response.json();
+        let response, json;
+        try {
+            response = await fetch(this.endpoint + path, {
+                body: JSON.stringify(body),
+                method: 'POST',
+            });
+            json = await response.json();
+        } catch (e) {
+            e.isFetchError = true;
+            throw e;
+        }
         if (!response.ok)
             throw new EosError(json)
         return json;
@@ -482,6 +588,8 @@ class Api {
             createInitialTypes() :
             (await this.getContract('eosio')).types;
         let abi = (await this.get_code(accountName)).abi;
+        if (!abi)
+            throw new Error("Missing abi for " + accountName);
         let types = getTypesFromAbi(initialTypes, abi);
         let actions = {};
         for (let { name, type } of abi.actions)
@@ -550,5 +658,5 @@ class Api {
     }
 } // Api
 
-export { ecc, EosError, EosBuffer, Api, dateToSec, secToDate, serializeUnknown, deserializeUnknown, serializeStruct, deserializeStruct, serializeArray, deserializeArray, createType, getType, getTypesFromAbi, createInitialTypes, transactionHeader, };
-global.eos_altjs = { ecc, EosError, EosBuffer, Api, dateToSec, secToDate, serializeUnknown, deserializeUnknown, serializeStruct, deserializeStruct, serializeArray, deserializeArray, createType, getType, getTypesFromAbi, createInitialTypes, transactionHeader, };
+export { ecc, EosError, EosBuffer, Api, numberToUint64, uint64ToNumber, numberToInt64, dateToSec, secToDate, serializeUnknown, deserializeUnknown, serializeStruct, deserializeStruct, serializeArray, deserializeArray, createType, getType, getTypesFromAbi, createInitialTypes, transactionHeader, };
+global.eos_altjs = { ecc, EosError, EosBuffer, Api, numberToUint64, uint64ToNumber, numberToInt64, dateToSec, secToDate, serializeUnknown, deserializeUnknown, serializeStruct, deserializeStruct, serializeArray, deserializeArray, createType, getType, getTypesFromAbi, createInitialTypes, transactionHeader, };
