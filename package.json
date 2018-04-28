@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "8.0.1",
+  "version": "9.0.1",
   "description": "General purpose library for the EOS blockchain.",
   "main": "lib/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test_lib": "mocha --use_strict lib/*.test.js",
     "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "build": "babel src --out-dir lib",
+    "build": "babel --copy-files src --out-dir lib",
     "build_browser": "npm run build && mkdir -p dist && browserify -o dist/eos.js -s Eos lib/index.js",
     "build_browser_test": "npm run build && mkdir -p dist && browserify -o dist/test.js lib/*.test.js",
     "docs": "jsdoc2md src/format.js > docs/index.md",
@@ -31,10 +31,11 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
     "babel-plugin-syntax-async-functions": "^6.13.0",
     "babel-plugin-transform-regenerator": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
     "browserify": "^14.4.0",
+    "camel-case": "^3.0.0",
     "coveralls": "^2.13.1",
     "eosjs-keygen": "^1.2.0",
     "jsdoc-to-markdown": "^3.0.4",
@@ -45,9 +46,8 @@
     "babel-polyfill": "^6.26.0",
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
-    "eosjs-api": "^4.0.3",
+    "eosjs-api": "^5.0.0",
     "eosjs-ecc": "^3.0.2",
-    "eosjs-json": "^4.0.2",
     "fcbuffer": "^2.1.5"
   },
   "babel": {

@@ -7,7 +7,11 @@ try {
 }
 
 const ecc = require('eosjs-ecc')
-const json = require('eosjs-json')
+const json = {
+  api: require('eosjs-api').api,
+  schema: require('./schema')
+}
+
 const Fcbuffer = require('fcbuffer')
 const api = require('eosjs-api')
 
@@ -39,6 +43,7 @@ const configDefaults = {
 }
 
 function development(Network) {
+  Network.schema = json.schema
   return (config = {}) => {
     config = Object.assign({}, configDefaults, config)
     const network = Network(Object.assign({}, {

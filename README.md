@@ -1,17 +1,15 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-### The current release of eosjs is built for the last stable eos build Dawn 2.x
+### The current public Testnet release of eosjs is built for Dawn 2.x
 You can find the current stable branch of eos here: https://github.com/EOSIO/eos/tree/dawn-2.x
 
-A Dawn 3.x pre-release version of eosjs is available:
-`npm i eosjs@dawn3`
-
-You can run the latest Dawn 3.x node from the default master branch at: http://github.com/eosio/eos
+Newer releases are available by running your own EOS node:
 
 | Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker](https://hub.docker.com/r/eosio/eos/) | Node |
 | --- | --- | --- | --- | --- | --- |
-| dawn3 | branch: master | `npm install eosjs@dawn3` | branch: master | eosio/eos:dawn3x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
+| DAWN-2018-04-23-ALPHA | branch: DAWN-2018-04-23-ALPHA | `npm install eosjs@dawn3` (version 9) | branch: DAWN-2018-04-23-ALPHA | eosio/eos:DAWN-2018-04-23-ALPHA | [local docker](https://github.com/EOSIO/eosjs/tree/DAWN-2018-04-23-ALPHA/docker) |
+| dawn3 | branch: master | `npm install eosjs@8` (version 8) | branch: master | eosio/eos:dawn3x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
 | dawn2 | branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x | http or [https://t1readonly.eos.io](https://t1readonly.eos.io/v1/chain/get_info) |
 
 # Eosjs
@@ -29,7 +27,7 @@ eos = Eos.Testnet() // testnet at eos.io
 // All API methods print help when called with no-arguments.
 eos.getBlock()
 
-// Next, your going to need eosd running on localhost:8888
+// Next, your going to need nodeos running on localhost:8888
 
 // If a callback is not provided, a Promise is returned
 eos.getBlock(1).then(result => {console.log(result)})
@@ -48,8 +46,8 @@ eos.getInfo({}).then(result => {console.log(result)})
 ```
 
 API methods and documentation are generated from:
-* [chain.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/chain.json)
-* [account_history.json](https://github.com/EOSIO/eosjs-json/blob/master/api/v1/account_history.json)
+* [chain.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/chain.json)
+* [account_history.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/account_history.json)
 
 ### Configuration
 
@@ -80,7 +78,7 @@ eos = Eos.Localnet(config)
 
 * `transactionHeaders` (optional) - manually calculate transaction header.  This
   may be provided so eosjs does not need to make header related API calls to
-  eosd.  This callback is called for every transaction.
+  nodeos.  This callback is called for every transaction.
   Headers are documented here [eosjs-api#headers](https://github.com/EOSIO/eosjs-api/blob/HEAD/docs/index.md#headers--object).
 
 ### Options
@@ -128,10 +126,10 @@ eos.transfer('inita', 'initb', '2 EOS', 'memo', options)
 eos.transfer('inita', 'initb', '1 EOS', '', false)
 ```
 
-Read-write API methods and documentation are generated from the [eosio](https://github.com/EOSIO/eosjs-json/blob/master/schema/eosio.json) schema.
+Read-write API methods and documentation are generated from the [eosio_system](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_system.json) schema.
 
 For more advanced signing, see `keyProvider` in
-[eosjs-keygen](https://www.npmjs.com/package/eosjs-keygen) or
+[eosjs-keygen](https://github.com/eosio/eosjs-keygen) or
 [unit test](https://github.com/EOSIO/eosjs/blob/master/src/index.test.js).
 
 ### Shorthand
@@ -206,7 +204,7 @@ currencyPublic = ecc.privateToPublic(currencyPrivate)
 keyProvider = [initaPrivate, currencyPrivate]
 
 //  Requires a large library, separate from the eosjs bundle
-// $ npm install binaryen
+// $ npm install binaryen@37.0.0
 binaryen = require('binaryen')
 
 eos = Eos.Localnet({keyProvider, binaryen})
@@ -319,8 +317,8 @@ eos.transaction({
 
 # Development
 
-From time-to-time the eosjs and eosd binary format will change between releases
-so you may need to start `eosd` with the `--skip-transaction-signatures` parameter
+From time-to-time the eosjs and nodeos binary format will change between releases
+so you may need to start `nodeos` with the `--skip-transaction-signatures` parameter
 to get your transactions to pass.
 
 Note, `package.json` has a "main" pointing to `./lib`.  The `./lib` folder is for
@@ -356,7 +354,9 @@ Use Node v8+ to `package-lock.json`.
 
 # Related Libraries
 
-These libraries are exported from `eosjs` or may be used separately.
+These libraries are integrated into `eosjs` seamlessly so you probably do not
+need to use them directly.  They are exported here giving more API access or
+in some cases may be used standalone.
 
 ```javascript
 var {api, ecc, json, Fcbuffer, format} = Eos.modules
@@ -366,7 +366,7 @@ var {api, ecc, json, Fcbuffer, format} = Eos.modules
   * Asset string formatting
 
 * eosjs-api [[Github](https://github.com/eosio/eosjs-api), [NPM](https://www.npmjs.org/package/eosjs-api)]
-  * Remote API to an EOS blockchain node (eosd)
+  * Remote API to an EOS blockchain node (nodeos)
   * Use this library directly if you need read-only access to the blockchain
     (don't need to sign transactions).
 
@@ -376,10 +376,8 @@ var {api, ecc, json, Fcbuffer, format} = Eos.modules
   * Encrypt or decrypt with EOS compatible checksums
   * Calculate a shared secret
 
-* eosjs-json [[Github](https://github.com/eosio/eosjs-json), [NPM](https://www.npmjs.org/package/eosjs-json)]
-  * Blockchain definitions (api method names, blockchain operations, etc)
-  * Maybe used by any language that can parse json
-  * Kept up-to-date
+* json {[api](https://github.com/EOSIO/eosjs-api/blob/master/src/api), [schema](https://github.com/EOSIO/eosjs/blob/master/src/schema)},
+  * Blockchain definitions (api method names, blockchain schema)
 
 * eosjs-keygen [[Github](https://github.com/eosio/eosjs-keygen), [NPM](https://www.npmjs.org/package/eosjs-keygen)]
   * private key storage and key management
@@ -387,7 +385,7 @@ var {api, ecc, json, Fcbuffer, format} = Eos.modules
 * Fcbuffer [[Github](https://github.com/eosio/eosjs-fcbuffer), [NPM](https://www.npmjs.org/package/fcbuffer)]
   * Binary serialization used by the blockchain
   * Clients sign the binary form of the transaction
-  * Essential so the client knows what it is signing
+  * Allows client to know what it is signing
 
 
 # Browser
@@ -410,6 +408,4 @@ var eos = Eos.Testnet()
 
 # Environment
 
-Node 6+ and browser (browserify, webpack, etc)
-
-React Native should work, create an issue if you find a bug.
+Node and browser (es2015)
