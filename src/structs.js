@@ -1,4 +1,4 @@
-const {ecc,PublicKey} = require('eosjs-ecc')
+const {Signature,PublicKey} = require('eosjs-ecc')
 const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
@@ -318,19 +318,19 @@ const Signature = (validation, baseTypes, customTypes) => {
     fromByteBuffer (b) {
       console.log(1);
       const signatureBuffer = signatureType.fromByteBuffer(b)
-      const signature = ecc.Signature.from(signatureBuffer)
+      const signature = Signature.from(signatureBuffer)
       return signature.toString()
     },
 
     appendByteBuffer (b, value) {
       console.log(2);
-      const signature = ecc.Signature.from(value)
+      const signature = Signature.from(value)
       signatureType.appendByteBuffer(b, signature.toBuffer())
     },
 
     fromObject (value) {
       console.log(3);
-      const signature = ecc.Signature.from(value)
+      const signature = Signature.from(value)
       return signature.toString()
     },
 
@@ -339,7 +339,7 @@ const Signature = (validation, baseTypes, customTypes) => {
       if (validation.defaults && value == null) {
         return 'SIGnature..'
       }
-      const signature = ecc.Signature.from(value)
+      const signature = Signature.from(value)
       return signature.toString()
     }
   }
