@@ -55,7 +55,7 @@ module.exports = (config = {}, extendedSchema) => {
     symbol: () => [AssetSymbol],
     asset: () => [Asset], // must come after AssetSymbol
     extended_asset: () => [ExtendedAsset], // after Asset
-    signature: () => [variant(Signature)]
+    signature: () => [variant(SignatureType)]
   }
 
   const customTypes = Object.assign({}, eosTypes, config.customTypes)
@@ -317,7 +317,7 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
   }
 }
 
-const Signature = (validation, baseTypes) => {
+const SignatureType = (validation, baseTypes) => {
   const signatureType = baseTypes.fixed_bytes65(validation)
   return {
     fromByteBuffer (b) {
@@ -328,7 +328,6 @@ const Signature = (validation, baseTypes) => {
 
     appendByteBuffer (b, value) {
       const signature = Signature.from(value)
-
       signatureType.appendByteBuffer(b, signature.toBuffer())
     },
 

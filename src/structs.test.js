@@ -83,6 +83,14 @@ describe('shorthand', () => {
     assert.equal(buf.toString('hex'), '04454f5300000000')
   })
 
+  it('signature', () => {
+    const eos = Eos.Localnet()
+    const {types} = eos.fc
+    const SignatureType = types.signature()
+    const signatureString = 'EOSKVm5YYck2DXHnUUKPinUFzVuxFngi7MAasbKCnvT1wP6sKwzRX9dngXV89gbwXM5HdGJzFtSwjGaP3SFMaQFFDGtStpeAN'
+    assertSerializer(SignatureType, signatureString)
+  })
+
 })
 
 if(process.env['NODE_ENV'] === 'development') {
