@@ -36,7 +36,7 @@
     "babel-preset-es2015": "^6.24.1",
     "browserify": "^14.4.0",
     "camel-case": "^3.0.0",
-    "coveralls": "^2.13.1",
+    "coveralls": "^3.0.0",
     "eosjs-keygen": "^1.2.0",
     "jsdoc-to-markdown": "^3.0.4",
     "mocha": "^3.4.2",
