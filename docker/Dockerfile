@@ -1,4 +1,26 @@
-FROM eosio/eos:latest
+FROM eosio/builder:dawn3 as builder
 
-COPY config.ini genesis.json /
+    #&& git checkout 1b15cf5f54b06d42227dbe88b94755f41c7f0705 \
+RUN git clone -b slim --depth 1 https://github.com/EOSIO/eos.git --recursive \
+    && cd eos \
+    && git rev-parse HEAD | tee /git-commit.txt \
+    && cmake -H. -B"/tmp/build" -GNinja -DCMAKE_BUILD_TYPE=Release -DWASM_ROOT=/opt/wasm -DCMAKE_CXX_COMPILER=clang++ \
+       -DCMAKE_C_COMPILER=clang -DCMAKE_INSTALL_PREFIX=/tmp/build  -DSecp256k1_ROOT_DIR=/usr/local -DBUILD_MONGO_DB_PLUGIN=true \
+    && cmake --build /tmp/build --target install
 
+
+FROM ubuntu:16.04
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install openssl && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /usr/local/lib/* /usr/local/lib/
+COPY --from=builder /tmp/build/bin /opt/eosio/bin
+COPY --from=builder /tmp/build/contracts /contracts
+COPY --from=builder /eos/Docker/nodeosd.sh /opt/eosio/bin/nodeosd.sh
+COPY --from=builder /git-commit.txt /
+COPY genesis.json config.ini /
+ENV EOSIO_ROOT=/opt/eosio
+RUN chmod +x /opt/eosio/bin/nodeosd.sh
+ENV LD_LIBRARY_PATH /usr/local/lib
+# VOLUME /opt/eosio/bin/data-dir
+RUN mkdir -p /opt/eosio/bin/data-dir
+ENV PATH /opt/eosio/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

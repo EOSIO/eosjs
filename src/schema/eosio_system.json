@@ -6,6 +6,33 @@
       "balance": "uint64"
     }
   },
+  "blockchain_parameters": {
+    "base": "",
+    "fields": {
+      "max_block_net_usage": "uint64",
+      "target_block_net_usage_pct": "uint32",
+      "max_transaction_net_usage": "uint32",
+      "base_per_transaction_net_usage": "uint32",
+      "context_free_discount_net_usage_num": "uint64",
+      "context_free_discount_net_usage_den": "uint64",
+      "max_block_cpu_usage": "uint64",
+      "target_block_cpu_usage_pct": "uint32",
+      "max_transaction_cpu_usage": "uint32",
+      "base_per_transaction_cpu_usage": "uint32",
+      "base_per_action_cpu_usage": "uint32",
+      "base_setcode_cpu_usage": "uint32",
+      "per_signature_cpu_usage": "uint32",
+      "context_free_discount_cpu_usage_num": "uint64",
+      "context_free_discount_cpu_usage_den": "uint64",
+      "max_transaction_lifetime": "uint32",
+      "deferred_trx_expiration_window": "uint32",
+      "max_transaction_delay": "uint32",
+      "max_inline_action_size": "uint32",
+      "max_inline_action_depth": "uint16",
+      "max_authority_depth": "uint16",
+      "max_generated_transaction_count": "uint32"
+    }
+  },
   "claimrewards": {
     "base": "",
     "type": "action",
@@ -26,9 +53,9 @@
     "fields": {
       "from": "account_name",
       "receiver": "account_name",
-      "stake_net": "asset",
-      "stake_cpu": "asset",
-      "stake_storage": "asset"
+      "stake_net_quantity": "asset",
+      "stake_cpu_quantity": "asset",
+      "stake_storage_quantity": "asset"
     }
   },
   "delegated_bandwidth": {
@@ -36,9 +63,9 @@
     "fields": {
       "from": "account_name",
       "to": "account_name",
-      "net_weight": "asset",
-      "cpu_weight": "asset",
-      "storage_stake": "asset",
+      "net_weight": "uint64",
+      "cpu_weight": "uint64",
+      "storage_stake": "uint64",
       "storage_bytes": "uint64"
     }
   },
@@ -51,29 +78,8 @@
     }
   },
   "eosio_parameters": {
-    "base": "",
+    "base": "blockchain_parameters",
     "fields": {
-      "base_per_transaction_net_usage": "uint32",
-      "base_per_transaction_cpu_usage": "uint32",
-      "base_per_action_cpu_usage": "uint32",
-      "base_setcode_cpu_usage": "uint32",
-      "per_signature_cpu_usage": "uint32",
-      "per_lock_net_usage": "uint32",
-      "context_free_discount_cpu_usage_num": "uint64",
-      "context_free_discount_cpu_usage_den": "uint64",
-      "max_transaction_cpu_usage": "uint32",
-      "max_transaction_net_usage": "uint32",
-      "max_block_cpu_usage": "uint64",
-      "target_block_cpu_usage_pct": "uint32",
-      "max_block_net_usage": "uint64",
-      "target_block_net_usage_pct": "uint32",
-      "max_transaction_lifetime": "uint32",
-      "max_transaction_exec_time": "uint32",
-      "max_authority_depth": "uint16",
-      "max_inline_depth": "uint16",
-      "max_inline_action_size": "uint32",
-      "max_generated_transaction_count": "uint32",
-      "max_transaction_delay": "uint32",
       "max_storage_size": "uint64",
       "percent_of_max_inflation_rate": "uint32",
       "storage_reserve_ratio": "uint32"
@@ -99,10 +105,9 @@
     "fields": {
       "owner": "account_name",
       "total_votes": "uint128",
-      "prefs": "eosio_parameters",
-      "packed_key": "uint8[]",
+      "packed_key": "public_key",
       "per_block_payments": "uint64",
-      "last_claim_time": "uint32"
+      "last_claim_time": "time"
     }
   },
   "refund": {
@@ -112,13 +117,21 @@
       "owner": "account_name"
     }
   },
+  "refund_request": {
+    "base": "",
+    "fields": {
+      "owner": "account_name",
+      "request_time": "time",
+      "amount": "uint64"
+    }
+  },
   "regproducer": {
     "base": "",
     "type": "action",
     "fields": {
       "producer": "account_name",
-      "producer_key": "bytes",
-      "prefs": "eosio_parameters"
+      "producer_key": "public_key",
+      "url": "string"
     }
   },
   "regproxy": {
@@ -126,6 +139,14 @@
     "type": "action",
     "fields": {
       "proxy": "account_name"
+    }
+  },
+  "setparams": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "max_ram_size": "uint64",
+      "ram_reserve_ratio": "uint32"
     }
   },
   "total_resources": {
@@ -154,9 +175,9 @@
     "fields": {
       "from": "account_name",
       "receiver": "account_name",
-      "unstake_net": "asset",
-      "unstake_cpu": "asset",
-      "unstake_bytes": "uint64"
+      "unstake_net_quantity": "asset",
+      "unstake_cpu_quantity": "asset",
+      "unstake_storage_bytes": "uint64"
     }
   },
   "unregprod": {
@@ -187,7 +208,7 @@
     "fields": {
       "owner": "account_name",
       "proxy": "account_name",
-      "last_update": "uint32",
+      "last_update": "time",
       "is_proxy": "uint32",
       "staked": "asset",
       "unstaking": "asset",

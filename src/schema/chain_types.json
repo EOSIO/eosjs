@@ -18,12 +18,16 @@
   "action_name": "name",
   "context_free_type": "bytes",
   "fields": "field_def[]",
+  "time_point": "int64",
   "time_point_sec": "time",
-  "block_id_type": "fixed_bytes32",
+  "block_id": "fixed_bytes32",
   "checksum_type": "fixed_bytes32",
   "checksum256_type": "fixed_bytes32",
   "checksum512_type": "fixed_bytes64",
   "checksum160_type": "fixed_bytes20",
+  "sha256": "fixed_bytes32",
+  "sha512": "fixed_bytes64",
+  "sha160": "fixed_bytes20",
   "weight_type": "uint16",
   "block_num_type": "uint32",
   "share_type": "int64",
@@ -321,5 +325,11 @@
       "schedule_version": "uint32",
       "new_producers": "producer_schedule?"
     }
+  },
+  "packed_transaction": {
+    "signatures": "signature[]",
+    "compression": "uint8",
+    "packed_context_free_data": "bytes",
+    "packed_trx": "bytes"
   }
 }
