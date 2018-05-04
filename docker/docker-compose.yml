@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${EOSIO_IMAGE-eosio/eos:DAWN-2018-04-23-ALPHA}
+    image: ${EOSIO_IMAGE-eosio/eos:latest}
     command: /opt/eosio/bin/nodeosd.sh
     ports:
       - 8888:8888

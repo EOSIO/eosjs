@@ -3,7 +3,7 @@ set -o errexit
 set -o xtrace
 
 function cleos() {
-  docker-compose exec nodeos /opt/eosio/bin/cleos -H nodeos "$@"
+  docker-compose exec nodeos /opt/eosio/bin/cleos "$@"
 }
 
 # Reset the volumes
