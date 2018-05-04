@@ -1,9 +1,11 @@
 FROM eosio/builder:dawn3 as builder
 
-    #&& git checkout 1b15cf5f54b06d42227dbe88b94755f41c7f0705 \
+ARG GIT_COMMIT=HEAD
+
 RUN git clone -b slim --depth 1 https://github.com/EOSIO/eos.git --recursive \
     && cd eos \
-    && git rev-parse HEAD | tee /git-commit.txt \
+    && git checkout $GIT_COMMIT \
+    && echo Git Commit $(git rev-parse HEAD) | tee /git-commit.txt \
     && cmake -H. -B"/tmp/build" -GNinja -DCMAKE_BUILD_TYPE=Release -DWASM_ROOT=/opt/wasm -DCMAKE_CXX_COMPILER=clang++ \
        -DCMAKE_C_COMPILER=clang -DCMAKE_INSTALL_PREFIX=/tmp/build  -DSecp256k1_ROOT_DIR=/usr/local -DBUILD_MONGO_DB_PLUGIN=true \
     && cmake --build /tmp/build --target install
