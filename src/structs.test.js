@@ -87,7 +87,7 @@ describe('shorthand', () => {
     const eos = Eos.Localnet()
     const {types} = eos.fc
     const SignatureType = types.signature()
-    const signatureString = 'EOSKVm5YYck2DXHnUUKPinUFzVuxFngi7MAasbKCnvT1wP6sKwzRX9dngXV89gbwXM5HdGJzFtSwjGaP3SFMaQFFDGtStpeAN'
+    const signatureString = 'SIG_K1_Jzdpi5RCzHLGsQbpGhndXBzcFs8vT5LHAtWLMxPzBdwRHSmJkcCdVu6oqPUQn1hbGUdErHvxtdSTS1YA73BThQFwV1v4G5'
     assertSerializer(SignatureType, signatureString)
   })
 
@@ -143,7 +143,7 @@ describe('Message.data', () => {
       data: hex,
       authorization: []
     }
-    
+
     const type = structs.action
     const obj = type.fromObject(value) // tests fromObject
     const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
@@ -175,7 +175,7 @@ describe('Message.data', () => {
     const obj3 = type.toObject(obj) // tests toObject
 
     const data = Fcbuffer.toBuffer(structs.transfer, value.data)
-    const dataHex = //Number(data.length).toString(16) + 
+    const dataHex = //Number(data.length).toString(16) +
       data.toString('hex')
 
     assert.deepEqual(Object.assign({}, value, {data: dataHex}), obj3, 'serialize object')
