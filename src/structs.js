@@ -338,7 +338,7 @@ const SignatureType = (validation, baseTypes) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return 'SIGnature..'
+        return 'SIG_K1_bas58signature..'
       }
       const signature = Signature.from(value)
       return signature.toString()
