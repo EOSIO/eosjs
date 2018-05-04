@@ -6,51 +6,7 @@
       "balance": "uint64"
     }
   },
-  "claimrewards": {
-    "base": "",
-    "type": "action",
-    "fields": {
-      "owner": "account_name"
-    }
-  },
-  "currency_stats": {
-    "base": "",
-    "fields": {
-      "currency": "uint64",
-      "supply": "uint64"
-    }
-  },
-  "delegatebw": {
-    "base": "",
-    "type": "action",
-    "fields": {
-      "from": "account_name",
-      "receiver": "account_name",
-      "stake_net": "asset",
-      "stake_cpu": "asset",
-      "stake_storage": "asset"
-    }
-  },
-  "delegated_bandwidth": {
-    "base": "",
-    "fields": {
-      "from": "account_name",
-      "to": "account_name",
-      "net_weight": "asset",
-      "cpu_weight": "asset",
-      "storage_stake": "asset",
-      "storage_bytes": "uint64"
-    }
-  },
-  "eosio_global_state": {
-    "base": "eosio_parameters",
-    "fields": {
-      "total_storage_bytes_reserved": "uint64",
-      "total_storage_stake": "uint64",
-      "payment_per_block": "uint64"
-    }
-  },
-  "eosio_parameters": {
+  "blockchain_parameters": {
     "base": "",
     "fields": {
       "base_per_transaction_net_usage": "uint32",
@@ -73,7 +29,56 @@
       "max_inline_depth": "uint16",
       "max_inline_action_size": "uint32",
       "max_generated_transaction_count": "uint32",
-      "max_transaction_delay": "uint32",
+      "max_transaction_delay": "uint32"
+    }
+  },
+  "claimrewards": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "owner": "account_name"
+    }
+  },
+  "currency_stats": {
+    "base": "",
+    "fields": {
+      "currency": "uint64",
+      "supply": "uint64"
+    }
+  },
+  "delegatebw": {
+    "base": "",
+    "type": "action",
+    "fields": {
+      "from": "account_name",
+      "receiver": "account_name",
+      "stake_net_quantity": "asset",
+      "stake_cpu_quantity": "asset",
+      "stake_storage_quantity": "asset"
+    }
+  },
+  "delegated_bandwidth": {
+    "base": "",
+    "fields": {
+      "from": "account_name",
+      "to": "account_name",
+      "net_weight": "uint64",
+      "cpu_weight": "uint64",
+      "storage_stake": "uint64",
+      "storage_bytes": "uint64"
+    }
+  },
+  "eosio_global_state": {
+    "base": "eosio_parameters",
+    "fields": {
+      "total_storage_bytes_reserved": "uint64",
+      "total_storage_stake": "uint64",
+      "payment_per_block": "uint64"
+    }
+  },
+  "eosio_parameters": {
+    "base": "blockchain_parameters",
+    "fields": {
       "max_storage_size": "uint64",
       "percent_of_max_inflation_rate": "uint32",
       "storage_reserve_ratio": "uint32"
@@ -110,6 +115,14 @@
     "type": "action",
     "fields": {
       "owner": "account_name"
+    }
+  },
+  "refund_request": {
+    "base": "",
+    "fields": {
+      "owner": "account_name",
+      "request_time": "time",
+      "amount": "uint64"
     }
   },
   "regproducer": {
@@ -154,9 +167,9 @@
     "fields": {
       "from": "account_name",
       "receiver": "account_name",
-      "unstake_net": "asset",
-      "unstake_cpu": "asset",
-      "unstake_bytes": "uint64"
+      "unstake_net_quantity": "asset",
+      "unstake_cpu_quantity": "asset",
+      "unstake_storage_bytes": "uint64"
     }
   },
   "unregprod": {
