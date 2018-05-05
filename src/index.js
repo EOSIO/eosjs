@@ -24,8 +24,8 @@ import * as ecc from 'eosjs-ecc';
 
 class EosError extends Error {
     constructor(json) {
-        if (json.error.details)
-            super(json.error.details[0].message);
+        if (json.processed && json.processed.except && json.processed.except.message)
+            super(json.processed.except.message);
         else
             super(json.message);
         this.json = json;
@@ -544,12 +544,14 @@ class Api {
                 method: 'POST',
             });
             json = await response.json();
+            if (json.processed && json.processed.except)
+                throw new EosError(json);
         } catch (e) {
             e.isFetchError = true;
             throw e;
         }
         if (!response.ok)
-            throw new EosError(json)
+            throw new EosError(json);
         return json;
     }
 
@@ -608,7 +610,7 @@ class Api {
         let tx = this.serializeTransaction(transaction).asUint8Array()
         let signatures = privateKeys.map(key => {
             let chainIdBuf = new Buffer(this.chainId, 'hex');
-            let signBuf = Buffer.concat([chainIdBuf, new Buffer(tx)]);
+            let signBuf = Buffer.concat([chainIdBuf, new Buffer(tx), new Buffer(new Uint8Array(32))]);
             return ecc.Signature.sign(signBuf, key).toString();
         });
         return await this.fetch('/v1/chain/push_transaction', {

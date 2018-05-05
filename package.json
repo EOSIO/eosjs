@@ -10,7 +10,7 @@
   "author": "Todd Fleming",
   "license": "MIT",
   "devDependencies": {
-    "eosjs-ecc": "^3.0.2",
+    "eosjs-ecc": "^4.0.0",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.14"
   }
