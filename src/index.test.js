@@ -192,7 +192,7 @@ if(process.env['NODE_ENV'] === 'development') {
         const pubkeys = ['EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV']
 
         return eos.getRequiredKeys(transaction, pubkeys).then(res => {
-          // Just the required_keys need to sign 
+          // Just the required_keys need to sign
           assert.deepEqual(res.required_keys, pubkeys)
           return sign(buf, wif) // return hex string signature or array of signatures
         })
@@ -309,7 +309,7 @@ if(process.env['NODE_ENV'] === 'development') {
       const assertTr = tr =>{
         assert.equal(2, tr.transaction.transaction.actions.length)
       }
-        
+
       //  contracts can be a string or array
       await assertTr(await testnet.transaction(['currency'], ({currency}) => trTest(currency)))
       await assertTr(await testnet.transaction('currency', currency => trTest(currency)))
