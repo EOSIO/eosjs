@@ -34,6 +34,7 @@
   "transaction_id_type": "checksum_type",
   "digest_type": "checksum_type",
   "context_free_type": "bytes",
+  "bool": "uint8",
 
   "transaction_header": {
     "base": "",
@@ -327,9 +328,11 @@
     }
   },
   "packed_transaction": {
-    "signatures": "signature[]",
-    "compression": "uint8",
-    "packed_context_free_data": "bytes",
-    "packed_trx": "bytes"
+    "fields": {
+      "signatures": "signature[]",
+      "compression": "uint8",
+      "packed_context_free_data": "bytes",
+      "packed_trx": "bytes"
+    }
   }
 }
