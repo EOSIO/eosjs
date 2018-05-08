@@ -126,7 +126,7 @@ eos.transfer('inita', 'initb', '2 EOS', 'memo', options)
 eos.transfer('inita', 'initb', '1 EOS', '', false)
 ```
 
-Read-write API methods and documentation are generated from the [eosio_system](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_system.json) schema.
+Read-write API methods and documentation are generated from the [eosio_system](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_token.json) schema.
 
 For more advanced signing, see `keyProvider` in
 [eosjs-keygen](https://github.com/eosio/eosjs-keygen) or
@@ -265,9 +265,9 @@ eos.transaction('currency', currency => {
 })
 
 // mix contracts in the same transaction
-eos.transaction(['currency', 'eosio'], ({currency, eosio}) => {
+eos.transaction(['currency', 'eosio.token'], ({currency, eosio_token}) => {
   currency.transfer('inita', 'initb', '1 CUR', '')
-  eosio.transfer('inita', 'initb', '1 EOS', '')
+  eosio_token.transfer('inita', 'initb', '1 EOS', '')
 })
 
 // contract lookups then transactions

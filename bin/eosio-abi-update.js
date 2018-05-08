@@ -2,9 +2,9 @@
 
 const fs = require('fs')
 
-console.log('reading ./eosio.system.abi')
+console.log('reading ./eosio.token.abi')
 
-let abi = JSON.parse(fs.readFileSync('eosio.system.abi', 'utf8'));
+let abi = JSON.parse(fs.readFileSync('eosio.token.abi', 'utf8'));
 
 let actions = {};
 for ({ name, type } of abi.actions)
@@ -29,5 +29,5 @@ let sorted = {};
 for (let key of Object.keys(gen).sort())
     sorted[key] = gen[key];
 
-console.log('writing ./eosio_system.json')
-fs.writeFileSync('eosio_system.json', JSON.stringify(sorted, null, 2), 'utf8');
+console.log('writing ./eosio_token.json')
+fs.writeFileSync('eosio_token.json', JSON.stringify(sorted, null, 2), 'utf8');

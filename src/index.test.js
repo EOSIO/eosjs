@@ -77,11 +77,11 @@ if(process.env['NODE_ENV'] === 'development') {
     it('Messages do not sort', async function() {
       const local = Eos.Localnet()
       const opts = {sign: false, broadcast: false}
-      const tx = await local.transaction(['currency', 'eosio'], ({currency, eosio}) => {
-        eosio.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio', ..} remains first
+      const tx = await local.transaction(['currency', 'eosio.token'], ({currency, eosio_token}) => {
+        eosio_token.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio', ..} remains first
         currency.transfer('inita', 'initd', '1 CUR', '') // {account: 'currency', ..} remains second
       }, opts)
-      assert.equal(tx.transaction.transaction.actions[0].account, 'eosio')
+      assert.equal(tx.transaction.transaction.actions[0].account, 'eosio.token')
       assert.equal(tx.transaction.transaction.actions[1].account, 'currency')
     })
 
@@ -192,7 +192,7 @@ if(process.env['NODE_ENV'] === 'development') {
         const pubkeys = ['EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV']
 
         return eos.getRequiredKeys(transaction, pubkeys).then(res => {
-          // Just the required_keys need to sign 
+          // Just the required_keys need to sign
           assert.deepEqual(res.required_keys, pubkeys)
           return sign(buf, wif) // return hex string signature or array of signatures
         })
@@ -309,7 +309,7 @@ if(process.env['NODE_ENV'] === 'development') {
       const assertTr = tr =>{
         assert.equal(2, tr.transaction.transaction.actions.length)
       }
-        
+
       //  contracts can be a string or array
       await assertTr(await testnet.transaction(['currency'], ({currency}) => trTest(currency)))
       await assertTr(await testnet.transaction('currency', currency => trTest(currency)))

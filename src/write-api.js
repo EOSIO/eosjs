@@ -18,7 +18,7 @@ function writeApiGen(Network, network, structs, config) {
   const reserveFunctions = new Set(['transaction', 'contract'])
   const merge = {}
 
-  // sends transactions, also a action collecting wrapper functions 
+  // sends transactions, also a action collecting wrapper functions
   merge.transaction = writeApi.genTransaction(structs, merge)
 
   // Immediate send operations automatically calls merge.transaction
@@ -270,7 +270,7 @@ function WriteApi(Network, network, config, Transaction) {
           messageOnly: true,
           noCallback: true
         }
-      })      
+      })
       if(ret == null) {
         // double-check (code can change)
         throw new Error('Callbacks can not be used when creating a multi-action transaction')
@@ -282,20 +282,21 @@ function WriteApi(Network, network, config, Transaction) {
     // or an object of contract names with functions under those
     for(const key in merges) {
       const value = merges[key]
+      const variableName = key.replace(/\./, '_')
       if(typeof value === 'function') {
         // Native operations (eos contract for example)
-        messageCollector[key] = wrap(value)
+        messageCollector[variableName] = wrap(value)
 
       } else if(typeof value === 'object') {
         // other contract(s) (currency contract for example)
-        if(messageCollector[key] == null) {
-          messageCollector[key] = {}
+        if(messageCollector[variableName] == null) {
+          messageCollector[variableName] = {}
         }
         for(const key2 in value) {
           if(key2 === 'transaction') {
             continue
           }
-          messageCollector[key][key2] = wrap(value[key2])
+          messageCollector[variableName][key2] = wrap(value[key2])
         }
       }
     }
