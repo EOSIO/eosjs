@@ -87,7 +87,7 @@ describe('shorthand', () => {
     const eos = Eos.Localnet()
     const {types} = eos.fc
     const SignatureType = types.signature()
-    const signatureString = 'EOSKVm5YYck2DXHnUUKPinUFzVuxFngi7MAasbKCnvT1wP6sKwzRX9dngXV89gbwXM5HdGJzFtSwjGaP3SFMaQFFDGtStpeAN'
+    const signatureString = 'SIG_K1_JwxtqesXpPdaZB9fdoVyzmbWkd8tuX742EQfnQNexTBfqryt2nn9PomT5xwsVnUB4m7KqTgTBQKYf2FTYbhkB5c7Kk9EsH'
     assertSerializer(SignatureType, signatureString)
   })
 
@@ -97,13 +97,13 @@ if(process.env['NODE_ENV'] === 'development') {
 
   describe('Eosio Abi', () => {
 
-    it('Eosio contract parses', (done) => {
+    it('Eosio token contract parses', (done) => {
       const eos = Eos.Localnet()
 
-      eos.contract('eosio', (error, eosio) => {
+      eos.contract('eosio.token', (error, eosio_token) => {
         assert(!error, error)
-        assert(eosio.transfer, 'eosio contract')
-        assert(eosio.issue, 'eosio contract')
+        assert(eosio_token.transfer, 'eosio contract')
+        assert(eosio_token.issue, 'eosio contract')
         done()
       })
     })
@@ -143,7 +143,7 @@ describe('Message.data', () => {
       data: hex,
       authorization: []
     }
-    
+
     const type = structs.action
     const obj = type.fromObject(value) // tests fromObject
     const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
@@ -175,7 +175,7 @@ describe('Message.data', () => {
     const obj3 = type.toObject(obj) // tests toObject
 
     const data = Fcbuffer.toBuffer(structs.transfer, value.data)
-    const dataHex = //Number(data.length).toString(16) + 
+    const dataHex = //Number(data.length).toString(16) +
       data.toString('hex')
 
     assert.deepEqual(Object.assign({}, value, {data: dataHex}), obj3, 'serialize object')
