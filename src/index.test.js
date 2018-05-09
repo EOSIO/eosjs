@@ -240,7 +240,8 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('mockTransactions fail', () => {
-      const eos = Eos.Localnet({signProvider, mockTransactions: 'fail'})
+      const logger = { error: null }
+      const eos = Eos.Localnet({signProvider, mockTransactions: 'fail', logger})
       return eos.transfer('inita', 'initb', '1 EOS', '').catch(error => {
         assert(error.indexOf('fake error') !== -1, 'expecting: fake error')
       })
@@ -288,8 +289,9 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('action to unknown contract', () => {
-      const name = 'acdef513521'
-      return Eos.Localnet({signProvider}).contract(name)
+      const name = 'unknown432'
+      const logger = { error: null }
+      return Eos.Localnet({signProvider, logger}).contract(name)
       .then(() => {throw 'expecting error'})
       .catch(error => {
         assert(/unknown key/.test(error.toString()),
