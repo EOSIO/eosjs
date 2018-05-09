@@ -391,7 +391,7 @@ const wasmCodeOverride = config => ({
     try {
       const code = object.code.toString()
       if(/^\s*\(module/.test(code)) {
-        console.log('Assembling WASM...')
+        console.debug('Assembling WASM..')
         const wasm = Buffer.from(binaryen.parseText(code).emitBinary())
         result.code = wasm
       } else {

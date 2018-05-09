@@ -33,7 +33,7 @@ cleos create account eosio initb EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5
 cleos create account eosio initc EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
 # setup contracts
-function create_contract() {
+function deploy_contract() {
   name=$1
   contract=${2-$name}
 
@@ -42,9 +42,12 @@ function create_contract() {
   # publish smart contract
   cleos set contract $name contracts/$contract -p $name@active
 }
-create_contract exchange
-create_contract eosio.token
-create_contract currency eosio.token
+
+deploy_contract eosio.bios
+deploy_contract eosio.msig
+deploy_contract eosio.system
+deploy_contract eosio.token
+deploy_contract currency eosio.token
 
 # issue new tokens
 cleos push action eosio.token create '{"issuer":"eosio.token", "maximum_supply": "1000000.0000 EOS", "can_freeze": 0, "can_recall": 0, "can_whitelist": 0}' -p eosio.token@active

@@ -84,28 +84,44 @@ if(process.env['NODE_ENV'] === 'development') {
       assert.equal(tx.transaction.transaction.actions[0].account, 'eosio.token')
       assert.equal(tx.transaction.transaction.actions[1].account, 'currency')
     })
+  })
 
+  describe('Contracts Deploy', () => {
     function deploy(name) {
-      it(`Deploy ${name}`, async function() {
+      it(name, async function() {
         this.timeout(4000)
         const config = {binaryen: require("binaryen"), keyProvider: wif}
         const eos = Eos.Localnet(config)
 
-        // When this test is ran multiple times, avoids same contract
-        // version re-deploy error.  TODO: undeploy contract instead
-        // const tmpWast = fs.readFileSync(`docker/contracts/proxy/proxy.wast`)
-        // await eos.setcode('inita', 0, 0, tmpWast)
-
         const wast = fs.readFileSync(`docker/contracts/${name}/${name}.wast`)
         const abi = fs.readFileSync(`docker/contracts/${name}/${name}.abi`)
+
+        // When ran multiple times, deploying to the same account
+        // avoids a same contract version deploy error.
+        // TODO: undeploy contract instead
         await eos.setcode('inita', 0, 0, wast)
         await eos.setabi('inita', JSON.parse(abi))
       })
     }
-    deploy('eosio.token')
     deploy('eosio.bios')
+    deploy('eosio.msig')
+    deploy('eosio.system')
+    deploy('eosio.token')
     // deploy('exchange') // exceeds: max_transaction_net_usage
+  })
 
+  describe('Contracts Load', () => {
+    function load(name) {
+      it(name, async function() {
+        const eos = Eos.Localnet()
+        const contract = await eos.contract(name)
+        assert(contract, 'contract')
+      })
+    }
+    load('eosio.bios')
+    load('eosio.msig')
+    load('eosio.system')
+    load('eosio.token')
   })
 
   describe('transactions', () => {
