@@ -165,32 +165,38 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
     keys = [keys]
   }
 
+  keys = keys.map(key => {
+    try {
+      // normalize format (WIF => PVT_K1_base58privateKey)
+      return {private: ecc.PrivateKey(key).toString()}
+    } catch(e) {
+      // normalize format (EOSKey => PUB_K1_base58publicKey)
+      return {public: ecc.PublicKey(key).toString()}
+    }
+    assert(false, 'expecting public or private keys from keyProvider')
+  })
+
   if(!keys.length) {
     throw new Error('missing key, check your keyProvider')
   }
 
   // simplify default signing #17
-  if(keys.length === 1 && ecc.isValidPrivate(keys[0])) {
-    const wif = keys[0]
-    return sign(buf, wif)
+  if(keys.length === 1 && keys[0].private) {
+    const pvt = keys[0].private
+    return sign(buf, pvt)
   }
 
   const keyMap = new Map()
 
   // keys are either public or private keys
   for(const key of keys) {
-    const isPrivate = ecc.isValidPrivate(key)
-    const isPublic = ecc.isValidPublic(key)
-
-    assert(
-      isPrivate || isPublic,
-      'expecting public or private keys from keyProvider'
-    )
+    const isPrivate = key.private != null
+    const isPublic = key.public != null
 
     if(isPrivate) {
-      keyMap.set(ecc.privateToPublic(key), key)
+      keyMap.set(ecc.privateToPublic(key.private), key.private)
     } else {
-      keyMap.set(key, null)
+      keyMap.set(key.public, null)
     }
   }
 
@@ -201,12 +207,15 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
       throw new Error('missing required keys for ' + JSON.stringify(transaction))
     }
 
-    const wifs = [], missingKeys = []
+    const pvts = [], missingKeys = []
 
-    for(const requiredKey of required_keys) {
+    for(let requiredKey of required_keys) {
+      // normalize (EOSKey.. => PUB_K1_Key..)
+      requiredKey = ecc.PublicKey(requiredKey).toString()
+
       const wif = keyMap.get(requiredKey)
       if(wif) {
-        wifs.push(wif)
+        pvts.push(wif)
       } else {
         missingKeys.push(requiredKey)
       }
@@ -216,13 +225,14 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
       assert(typeof keyProvider === 'function',
         'keyProvider function is needed for private key lookup')
 
+      // const pubkeys = missingKeys.map(key => ecc.PublicKey(key).toStringLegacy())
       keyProvider({pubkeys: missingKeys})
-        .forEach(wif => { wifs.push(wif) })
+        .forEach(pvt => { pvts.push(pvt) })
     }
 
     const sigs = []
-    for(const wif of wifs) {
-      sigs.push(sign(buf, wif))
+    for(const pvt of pvts) {
+      sigs.push(sign(buf, pvt))
     }
 
     return sigs
