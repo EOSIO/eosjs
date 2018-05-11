@@ -496,6 +496,10 @@ function getTypesFromAbi(initialTypes, abi) {
         types[new_type_name] =
             createType({ name: new_type_name, aliasOfName: type, });
     for (let { name, base, fields } of abi.structs) {
+        // HACK: dawn4: abi is missing extensions_type and transaction.transaction_extensions.
+        //              populate with dummy array
+        if (name === 'transaction' && !fields.find(({ name }) => name === 'transaction_extensions'))
+            fields.push({ name: 'transaction_extensions', type: 'bytes' });
         types[name] = createType({
             name,
             baseName: base,
@@ -649,12 +653,12 @@ class Api {
     serializeTransaction(transaction) {
         return this.contracts.eosio.types.transaction.serialize(
             new EosBuffer, {
-                region: 0,
                 max_net_usage_words: 0,
-                max_kcpu_usage: 0,
+                max_cpu_usage_ms: 0,
                 delay_sec: 0,
                 context_free_actions: [],
                 actions: [],
+                transaction_extensions: [],
                 ...transaction,
             });
     }
