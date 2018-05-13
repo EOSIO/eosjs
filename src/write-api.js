@@ -410,7 +410,7 @@ function WriteApi(Network, network, config, Transaction) {
       let sigs = []
       if(options.sign){
         const chainIdBuf = new Buffer(config.chainId, 'hex')
-        const signBuf = Buffer.concat([chainIdBuf, buf])
+        const signBuf = Buffer.concat([chainIdBuf, buf, new Buffer(new Uint8Array(32))])
         sigs = config.signProvider({transaction: tr, buf: signBuf, sign})
         if(!Array.isArray(sigs)) {
           sigs = [sigs]
