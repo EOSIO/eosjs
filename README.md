@@ -47,7 +47,7 @@ eos.getInfo({}).then(result => {console.log(result)})
 
 API methods and documentation are generated from:
 * [chain.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/chain.json)
-* [account_history.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/account_history.json)
+* [history.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/history.json)
 
 ### Configuration
 
