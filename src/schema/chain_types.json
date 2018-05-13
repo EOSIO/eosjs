@@ -34,25 +34,34 @@
   "transaction_id_type": "checksum_type",
   "digest_type": "checksum_type",
   "context_free_type": "bytes",
+  "unsigned_int": "varuint32",
   "bool": "uint8",
+
+  "extensions_type": {
+    "base": "",
+    "fields": {
+      "type": "uint16",
+      "data": "bytes"
+    }
+  },
 
   "transaction_header": {
     "base": "",
     "fields": {
-      "expiration": "time_point_sec",
-      "region": "uint16",
+      "expiration": "time",
       "ref_block_num": "uint16",
       "ref_block_prefix": "uint32",
-      "max_net_usage_words": "varuint32",
-      "max_kcpu_usage": "varuint32",
-      "delay_sec": "varuint32"
+      "net_usage_words": "unsigned_int",
+      "max_cpu_usage_ms": "uint8",
+      "delay_sec": "unsigned_int"
     }
   },
   "transaction": {
     "base": "transaction_header",
     "fields": {
       "context_free_actions": "action[]",
-      "actions": "action[]"
+      "actions": "action[]",
+      "transaction_extensions": "extensions_type[]"
     }
   },
   "setabi": {

@@ -17,13 +17,13 @@ describe('version', () => {
 describe('offline', () => {
   const headers = {
     expiration: new Date().toISOString().split('.')[0],
-    region: 0,
     ref_block_num: 1,
     ref_block_prefix: 452435776,
-    max_net_usage_words: 0,
-    max_kcpu_usage: 0,
+    net_usage_words: 0,
+    max_cpu_usage_ms: 0,
     delay_sec: 0,
-    context_free_actions: []
+    context_free_actions: [],
+    transaction_extensions: []
   }
 
   it('transaction', async function() {
@@ -44,13 +44,13 @@ describe('offline', () => {
 
     assert.deepEqual({
       expiration: trx.transaction.transaction.expiration,
-      region: 0,
       ref_block_num: trx.transaction.transaction.ref_block_num,
       ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
-      max_net_usage_words: 0,
-      max_kcpu_usage: 0,
+      net_usage_words: 0,
+      max_cpu_usage_ms: 0,
       delay_sec: 0,
-      context_free_actions: []
+      context_free_actions: [],
+      transaction_extensions: []
     }, headers)
 
     assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
