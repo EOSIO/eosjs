@@ -68,7 +68,7 @@ describe('shorthand', () => {
     const eaType = eos.fc.types.extended_asset()
     const eaString = eaType.toObject()
     assertSerializer(eaType, eaString)
-    assert.equal(eaType.toObject('1 SBL'), '1.0000 SBL@eosio')
+    assert.equal(eaType.toObject('1 SBL'), '1.0000 SBL@eosio.token')
   })
 
   it('symbol', () => {
@@ -103,8 +103,8 @@ if(process.env['NODE_ENV'] === 'development') {
 
       eos.contract('eosio.token', (error, eosio_token) => {
         assert(!error, error)
-        assert(eosio_token.transfer, 'eosio contract')
-        assert(eosio_token.issue, 'eosio contract')
+        assert(eosio_token.transfer, 'eosio.token contract')
+        assert(eosio_token.issue, 'eosio.token contract')
         done()
       })
     })
@@ -117,7 +117,7 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
-      account: 'eosio',
+      account: 'eosio.token',
       name: 'transfer',
       data: {
         from: 'inita',
@@ -139,7 +139,7 @@ describe('Message.data', () => {
     // const lenPrefixHex = Number(hex.length / 2).toString(16) + hex.toString('hex')
 
     const value = {
-      account: 'eosio',
+      account: 'eosio.token',
       name: 'transfer',
       data: hex,
       authorization: []
@@ -159,7 +159,7 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: true})
     const {structs, types} = eos.fc
     const value = {
-      account: 'eosio',
+      account: 'eosio.token',
       name: 'transfer',
       data: {
         from: 'inita',
@@ -187,7 +187,7 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
-      account: 'eosio',
+      account: 'eosio.token',
       name: 'mytype',
       data: '030a0b0c',
       authorization: []

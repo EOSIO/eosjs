@@ -11,7 +11,7 @@ const {isName, encodeName, decodeName,
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
-    if(account === 'eosio') {
+    if(account === 'eosio.token') {
       return structs[lookupName]
     }
     const abi = config.abiCache.abi(account)
@@ -286,7 +286,7 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
 
   function toString(value) {
     assert.equal(typeof value, 'string', 'extended_asset is expecting a string like: 9.9999 SBL@contract')
-    const [asset, contract = 'eosio'] = value.split('@')
+    const [asset, contract = 'eosio.token'] = value.split('@')
     return `${assetType.fromObject(asset)}@${contract}`
   }
 

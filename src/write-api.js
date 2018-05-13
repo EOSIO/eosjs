@@ -92,7 +92,7 @@ function WriteApi(Network, network, config, Transaction) {
       }
       const abiPromises = []
       accounts.forEach(account => {
-        if(account !== 'eosio') { // Eos contract operations are cached (allows for offline transactions)
+        if(account !== 'eosio.token') { // Eos contract operations are cached (allows for offline transactions)
           abiPromises.push(config.abiCache.abiAsync(account))
         }
       })
@@ -159,7 +159,7 @@ function WriteApi(Network, network, config, Transaction) {
     })
   }
 
-  function genMethod(type, definition, transactionArg, account = 'eosio', name = type) {
+  function genMethod(type, definition, transactionArg, account = 'eosio.token', name = type) {
     return function (...args) {
       if (args.length === 0) {
         console.error(usage(type, definition, Network, account, config))
@@ -518,7 +518,7 @@ function usage (type, definition, Network, account, config) {
   out()
 
   let struct
-  if(account === 'eosio') {
+  if(account === 'eosio.token') {
     const {structs} = Structs({defaults: true, network: Network})
     struct = structs[type]
 

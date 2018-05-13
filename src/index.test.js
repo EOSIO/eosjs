@@ -78,7 +78,7 @@ if(process.env['NODE_ENV'] === 'development') {
       const local = Eos.Localnet()
       const opts = {sign: false, broadcast: false}
       const tx = await local.transaction(['currency', 'eosio.token'], ({currency, eosio_token}) => {
-        eosio_token.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio', ..} remains first
+        eosio_token.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio.token', ..} remains first
         currency.transfer('inita', 'initd', '1 CUR', '') // {account: 'currency', ..} remains second
       }, opts)
       assert.equal(tx.transaction.transaction.actions[0].account, 'eosio.token')
