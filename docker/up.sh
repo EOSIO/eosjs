@@ -19,13 +19,11 @@ docker-compose logs -f | egrep -v 'Produced block 0000' &
 
 sleep 2
 
-cleos wallet create -n test
+cleos wallet create
+#cleos wallet create -n test
 
 # Root key need not be imported
 # cleos wallet import 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
-
-# Hack: publish main eosio smart contract
-# cleos set contract eosio contracts/eosio.system -p eosio@active
 
 # create accounts
 cleos create account eosio inita EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
