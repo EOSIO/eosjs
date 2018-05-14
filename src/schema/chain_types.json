@@ -208,7 +208,7 @@
   "asset": {
     "fields": {
       "amount": "share_type",
-      "symbol": "symbol"
+      "sym": "symbol"
     }
   },
   "producer_key": {
