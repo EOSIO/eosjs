@@ -130,7 +130,8 @@
       "name": "account_name",
       "owner": "authority",
       "active": "authority",
-      "recovery": "authority"
+      "recovery": "authority",
+      "deposit": "asset"
     }
   },
   "nonce": {
