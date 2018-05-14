@@ -15,7 +15,7 @@ docker-compose down
 
 # Start the server for testing
 docker-compose up -d
-docker-compose logs -f | egrep -v 'Produced block 0000' &
+docker-compose logs -f | egrep -v 'Produced block 0' &
 
 sleep 2
 
