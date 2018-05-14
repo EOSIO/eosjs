@@ -238,17 +238,17 @@ const Asset = (validation, baseTypes, customTypes) => {
   const amountType = baseTypes.int64(validation)
   const symbolType = customTypes.symbol(validation)
 
-  const symbolCache = symbol => ({precision: 4})
-  const precision = symbol => symbolCache(symbol).precision
+  const symbolCache = sym => ({precision: 4})
+  const precision = sym => symbolCache(sym).precision
 
   function toAssetString(value) {
     if(typeof value === 'string') {
-      const [amount, symbol] = value.split(' ')
-      return `${UDecimalPad(amount, precision(symbol))} ${symbol}`
+      const [amount, sym] = value.split(' ')
+      return `${UDecimalPad(amount, precision(sym))} ${sym}`
     }
     if(typeof value === 'object') {
-      const {amount, symbol} = value
-      return `${UDecimalUnimply(amount, precision(symbol))} ${symbol}`
+      const {amount, sym} = value
+      return `${UDecimalUnimply(amount, precision(sym))} ${sym}`
     }
     return value
   }
@@ -256,15 +256,15 @@ const Asset = (validation, baseTypes, customTypes) => {
   return {
     fromByteBuffer (b) {
       const amount = amountType.fromByteBuffer(b)
-      const symbol = symbolType.fromByteBuffer(b)
-      return `${UDecimalUnimply(amount, precision(symbol))} ${symbol}`
+      const sym = symbolType.fromByteBuffer(b)
+      return `${UDecimalUnimply(amount, precision(sym))} ${sym}`
     },
 
     appendByteBuffer (b, value) {
       assert.equal(typeof value, 'string', 'value')
-      const [amount, symbol] = value.split(' ')
-      amountType.appendByteBuffer(b, UDecimalImply(amount, precision(symbol)))
-      symbolType.appendByteBuffer(b, symbol)
+      const [amount, sym] = value.split(' ')
+      amountType.appendByteBuffer(b, UDecimalImply(amount, precision(sym)))
+      symbolType.appendByteBuffer(b, sym)
     },
 
     fromObject (value) {
@@ -273,7 +273,7 @@ const Asset = (validation, baseTypes, customTypes) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '0.0001 SYMBOL'
+        return '0.0001 SYM'
       }
       return toAssetString(value)
     }
