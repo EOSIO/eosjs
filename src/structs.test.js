@@ -25,10 +25,13 @@ describe('shorthand', () => {
     const {authority} = eos.fc.structs
 
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
-    const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
+    const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}]}
 
     assert.deepEqual(authority.fromObject(pubkey), auth)
-    assert.deepEqual(authority.fromObject(auth), auth)
+    assert.deepEqual(
+      authority.fromObject(auth),
+      Object.assign({}, auth, {accounts: [], waits: []})
+    )
   })
 
   it('PublicKey sorting', () => {
@@ -43,12 +46,12 @@ describe('shorthand', () => {
     const authSorted = {threshold: 1, keys: [
       {key: pubkeys[1], weight: 1},
       {key: pubkeys[0], weight: 1}
-    ], accounts: []}
+    ], accounts: [], waits: []}
 
     const authUnsorted = {threshold: 1, keys: [
       {key: pubkeys[0], weight: 1},
       {key: pubkeys[1], weight: 1}
-    ], accounts: []}
+    ], accounts: [], waits: []}
 
     // assert.deepEqual(authority.fromObject(pubkey), auth)
     assert.deepEqual(authority.fromObject(authUnsorted), authSorted)

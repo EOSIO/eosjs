@@ -315,12 +315,20 @@
       "ricardian_contract": "string"
     }
   },
+  "wait_weight": {
+    "base": "",
+    "fields": {
+      "wait_sec": "uint32",
+      "weight":  "weight_type"
+    }
+  },
   "authority": {
     "base": "",
     "fields": {
       "threshold": "uint32",
       "keys": "key_weight[]",
-      "accounts": "permission_level_weight[]"
+      "accounts": "permission_level_weight[]",
+      "waits": "wait_weight[]"
     }
   },
   "block_header": {

@@ -352,15 +352,13 @@ const authorityOverride = ({
     if(PublicKey.fromString(value)) {
       return {
         threshold: 1,
-        keys: [{key: value, weight: 1}],
-        accounts: []
+        keys: [{key: value, weight: 1}]
       }
     }
     if(typeof value === 'string') {
       const [account, permission = 'active'] = value.split('@')
       return {
         threshold: 1,
-        keys: [],
         accounts: [{
           permission: {
             actor: account,
