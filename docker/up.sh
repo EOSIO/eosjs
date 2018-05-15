@@ -3,7 +3,7 @@ set -o errexit
 set -o xtrace
 
 function cleos() {
-  docker-compose exec nodeos /opt/eosio/bin/cleos "$@"
+  docker exec docker_keosd_1 cleos -u http://nodeosd:8888 "$@"
 }
 
 # Reset the volumes
@@ -12,7 +12,6 @@ docker-compose down
 # Update image
 #docker-compose pull
 
-
 # Start the server for testing
 docker-compose up -d
 docker-compose logs -f | egrep -v 'Produced block 0' &
@@ -20,7 +19,6 @@ docker-compose logs -f | egrep -v 'Produced block 0' &
 sleep 2
 
 cleos wallet create
-#cleos wallet create -n test
 
 # Root key need not be imported
 # cleos wallet import 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3

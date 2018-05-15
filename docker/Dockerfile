@@ -1,11 +1,9 @@
-FROM eosio/builder:dawn3 as builder
+FROM eosio/builder as builder
 
-ARG GIT_COMMIT=HEAD
+ARG branch=dawn-v4.0.0
 
-RUN git clone -b slim --depth 1 https://github.com/EOSIO/eos.git --recursive \
-    && cd eos \
-    && git checkout $GIT_COMMIT \
-    && echo Git Commit $(git rev-parse HEAD) | tee /git-commit.txt \
+RUN git clone -b $branch --depth 1 https://github.com/EOSIO/eos.git --recursive \
+    && cd eos && echo "$branch:$(git rev-parse HEAD)" | tee /etc/eosio-version \
     && cmake -H. -B"/tmp/build" -GNinja -DCMAKE_BUILD_TYPE=Release -DWASM_ROOT=/opt/wasm -DCMAKE_CXX_COMPILER=clang++ \
        -DCMAKE_C_COMPILER=clang -DCMAKE_INSTALL_PREFIX=/tmp/build  -DSecp256k1_ROOT_DIR=/usr/local -DBUILD_MONGO_DB_PLUGIN=true \
     && cmake --build /tmp/build --target install
@@ -18,7 +16,7 @@ COPY --from=builder /usr/local/lib/* /usr/local/lib/
 COPY --from=builder /tmp/build/bin /opt/eosio/bin
 COPY --from=builder /tmp/build/contracts /contracts
 COPY --from=builder /eos/Docker/nodeosd.sh /opt/eosio/bin/nodeosd.sh
-COPY --from=builder /git-commit.txt /
+COPY --from=builder /etc/eosio-version /etc
 COPY genesis.json config.ini /
 ENV EOSIO_ROOT=/opt/eosio
 RUN chmod +x /opt/eosio/bin/nodeosd.sh
