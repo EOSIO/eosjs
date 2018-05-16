@@ -1,0 +1,161 @@
+{
+  "canceldelay": {
+    "base": "",
+    "action": {
+      "name": "canceldelay",
+      "account": "eosio"
+    },
+    "fields": {
+      "trx_id": "transaction_id_type"
+    }
+  },
+  "deleteauth": {
+    "base": "",
+    "action": {
+      "name": "deleteauth",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "permission": "permission_name"
+    }
+  },
+  "linkauth": {
+    "base": "",
+    "action": {
+      "name": "linkauth",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "code": "account_name",
+      "type": "action_name",
+      "requirement": "permission_name"
+    }
+  },
+  "newaccount": {
+    "base": "",
+    "action": {
+      "name": "newaccount",
+      "account": "eosio"
+    },
+    "fields": {
+      "creator": "account_name",
+      "name": "account_name",
+      "owner": "authority",
+      "active": "authority"
+    }
+  },
+  "nonce": {
+    "base": "",
+    "action": {
+      "name": "nonce",
+      "account": "eosio"
+    },
+    "fields": {
+      "value": "string"
+    }
+  },
+  "onblock": {
+    "base": "",
+    "action": {
+      "name": "onblock",
+      "account": "eosio"
+    },
+    "fields": {
+      "header": "block_header"
+    }
+  },
+  "passrecovery": {
+    "base": "",
+    "action": {
+      "name": "passrecovery",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name"
+    }
+  },
+  "postrecovery": {
+    "base": "",
+    "action": {
+      "name": "postrecovery",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "data": "authority",
+      "memo": "string"
+    }
+  },
+  "setabi": {
+    "base": "",
+    "action": {
+      "name": "setabi",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "abi": "abi_def"
+    }
+  },
+  "setcode": {
+    "base": "",
+    "action": {
+      "name": "setcode",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "vmtype": "uint8",
+      "vmversion": "uint8",
+      "code": "bytes"
+    }
+  },
+  "unlinkauth": {
+    "base": "",
+    "action": {
+      "name": "unlinkauth",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "code": "account_name",
+      "type": "action_name"
+    }
+  },
+  "unregproxy": {
+    "base": "",
+    "action": {
+      "name": "unregproxy",
+      "account": "eosio"
+    },
+    "fields": {
+      "proxy": "account_name"
+    }
+  },
+  "updateauth": {
+    "base": "",
+    "action": {
+      "name": "updateauth",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "permission": "permission_name",
+      "parent": "permission_name",
+      "data": "authority",
+      "delay": "uint32"
+    }
+  },
+  "vetorecovery": {
+    "base": "",
+    "action": {
+      "name": "vetorecovery",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name"
+    }
+  }
+}

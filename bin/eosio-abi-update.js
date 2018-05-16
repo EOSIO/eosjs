@@ -2,14 +2,17 @@
 
 const fs = require('fs')
 
-console.log('reading ./eosio.token.abi')
+const account = process.argv[2]
+const abiFileName = `${account}.abi`
+const jsonFileName = process.argv[3]
 
-let abi = JSON.parse(fs.readFileSync('eosio.token.abi', 'utf8'));
+console.log('reading ' + abiFileName)
+
+let abi = JSON.parse(fs.readFileSync(abiFileName, 'utf8'));
 
 let actions = {};
 for ({ name, type } of abi.actions)
-    if (name === type)
-        actions[name] = true;
+    actions[type] = name;
 
 let gen = {};
 for (let type of abi.types)
@@ -19,8 +22,9 @@ for (let { name, fields, ...rest } of abi.structs) {
     let genFields = {};
     for (let { name, type } of fields)
         genFields[name] = type;
+
     if (actions[name])
-        rest.type = "action";
+        rest.action = {name: actions[name], account}
 
     gen[name] = { ...rest, fields: genFields };
 }
@@ -29,5 +33,5 @@ let sorted = {};
 for (let key of Object.keys(gen).sort())
     sorted[key] = gen[key];
 
-console.log('writing ./eosio_token.json')
-fs.writeFileSync('eosio_token.json', JSON.stringify(sorted, null, 2), 'utf8');
+console.log('writing ' + jsonFileName)
+fs.writeFileSync(jsonFileName, JSON.stringify(sorted, null, 2), 'utf8');

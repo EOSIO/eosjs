@@ -61,17 +61,17 @@ describe('offline', () => {
 //  no testnet yet, avoid breaking travis-ci
 if(process.env['NODE_ENV'] === 'development') {
 
-  describe('networks', () => {
-    it('testnet', (done) => {
-      const eos = Eos.Localnet()
-      eos.getBlock(1, (err, block) => {
-        if(err) {
-          throw err
-        }
-        done()
-      })
-    })
-  })
+  // describe('networks', () => {
+  //   it('testnet', (done) => {
+  //     const eos = Eos.Testnet()
+  //     eos.getBlock(1, (err, block) => {
+  //       if(err) {
+  //         throw err
+  //       }
+  //       done()
+  //     })
+  //   })
+  // })
 
   describe('Contracts', () => {
     it('Messages do not sort', async function() {
@@ -103,11 +103,11 @@ if(process.env['NODE_ENV'] === 'development') {
         await eos.setabi('inita', JSON.parse(abi))
       })
     }
-    deploy('eosio.bios')
-    deploy('eosio.msig')
-    deploy('eosio.system')
-    deploy('eosio.token')
-    // deploy('exchange') // exceeds: max_transaction_net_usage
+    console.log('todo, skipping')
+    // deploy('eosio.bios')
+    // deploy('eosio.msig')
+    // deploy('eosio.system')
+    // deploy('eosio.token')
   })
 
   describe('Contracts Load', () => {
@@ -220,15 +220,13 @@ if(process.env['NODE_ENV'] === 'development') {
     it('newaccount (broadcast)', () => {
       const eos = Eos.Localnet({signProvider})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
-      // const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}], accounts: []}
       const name = randomName()
 
       return eos.newaccount({
         creator: 'inita',
         name,
         owner: pubkey,
-        active: pubkey,
-        recovery: 'inita'
+        active: pubkey
       })
     })
 
@@ -317,7 +315,7 @@ if(process.env['NODE_ENV'] === 'development') {
 
     it('action to contract atomic', async function() {
       let amt = 1 // for unique transactions
-      const testnet = Eos.Localnet({signProvider})
+      const eos = Eos.Localnet({signProvider})
 
       const trTest = currency => {
         assert(currency.transfer('inita', 'initb', amt + ' CUR', '') == null)
@@ -329,8 +327,8 @@ if(process.env['NODE_ENV'] === 'development') {
       }
 
       //  contracts can be a string or array
-      await assertTr(await testnet.transaction(['currency'], ({currency}) => trTest(currency)))
-      await assertTr(await testnet.transaction('currency', currency => trTest(currency)))
+      await assertTr(await eos.transaction(['currency'], ({currency}) => trTest(currency)))
+      await assertTr(await eos.transaction('currency', currency => trTest(currency)))
     })
 
     it('action to contract (contract tr nesting)', function () {

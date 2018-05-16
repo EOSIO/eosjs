@@ -24,10 +24,11 @@ function writeApiGen(Network, network, structs, config) {
   // Immediate send operations automatically calls merge.transaction
   for(let type in Network.schema) {
     const schema = Network.schema[type]
-    if(schema.type !== 'action') {
+    if(schema.action == null) {
       continue
     }
-    if(reserveFunctions.has(type)) {
+    const actionName = schema.action.name
+    if(reserveFunctions.has(actionName)) {
       throw new TypeError('Conflicting Api function: ' + type)
     }
 
@@ -36,7 +37,7 @@ function writeApiGen(Network, network, structs, config) {
       continue
     }
     const definition = schemaFields(Network.schema, type)
-    merge[type] = writeApi.genMethod(type, definition, merge.transaction)
+    merge[actionName] = writeApi.genMethod(type, definition, merge.transaction, schema.action.account)
   }
 
   /**
@@ -90,9 +91,12 @@ function WriteApi(Network, network, config, Transaction) {
       for(const action of args[0].actions) {
         accounts.add(action.account)
       }
+
       const abiPromises = []
+      // Eos contract operations are cached (efficient and offline transactions)
+      const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.system'])
       accounts.forEach(account => {
-        if(account !== 'eosio.token') { // Eos contract operations are cached (allows for offline transactions)
+        if(!cachedCode.has(account)) {
           abiPromises.push(config.abiCache.abiAsync(account))
         }
       })

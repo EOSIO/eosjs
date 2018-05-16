@@ -9,7 +9,10 @@
   },
   "create": {
     "base": "",
-    "type": "action",
+    "action": {
+      "name": "create",
+      "account": "eosio.token"
+    },
     "fields": {
       "issuer": "account_name",
       "maximum_supply": "asset",
@@ -33,7 +36,10 @@
   },
   "issue": {
     "base": "",
-    "type": "action",
+    "action": {
+      "name": "issue",
+      "account": "eosio.token"
+    },
     "fields": {
       "to": "account_name",
       "quantity": "asset",
@@ -42,7 +48,10 @@
   },
   "transfer": {
     "base": "",
-    "type": "action",
+    "action": {
+      "name": "transfer",
+      "account": "eosio.token"
+    },
     "fields": {
       "from": "account_name",
       "to": "account_name",

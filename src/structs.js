@@ -11,7 +11,8 @@ const {isName, encodeName, decodeName,
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
-    if(account === 'eosio.token') {
+    const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.system'])
+    if(cachedCode.has(account)) {
       return structs[lookupName]
     }
     const abi = config.abiCache.abi(account)
@@ -261,7 +262,7 @@ const Asset = (validation, baseTypes, customTypes) => {
     },
 
     appendByteBuffer (b, value) {
-      assert.equal(typeof value, 'string', 'value')
+      assert.equal(typeof value, 'string', `expecting string, got ` + (typeof value))
       const [amount, sym] = value.split(' ')
       amountType.appendByteBuffer(b, UDecimalImply(amount, precision(sym)))
       symbolType.appendByteBuffer(b, sym)

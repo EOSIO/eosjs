@@ -8,6 +8,7 @@ Newer releases are available by running your own EOS node:
 
 | Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker](https://hub.docker.com/r/eosio/eos/) | Node |
 | --- | --- | --- | --- | --- | --- |
+| dawn4 | tag: 11.x.x | `npm install eosjs@dawn4` (version 11) | tag: dawn-v4.0.0 | eosio/eos:dawn4x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
 | DAWN-2018-04-23-ALPHA | tag: 9.x.x | `npm install eosjs@dawn3` (version 9) | tag: DAWN-2018-04-23-ALPHA | eosio/eos:DAWN-2018-04-23-ALPHA | [local docker](https://github.com/EOSIO/eosjs/tree/DAWN-2018-04-23-ALPHA/docker) |
 | dawn3 | tag: 8.x.x | `npm install eosjs@8` (version 8) | tag: dawn-v3.0.0 | eosio/eos:dawn3x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
 | dawn2 | branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x | http or [https://t1readonly.eos.io](https://t1readonly.eos.io/v1/chain/get_info) |
@@ -21,13 +22,12 @@ General purpose library for the EOS blockchain.
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 
-// eos = Eos.Localnet() // 127.0.0.1:8888
-eos = Eos.Testnet() // testnet at eos.io
+eos = Eos.Localnet() // 127.0.0.1:8888
 
 // All API methods print help when called with no-arguments.
 eos.getBlock()
 
-// Next, your going to need nodeos running on localhost:8888
+// Next, your going to need nodeosd running on localhost:8888 (see ./docker)
 
 // If a callback is not provided, a Promise is returned
 eos.getBlock(1).then(result => {console.log(result)})
@@ -117,6 +117,7 @@ eos.transfer()
 
 // Usage with options (options are always optional)
 options = {broadcast: false}
+
 eos.transfer({from: 'inita', to: 'initb', quantity: '1 EOS', memo: ''}, options)
 
 // Object or ordered args may be used.
@@ -139,7 +140,7 @@ Shorthand is available for some types such as Asset and Authority.
 For example:
 * deposit: `'1 EOS'` is shorthand for `1.0000 EOS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
-* recovery: `inita` or `inita@active` is shorthand
+* active: `inita` or `inita@active` is shorthand
   * `{{threshold: 1, accounts: [..actor: inita, permission: active, weight: 1]}}`
   * `inita@other` would replace the permission `active` with `other`
 
@@ -157,8 +158,7 @@ eos.newaccount({
   creator: 'inita',
   name: 'mynewacct',
   owner: initaPublic,
-  active: initaPublic,
-  recovery: 'inita'
+  active: initaPublic
 })
 
 ```
@@ -185,7 +185,7 @@ Import and include the library when you configure Eos:
 
 ```javascript
 binaryen = require('binaryen')
-eos = Eos.Testnet({..., binaryen})
+eos = Eos.Localnet({..., binaryen})
 ```
 
 Complete example:
@@ -213,21 +213,20 @@ eos.newaccount({
   creator: 'inita',
   name: 'currency',
   owner: currencyPublic,
-  active: currencyPublic,
-  recovery: 'inita'
+  active: currencyPublic
 })
 
-contractDir = `${process.env.HOME}/eosio/dawn3/build/contracts/currency`
-wast = fs.readFileSync(`${contractDir}/currency.wast`)
-abi = fs.readFileSync(`${contractDir}/currency.abi`)
+wast = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.wast`)
+abi = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.abi`)
 
 // Publish contract to the blockchain
 eos.setcode('currency', 0, 0, wast)
 eos.setabi('currency', JSON.parse(abi))
 
 currency = null
+
 // eos.contract(account<string>, [options], [callback])
-eos.contract('currency').then(contract => currency = contract)
+eos.contract('currency').then(c => currency = c)
 
 // Issue is one of the actions in currency.abi
 currency.issue('inita', '1000.0000 CUR', {authorization: 'currency'})
@@ -297,7 +296,7 @@ eos = Eos.Localnet({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79z
 eos.transaction({
   actions: [
     {
-      account: 'eosio',
+      account: 'eosio.token',
       name: 'transfer',
       authorization: [{
         actor: 'inita',

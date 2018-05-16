@@ -54,5 +54,9 @@ cleos push action eosio.token issue '{"to":"initc", "quantity": "1000.0000 EOS",
 cleos push action eosio.token issue '{"to":"eosio", "quantity": "1000.0000 EOS", "memo": ""}' -p eosio.token@active
 
 cleos push action eosio.token create '{"issuer":"eosio.token", "maximum_supply": "1000000.0000 CUR", "can_freeze": 1, "can_recall": 1, "can_whitelist": 1}' -p eosio.token@active
-cleos push action eosio.token issue '{"to":"inita", "quantity": "1000.0000 CUR", "memo": ""}' -p eosio.token@active
-cleos push action eosio.token issue '{"to":"initb", "quantity": "1000.0000 CUR", "memo": ""}' -p eosio.token@active
+cleos push action eosio.token issue '{"to":"inita", "quantity": "100000.0000 CUR", "memo": ""}' -p eosio.token@active
+cleos push action eosio.token issue '{"to":"initb", "quantity": "100000.0000 CUR", "memo": ""}' -p eosio.token@active
+
+cleos push action currency create '{"issuer":"currency", "maximum_supply": "1000000.0000 CUR", "can_freeze": 0, "can_recall": 0, "can_whitelist": 0}' -p currency@active
+cleos push action currency issue '{"to":"inita", "quantity": "100000.0000 CUR", "memo": ""}' -p currency@active
+cleos push action currency issue '{"to":"initb", "quantity": "100000.0000 CUR", "memo": ""}' -p currency@active
