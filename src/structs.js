@@ -5,8 +5,11 @@ const assert = require('assert')
 
 const json = {schema: require('./schema')}
 
-const {isName, encodeName, decodeName,
-  UDecimalPad, UDecimalImply, UDecimalUnimply} = require('./format')
+const {
+  isName, encodeName, decodeName,
+  UDecimalPad, UDecimalImply, UDecimalUnimply,
+  parseAssetSymbol
+} = require('./format')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
@@ -55,7 +58,7 @@ module.exports = (config = {}, extendedSchema) => {
     public_key: () => [variant(PublicKeyEcc)],
     symbol: () => [AssetSymbol],
     asset: () => [Asset], // must come after AssetSymbol
-    extended_asset: () => [ExtendedAsset], // after Asset
+    extended_asset: () => [ExtendedAsset(config.assetCache.lookup)], // after Asset
     signature: () => [variant(SignatureType)]
   }
 
@@ -178,16 +181,7 @@ const PublicKeyEcc = (validation) => {
   }
 }
 
-const AssetSymbol = (validation) => {
-  function valid(value) {
-    if(typeof value !== 'string') {
-      throw new TypeError(`Asset symbol should be a string`)
-    }
-    if(value.length > 7) {
-      throw new TypeError(`Asset symbol is 7 characters or less`)
-    }
-  }
-
+const AssetSymbol = validation => {
   const prefix = '\u0004' // 4 decimals in EOS
 
   return {
@@ -195,7 +189,6 @@ const AssetSymbol = (validation) => {
       const bcopy = b.copy(b.offset, b.offset + 8)
       b.skip(8)
 
-      // TODO
       // const precision = bcopy.readUint8()
       // console.log('precision', precision)
 
@@ -214,21 +207,21 @@ const AssetSymbol = (validation) => {
     },
 
     appendByteBuffer (b, value) {
-      valid(value)
+      parseAssetSymbol(value)
       value += '\0'.repeat(7 - value.length)
       b.append(prefix + value)
     },
 
     fromObject (value) {
-      valid(value)
+      parseAssetSymbol(value)
       return value
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return 'SYMBOL'
+        return 'SYM'
       }
-      valid(value)
+      parseAssetSymbol(value)
       return value
     }
   }
@@ -281,7 +274,7 @@ const Asset = (validation, baseTypes, customTypes) => {
   }
 }
 
-const ExtendedAsset = (validation, baseTypes, customTypes) => {
+const ExtendedAsset = assetLookup => (validation, baseTypes, customTypes) => {
   const assetType = customTypes.asset(validation)
   const contractName = customTypes.name(validation)
 

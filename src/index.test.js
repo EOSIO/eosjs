@@ -57,8 +57,7 @@ describe('offline', () => {
   })
 })
 
-// even transactions that don't broadcast require Api lookups
-//  no testnet yet, avoid breaking travis-ci
+// some transactions that don't broadcast may require Api lookups
 if(process.env['NODE_ENV'] === 'development') {
 
   // describe('networks', () => {
@@ -90,24 +89,24 @@ if(process.env['NODE_ENV'] === 'development') {
     function deploy(name) {
       it(name, async function() {
         this.timeout(4000)
-        const config = {binaryen: require("binaryen"), keyProvider: wif}
-        const eos = Eos.Localnet(config)
-
-        const wast = fs.readFileSync(`docker/contracts/${name}/${name}.wast`)
-        const abi = fs.readFileSync(`docker/contracts/${name}/${name}.abi`)
-
-        // When ran multiple times, deploying to the same account
-        // avoids a same contract version deploy error.
-        // TODO: undeploy contract instead
-        await eos.setcode('inita', 0, 0, wast)
-        await eos.setabi('inita', JSON.parse(abi))
+        console.log('todo, skipping deploy ' + name)
+        // const config = {binaryen: require("binaryen"), keyProvider: wif}
+        // const eos = Eos.Localnet(config)
+        //
+        // const wast = fs.readFileSync(`docker/contracts/${name}/${name}.wast`)
+        // const abi = fs.readFileSync(`docker/contracts/${name}/${name}.abi`)
+        //
+        // // When ran multiple times, deploying to the same account
+        // // avoids a same contract version deploy error.
+        // // TODO: undeploy contract instead
+        // await eos.setcode('inita', 0, 0, wast)
+        // await eos.setabi('inita', JSON.parse(abi))
       })
     }
-    console.log('todo, skipping')
-    // deploy('eosio.bios')
-    // deploy('eosio.msig')
-    // deploy('eosio.system')
-    // deploy('eosio.token')
+    deploy('eosio.bios')
+    deploy('eosio.msig')
+    deploy('eosio.system')
+    deploy('eosio.token')
   })
 
   describe('Contracts Load', () => {
@@ -248,6 +247,11 @@ if(process.env['NODE_ENV'] === 'development') {
     it('transfer (broadcast)', () => {
       const eos = Eos.Localnet({signProvider})
       return eos.transfer('inita', 'initb', '1 EOS', '')
+    })
+
+    it('transfer custom token precision (broadcast)', () => {
+      const eos = Eos.Localnet({signProvider})
+      return eos.transfer('inita', 'initb', '1.618 3,PHI', '')
     })
 
     it('transfer custom authorization (broadcast)', () => {

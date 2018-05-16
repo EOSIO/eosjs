@@ -17,6 +17,7 @@ const api = require('eosjs-api')
 
 const Structs = require('./structs')
 const AbiCache = require('./abi-cache')
+const AssetCache = require('./asset-cache')
 const writeApiGen = require('./write-api')
 const assert = require('assert')
 const format = require('./format')
@@ -64,7 +65,9 @@ Eos.Localnet = development(api.Localnet)
 
 function createEos(config, Network, network) {
   const abiCache = AbiCache(network, config)
-  config = Object.assign({}, config, {network, abiCache})
+  const assetCache = AbiCache(network)
+
+  config = Object.assign({}, config, {network, abiCache, assetCache})
 
   if(!config.chainId) {
     config.chainId = '00'.repeat(32)

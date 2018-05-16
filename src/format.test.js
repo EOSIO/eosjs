@@ -2,7 +2,8 @@
 const assert = require('assert')
 const {
   encodeName, decodeName, encodeNameHex, decodeNameHex,
-  isName, UDecimalPad, UDecimalUnimply
+  isName, UDecimalPad, UDecimalUnimply,
+  parseAssetSymbol
 } = require('./format')
 
 describe('format', () => {
@@ -86,15 +87,15 @@ describe('format', () => {
     assert.throws(() => UDecimalUnimply('1.', 1), /invalid whole number/)
     assert.throws(() => UDecimalUnimply('.1', 1), /invalid whole number/)
     assert.throws(() => UDecimalUnimply('1.1', 1), /invalid whole number/)
-  
+
     const decFixtures = [
       {value: 1, precision: 0, answer: '1'},
       {value: '1', precision: 0, answer: '1'},
       {value: '10', precision: 0, answer: '10'},
-  
+
       {value: 1, precision: 1, answer: '0.1'},
       {value: '10', precision: 1, answer: '1'},
-  
+
       {value: '11', precision: 2, answer: '0.11'},
       {value: '110', precision: 2, answer: '1.1'},
       {value: '101', precision: 2, answer: '1.01'},
@@ -105,6 +106,20 @@ describe('format', () => {
       assert.equal(UDecimalUnimply(value, precision), answer, JSON.stringify(test))
     }
   })
+
+  it('parseAssetSymbol', () => {
+    assert.deepEqual(parseAssetSymbol('SYM'), {precision: null, symbol: 'SYM'})
+    assert.deepEqual(parseAssetSymbol('4,SYM'), {precision: 4, symbol: 'SYM'})
+
+    assert.throws(() => parseAssetSymbol(369), /should be string/)
+    assert.throws(() => parseAssetSymbol('4,SYM,2', 2), /precision like this/)
+    assert.throws(() => parseAssetSymbol('4,SYM', 2), /Asset symbol precision mismatch/)
+    assert.throws(() => parseAssetSymbol('-2,SYM'), /precision must be positive/)
+    assert.throws(() => parseAssetSymbol('sym'), /only uppercase/)
+    assert.throws(() => parseAssetSymbol('19,SYM'), /18 characters or less/)
+    assert.throws(() => parseAssetSymbol('TOOLONGSYM'), /7 characters or less/)
+  })
+
 })
 
 /* istanbul ignore next */

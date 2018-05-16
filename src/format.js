@@ -12,7 +12,8 @@ module.exports = {
   UDecimalString,
   UDecimalPad,
   UDecimalImply,
-  UDecimalUnimply
+  UDecimalUnimply,
+  parseAssetSymbol
 }
 
 function ULong(value, unsigned = true, radix = 10) {
@@ -231,4 +232,43 @@ function UDecimalUnimply(value, precision) {
   const dotIdx = value.length - precision
   value = `${value.slice(0, dotIdx)}.${value.slice(dotIdx)}`
   return UDecimalString(value) // Normalize
+}
+
+/**
+  @arg {string} assetSymbol - 4,SYM
+  @arg {number} [precision = null] - expected precision or mismatch AssertionError
+
+  @example assert.deepEqual(parseAssetSymbol('SYM'), {precision: null, symbol: 'SYM'})
+  @example assert.deepEqual(parseAssetSymbol('4,SYM'), {precision: 4, symbol: 'SYM'})
+  @throws AssertionError
+  @throws TypeError
+*/
+function parseAssetSymbol(assetSymbol, precision = null) {
+  assert.equal(typeof assetSymbol, 'string', 'Asset symbol should be string')
+
+  if(assetSymbol.indexOf(',') === -1) {
+    assetSymbol = `,${assetSymbol}` // null precision
+  }
+  const v = assetSymbol.split(',')
+  assert(v.length === 2, `Asset symbol "${assetSymbol}" may have a precision like this: 4,SYM`)
+
+  const symbolPrecision = v[0] == '' ? null : parseInt(v[0])
+  const symbol = v[1]
+
+  if(precision != null) {
+    assert.equal(precision, symbolPrecision, 'Asset symbol precision mismatch')
+  } else {
+    precision = symbolPrecision
+  }
+
+  if(precision != null) {
+    assert.equal(typeof precision, 'number', 'precision')
+    assert(precision > -1, 'precision must be positive')
+  }
+
+  assert(/^[A-Z]+$/.test(symbol), `Asset symbol should contain only uppercase letters A-Z`)
+  assert(precision <= 18, `Precision should be 18 characters or less`)
+  assert(symbol.length <= 7, `Asset symbol is 7 characters or less`)
+
+  return {precision, symbol}
 }
