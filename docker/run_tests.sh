@@ -14,7 +14,7 @@ trap finish EXIT
 trap finish ERR
 
 # For unit testing
-docker cp docker_nodeos_1:/contracts .
+docker cp docker_nodeosd_1:/contracts .
 
 cd ..
 npm install
