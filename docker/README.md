@@ -7,10 +7,10 @@ This branch is already configured for a compatible docker:
 
 ```bash
 egrep image docker-compose.yml
-    image: ${EOSIO_IMAGE-eosio/eos:dawn4x}
+    image: ${EOSIO_IMAGE-eosio/eos:dawn-v4.0.0}
 
 # If you need to change the docker image
-echo "EOSIO_IMAGE=eosio/eos:dawn4x" > .env
+echo "EOSIO_IMAGE=eosio/eos:dawn-v4.0.0" > .env
 ```
 
 See [./up.sh](./up.sh) for a private key and funded accounts.
@@ -50,6 +50,6 @@ docker cp docker_nodeos_1:/opt/eosio/bin/nodeos .
 
 ```bash
 # Note, update release (dawn4x)
-docker run --rm -it eosio/eos:dawn4x ls /opt/eosio/bin
-docker run -v "$(pwd):/share" --rm -it eosio/eos:dawn4x cp /opt/eosio/bin/nodeos /share
+docker run --rm -it eosio/eos:dawn-v4.0.0 ls /opt/eosio/bin
+docker run -v "$(pwd):/share" --rm -it eosio/eos:dawn-v4.0.0 cp /opt/eosio/bin/nodeos /share
 ```

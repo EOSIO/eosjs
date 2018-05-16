@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-| Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker](https://hub.docker.com/r/eosio/eos/) | Node |
+| Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) | Node |
 | --- | --- | --- | --- | --- | --- |
-| dawn4 | tag: 11.x.x | `npm install eosjs@dawn4` (version 11) | tag: dawn-v4.0.0 | eosio/eos:dawn4x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
+| dawn4 | tag: 11.x.x | `npm install eosjs@dawn4` (version 11) | tag: dawn-v4.0.0 | eosio/eos:dawn-v4.0.0 | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
 | DAWN-2018-04-23-ALPHA | tag: 9.x.x | `npm install eosjs@dawn3` (version 9) | tag: DAWN-2018-04-23-ALPHA | eosio/eos:DAWN-2018-04-23-ALPHA | [local docker](https://github.com/EOSIO/eosjs/tree/DAWN-2018-04-23-ALPHA/docker) |
 | dawn3 | tag: 8.x.x | `npm install eosjs@8` (version 8) | tag: dawn-v3.0.0 | eosio/eos:dawn3x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
 | dawn2 | branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x | http or [https://t1readonly.eos.io](https://t1readonly.eos.io/v1/chain/get_info) |
