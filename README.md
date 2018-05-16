@@ -1,11 +1,6 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-### The current public Testnet release of eosjs is built for Dawn 2.x
-You can find the current stable branch of eos here: https://github.com/EOSIO/eos/tree/dawn-2.x
-
-Newer releases are available by running your own EOS node:
-
 | Version | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](/EOSIO/eos) | [Docker](https://hub.docker.com/r/eosio/eos/) | Node |
 | --- | --- | --- | --- | --- | --- |
 | dawn4 | tag: 11.x.x | `npm install eosjs@dawn4` (version 11) | tag: dawn-v4.0.0 | eosio/eos:dawn4x | [local docker](https://github.com/EOSIO/eosjs/tree/master/docker) |
