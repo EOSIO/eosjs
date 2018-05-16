@@ -6,14 +6,14 @@ is designed to reset its blockchain and wallet state upon shutdown.
 This branch is already configured for a compatible docker:
 
 ```bash
-egrep image docker-compose.yml 
-    image: ${EOSIO_IMAGE-eosio/eos:dawn3x}
+egrep image docker-compose.yml
+    image: ${EOSIO_IMAGE-eosio/eos:dawn4x}
 
 # If you need to change the docker image
-echo "EOSIO_IMAGE=eosio/eos:dawn4x" > .env 
+echo "EOSIO_IMAGE=eosio/eos:dawn4x" > .env
 ```
 
-See [./up.sh](./up.sh) for a private key and funded accounts. 
+See [./up.sh](./up.sh) for a private key and funded accounts.
 
 # Localnet
 
@@ -49,7 +49,7 @@ docker cp docker_nodeos_1:/opt/eosio/bin/nodeos .
 ## Stopped container (obtaining files)
 
 ```bash
-# Note, update release (dawn3x)
-docker run --rm -it eosio/eos:dawn3x ls /opt/eosio/bin
-docker run -v "$(pwd):/share" --rm -it eosio/eos:dawn3x cp /opt/eosio/bin/nodeos /share
+# Note, update release (dawn4x)
+docker run --rm -it eosio/eos:dawn4x ls /opt/eosio/bin
+docker run -v "$(pwd):/share" --rm -it eosio/eos:dawn4x cp /opt/eosio/bin/nodeos /share
 ```
