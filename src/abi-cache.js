@@ -2,7 +2,7 @@ const assert = require('assert')
 const Structs = require('./structs')
 
 module.exports = AbiCache
- 
+
 function AbiCache(network, config) {
   // Help (or "usage") needs {defaults: true}
   config = Object.assign({}, {defaults: true}, config)
@@ -10,7 +10,7 @@ function AbiCache(network, config) {
 
   /**
     @arg {boolean} force false when ABI is immutable.  When force is true, API
-    user is still free to cache the contract object returned by eosjs. 
+    user is still free to cache the contract object returned by eosjs.
   */
   function abiAsync(account, force = true) {
     assert(account, 'required account')
@@ -29,7 +29,7 @@ function AbiCache(network, config) {
   function abi(account) {
     const c = cache[account]
     if(c == null) {
-      throw new Error(`Abi '${account}' is not cached, call abiAsync('${account}')`)
+      throw new Error(`Abi '${account}' is not cached`)
     }
     return c
   }

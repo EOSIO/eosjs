@@ -64,10 +64,10 @@ Eos.Localnet = development(api.Localnet)
 // Eos.Mainnet = config => ..
 
 function createEos(config, Network, network) {
-  const abiCache = AbiCache(network, config)
-  const assetCache = AbiCache(network)
+  config = Object.assign({}, config, {network})
 
-  config = Object.assign({}, config, {network, abiCache, assetCache})
+  config.assetCache =AssetCache(network)
+  config.abiCache = AbiCache(network, config)
 
   if(!config.chainId) {
     config.chainId = '00'.repeat(32)

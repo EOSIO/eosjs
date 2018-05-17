@@ -50,15 +50,14 @@ module.exports = (config = {}, extendedSchema) => {
     config.override
   )
 
-  // eosTypes reconciled with:
-  //   eos::abi_serializer.cpp
+  const {assetCache} = config
 
   const eosTypes = {
     name: ()=> [Name],
     public_key: () => [variant(PublicKeyEcc)],
-    symbol: () => [AssetSymbol],
-    asset: () => [Asset], // must come after AssetSymbol
-    extended_asset: () => [ExtendedAsset(config.assetCache.lookup)], // after Asset
+    symbol: () => [AssetSymbol(assetCache)],
+    asset: () => [Asset(assetCache)], // must come after AssetSymbol
+    extended_asset: () => [ExtendedAsset], // after Asset
     signature: () => [variant(SignatureType)]
   }
 
@@ -181,68 +180,97 @@ const PublicKeyEcc = (validation) => {
   }
 }
 
-const AssetSymbol = validation => {
-  const prefix = '\u0004' // 4 decimals in EOS
+/** Current action within a transaction. */
+let currentAction
 
+/** @private */
+function precisionCache(assetCache, sym) {
+  const assetSymbol = parseAssetSymbol(sym)
+  let precision = assetSymbol.precision
+
+  if(currentAction) {
+    const asset = assetCache.lookup(assetSymbol.symbol, currentAction.account)
+    if(asset) {
+      if(precision == null) {
+        precision = asset.precision
+      } else {
+        assert.equal(asset.precision, precision,
+          `Precision mismatch for asset: ${sym}@${currentAction.account}`)
+      }
+    } else {
+      // Lookup data for later (appendByteBuffer needs it)
+      assetCache.lookupAsync(assetSymbol.symbol, currentAction.account)
+    }
+  }
+  return {symbol: assetSymbol.symbol, precision}
+}
+
+const AssetSymbol = assetCache => validation => {
   return {
     fromByteBuffer (b) {
       const bcopy = b.copy(b.offset, b.offset + 8)
       b.skip(8)
 
-      // const precision = bcopy.readUint8()
-      // console.log('precision', precision)
-
+      const precision = bcopy.readUint8()
       const bin = bcopy.toBinary()
-      if(bin.slice(0, 1) !== prefix) {
-        throw new TypeError(`Asset precision does not match: ${bin.slice(0, 1)}`)
-      }
+
       let symbol = ''
-      for(const code of bin.slice(1))  {
+      for(const code of bin)  {
         if(code == '\0') {
           break
         }
         symbol += code
       }
-      return symbol
+      precisionCache(assetCache, `${precision},${symbol}`) // validate
+      return `${precision},${symbol}`
     },
 
     appendByteBuffer (b, value) {
-      parseAssetSymbol(value)
-      value += '\0'.repeat(7 - value.length)
-      b.append(prefix + value)
+      const {symbol, precision} = precisionCache(assetCache, value)
+      assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAction.account}`)
+      const pad = '\0'.repeat(7 - symbol.length)
+      b.append(String.fromCharCode(precision) + symbol + pad)
     },
 
     fromObject (value) {
-      parseAssetSymbol(value)
-      return value
+      const {symbol, precision} = precisionCache(assetCache, value)
+      if(precision == null) {
+        return symbol
+      } else {
+        // Internal object, this can have the precision prefix
+        return `${precision},${symbol}`
+      }
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return 'SYM'
+        return 'EOS'
       }
-      parseAssetSymbol(value)
-      return value
+      // symbol only (without precision prefix)
+      return precisionCache(assetCache, value).symbol
     }
   }
 }
 
 /** @example '0.0001 CUR' */
-const Asset = (validation, baseTypes, customTypes) => {
+const Asset = assetCache => (validation, baseTypes, customTypes) => {
   const amountType = baseTypes.int64(validation)
   const symbolType = customTypes.symbol(validation)
-
-  const symbolCache = sym => ({precision: 4})
-  const precision = sym => symbolCache(sym).precision
 
   function toAssetString(value) {
     if(typeof value === 'string') {
       const [amount, sym] = value.split(' ')
-      return `${UDecimalPad(amount, precision(sym))} ${sym}`
+      const {precision, symbol} = precisionCache(assetCache, sym)
+      if(precision == null) {
+        return value
+      }
+      return `${UDecimalPad(amount, precision)} ${symbol}`
     }
     if(typeof value === 'object') {
       const {amount, sym} = value
-      return `${UDecimalUnimply(amount, precision(sym))} ${sym}`
+      const {precision, symbol} = precisionCache(assetCache, sym)
+      assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAction.account}`)
+      return `${UDecimalUnimply(amount, precision)} ${symbol}`
     }
     return value
   }
@@ -251,13 +279,16 @@ const Asset = (validation, baseTypes, customTypes) => {
     fromByteBuffer (b) {
       const amount = amountType.fromByteBuffer(b)
       const sym = symbolType.fromByteBuffer(b)
-      return `${UDecimalUnimply(amount, precision(sym))} ${sym}`
+      const {precision} = precisionCache(assetCache, sym)
+      return `${UDecimalUnimply(amount, precision)} ${sym}`
     },
 
     appendByteBuffer (b, value) {
       assert.equal(typeof value, 'string', `expecting string, got ` + (typeof value))
       const [amount, sym] = value.split(' ')
-      amountType.appendByteBuffer(b, UDecimalImply(amount, precision(sym)))
+      const {precision} = precisionCache(assetCache, sym)
+      assert(precision != null, `Precision unknown for asset: ${sym}@${currentAction.account}`)
+      amountType.appendByteBuffer(b, UDecimalImply(amount, precision))
       symbolType.appendByteBuffer(b, sym)
     },
 
@@ -267,14 +298,14 @@ const Asset = (validation, baseTypes, customTypes) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '0.0001 SYM'
+        return '0.0001 EOS'
       }
       return toAssetString(value)
     }
   }
 }
 
-const ExtendedAsset = assetLookup => (validation, baseTypes, customTypes) => {
+const ExtendedAsset = (validation, baseTypes, customTypes) => {
   const assetType = customTypes.asset(validation)
   const contractName = customTypes.name(validation)
 
@@ -304,7 +335,7 @@ const ExtendedAsset = assetLookup => (validation, baseTypes, customTypes) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '0.0001 SYMBOL@contract'
+        return '0.0001 EOS@eosio'
       }
       return toString(value)
     }
@@ -436,6 +467,8 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
 
   'action.data.fromObject': ({fields, object, result}) => {
     const {data, name} = object
+    currentAction = object
+
     const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
     if(ser) {
       if(typeof data === 'object') {
@@ -451,10 +484,13 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
       // console.log(`Unknown Action.name ${object.name}`)
       result.data = data
     }
+
+    currentAction = null
   },
 
   'action.data.toObject': ({fields, object, result, config}) => {
-    const {data, name} = object || {}
+    const {data, name, account} = object || {}
+
     const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
     if(!ser) {
       // Types without an ABI will accept hex

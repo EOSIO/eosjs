@@ -71,7 +71,7 @@ describe('shorthand', () => {
     const eaType = eos.fc.types.extended_asset()
     const eaString = eaType.toObject()
     assertSerializer(eaType, eaString)
-    assert.equal(eaType.toObject('1 SBL'), '1.0000 SBL@eosio.token')
+    assert.equal(eaType.toObject('1 EOS'), '1.0000 EOS@eosio.token')
   })
 
   it('symbol', () => {

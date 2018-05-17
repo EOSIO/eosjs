@@ -523,7 +523,12 @@ function usage (type, definition, Network, account, config) {
 
   let struct
   if(account === 'eosio.token') {
-    const {structs} = Structs({defaults: true, network: Network})
+    const {structs} = Structs(
+      Object.assign(
+        {defaults: true, network: Network},
+        config
+      )
+    )
     struct = structs[type]
 
     out('PARAMETERS')
