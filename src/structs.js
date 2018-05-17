@@ -267,10 +267,9 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
       return `${UDecimalPad(amount, precision)} ${symbol}`
     }
     if(typeof value === 'object') {
-      const {amount, sym} = value
-      const {precision, symbol} = precisionCache(assetCache, sym)
+      const {precision, symbol} = precisionCache(assetCache, value.symbol)
       assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAction.account}`)
-      return `${UDecimalUnimply(amount, precision)} ${symbol}`
+      return `${UDecimalUnimply(value.amount, precision)} ${symbol}`
     }
     return value
   }
