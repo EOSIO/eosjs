@@ -1,28 +1,46 @@
 Dockerized eosio instance for development and testing.  This container
 is designed to reset its blockchain and wallet state upon shutdown.
 
-# Configure
+# Nodeosd from Docker Hub
 
-This branch is already configured for a compatible docker:
+Configure:
 
 ```bash
-egrep image docker-compose.yml
-    image: ${EOSIO_IMAGE-eosio/eos:dawn-v4.0.0}
+docker-compose.yml:
+    image: ${EOSIO_IMAGE-eosio/eos}
 
 # If you need to change the docker image
-echo "EOSIO_IMAGE=eosio/eos:dawn-v4.0.0" > .env
+echo "EOSIO_IMAGE=eosio/eos:latest" > .env
 ```
 
-See [./up.sh](./up.sh) for a private key and funded accounts.
+Build:
+
+```bash
+docker-compose build
+```
+
+# Nodeosd from GitHub (build from scratch)
+
+Build:
+
+```bash
+# master branch
+EOSIO_DOCKER=Dockerfile.build docker-compose build
+
+# other branch
+EOSIO_DOCKER=Dockerfile.build docker-compose build --build-arg branch=other
+```
 
 # Localnet
 
-Starting and stopping an eosio instance.
+Starting and stopping an eosio instance:
 
 ```js
 ./up.sh
 docker-compose down
 ```
+
+See [./up.sh](./up.sh) for a private key and funded test accounts.
 
 # Unit Test
 
@@ -31,13 +49,11 @@ Run all unit test in a temporary instance.  Note, this script will run
 
 `./run_tests.sh`
 
-# Files
+# Misc
 
-Find and obtain files and executables for use outside of the container.
+## Obtain files from a running container
 
-## Running container (obtaining files)
-
-After running: ./up.sh
+After ./up.sh
 
 ```bash
 docker exec docker_nodeos_1 ls /opt/eosio/bin
@@ -49,7 +65,7 @@ docker cp docker_nodeos_1:/opt/eosio/bin/nodeos .
 ## Stopped container (obtaining files)
 
 ```bash
-# Note, update release (dawn4x)
-docker run --rm -it eosio/eos:dawn-v4.0.0 ls /opt/eosio/bin
-docker run -v "$(pwd):/share" --rm -it eosio/eos:dawn-v4.0.0 cp /opt/eosio/bin/nodeos /share
+# Note, update release
+docker run --rm -it eosio/eos:latest ls /opt/eosio/bin
+docker run -v "$(pwd):/share" --rm -it eosio/eos:latest cp /opt/eosio/bin/nodeos /share
 ```

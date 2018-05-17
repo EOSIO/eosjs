@@ -4,8 +4,8 @@ services:
   nodeosd:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: ${EOSIO_IMAGE-eosio/eos:dawn-v4.0.0}
+      dockerfile: ${EOSIO_DOCKER-Dockerfile}
+    image: ${EOSIO_IMAGE-eosio/eos}
     command: /opt/eosio/bin/nodeosd.sh
     ports:
       - 8888:8888
@@ -13,7 +13,7 @@ services:
     expose:
       - "8888"
   keosd:
-    image: ${EOSIO_IMAGE-eosio/eos:dawn-v4.0.0}
+    image: ${EOSIO_IMAGE-eosio/eos}
     command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir
     hostname: keosd
     links:
