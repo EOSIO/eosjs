@@ -6,10 +6,7 @@ module.exports = AssetCache
 function AssetCache(network) {
   const cache = {
     'EOS@eosio': {precision: 4},
-    'EOS@eosio.token': {precision: 4},
-    'CUR@currency': {precision: 4},
-    'EOS@currency': {precision: 4},
-    'PHI@eosio.token': {precision: 3}
+    'EOS@eosio.token': {precision: 4}
   }
 
   /** @return {Promise} {precision} */
@@ -43,6 +40,7 @@ function AssetCache(network) {
 
       return cache[extendedAsset] = {precision}
     })
+    promises.push(statsPromise)
     return cache[extendedAsset] = statsPromise
   }
 
@@ -65,4 +63,11 @@ function AssetCache(network) {
     lookupAsync,
     lookup
   }
+}
+
+let promises = []
+
+AssetCache.resolve = async function() {
+  await Promise.all(promises)
+  promises = []
 }

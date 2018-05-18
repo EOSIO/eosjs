@@ -433,6 +433,7 @@ const wasmCodeOverride = config => ({
 */
 const actionDataOverride = (structLookup, forceActionDataHex) => ({
   'action.data.fromByteBuffer': ({fields, object, b, config}) => {
+    currentAction = object
     const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
       b.readVarint32() // length prefix (usefull if object.name is unknown)
@@ -447,6 +448,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
   },
 
   'action.data.appendByteBuffer': ({fields, object, b}) => {
+    currentAction = object
     const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
@@ -483,12 +485,11 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
       // console.log(`Unknown Action.name ${object.name}`)
       result.data = data
     }
-
-    currentAction = null
   },
 
   'action.data.toObject': ({fields, object, result, config}) => {
     const {data, name, account} = object || {}
+    currentAction = object
 
     const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
     if(!ser) {

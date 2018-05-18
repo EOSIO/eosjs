@@ -4,6 +4,7 @@ const Fcbuffer = require('fcbuffer')
 const createHash = require('create-hash')
 const {processArgs} = require('eosjs-api')
 const Structs = require('./structs')
+const AssetCache = require('./asset-cache')
 
 module.exports = writeApiGen
 
@@ -380,7 +381,7 @@ function WriteApi(Network, network, config, Transaction) {
       config.transactionHeaders :
       network.createTransaction
 
-    headers(options.expireInSeconds, checkError(callback, rawTx => {
+    headers(options.expireInSeconds, checkError(callback, async function(rawTx) {
       // console.log('rawTx', rawTx)
       assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
       assert.equal(typeof rawTx.expiration, 'string', 'expecting expiration: iso date time string')
@@ -396,6 +397,9 @@ function WriteApi(Network, network, config, Transaction) {
       // resolve shorthand
       // const txObject = Transaction.toObject(Transaction.fromObject(rawTx))
       const txObject = Transaction.fromObject(rawTx)
+
+      // After fromObject ensure any async actions are finished
+      await AssetCache.resolve()
 
       // if(txObject.context_free_cpu_bandwidth == null) {
       //   // number of CPU usage units to bill transaction for

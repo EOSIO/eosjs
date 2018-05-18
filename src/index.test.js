@@ -77,8 +77,12 @@ if(process.env['NODE_ENV'] === 'development') {
       const local = Eos.Localnet()
       const opts = {sign: false, broadcast: false}
       const tx = await local.transaction(['currency', 'eosio.token'], ({currency, eosio_token}) => {
-        eosio_token.transfer('inita', 'initd', '1 EOS', '') // make sure {account: 'eosio.token', ..} remains first
-        currency.transfer('inita', 'initd', '1 CUR', '') // {account: 'currency', ..} remains second
+        // make sure {account: 'eosio.token', ..} remains first
+        eosio_token.transfer('inita', 'initd', '1.1 EOS', '')
+
+        // {account: 'currency', ..} remains second (reverse sort)
+        currency.transfer('inita', 'initd', '1.2 CUR', '')
+
       }, opts)
       assert.equal(tx.transaction.transaction.actions[0].account, 'eosio.token')
       assert.equal(tx.transaction.transaction.actions[1].account, 'currency')
@@ -256,7 +260,7 @@ if(process.env['NODE_ENV'] === 'development') {
 
     it('transfer custom token precision (broadcast)', () => {
       const eos = Eos.Localnet({signProvider})
-      return eos.transfer('inita', 'initb', '1.618 3,PHI', '')
+      return eos.transfer('inita', 'initb', '1.618 PHI', '')
     })
 
     it('transfer custom authorization (broadcast)', () => {
