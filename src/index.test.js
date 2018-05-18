@@ -200,6 +200,11 @@ if(process.env['NODE_ENV'] === 'development') {
       return eos.transfer('inita', 'initb', '12 EOS', '', true)
     })
 
+    it('keyProvider return Promise', () => {
+      const eos = Eos.Localnet({keyProvider: new Promise(resolve => {resolve(wif)})})
+      return eos.transfer('inita', 'initb', '1.618 EOS', '', true)
+    })
+
     it('signProvider', () => {
       const customSignProvider = ({buf, sign, transaction}) => {
 
