@@ -14,7 +14,7 @@ const {
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
-    const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.system'])
+    const cachedCode = new Set(['eosio', 'eosio.token'])
     if(cachedCode.has(account)) {
       return structs[lookupName]
     }
@@ -181,25 +181,25 @@ const PublicKeyEcc = (validation) => {
 }
 
 /** Current action within a transaction. */
-let currentAction
+let currentAccount
 
 /** @private */
 function precisionCache(assetCache, sym) {
   const assetSymbol = parseAssetSymbol(sym)
   let precision = assetSymbol.precision
 
-  if(currentAction) {
-    const asset = assetCache.lookup(assetSymbol.symbol, currentAction.account)
+  if(currentAccount) {
+    const asset = assetCache.lookup(assetSymbol.symbol, currentAccount)
     if(asset) {
       if(precision == null) {
         precision = asset.precision
       } else {
         assert.equal(asset.precision, precision,
-          `Precision mismatch for asset: ${sym}@${currentAction.account}`)
+          `Precision mismatch for asset: ${sym}@${currentAccount}`)
       }
     } else {
       // Lookup data for later (appendByteBuffer needs it)
-      assetCache.lookupAsync(assetSymbol.symbol, currentAction.account)
+      assetCache.lookupAsync(assetSymbol.symbol, currentAccount)
     }
   }
   return {symbol: assetSymbol.symbol, precision}
@@ -227,7 +227,7 @@ const AssetSymbol = assetCache => validation => {
 
     appendByteBuffer (b, value) {
       const {symbol, precision} = precisionCache(assetCache, value)
-      assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAction.account}`)
+      assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAccount}`)
       const pad = '\0'.repeat(7 - symbol.length)
       b.append(String.fromCharCode(precision) + symbol + pad)
     },
@@ -244,7 +244,7 @@ const AssetSymbol = assetCache => validation => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return 'EOS'
+        return 'SYS'
       }
       // symbol only (without precision prefix)
       return precisionCache(assetCache, value).symbol
@@ -268,7 +268,7 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
     }
     if(typeof value === 'object') {
       const {precision, symbol} = precisionCache(assetCache, value.symbol)
-      assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAction.account}`)
+      assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAccount}`)
       return `${UDecimalUnimply(value.amount, precision)} ${symbol}`
     }
     return value
@@ -286,7 +286,7 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
       assert.equal(typeof value, 'string', `expecting string, got ` + (typeof value))
       const [amount, sym] = value.split(' ')
       const {precision} = precisionCache(assetCache, sym)
-      assert(precision != null, `Precision unknown for asset: ${sym}@${currentAction.account}`)
+      assert(precision != null, `Precision unknown for asset: ${sym}@${currentAccount}`)
       amountType.appendByteBuffer(b, UDecimalImply(amount, precision))
       symbolType.appendByteBuffer(b, sym)
     },
@@ -297,7 +297,7 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '0.0001 EOS'
+        return '0.0001 SYS'
       }
       return toAssetString(value)
     }
@@ -311,6 +311,7 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
   function toString(value) {
     assert.equal(typeof value, 'string', 'extended_asset is expecting a string like: 9.9999 SBL@contract')
     const [asset, contract = 'eosio.token'] = value.split('@')
+    currentAccount = contract
     return `${assetType.fromObject(asset)}@${contract}`
   }
 
@@ -318,12 +319,14 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
     fromByteBuffer (b) {
       const asset = assetType.fromByteBuffer(b)
       const contract = contractName.fromByteBuffer(b)
+      currentAccount = contract
       return `${asset}@${contract}`
     },
 
     appendByteBuffer (b, value) {
       assert.equal(typeof value, 'string', 'value')
       const [asset, contract] = value.split('@')
+      currentAccount = contract
       assetType.appendByteBuffer(b, asset)
       contractName.appendByteBuffer(b, contract)
     },
@@ -334,7 +337,7 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '0.0001 EOS@eosio'
+        return '0.0001 SYS@eosio'
       }
       return toString(value)
     }
@@ -433,7 +436,7 @@ const wasmCodeOverride = config => ({
 */
 const actionDataOverride = (structLookup, forceActionDataHex) => ({
   'action.data.fromByteBuffer': ({fields, object, b, config}) => {
-    currentAction = object
+    currentAccount = object.account
     const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
       b.readVarint32() // length prefix (usefull if object.name is unknown)
@@ -448,7 +451,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
   },
 
   'action.data.appendByteBuffer': ({fields, object, b}) => {
-    currentAction = object
+    currentAccount = object.account
     const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
@@ -468,7 +471,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
 
   'action.data.fromObject': ({fields, object, result}) => {
     const {data, name} = object
-    currentAction = object
+    currentAccount = object.account
 
     const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
     if(ser) {
@@ -489,7 +492,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
 
   'action.data.toObject': ({fields, object, result, config}) => {
     const {data, name, account} = object || {}
-    currentAction = object
+    currentAccount = object.account
 
     const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
     if(!ser) {

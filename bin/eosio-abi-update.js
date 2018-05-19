@@ -2,8 +2,8 @@
 
 const fs = require('fs')
 
-const account = process.argv[2]
-const abiFileName = `${account}.abi`
+const contract = process.argv[2]
+const abiFileName = `${contract}.abi`
 const jsonFileName = process.argv[3]
 
 console.log('reading ' + abiFileName)
@@ -23,8 +23,17 @@ for (let { name, fields, ...rest } of abi.structs) {
     for (let { name, type } of fields)
         genFields[name] = type;
 
-    if (actions[name])
-        rest.action = {name: actions[name], account}
+    if (actions[name]) {
+        const account =
+          contract === 'eosio.system' ? 'eosio' :
+          contract === 'eosio.bios' ? 'eosio' :
+          contract
+
+        rest.action = {
+          name: actions[name],
+          account
+        }
+    }
 
     gen[name] = { ...rest, fields: genFields };
 }

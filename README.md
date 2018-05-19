@@ -113,13 +113,13 @@ eos.transfer()
 // Usage with options (options are always optional)
 options = {broadcast: false}
 
-eos.transfer({from: 'inita', to: 'initb', quantity: '1 EOS', memo: ''}, options)
+eos.transfer({from: 'inita', to: 'initb', quantity: '1 SYS', memo: ''}, options)
 
 // Object or ordered args may be used.
-eos.transfer('inita', 'initb', '2 EOS', 'memo', options)
+eos.transfer('inita', 'initb', '2 SYS', 'memo', options)
 
 // A broadcast boolean may be provided as a shortcut for {broadcast: false}
-eos.transfer('inita', 'initb', '1 EOS', '', false)
+eos.transfer('inita', 'initb', '1 SYS', '', false)
 ```
 
 Read-write API methods and documentation are generated from the [eosio_system](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_token.json) schema.
@@ -133,7 +133,7 @@ For more advanced signing, see `keyProvider` in
 Shorthand is available for some types such as Asset and Authority.
 
 For example:
-* deposit: `'1 EOS'` is shorthand for `1.0000 EOS`
+* deposit: `'1 SYS'` is shorthand for `1.0000 SYS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
 * active: `inita` or `inita@active` is shorthand
   * `{{threshold: 1, accounts: [..actor: inita, permission: active, weight: 1]}}`
@@ -245,8 +245,8 @@ eos = Eos.Localnet({keyProvider})
 // if either transfer fails, both will fail (1 transaction, 2 messages)
 eos.transaction(eos =>
   {
-    eos.transfer('inita', 'initb', '1 EOS', '')
-    eos.transfer('inita', 'initc', '1 EOS', '')
+    eos.transfer('inita', 'initb', '1 SYS', '')
+    eos.transfer('inita', 'initc', '1 SYS', '')
     // Returning a promise is optional (but handled as expected)
   }
   // [options],
@@ -261,7 +261,7 @@ eos.transaction('currency', currency => {
 // mix contracts in the same transaction
 eos.transaction(['currency', 'eosio.token'], ({currency, eosio_token}) => {
   currency.transfer('inita', 'initb', '1 CUR', '')
-  eosio_token.transfer('inita', 'initb', '1 EOS', '')
+  eosio_token.transfer('inita', 'initb', '1 SYS', '')
 })
 
 // contract lookups then transactions
@@ -300,7 +300,7 @@ eos.transaction({
       data: {
         from: 'inita',
         to: 'initb',
-        quantity: '7 EOS',
+        quantity: '7 SYS',
         memo: ''
       }
     }

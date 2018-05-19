@@ -11,13 +11,13 @@ describe('shorthand', () => {
     const {types} = eos.fc
     const AssetType = types.asset()
 
-    assertSerializer(AssetType, '1.0000 EOS')
+    assertSerializer(AssetType, '1.0000 SYS')
 
-    const obj = AssetType.fromObject('1 EOS')
-    assert.equal(obj, '1.0000 EOS')
+    const obj = AssetType.fromObject('1 SYS')
+    assert.equal(obj, '1.0000 SYS')
 
-    const obj2 = AssetType.fromObject({amount: 10000, symbol: 'EOS'})
-    assert.equal(obj, '1.0000 EOS')
+    const obj2 = AssetType.fromObject({amount: 10000, symbol: 'SYS'})
+    assert.equal(obj, '1.0000 SYS')
   })
 
   it('authority', () => {
@@ -71,19 +71,19 @@ describe('shorthand', () => {
     const eaType = eos.fc.types.extended_asset()
     const eaString = eaType.toObject()
     assertSerializer(eaType, eaString)
-    assert.equal(eaType.toObject('1 EOS'), '1.0000 EOS@eosio.token')
+    assert.equal(eaType.toObject('1 SYS'), '1.0000 SYS@eosio.token')
   })
 
   it('symbol', () => {
     const eos = Eos.Localnet()
     const {types} = eos.fc
-    const AssetSymbolType = types.symbol()
+    const ExtendedAssetType = types.extended_asset()
 
-    assertSerializer(AssetSymbolType, 'EOS')
+    assertSerializer(ExtendedAssetType, '1.0000 SYS@eosio.token')
 
-    const obj = AssetSymbolType.fromObject('EOS')
-    const buf = Fcbuffer.toBuffer(AssetSymbolType, obj)
-    assert.equal(buf.toString('hex'), '04454f5300000000')
+    // const obj = AssetSymbolType.fromObject('1.000 SYS@eosio.token')
+    // const buf = Fcbuffer.toBuffer(AssetSymbolType, obj)
+    // assert.equal(buf.toString('hex'), '04454f5300000000')
   })
 
   it('signature', () => {
@@ -125,7 +125,7 @@ describe('Message.data', () => {
       data: {
         from: 'inita',
         to: 'initb',
-        quantity: '1.0000 EOS',
+        quantity: '1.0000 SYS',
         memo: ''
       },
       authorization: []
@@ -137,7 +137,7 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: false, debug: false})
     const {structs, types} = eos.fc
 
-    const tr = {from: 'inita', to: 'initb', quantity: '1.0000 EOS', memo: ''}
+    const tr = {from: 'inita', to: 'initb', quantity: '1.0000 SYS', memo: ''}
     const hex = Fcbuffer.toBuffer(structs.transfer, tr).toString('hex')
     // const lenPrefixHex = Number(hex.length / 2).toString(16) + hex.toString('hex')
 
@@ -167,7 +167,7 @@ describe('Message.data', () => {
       data: {
         from: 'inita',
         to: 'initb',
-        quantity: '1 EOS',
+        quantity: '1 SYS',
         memo: ''
       },
       authorization: []

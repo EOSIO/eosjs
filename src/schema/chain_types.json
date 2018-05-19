@@ -30,7 +30,6 @@
   "weight_type": "uint16",
   "block_num_type": "uint32",
   "share_type": "int64",
-  "transaction_id_type": "checksum_type",
   "digest_type": "checksum_type",
   "context_free_type": "bytes",
   "unsigned_int": "varuint32",
@@ -81,28 +80,6 @@
     "fields": {
       "name": "field_name",
       "type": "type_name"
-    }
-  },
-  "key_weight": {
-    "base": "",
-    "fields": {
-      "key": "public_key",
-      "weight": "weight_type"
-    }
-  },
-  "onerror": "bytes",
-  "permission_level": {
-    "base": "",
-    "fields": {
-      "actor": "account_name",
-      "permission": "permission_name"
-    }
-  },
-  "permission_level_weight": {
-    "base": "",
-    "fields": {
-      "permission": "permission_level",
-      "weight": "weight_type"
     }
   },
   "asset": {
@@ -198,22 +175,6 @@
       "name": "action_name",
       "type": "type_name",
       "ricardian_contract": "string"
-    }
-  },
-  "wait_weight": {
-    "base": "",
-    "fields": {
-      "wait_sec": "uint32",
-      "weight":  "weight_type"
-    }
-  },
-  "authority": {
-    "base": "",
-    "fields": {
-      "threshold": "uint32",
-      "keys": "key_weight[]",
-      "accounts": "permission_level_weight[]",
-      "waits": "wait_weight[]"
     }
   },
   "block_header": {

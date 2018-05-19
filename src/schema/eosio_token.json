@@ -2,11 +2,10 @@
   "account": {
     "base": "",
     "fields": {
-      "balance": "asset",
-      "frozen": "uint8",
-      "whitelist": "uint8"
+      "balance": "asset"
     }
   },
+  "account_name": "name",
   "create": {
     "base": "",
     "action": {
@@ -15,10 +14,7 @@
     },
     "fields": {
       "issuer": "account_name",
-      "maximum_supply": "asset",
-      "can_freeze": "uint8",
-      "can_recall": "uint8",
-      "can_whitelist": "uint8"
+      "maximum_supply": "asset"
     }
   },
   "currency_stats": {
@@ -26,12 +22,7 @@
     "fields": {
       "supply": "asset",
       "max_supply": "asset",
-      "issuer": "account_name",
-      "can_freeze": "uint8",
-      "can_recall": "uint8",
-      "can_whitelist": "uint8",
-      "is_frozen": "uint8",
-      "enforce_whitelist": "uint8"
+      "issuer": "account_name"
     }
   },
   "issue": {
