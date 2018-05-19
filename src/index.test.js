@@ -26,35 +26,35 @@ describe('offline', () => {
     transaction_extensions: []
   }
 
-  // it('transaction', async function() {
-  //   const privateKey = await ecc.unsafeRandomKey()
-  //
-  //   const eos = Eos.Localnet({
-  //     keyProvider: privateKey,
-  //     httpEndpoint: 'https://doesnotexist.example.org',
-  //     transactionHeaders: (expireInSeconds, callback) => {
-  //       callback(null/*error*/, headers)
-  //     },
-  //     broadcast: false,
-  //     sign: true
-  //   })
-  //
-  //   const memo = ''
-  //   const trx = await eos.transfer('bankers', 'people', '1000000 SYS', memo)
-  //
-  //   assert.deepEqual({
-  //     expiration: trx.transaction.transaction.expiration,
-  //     ref_block_num: trx.transaction.transaction.ref_block_num,
-  //     ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
-  //     net_usage_words: 0,
-  //     max_cpu_usage_ms: 0,
-  //     delay_sec: 0,
-  //     context_free_actions: [],
-  //     transaction_extensions: []
-  //   }, headers)
-  //
-  //   assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
-  // })
+  it('transaction', async function() {
+    const privateKey = await ecc.unsafeRandomKey()
+
+    const eos = Eos.Localnet({
+      keyProvider: privateKey,
+      httpEndpoint: 'https://doesnotexist.example.org',
+      transactionHeaders: (expireInSeconds, callback) => {
+        callback(null/*error*/, headers)
+      },
+      broadcast: false,
+      sign: true
+    })
+
+    const memo = ''
+    const trx = await eos.transfer('bankers', 'people', '1000000 SYS', memo)
+
+    assert.deepEqual({
+      expiration: trx.transaction.transaction.expiration,
+      ref_block_num: trx.transaction.transaction.ref_block_num,
+      ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
+      net_usage_words: 0,
+      max_cpu_usage_ms: 0,
+      delay_sec: 0,
+      context_free_actions: [],
+      transaction_extensions: []
+    }, headers)
+
+    assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
+  })
 })
 
 // some transactions that don't broadcast may require Api lookups
