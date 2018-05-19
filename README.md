@@ -225,7 +225,6 @@ eos.contract('currency').then(c => currency = c)
 
 // Issue is one of the actions in currency.abi
 currency.issue('inita', '1000.0000 CUR', {authorization: 'currency'})
-
 ```
 
 ### Atomic Operations

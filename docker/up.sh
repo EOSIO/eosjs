@@ -62,8 +62,6 @@ cleos transfer eosio.token inita '100000 PHI'
 cleos transfer eosio.token initb '100000 PHI'
 
 # CUR (user issued own contract)
-# Non-privileged account names must be 12 characters in length
-# TODO: Nodeosd does not support this yet..
 # newaccount eosio currency3.14 $owner_pubkey $active_pubkey
 # cleos set contract currency3.14 contracts/eosio.token -p currency3.14@active
 # cleos push action currency3.14 create\
@@ -71,5 +69,6 @@ cleos transfer eosio.token initb '100000 PHI'
 # cleos push action currency3.14 issue\
 #   '{"to":"currency3.14", "quantity": "1000000000.0000 CUR", "memo": "issue"}' -p currency3.14@active
 #
+# # Nodeosd error: "Symbol CUR is not supported by token contract eosio.token"
 # cleos transfer currency3.14 inita '100000 CUR'
 # cleos transfer currency3.14 initb '100000 CUR'
