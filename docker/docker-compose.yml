@@ -2,23 +2,22 @@ version: "3"
 
 services:
   nodeosd:
-    environment:
-      - VERSION=dawn-v4.1.0
-      - DOCKER_VERSION=20180519
-    image: eosio/eos:$VERSION
+    image: eosio/eos:20180519
     build:
       context: .
       dockerfile: Dockerfile
       #args:
-      #  branch: $VERSION
+      #  branch: $GITHUB_BRANCH
+
     command: /opt/eosio/bin/nodeosd.sh
     ports:
       - 8888:8888
       - 9876:9876
     expose:
       - "8888"
+
   keosd:
-    image: eosio/eos:$VERSION
+    image: eosio/eos:20180519
     command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir
     hostname: keosd
     links:

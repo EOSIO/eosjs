@@ -1,3 +1,2 @@
-ARG DOCKER_VERSION=20180519
-FROM eosio/eos:$DOCKER_VERSION
+FROM eosio/eos:20180519
 COPY config.ini genesis.json /
