@@ -4,12 +4,13 @@ services:
   nodeosd:
     environment:
       - VERSION=dawn-v4.1.0
+      - DOCKER_VERSION=20180519
     image: eosio/eos:$VERSION
     build:
       context: .
-      dockerfile: Dockerfile.build
-      args:
-        branch: $VERSION
+      dockerfile: Dockerfile
+      #args:
+      #  branch: $VERSION
     command: /opt/eosio/bin/nodeosd.sh
     ports:
       - 8888:8888
