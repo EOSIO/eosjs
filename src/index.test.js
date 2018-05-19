@@ -224,21 +224,21 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('newaccount (broadcast)', () => {
-      const eos = Eos.Localnet({signProvider, debug: false})
+      const eos = Eos.Localnet({signProvider, debug: true})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       const name = randomName()
 
       return eos.transaction(tr => {
         tr.newaccount({
-          creator: 'inita',
+          creator: 'eosio',
           name,
           owner: pubkey,
           active: pubkey
         })
-        tr.buyram({
+        tr.buyrambytes({
           payer: 'eosio',
           receiver: 'rnd111111111',
-          quant: '100.0000 SYS'
+          bytes: 8192
         })
         tr.delegatebw({
           from: 'eosio',
