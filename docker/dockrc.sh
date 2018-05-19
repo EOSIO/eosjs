@@ -11,6 +11,6 @@ function cleos() {
 
 function newaccount() {
   cleos system newaccount\
-    --stake-net "10 SYS" --stake-cpu "10 SYS" --buy-ram-bytes 256\
+    --stake-net "10 SYS" --stake-cpu "100 SYS" --buy-ram-bytes 256\
     "$@"
 }
