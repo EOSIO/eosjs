@@ -1,3 +1,3 @@
-FROM eosio/eos:dawn-v4.0.0
-
+ARG image=eosio/eos
+FROM $image
 COPY config.ini genesis.json /
