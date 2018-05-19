@@ -207,6 +207,13 @@
       "last_produced_block_time": "uint32"
     }
   },
+  "producer_key": {
+    "base": "",
+    "fields": {
+      "producer_name": "account_name",
+      "block_signing_key": "public_key"
+    }
+  },
   "refund": {
     "base": "",
     "action": {
@@ -249,6 +256,16 @@
       "isproxy": "bool"
     }
   },
+  "require_auth": {
+    "base": "",
+    "action": {
+      "name": "reqauth",
+      "account": "eosio"
+    },
+    "fields": {
+      "from": "account_name"
+    }
+  },
   "sellram": {
     "base": "",
     "action": {
@@ -258,6 +275,39 @@
     "fields": {
       "account": "account_name",
       "bytes": "uint64"
+    }
+  },
+  "set_account_limits": {
+    "base": "",
+    "action": {
+      "name": "setalimits",
+      "account": "eosio"
+    },
+    "fields": {
+      "account": "account_name",
+      "ram_bytes": "int64",
+      "net_weight": "int64",
+      "cpu_weight": "int64"
+    }
+  },
+  "set_global_limits": {
+    "base": "",
+    "action": {
+      "name": "setglimits",
+      "account": "eosio"
+    },
+    "fields": {
+      "cpu_usec_per_period": "int64"
+    }
+  },
+  "set_producers": {
+    "base": "",
+    "action": {
+      "name": "setprods",
+      "account": "eosio"
+    },
+    "fields": {
+      "schedule": "producer_key[]"
     }
   },
   "setabi": {
