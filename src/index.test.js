@@ -224,7 +224,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
 
     it('newaccount (broadcast)', () => {
-      const eos = Eos.Localnet({signProvider, debug: true})
+      const eos = Eos.Localnet({signProvider})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
       const name = randomName()
 
@@ -237,12 +237,12 @@ if(process.env['NODE_ENV'] === 'development') {
         })
         tr.buyrambytes({
           payer: 'eosio',
-          receiver: 'rnd111111111',
+          receiver: name,
           bytes: 8192
         })
         tr.delegatebw({
           from: 'eosio',
-          receiver: 'rnd111111111',
+          receiver: name,
           stake_net_quantity: '100.0000 SYS',
           stake_cpu_quantity: '100.0000 SYS',
           transfer: 0
