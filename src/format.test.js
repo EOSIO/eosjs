@@ -46,13 +46,14 @@ describe('format', () => {
 
   it('UDecimalPad', () => {
     assert.throws(() => UDecimalPad(), /value is required/)
-    assert.throws(() => UDecimalPad(1), /precision/)
     assert.throws(() => UDecimalPad('$10', 0), /invalid decimal/)
     assert.throws(() => UDecimalPad('1.1.', 0), /invalid decimal/)
     assert.throws(() => UDecimalPad('1.1,1', 0), /invalid decimal/)
     assert.throws(() => UDecimalPad('1.11', 1), /exceeds precision/)
 
     const decFixtures = [
+      {value: 1, precision: null, answer: '1'},
+
       {value: 1, precision: 0, answer: '1'},
       {value: '1', precision: 0, answer: '1'},
       {value: '1.', precision: 0, answer: '1'},
