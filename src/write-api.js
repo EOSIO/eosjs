@@ -392,26 +392,14 @@ function WriteApi(Network, network, config, Transaction) {
 
       rawTx.actions = arg.actions
 
-      // console.log('rawTx', JSON.stringify(rawTx,null,4))
-
       // resolve shorthand
-      // const txObject = Transaction.toObject(Transaction.fromObject(rawTx))
       const txObject = Transaction.fromObject(rawTx)
 
       // After fromObject ensure any async actions are finished
       await AssetCache.resolve()
 
-      // if(txObject.context_free_cpu_bandwidth == null) {
-      //   // number of CPU usage units to bill transaction for
-      //   // eosiod getCpuEstimate does not exist, it will probably have another name
-      //   txObject.context_free_cpu_bandwidth = await eos.getCpuEstimate(txObject)
-      // }
-
-      // console.log('txObject', JSON.stringify(txObject,null,4))
-
-      // Broadcast what is signed (instead of rawTx)
       const buf = Fcbuffer.toBuffer(Transaction, txObject)
-      const tr = Fcbuffer.fromBuffer(Transaction, buf)
+      const tr = Transaction.toObject(txObject)
 
       const transactionId  = createHash('sha256').update(buf).digest().toString('hex')
 
@@ -427,12 +415,11 @@ function WriteApi(Network, network, config, Transaction) {
 
       // sigs can be strings or Promises
       Promise.all(sigs).then(sigs => {
-        sigs = [].concat.apply([], sigs) //flatten arrays in array
-        // tr.signatures = sigs // replaced by packedTr
+        sigs = [].concat.apply([], sigs) // flatten arrays in array
 
         for(let i = 0; i < sigs.length; i++) {
           const sig = sigs[i]
-          // convert from hex to base58 format
+          // normalize (hex to base58 format for example)
           if(typeof sig === 'string' && sig.length === 130) {
             sigs[i] = ecc.Signature.from(sig).toString()
           }
@@ -563,7 +550,9 @@ const checkError = (parentErr, parrentRes) => (error, result) => {
     console.log('error', error)
     parentErr(error)
   } else {
-    parrentRes(result)
+    Promise.resolve(parrentRes(result)).catch(error => {
+      parentErr(error)
+    })
   }
 }
 
