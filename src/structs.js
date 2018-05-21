@@ -257,19 +257,21 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
   const amountType = baseTypes.int64(validation)
   const symbolType = customTypes.symbol(validation)
 
-  function toAssetString(value) {
+  function toAssetString(value, withPrecision) {
     if(typeof value === 'string') {
       const [amount, sym] = value.split(' ')
       const {precision, symbol} = precisionCache(assetCache, sym)
       if(precision == null) {
         return value
       }
-      return `${UDecimalPad(amount, precision)} ${symbol}`
+      const assetString = withPrecision ? `${precision},${symbol}` : symbol
+      return `${UDecimalPad(amount, precision)} ${assetString}`
     }
     if(typeof value === 'object') {
       const {precision, symbol} = precisionCache(assetCache, value.symbol)
       assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAccount}`)
-      return `${UDecimalUnimply(value.amount, precision)} ${symbol}`
+      const assetString = withPrecision ? `${precision},${symbol}` : symbol
+      return `${UDecimalUnimply(value.amount, precision)} ${assetString}`
     }
     return value
   }
@@ -292,14 +294,14 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
     },
 
     fromObject (value) {
-      return toAssetString(value)
+      return toAssetString(value, true)
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
         return '0.0001 SYS'
       }
-      return toAssetString(value)
+      return toAssetString(value, false)
     }
   }
 }
