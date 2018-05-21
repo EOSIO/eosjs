@@ -437,87 +437,109 @@ const wasmCodeOverride = config => ({
 const actionDataOverride = (structLookup, forceActionDataHex) => ({
   'action.data.fromByteBuffer': ({fields, object, b, config}) => {
     currentAccount = object.account
-    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
-    if(ser) {
-      b.readVarint32() // length prefix (usefull if object.name is unknown)
-      object.data = ser.fromByteBuffer(b, config)
-    } else {
-      // console.log(`Unknown Action.name ${object.name}`)
-      const lenPrefix = b.readVarint32()
-      const bCopy = b.copy(b.offset, b.offset + lenPrefix)
-      b.skip(lenPrefix)
-      object.data = Buffer.from(bCopy.toBinary(), 'binary')
+    try {
+      const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
+      if(ser) {
+        b.readVarint32() // length prefix (usefull if object.name is unknown)
+        object.data = ser.fromByteBuffer(b, config)
+      } else {
+        // console.log(`Unknown Action.name ${object.name}`)
+        const lenPrefix = b.readVarint32()
+        const bCopy = b.copy(b.offset, b.offset + lenPrefix)
+        b.skip(lenPrefix)
+        object.data = Buffer.from(bCopy.toBinary(), 'binary')
+      }
+    } catch(error) {
+      throw error
+    } finally {
+      currentAccount = null
     }
   },
 
   'action.data.appendByteBuffer': ({fields, object, b}) => {
     currentAccount = object.account
-    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
-    if(ser) {
-      const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-      ser.appendByteBuffer(b2, object.data)
-      b.writeVarint32(b2.offset)
-      b.append(b2.copy(0, b2.offset), 'binary')
-    } else {
-      // console.log(`Unknown Action.name ${object.name}`)
-      const data = typeof object.data === 'string' ? new Buffer(object.data, 'hex') : object.data
-      if(!Buffer.isBuffer(data)) {
-        throw new TypeError(`Unknown struct '${object.name}' for contract '${object.account}', locate this struct or provide serialized action.data`)
+    try {
+      const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
+      if(ser) {
+        const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
+        ser.appendByteBuffer(b2, object.data)
+        b.writeVarint32(b2.offset)
+        b.append(b2.copy(0, b2.offset), 'binary')
+      } else {
+        // console.log(`Unknown Action.name ${object.name}`)
+        const data = typeof object.data === 'string' ? new Buffer(object.data, 'hex') : object.data
+        if(!Buffer.isBuffer(data)) {
+          throw new TypeError(`Unknown struct '${object.name}' for contract '${object.account}', locate this struct or provide serialized action.data`)
+        }
+        b.writeVarint32(data.length)
+        b.append(data.toString('binary'), 'binary')
       }
-      b.writeVarint32(data.length)
-      b.append(data.toString('binary'), 'binary')
+    } catch(error) {
+      throw error
+    } finally {
+      currentAccount = null
     }
   },
 
   'action.data.fromObject': ({fields, object, result}) => {
     const {data, name} = object
     currentAccount = object.account
-
-    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
-    if(ser) {
-      if(typeof data === 'object') {
-        result.data = ser.fromObject(data) // resolve shorthand
-        return
-      } else if(typeof data === 'string') {
-        const buf = new Buffer(data, 'hex')
-        result.data = Fcbuffer.fromBuffer(ser, buf)
+    try {
+      const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
+      if(ser) {
+        if(typeof data === 'object') {
+          result.data = ser.fromObject(data) // resolve shorthand
+          return
+        } else if(typeof data === 'string') {
+          const buf = new Buffer(data, 'hex')
+          result.data = Fcbuffer.fromBuffer(ser, buf)
+        } else {
+          throw new TypeError('Expecting hex string or object in action.data')
+        }
       } else {
-        throw new TypeError('Expecting hex string or object in action.data')
+        // console.log(`Unknown Action.name ${object.name}`)
+        result.data = data
       }
-    } else {
-      // console.log(`Unknown Action.name ${object.name}`)
-      result.data = data
+    } catch(error) {
+      throw error
+    } finally {
+      currentAccount = null
     }
   },
 
   'action.data.toObject': ({fields, object, result, config}) => {
     const {data, name, account} = object || {}
     currentAccount = object.account
-
-    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
-    if(!ser) {
-      // Types without an ABI will accept hex
-      // const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-      // const buf = !Buffer.isBuffer(data) ? new Buffer(data, 'hex') : data
-      // b2.writeVarint32(buf.length)
-      // b2.append(buf)
-      // result.data = b2.copy(0, b2.offset).toString('hex')
-      result.data = Buffer.isBuffer(data) ? data.toString('hex') : data
-      return
-    }
-
-    if(forceActionDataHex) {
-      const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-      if(data) {
-        ser.appendByteBuffer(b2, data)
+    try {
+      const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
+      if(!ser) {
+        // Types without an ABI will accept hex
+        // const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
+        // const buf = !Buffer.isBuffer(data) ? new Buffer(data, 'hex') : data
+        // b2.writeVarint32(buf.length)
+        // b2.append(buf)
+        // result.data = b2.copy(0, b2.offset).toString('hex')
+        result.data = Buffer.isBuffer(data) ? data.toString('hex') : data
+        return
       }
-      result.data = b2.copy(0, b2.offset).toString('hex')
 
-      // console.log('result.data', result.data)
-      return
+      if(forceActionDataHex) {
+        const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
+        if(data) {
+          ser.appendByteBuffer(b2, data)
+        }
+        result.data = b2.copy(0, b2.offset).toString('hex')
+
+        // console.log('result.data', result.data)
+        return
+      }
+
+      // Serializable JSON
+      result.data = ser.toObject(data, config)
+    } catch(error) {
+      throw error
+    } finally {
+      currentAccount = null
     }
-
-    // Serializable JSON
-    result.data = ser.toObject(data, config)
   }
 })
