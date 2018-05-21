@@ -57,7 +57,7 @@ module.exports = (config = {}, extendedSchema) => {
     public_key: () => [variant(PublicKeyEcc)],
     symbol: () => [AssetSymbol(assetCache)],
     asset: () => [Asset(assetCache)], // must come after AssetSymbol
-    extended_asset: () => [ExtendedAsset], // after Asset
+    extended_asset: () => [ExtendedAsset(assetCache)], // after Asset
     signature: () => [variant(SignatureType)]
   }
 
@@ -252,68 +252,65 @@ const AssetSymbol = assetCache => validation => {
   }
 }
 
-/** @example '0.0001 CUR' */
+function toAssetString(value, assetCache, withMetadata = true, defaultContract = null) {
+  assert.equal(typeof value, 'string', `expecting asset string, got ` + (typeof value))
+  const [amount, sym] = value.split(' ')
+  const [asset, contract = defaultContract] = sym.split('@')
+  const {precision, symbol} = precisionCache(assetCache, asset)
+
+  if(withMetadata) {
+    const precisionPrefix = precision != null ? `${precision},` : ''
+    const contractSuffix = contract ? `@${contract}` : ''
+
+    return `${UDecimalPad(amount, precision)} ${precisionPrefix}${symbol}${contractSuffix}`
+  }
+
+  return `${UDecimalPad(amount, precision)} ${symbol}`
+}
+
+/** @example '0.0001 CUR'  or '0.0001 4,CUR@eosio.token'*/
 const Asset = assetCache => (validation, baseTypes, customTypes) => {
   const amountType = baseTypes.int64(validation)
   const symbolType = customTypes.symbol(validation)
-
-  function toAssetString(value, withPrecision) {
-    if(typeof value === 'string') {
-      const [amount, sym] = value.split(' ')
-      const {precision, symbol} = precisionCache(assetCache, sym)
-      if(precision == null) {
-        return value
-      }
-      const assetString = withPrecision ? `${precision},${symbol}` : symbol
-      return `${UDecimalPad(amount, precision)} ${assetString}`
-    }
-    if(typeof value === 'object') {
-      const {precision, symbol} = precisionCache(assetCache, value.symbol)
-      assert(precision != null, `Precision unknown for asset: ${symbol}@${currentAccount}`)
-      const assetString = withPrecision ? `${precision},${symbol}` : symbol
-      return `${UDecimalUnimply(value.amount, precision)} ${assetString}`
-    }
-    return value
-  }
 
   return {
     fromByteBuffer (b) {
       const amount = amountType.fromByteBuffer(b)
       const sym = symbolType.fromByteBuffer(b)
       const {precision} = precisionCache(assetCache, sym)
-      return `${UDecimalUnimply(amount, precision)} ${sym}`
+      return toAssetString(`${UDecimalUnimply(amount, precision)} ${sym}`, assetCache, true, currentAccount)
     },
 
     appendByteBuffer (b, value) {
-      assert.equal(typeof value, 'string', `expecting string, got ` + (typeof value))
+      assert.equal(typeof value, 'string', `expecting asset string, got ` + (typeof value))
       const [amount, sym] = value.split(' ')
       const {precision} = precisionCache(assetCache, sym)
       assert(precision != null, `Precision unknown for asset: ${sym}@${currentAccount}`)
+      const [asset, contract] = sym.split('@')
       amountType.appendByteBuffer(b, UDecimalImply(amount, precision))
-      symbolType.appendByteBuffer(b, sym)
+      symbolType.appendByteBuffer(b, asset)
     },
 
     fromObject (value) {
-      return toAssetString(value, true)
+      return toAssetString(value, assetCache, true, currentAccount)
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
         return '0.0001 SYS'
       }
-      return toAssetString(value, false)
+      return toAssetString(value, assetCache, false, currentAccount)
     }
   }
 }
 
-const ExtendedAsset = (validation, baseTypes, customTypes) => {
+const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
   const assetType = customTypes.asset(validation)
   const contractName = customTypes.name(validation)
 
   function toString(value) {
     assert.equal(typeof value, 'string', 'extended_asset is expecting a string like: 9.9999 SBL@contract')
-    const [asset, contract = 'eosio.token'] = value.split('@')
-    currentAccount = contract
+    const [asset, contract] = value.split('@')
     return `${assetType.fromObject(asset)}@${contract}`
   }
 
@@ -321,27 +318,26 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
     fromByteBuffer (b) {
       const asset = assetType.fromByteBuffer(b)
       const contract = contractName.fromByteBuffer(b)
-      currentAccount = contract
       return `${asset}@${contract}`
     },
 
     appendByteBuffer (b, value) {
-      assert.equal(typeof value, 'string', 'value')
+      assert.equal(typeof value, 'string', 'Expecting extended asset format like: SYM@contract')
       const [asset, contract] = value.split('@')
-      currentAccount = contract
+      assert.equal(typeof contract, 'string', 'Missing @contract suffix in extended asset: ' + value)
       assetType.appendByteBuffer(b, asset)
       contractName.appendByteBuffer(b, contract)
     },
 
     fromObject (value) {
-      return toString(value)
+      return toAssetString(value, assetCache)
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '0.0001 SYS@eosio'
+        return '0.0001 4,SYS@eosio.token'
       }
-      return toString(value)
+      return toAssetString(value, assetCache)
     }
   }
 }

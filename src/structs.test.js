@@ -1,24 +1,11 @@
 /* eslint-env mocha */
 const assert = require('assert')
 const Fcbuffer = require('fcbuffer')
+const ByteBuffer = require('bytebuffer')
 
 const Eos = require('.')
 
 describe('shorthand', () => {
-
-  it('asset', () => {
-    const eos = Eos.Localnet()
-    const {types} = eos.fc
-    const AssetType = types.asset()
-
-    assertSerializer(AssetType, '1.0000 SYS')
-
-    const obj = AssetType.fromObject('1 SYS')
-    assert.equal(obj, '1.0000 SYS')
-
-    const obj2 = AssetType.fromObject({amount: 10000, symbol: 'SYS'})
-    assert.equal(obj, '1.0000 SYS')
-  })
 
   it('authority', () => {
     const eos = Eos.Localnet()
@@ -66,24 +53,27 @@ describe('shorthand', () => {
     assertSerializer(PublicKeyType, pubkey)
   })
 
+  it('symbol', () => {
+    const eos = Eos.Localnet()
+    const {types} = eos.fc
+    const Symbol = types.symbol()
+
+    assertSerializer(Symbol, '4,SYS', '4,SYS', 'SYS')
+  })
+
+  it('asset', () => {
+    const eos = Eos.Localnet()
+    const {types} = eos.fc
+    const AssetType = types.asset()
+
+    assertSerializer(AssetType, '1.1 4,SYS@eosio.token', '1.1000 4,SYS@eosio.token', '1.1000 SYS')
+  })
+
   it('extended_asset', () => {
     const eos = Eos.Localnet({defaults: true})
     const eaType = eos.fc.types.extended_asset()
     const eaString = eaType.toObject()
     assertSerializer(eaType, eaString)
-    assert.equal(eaType.toObject('1 SYS'), '1.0000 SYS@eosio.token')
-  })
-
-  it('symbol', () => {
-    const eos = Eos.Localnet()
-    const {types} = eos.fc
-    const ExtendedAssetType = types.extended_asset()
-
-    assertSerializer(ExtendedAssetType, '1.0000 SYS@eosio.token')
-
-    // const obj = AssetSymbolType.fromObject('1.000 SYS@eosio.token')
-    // const buf = Fcbuffer.toBuffer(AssetSymbolType, obj)
-    // assert.equal(buf.toString('hex'), '04454f5300000000')
   })
 
   it('signature', () => {
@@ -137,9 +127,8 @@ describe('Message.data', () => {
     const eos = Eos.Localnet({forceActionDataHex: false, debug: false})
     const {structs, types} = eos.fc
 
-    const tr = {from: 'inita', to: 'initb', quantity: '1.0000 SYS', memo: ''}
+    const tr = {from: 'inita', to: 'initb', quantity: '1.0000 4,SYS@eosio.token', memo: ''}
     const hex = Fcbuffer.toBuffer(structs.transfer, tr).toString('hex')
-    // const lenPrefixHex = Number(hex.length / 2).toString(16) + hex.toString('hex')
 
     const value = {
       account: 'eosio.token',
@@ -148,11 +137,18 @@ describe('Message.data', () => {
       authorization: []
     }
 
-    const type = structs.action
-    const obj = type.fromObject(value) // tests fromObject
-    const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
-    const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
-    const obj3 = type.toObject(obj) // tests toObject
+    const {action} = structs
+    const obj = action.fromObject(value) // tests fromObject
+    const buf = Fcbuffer.toBuffer(action, obj) // tests appendByteBuffer
+
+    // Note, Fcbuffer.fromBuffer calls toObject (that would remove the precision again)
+    const b = ByteBuffer.fromBinary(buf, ByteBuffer.LITTLE_ENDIAN)
+    const obj2 = action.fromByteBuffer(b)
+    assert.equal('1.0000 4,SYS@eosio.token', obj2.data.quantity)
+
+    const obj3 = action.toObject(obj) // tests toObject
+    assert.equal('1.0000 SYS', obj3.data.quantity) // blockchain compatible format
+    obj3.data.quantity = '1.0000 4,SYS@eosio.token' //convert back to internal format (for asserts below)
 
     assert.deepEqual(Object.assign({}, value, {data: tr}), obj3, 'serialize object')
     assert.deepEqual(obj3, obj2, 'serialize buffer')
@@ -178,9 +174,8 @@ describe('Message.data', () => {
     const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
     const obj3 = type.toObject(obj) // tests toObject
 
-    const data = Fcbuffer.toBuffer(structs.transfer, value.data)
-    const dataHex = //Number(data.length).toString(16) +
-      data.toString('hex')
+    const data = Fcbuffer.toBuffer(structs.transfer, obj.data)
+    const dataHex = data.toString('hex')
 
     assert.deepEqual(Object.assign({}, value, {data: dataHex}), obj3, 'serialize object')
     assert.deepEqual(obj3, obj2, 'serialize buffer')
@@ -199,12 +194,24 @@ describe('Message.data', () => {
   })
 })
 
-function assertSerializer (type, value) {
+function assertSerializer (type, value, fromObjectResult = null, toObjectResult = fromObjectResult) {
   const obj = type.fromObject(value) // tests fromObject
   const buf = Fcbuffer.toBuffer(type, obj) // tests appendByteBuffer
   const obj2 = Fcbuffer.fromBuffer(type, buf) // tests fromByteBuffer
   const obj3 = type.toObject(obj) // tests toObject
 
-  assert.deepEqual(value, obj3, 'serialize object')
-  assert.deepEqual(obj3, obj2, 'serialize buffer')
+  if(!fromObjectResult && !toObjectResult) {
+    assert.deepEqual(value, obj3, 'serialize object')
+    assert.deepEqual(obj3, obj2, 'serialize buffer')
+    return
+  }
+
+  if(fromObjectResult) {
+    assert(fromObjectResult, obj, 'fromObjectResult')
+    assert(fromObjectResult, obj2, 'fromObjectResult')
+  }
+
+  if(toObjectResult) {
+    assert(toObjectResult, obj3, 'toObjectResult')
+  }
 }
