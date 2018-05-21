@@ -5,14 +5,19 @@ module.exports = AssetCache
 
 function AssetCache(network) {
   const cache = {
-    'SYS@eosio': {precision: 4},
-    'SYS@eosio.token': {precision: 4}
+    'SYS@eosio.token': {precision: 4},
+    'EOS@eosio.token': {precision: 4}
   }
 
   /** @return {Promise} {precision} */
   function lookupAsync(symbol, account) {
     assert(symbol, 'required symbol')
     assert(account, 'required account')
+
+    if(account === 'eosio') {
+      account = 'eosio.token'
+    }
+
     const extendedAsset = `${symbol}@${account}`
 
     if(cache[extendedAsset] != null) {
@@ -47,6 +52,11 @@ function AssetCache(network) {
   function lookup(symbol, account) {
     assert(symbol, 'required symbol')
     assert(account, 'required account')
+
+    if(account === 'eosio') {
+      account = 'eosio.token'
+    }
+
     const extendedAsset = `${symbol}@${account}`
 
     const c = cache[extendedAsset]
