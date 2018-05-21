@@ -222,6 +222,7 @@ function UDecimalUnimply(value, precision) {
   assert(value != null, 'value is required')
   value = value === 'object' && value.toString ? value.toString() : String(value)
   assert(/^\d+$/.test(value), `invalid whole number ${value}`)
+  assert(precision != null, 'precision required')
 
   // Ensure minimum length
   const pad = precision - value.length
@@ -231,7 +232,7 @@ function UDecimalUnimply(value, precision) {
 
   const dotIdx = value.length - precision
   value = `${value.slice(0, dotIdx)}.${value.slice(dotIdx)}`
-  return UDecimalString(value) // Normalize
+  return UDecimalPad(value, precision) // Normalize
 }
 
 /**

@@ -94,10 +94,10 @@ describe('format', () => {
       {value: '10', precision: 0, answer: '10'},
 
       {value: 1, precision: 1, answer: '0.1'},
-      {value: '10', precision: 1, answer: '1'},
+      {value: '10', precision: 1, answer: '1.0'},
 
       {value: '11', precision: 2, answer: '0.11'},
-      {value: '110', precision: 2, answer: '1.1'},
+      {value: '110', precision: 2, answer: '1.10'},
       {value: '101', precision: 2, answer: '1.01'},
       {value: '0101', precision: 2, answer: '1.01'},
     ]
