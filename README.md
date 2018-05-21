@@ -134,9 +134,9 @@ For more advanced signing, see `keyProvider` in
 Shorthand is available for some types such as Asset and Authority.
 
 For example:
-* deposit: `'1 SYS'` is shorthand for `1.0000 SYS`
+* stake_net_quantity: `'1 SYS'` is shorthand for `1.0000 SYS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
-* active: `inita` or `inita@active` is shorthand
+* active: `inita` or `inita@active` is shorthand for 
   * `{{threshold: 1, accounts: [..actor: inita, permission: active, weight: 1]}}`
   * `inita@other` would replace the permission `active` with `other`
 
@@ -150,11 +150,25 @@ keyProvider = initaPrivate
 
 eos = Eos.Localnet({keyProvider})
 
-eos.newaccount({
-  creator: 'inita',
-  name: 'mynewacct',
-  owner: initaPublic,
-  active: initaPublic
+eos.transaction(tr => {
+  tr.newaccount({
+    creator: 'inita',
+    'mycontract11',
+    owner: pubkey,
+    active: pubkey
+  })
+  tr.buyrambytes({
+    payer: 'inita',
+    receiver: 'mycontract11',
+    bytes: 8192
+  })
+  tr.delegatebw({
+    from: 'inita',
+    receiver: 'mycontract11',
+    stake_net_quantity: '100.0000 SYS',
+    stake_cpu_quantity: '100.0000 SYS',
+    transfer: 0
+  })
 })
 
 ```
