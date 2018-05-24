@@ -97,13 +97,13 @@ if(process.env['NODE_ENV'] === 'development') {
         // const config = {binaryen: require("binaryen"), keyProvider: wif}
         // const eos = Eos.Localnet(config)
         //
-        // const wast = fs.readFileSync(`docker/contracts/${contract}/${contract}.wast`)
+        // const wasm = fs.readFileSync(`docker/contracts/${contract}/${contract}.wasm`)
         // const abi = fs.readFileSync(`docker/contracts/${contract}/${contract}.abi`)
         //
         // // When ran multiple times, deploying to the same account
         // // avoids a same contract version deploy error.
         // // TODO: undeploy contract instead
-        // await eos.setcode(account, 0, 0, wast)
+        // await eos.setcode(account, 0, 0, wasm)
         // await eos.setabi(account, JSON.parse(abi))
       })
     }
@@ -430,7 +430,7 @@ if(process.env['NODE_ENV'] === 'development') {
     })
   })
 
-  // ./eosioc set contract currency build/contracts/currency/currency.wast build/contracts/currency/currency.abi
+  // ./eosioc set contract currency build/contracts/currency/currency.wasm build/contracts/currency/currency.abi
   it('Transaction ABI lookup', async function() {
     const eos = Eos.Localnet()
     const tx = await eos.transaction(
