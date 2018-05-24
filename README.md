@@ -226,11 +226,11 @@ eos.newaccount({
   active: currencyPublic
 })
 
-wast = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.wast`)
+wasm = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.wasm`)
 abi = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.abi`)
 
 // Publish contract to the blockchain
-eos.setcode('currency', 0, 0, wast)
+eos.setcode('currency', 0, 0, wasm)
 eos.setabi('currency', JSON.parse(abi))
 
 currency = null
