@@ -134,11 +134,11 @@
   "abi_def": {
     "base": "",
     "fields": {
+      "version": "string",
       "types": "type_def[]",
       "structs": "struct_def[]",
       "actions": "action_def[]",
-      "tables": "table_def[]",
-      "ricardian_clauses": "clause_pair[]"
+      "tables": "table_def[]"
     }
   },
   "table_def": {
