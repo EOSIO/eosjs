@@ -239,11 +239,11 @@ function UDecimalUnimply(value, precision) {
 }
 
 /**
-  @arg {string} assetSymbol - 4,SYM
+  @arg {string} assetSymbol - 4,SYS
   @arg {number} [precision = null] - expected precision or mismatch AssertionError
 
-  @example assert.deepEqual(parseAssetSymbol('SYM'), {precision: null, symbol: 'SYM'})
-  @example assert.deepEqual(parseAssetSymbol('4,SYM'), {precision: 4, symbol: 'SYM'})
+  @example assert.deepEqual(parseAssetSymbol('SYS'), {precision: null, symbol: 'SYS'})
+  @example assert.deepEqual(parseAssetSymbol('4,SYS'), {precision: 4, symbol: 'SYS'})
   @throws AssertionError
   @throws TypeError
 */
@@ -254,7 +254,7 @@ function parseAssetSymbol(assetSymbol, precision = null) {
     assetSymbol = `,${assetSymbol}` // null precision
   }
   const v = assetSymbol.split(',')
-  assert(v.length === 2, `Asset symbol "${assetSymbol}" may have a precision like this: 4,SYM`)
+  assert(v.length === 2, `Asset symbol "${assetSymbol}" may have a precision like this: 4,SYS`)
 
   const symbolPrecision = v[0] == '' ? null : parseInt(v[0])
   const [symbol] = v[1].split('@') // remove contract (if exists)
