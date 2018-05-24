@@ -136,7 +136,7 @@ Shorthand is available for some types such as Asset and Authority.
 For example:
 * stake_net_quantity: `'1 SYS'` is shorthand for `1.0000 SYS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
-* active: `inita` or `inita@active` is shorthand for 
+* active: `inita` or `inita@active` is shorthand for
   * `{{threshold: 1, accounts: [..actor: inita, permission: active, weight: 1]}}`
   * `inita@other` would replace the permission `active` with `other`
 
@@ -144,16 +144,15 @@ For example:
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 
-initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
-initaPublic = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
-keyProvider = initaPrivate
+wif = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
+pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
 
-eos = Eos.Localnet({keyProvider})
+eos = Eos.Localnet({keyProvider: wif})
 
 eos.transaction(tr => {
   tr.newaccount({
     creator: 'inita',
-    'mycontract11',
+    name: 'mycontract11',
     owner: pubkey,
     active: pubkey
   })
@@ -204,14 +203,7 @@ Complete example:
 Eos = require('eosjs') // Eos = require('./src')
 let {ecc} = Eos.modules
 
-initaPrivate = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
-
-// New deterministic key for the currency account.  Only use a simple
-// seedPrivate in production if you want to give away money.
-currencyPrivate = ecc.seedPrivate('currency')
-currencyPublic = ecc.privateToPublic(currencyPrivate)
-
-keyProvider = [initaPrivate, currencyPrivate]
+keyProvider = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 
 //  Requires a large library, separate from the eosjs bundle
 // $ npm install binaryen@37.0.0
@@ -219,27 +211,17 @@ binaryen = require('binaryen')
 
 eos = Eos.Localnet({keyProvider, binaryen})
 
-eos.newaccount({
-  creator: 'inita',
-  name: 'currency',
-  owner: currencyPublic,
-  active: currencyPublic
-})
-
 wasm = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.wasm`)
 abi = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.abi`)
 
 // Publish contract to the blockchain
-eos.setcode('currency', 0, 0, wasm)
-eos.setabi('currency', JSON.parse(abi))
-
-currency = null
+eos.setcode('inita', 0, 0, wasm)
+eos.setabi('inita', JSON.parse(abi))
 
 // eos.contract(account<string>, [options], [callback])
-eos.contract('currency').then(c => currency = c)
+eos.contract('inita').then(c => inita = c)
 
-// Issue is one of the actions in currency.abi
-currency.issue('inita', '1000.0000 CUR', {authorization: 'currency'})
+inita.create('inita', '1000.0000 CUR', {authorization: 'inita'})
 ```
 
 ### Atomic Operations
