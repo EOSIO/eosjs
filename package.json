@@ -47,7 +47,7 @@
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
     "eosjs-api": "^6.0.1",
-    "eosjs-ecc": "^4.0.0",
+    "eosjs-ecc": "^4.0.1",
     "fcbuffer": "^2.2.0"
   },
   "babel": {
