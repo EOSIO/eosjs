@@ -201,7 +201,6 @@ Complete example:
 
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
-let {ecc} = Eos.modules
 
 keyProvider = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 
