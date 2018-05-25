@@ -10,6 +10,18 @@
       "waits": "wait_weight[]"
     }
   },
+  "bidname": {
+    "base": "",
+    "action": {
+      "name": "bidname",
+      "account": "eosio"
+    },
+    "fields": {
+      "bidder": "account_name",
+      "newname": "account_name",
+      "bid": "asset"
+    }
+  },
   "blockchain_parameters": {
     "base": "",
     "fields": {
@@ -29,8 +41,7 @@
       "max_transaction_delay": "uint32",
       "max_inline_action_size": "uint32",
       "max_inline_action_depth": "uint16",
-      "max_authority_depth": "uint16",
-      "max_generated_transaction_count": "uint32"
+      "max_authority_depth": "uint16"
     }
   },
   "buyram": {
@@ -124,8 +135,10 @@
       "savings": "int64",
       "total_unpaid_blocks": "uint32",
       "total_activated_stake": "int64",
+      "thresh_activated_stake_time": "uint64",
       "last_producer_schedule_id": "checksum160",
-      "total_producer_vote_weight": "float64"
+      "total_producer_vote_weight": "float64",
+      "last_name_close": "block_timestamp_type"
     }
   },
   "eosio_parameters": {
@@ -229,7 +242,8 @@
     "fields": {
       "owner": "account_name",
       "request_time": "time_point_sec",
-      "amount": "uint64"
+      "net_amount": "asset",
+      "cpu_amount": "asset"
     }
   },
   "regproducer": {
