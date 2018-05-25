@@ -41,9 +41,6 @@ cleos push action currency issue\
 # eosio.* accounts  allowed only before lockdown
 
 # Lockdown (deploy eosio.system or eosio.bios to the eosio account)
-cleos set contract eosio contracts/eosio.bios -p eosio@active
-cleos push action eosio setalimits '["eosio", -1, -1, -1]' -p eosio@active
-
 cleos set contract eosio contracts/eosio.system -p eosio@active
 
 # Non-privileged operations (after lockdown)
