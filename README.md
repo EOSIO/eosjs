@@ -217,9 +217,8 @@ abi = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.abi`)
 eos.setcode('inita', 0, 0, wasm)
 eos.setabi('inita', JSON.parse(abi))
 
-// eos.contract(account<string>, [options], [callback])
+// Error reading contract; https://github.com/EOSIO/eos/issues/3159
 eos.contract('inita').then(c => inita = c)
-
 inita.create('inita', '1000.0000 CUR', {authorization: 'inita'})
 ```
 
