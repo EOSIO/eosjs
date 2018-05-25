@@ -9,7 +9,7 @@ services:
       #args:
       #  branch: $GITHUB_BRANCH
 
-    command: /opt/eosio/bin/nodeosd.sh
+    command: /opt/eosio/bin/nodeosd.sh --max-transaction-time=1000
     ports:
       - 8888:8888
       - 9876:9876
