@@ -37,10 +37,10 @@ Run all unit test in a temporary instance.  Note, this script will run
 After ./up.sh
 
 ```bash
-docker exec docker_nodeos_1 ls /opt/eosio/bin
-docker exec docker_nodeos_1 ls /contracts
+docker exec docker_nodeosd_1 ls /opt/eosio/bin
+docker exec docker_nodeosd_1 ls /contracts
 
-docker cp docker_nodeos_1:/opt/eosio/bin/nodeos .
+docker cp docker_nodeosd_1:/opt/eosio/bin/nodeos .
 ```
 
 # Stopped container
