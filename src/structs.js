@@ -79,8 +79,7 @@ module.exports = (config = {}, extendedSchema) => {
 
   const {structs, types, errors, fromBuffer, toBuffer} = Fcbuffer(schema, config)
   if(errors.length !== 0) {
-    throw new Error(JSON.stringify(errors, null, 4) + '\nin\n' +
-      JSON.stringify(schema, null, 4))
+    throw new Error(JSON.stringify(errors, null, 4))
   }
 
   return {structs, types, fromBuffer, toBuffer}
