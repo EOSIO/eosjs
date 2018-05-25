@@ -1,2 +1,2 @@
-FROM eosio/eos:20180519
+FROM eosio/eos:latest
 COPY config.ini genesis.json /

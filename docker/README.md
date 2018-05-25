@@ -39,8 +39,12 @@ After ./up.sh
 ```bash
 docker exec docker_nodeosd_1 ls /opt/eosio/bin
 docker exec docker_nodeosd_1 ls /contracts
-
 docker cp docker_nodeosd_1:/opt/eosio/bin/nodeos .
+
+# Or setup an environment:
+. ./dockerc.sh
+keosd ls /opt/eosio/bin
+cleos --help
 ```
 
 # Stopped container

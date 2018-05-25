@@ -18,12 +18,25 @@ sleep 2
 cleos wallet create
 
 # Create accounts must happen before eosio.system is installed
+
+# Test accounts (for eosjs)
 cleos create account eosio inita $owner_pubkey $active_pubkey
 cleos create account eosio initb $owner_pubkey $active_pubkey
 cleos create account eosio initc $owner_pubkey $active_pubkey
 
-# Deploy, create and issue SYS token to eosio.token
+# System accounts for Nodeosd
+cleos create account eosio eosio.bpay $owner_pubkey $active_pubkey
+cleos create account eosio eosio.msig $owner_pubkey $active_pubkey
+cleos create account eosio eosio.names $owner_pubkey $active_pubkey
+cleos create account eosio eosio.ram $owner_pubkey $active_pubkey
+cleos create account eosio eosio.ramfee $owner_pubkey $active_pubkey
+cleos create account eosio eosio.saving $owner_pubkey $active_pubkey
+cleos create account eosio eosio.stake $owner_pubkey $active_pubkey
 cleos create account eosio eosio.token $owner_pubkey $active_pubkey
+cleos create account eosio eosio.vpay $owner_pubkey $active_pubkey
+
+# Deploy, create and issue SYS token to eosio.token
+# cleos create account eosio eosio.token $owner_pubkey $active_pubkey
 cleos set contract eosio.token contracts/eosio.token -p eosio.token@active
 cleos push action eosio.token create\
   '{"issuer":"eosio.token", "maximum_supply": "1000000000.0000 SYS"}' -p eosio.token@active
