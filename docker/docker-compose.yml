@@ -2,7 +2,7 @@ version: "3"
 
 services:
   nodeosd:
-    image: eosio/eos:latest
+    image: eosio/eos:20180526
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
       - "8888"
 
   keosd:
-    image: eosio/eos:latest
+    image: eosio/eos:20180526
     command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir
     hostname: keosd
     links:
