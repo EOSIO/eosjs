@@ -16,15 +16,6 @@ docker-compose down
 . ./dockrc.sh
 ```
 
-# Configure
-
-Change branch / version:
-
-```bash
-echo "VERSION=master" > .env
-docker-compose build
-```
-
 # Unit Test
 
 Run all unit test in a temporary instance.  Note, this script will run
