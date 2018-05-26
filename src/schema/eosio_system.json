@@ -348,6 +348,16 @@
       "code": "bytes"
     }
   },
+  "setparams": {
+    "base": "",
+    "action": {
+      "name": "setparams",
+      "account": "eosio"
+    },
+    "fields": {
+      "params": "eosio_parameters"
+    }
+  },
   "setpriv": {
     "base": "",
     "action": {
