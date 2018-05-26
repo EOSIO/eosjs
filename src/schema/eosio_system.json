@@ -332,7 +332,7 @@
     },
     "fields": {
       "account": "account_name",
-      "abi": "abi_def"
+      "abi": "bytes"
     }
   },
   "setcode": {
