@@ -205,11 +205,14 @@ Eos = require('eosjs') // Eos = require('./src')
 
 keyProvider = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 
-//  Requires a large library, separate from the eosjs bundle
+// If your loading a wasm file, you do not need binaryen.  If your loading
+// a "wast" file you can include and configure the binaryen compiler:
+//
 // $ npm install binaryen@37.0.0
-binaryen = require('binaryen')
+// binaryen = require('binaryen')
+// eos = Eos.Localnet({keyProvider, binaryen})
 
-eos = Eos.Localnet({keyProvider, binaryen})
+eos = Eos.Localnet({keyProvider})
 
 wasm = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.wasm`)
 abi = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.abi`)
