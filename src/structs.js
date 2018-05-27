@@ -472,11 +472,11 @@ const abiOverride = ({
 
 const wasmCodeOverride = config => ({
   'setcode.code.fromObject': ({object, result}) => {
-    const {binaryen} = config
-    assert(binaryen != null, 'required: config.binaryen = require("binaryen")')
     try {
       const code = object.code.toString()
       if(/^\s*\(module/.test(code)) {
+        const {binaryen} = config
+        assert(binaryen != null, 'required: config.binaryen = require("binaryen")')
         if(config.debug) {
           console.log('Assembling WASM..')
         }
