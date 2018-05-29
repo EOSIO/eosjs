@@ -53,6 +53,7 @@ Eos = require('eosjs') // Eos = require('./src')
 
 // Optional configuration..
 config = {
+  chainId: null, // 32 byte (64 char) hex string
   keyProvider: ['PrivateKeys...'], // WIF string or array of keys..
   httpEndpoint: 'http://127.0.0.1:8888',
   mockTransactions: () => 'pass', // or 'fail'
@@ -91,6 +92,10 @@ options = {
   authorization: null
 }
 ```
+
+* **chainId** - Unique ID for the blockchain your connecting too.  This is
+  required for valid transaction signing.  The chainId is provided via the
+  [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
 
 * **authorization** `{array<auth>|auth}` - identifies the
   signing account and permission typically in a multi-sig
