@@ -513,7 +513,7 @@ function usage (type, definition, Network, account, config) {
   out()
 
   let struct
-  if(account === 'eosio.token') {
+  if(account === 'eosio' || account === 'eosio.token') {
     const {structs} = Structs(
       Object.assign(
         {defaults: true, network: Network},
