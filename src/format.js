@@ -263,10 +263,9 @@ function parseExtendedAsset(str) {
   const contract = /[a-z0-5]+(\.[a-z0-5]+])?$/.test(contractRaw) ? contractRaw : null
 
   const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
-  const asset = join(precision, ',') + join(symbol, '')
+  const asset = join(precision, ',') + symbol
   const check = join(amount, ' ') + asset + join('@', contract)
-  assert.equal(str, check,  `Invalid extended asset string`)
-
+  assert.equal(str, check,  `Invalid extended asset string: ${str} !== ${check}`)
 
   if(precision != null) {
     assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)

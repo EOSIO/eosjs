@@ -341,7 +341,9 @@ function toAssetString(value, assetCache, format = '') {
   if(format === 'full') {
     const contractSuffix = contract ? `@${contract}` : ''
     const precisionPrefix = precision != null ? `${precision},` : ''
-    return `${UDecimalPad(amount, precision)} ${precisionPrefix}${symbol}${contractSuffix}`
+    const full = `${UDecimalPad(amount, precision)} ${precisionPrefix}${symbol}${contractSuffix}`
+    // console.log('full', full)
+    return full
   }
 
   assert(false, 'format should be: plain, extended, or full')
@@ -359,8 +361,8 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
     fromByteBuffer (b) {
       const amount = amountType.fromByteBuffer(b)
       const sym = symbolType.fromByteBuffer(b)
-      const {precision} = precisionCache(assetCache, sym)
-      return toAssetString(`${UDecimalUnimply(amount, precision)} ${sym}`, assetCache, 'full')
+      const {precision, symbol} = precisionCache(assetCache, sym)
+      return toAssetString(`${UDecimalUnimply(amount, precision)} ${precision},${symbol}`, assetCache, 'full')
     },
 
     appendByteBuffer (b, value) {

@@ -335,16 +335,17 @@ eos = Eos.Localnet()
 The `eos` instance can provide more convenient serialization:
 
 ```javascript
-// 'nonce' is a struct but could be any type or struct like: uint8 or transaction
-nonce = {value: '..'}
-nonceBuffer = eos.fc.toBuffer('nonce', nonce)
-assert.deepEqual(nonce, eos.fc.fromBuffer('nonce', nonceBuffer))
+// 'asset' is a type but could be any struct or type like: transaction or uint8
+type = {type: 1, data: '00ff'}
+buffer = eos.fc.toBuffer('extensions_type', type)
+assert.deepEqual(type, eos.fc.fromBuffer('extensions_type', buffer))
 
 // Serialization for a smart-contract's Abi:
 eos.contract('currency', (error, c) => currency = c)
-issue = {to: 'inita', quantity: '1.0000 CUR', memo: 'memo'}
-issueBuffer = currency.fc.toBuffer('issue', issue)
-assert.deepEqual(issue, currency.fc.fromBuffer('issue', issueBuffer))
+create = {issuer: 'inita', maximum_supply: '1.0000 4,CUR'}
+buffer = currency.fc.toBuffer('create', create)
+create.maximum_supply = '1.0000 CUR'
+assert.deepEqual(create, currency.fc.fromBuffer('create', buffer))
 ```
 
 Use Node v8+ to `package-lock.json`.
