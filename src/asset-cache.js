@@ -93,3 +93,7 @@ AssetCache.resolve = async function() {
   await Promise.all(promises)
   promises = []
 }
+
+AssetCache.pending = function() {
+  return promises.length !== 0
+}

@@ -223,6 +223,14 @@ if(process.env['NODE_ENV'] === 'development') {
       return eos.transfer('inita', 'initb', '2 SYS', '', false)
     })
 
+    it('create asset', async function() {
+      const eos = Eos.Localnet({signProvider})
+      const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+      const auth = {authorization: 'eosio.token'}
+      await eos.create('eosio.token', '10000 ' + randomAsset(), auth)
+      await eos.create('eosio.token', '10000.00 ' + randomAsset(), auth)
+    })
+
     it('newaccount (broadcast)', () => {
       const eos = Eos.Localnet({signProvider})
       const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
@@ -463,3 +471,6 @@ const randomName = () => {
   const name = String(Math.round(Math.random() * 1000000000)).replace(/[0,6-9]/g, '')
   return 'a' + name + '111222333444'.substring(0, 11 - name.length) // always 12 in length
 }
+
+const randomAsset = () =>
+  ecc.sha256(String(Math.random())).toUpperCase().replace(/[^A-Z]/g, '').substring(0, 7)
