@@ -63,7 +63,10 @@ const charidx = ch => {
 
   @see types.hpp string_to_name
 
-  @arg {string} name - A string to encode, up to 13 characters long.
+  @arg {string} name - A string to encode, up to 13 characters long.  Note,
+    the 13th letter of the name is limited (. 1-5 and <= 'j') so the safe
+    or practical limit is 12.
+
   @return {string<uint64>} - compressed string (from name arg).  A string is
     always used because a number could exceed JavaScript's 52 bit limit.
 */
