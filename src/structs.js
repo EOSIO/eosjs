@@ -8,7 +8,7 @@ const json = {schema: require('./schema')}
 const {
   isName, encodeName, decodeName,
   UDecimalPad, UDecimalImply, UDecimalUnimply,
-  parseAssetSymbol
+  parseExtendedAsset
 } = require('./format')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
@@ -187,25 +187,48 @@ const PublicKeyEcc = (validation) => {
 let currentAccount
 
 /** @private */
-function precisionCache(assetCache, sym, account = currentAccount) {
-  const assetSymbol = parseAssetSymbol(sym)
-  let precision = assetSymbol.precision
+function precisionCache(assetCache, value) {
+  const symbolInfo = parseExtendedAsset(value)
+  const contract = symbolInfo.contract || currentAccount
 
-  if(account) {
-    const asset = assetCache.lookup(assetSymbol.symbol, account)
-    if(asset) {
-      if(precision == null) {
-        precision = asset.precision
-      } else {
-        assert.equal(asset.precision, precision,
-          `Precision mismatch for asset: ${sym}@${account}`)
+  let precision
+
+  if(contract) {
+    const asset = assetCache.lookup(symbolInfo.symbol, contract)
+
+    if(asset != null) {
+      if(symbolInfo.precision != null) {
+        assert.equal(asset.precision, symbolInfo.precision,
+          `Precision mismatch for asset: ${value}`)
       }
+      precision = asset.precision
+
     } else {
-      // Lookup data for later (appendByteBuffer needs it)
-      assetCache.lookupAsync(assetSymbol.symbol, account)
+      // Lookup for later (appendByteBuffer)
+      assetCache.lookupAsync(symbolInfo.symbol, contract)
+
+      // asset === null is a confirmation that the asset did not exist on the blockchain
+      if(asset === null) {
+        if(symbolInfo.precision == null && symbolInfo.amount != null) {
+          // no blockchain asset, no explicit precision .. derive from amount
+          const [, decimalstr = ''] = symbolInfo.amount.split('.')
+          precision = decimalstr.length
+          // console.log('derivied precision for new asset: ' + precision + ',' + symbolInfo.symbol)
+        }
+      }
     }
   }
-  return {symbol: assetSymbol.symbol, precision}
+
+  if(precision == null) {
+    precision = symbolInfo.precision
+  }
+
+  const pc = Object.assign({}, symbolInfo, {contract})
+  if(precision != null) {
+    pc.precision = precision
+  }
+  // console.log('precisionCache', pc)
+  return pc
 }
 
 
@@ -301,11 +324,10 @@ const ExtendedSymbol = assetCache => (validation, baseTypes, customTypes) => {
   }
 }
 
-function toAssetString(value, assetCache, format = '', defaultContract = null) {
+function toAssetString(value, assetCache, format = '') {
   assert.equal(typeof value, 'string', `expecting asset string, got ` + (typeof value))
-  const [amount, sym] = value.split(' ')
-  const [asset, contract = defaultContract] = sym.split('@')
-  const {precision, symbol} = precisionCache(assetCache, asset, contract)
+
+  const {precision, symbol, amount, contract} = precisionCache(assetCache, value)
 
   if(format === 'plain') {
     return `${UDecimalPad(amount, precision)} ${symbol}`
@@ -338,28 +360,26 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
       const amount = amountType.fromByteBuffer(b)
       const sym = symbolType.fromByteBuffer(b)
       const {precision} = precisionCache(assetCache, sym)
-      return toAssetString(`${UDecimalUnimply(amount, precision)} ${sym}`, assetCache, 'full', currentAccount)
+      return toAssetString(`${UDecimalUnimply(amount, precision)} ${sym}`, assetCache, 'full')
     },
 
     appendByteBuffer (b, value) {
       assert.equal(typeof value, 'string', `expecting asset string, got ` + (typeof value))
-      const [amount, sym] = value.split(' ')
-      const {precision} = precisionCache(assetCache, sym)
-      assert(precision != null, `Precision unknown for asset: ${sym}@${currentAccount}`)
-      const [asset, contract] = sym.split('@')
+      const {amount, precision, symbol, contract} = precisionCache(assetCache, value)
+      assert(precision != null, `Precision unknown for asset: ${value}`)
       amountType.appendByteBuffer(b, UDecimalImply(amount, precision))
-      symbolType.appendByteBuffer(b, asset)
+      symbolType.appendByteBuffer(b, value)
     },
 
     fromObject (value) {
-      return toAssetString(value, assetCache, 'full', currentAccount)
+      return toAssetString(value, assetCache, 'full')
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
         return '0.0001 SYS'
       }
-      return toAssetString(value, assetCache, 'plain', currentAccount)
+      return toAssetString(value, assetCache, 'plain')
     }
   }
 }

@@ -3,7 +3,7 @@ const assert = require('assert')
 const {
   encodeName, decodeName, encodeNameHex, decodeNameHex,
   isName, UDecimalPad, UDecimalUnimply,
-  parseAssetSymbol
+  parseExtendedAsset
 } = require('./format')
 
 describe('format', () => {
@@ -108,19 +108,24 @@ describe('format', () => {
     }
   })
 
-  it('parseAssetSymbol', () => {
-    assert.deepEqual(parseAssetSymbol('SYS'), {precision: null, symbol: 'SYS'})
-    assert.deepEqual(parseAssetSymbol('4,SYS'), {precision: 4, symbol: 'SYS'})
-
-    assert.throws(() => parseAssetSymbol(369), /should be string/)
-    assert.throws(() => parseAssetSymbol('4,SYS,2', 2), /precision like this/)
-    assert.throws(() => parseAssetSymbol('4,SYS', 2), /Asset symbol precision mismatch/)
-    assert.throws(() => parseAssetSymbol('-2,SYS'), /precision must be positive/)
-    assert.throws(() => parseAssetSymbol('sym'), /only uppercase/)
-    assert.throws(() => parseAssetSymbol('19,SYS'), /18 characters or less/)
-    assert.throws(() => parseAssetSymbol('TOOLONGSYM'), /7 characters or less/)
+  it('parseExtendedAsset', () => {
+    const parseExtendedAssets = [
+      ['SYM', null, null, 'SYM', null],
+      ['SYM@contract', null, null, 'SYM', 'contract'],
+      ['4,SYM', null, 4, 'SYM', null],
+      ['4,SYM@contract', null, 4, 'SYM', 'contract'],
+      ['1 SYM', '1', null, 'SYM', null],
+      ['1.0 SYM', '1.0', null, 'SYM', null],
+      ['1.0 4,SYM@contract', '1.0', 4, 'SYM', 'contract'],
+      ['1.0 4,SYM', '1.0', 4, 'SYM', null],
+    ]
+    for(const [str, amount, precision, symbol, contract] of parseExtendedAssets) {
+      assert.deepEqual(
+        parseExtendedAsset(str),
+        {amount, precision, symbol, contract}
+      )
+    }
   })
-
 })
 
 /* istanbul ignore next */

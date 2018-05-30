@@ -9,24 +9,31 @@ function AssetCache(network) {
     'EOS@eosio.token': {precision: 4}
   }
 
-  /** @return {Promise} {precision} */
-  function lookupAsync(symbol, account) {
+  /**
+    @return {Promise} {precision}
+    @throws AssertionError
+  */
+  function lookupAsync(symbol, contract) {
     assert(symbol, 'required symbol')
-    assert(account, 'required account')
+    assert(contract, 'required contract')
 
-    if(account === 'eosio') {
-      account = 'eosio.token'
+    if(contract === 'eosio') {
+      contract = 'eosio.token'
     }
 
-    const extendedAsset = `${symbol}@${account}`
+    const extendedAsset = `${symbol}@${contract}`
 
     if(cache[extendedAsset] != null) {
       return Promise.resolve(cache[extendedAsset])
     }
 
-    const statsPromise = network.getCurrencyStats(account, symbol).then(result => {
+    const statsPromise = network.getCurrencyStats(contract, symbol).then(result => {
       const stats = result[symbol]
-      assert(stats, `Missing currency stats for asset: ${extendedAsset}`)
+      if(!stats) {
+        cache[extendedAsset] = null // retry (null means no asset was observed)
+        // console.log(`Missing currency stats for asset: ${extendedAsset}`)
+        return
+      }
 
       const {max_supply} = stats
 
@@ -45,28 +52,33 @@ function AssetCache(network) {
 
       return cache[extendedAsset] = {precision}
     })
+
     promises.push(statsPromise)
+
     return cache[extendedAsset] = statsPromise
   }
 
-  function lookup(symbol, account) {
+  /**
+    @return {Object} {precision}, or null asset did not exist,
+      or undefined = unknown if asset exists (call lookupAsync)
+  */
+  function lookup(symbol, contract) {
     assert(symbol, 'required symbol')
-    assert(account, 'required account')
+    assert(contract, 'required contract')
 
-    if(account === 'eosio') {
-      account = 'eosio.token'
+    if(contract === 'eosio') {
+      contract = 'eosio.token'
     }
 
-    const extendedAsset = `${symbol}@${account}`
+    const extendedAsset = `${symbol}@${contract}`
 
     const c = cache[extendedAsset]
-    if(c != null) {
-      return c
-    }
+
     if(c instanceof Promise) {
-      return undefined
+      return undefined // pending
     }
-    return null
+
+    return c
   }
 
   return {
