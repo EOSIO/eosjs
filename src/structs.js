@@ -567,12 +567,12 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
   'action.data.fromObject': ({fields, object, result}) => {
     const {data, name} = object
     currentAccount = object.account
+
     try {
       const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
       if(ser) {
         if(typeof data === 'object') {
           result.data = ser.fromObject(data) // resolve shorthand
-          return
         } else if(typeof data === 'string') {
           const buf = new Buffer(data, 'hex')
           result.data = Fcbuffer.fromBuffer(ser, buf)
@@ -591,17 +591,13 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
   },
 
   'action.data.toObject': ({fields, object, result, config}) => {
-    const {data, name, account} = object || {}
+    const {data, name} = object || {}
     currentAccount = object.account
+
     try {
       const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
       if(!ser) {
         // Types without an ABI will accept hex
-        // const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-        // const buf = !Buffer.isBuffer(data) ? new Buffer(data, 'hex') : data
-        // b2.writeVarint32(buf.length)
-        // b2.append(buf)
-        // result.data = b2.copy(0, b2.offset).toString('hex')
         result.data = Buffer.isBuffer(data) ? data.toString('hex') : data
         return
       }
@@ -612,7 +608,6 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
           ser.appendByteBuffer(b2, data)
         }
         result.data = b2.copy(0, b2.offset).toString('hex')
-
         // console.log('result.data', result.data)
         return
       }
