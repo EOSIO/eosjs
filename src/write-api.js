@@ -392,11 +392,14 @@ function WriteApi(Network, network, config, Transaction) {
 
       rawTx.actions = arg.actions
 
-      // resolve shorthand
-      const txObject = Transaction.fromObject(rawTx)
+      // Resolve shorthand, queue requests
+      Transaction.fromObject(rawTx)
 
       // After fromObject ensure any async actions are finished
       await AssetCache.resolve()
+
+      // Create the object again with resolved data
+      const txObject = Transaction.fromObject(rawTx)
 
       const buf = Fcbuffer.toBuffer(Transaction, txObject)
       const tr = Transaction.toObject(txObject)
