@@ -10,8 +10,8 @@ describe('format', () => {
   // In isname111111k, 'k' overflows the last 4 bits of the name
   describe('name', () => {
     const nameFixture = {
-      isname: ['isname111111j', 'a', '1', '5', 'sam5', 'sam', 'adam.applejjj'],
-      noname: ['isname111111k', undefined, null, 1, '6', 'a6', ' ']
+      isname: ['isname111111', 'a', '1', '5', 'sam5', 'sam', 'adam.applejj'],
+      noname: ['isname111111j', undefined, null, 1, '6', 'a6', ' ']
     }
 
     it('isName', () => {

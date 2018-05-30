@@ -63,9 +63,7 @@ const charidx = ch => {
 
   @see types.hpp string_to_name
 
-  @arg {string} name - A string to encode, up to 13 characters long.  Note,
-    the 13th letter of the name is limited (. 1-5 and <= 'j') so the safe
-    or practical limit is 12.
+  @arg {string} name - A string to encode, up to 12 characters long.
 
   @return {string<uint64>} - compressed string (from name arg).  A string is
     always used because a number could exceed JavaScript's 52 bit limit.
@@ -74,8 +72,8 @@ function encodeName(name, littleEndian = true) {
   if(typeof name !== 'string')
     throw new TypeError('name parameter is a required string')
 
-  if(name.length > 13)
-    throw new TypeError('A name can be up to 13 characters long')
+  if(name.length > 12)
+    throw new TypeError('A name can be up to 12 characters long')
 
   let bitstr = ''
   for(let i = 0; i <= 12; i++) { // process all 64 bits (even if name is short)
