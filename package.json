@@ -46,7 +46,7 @@
     "babel-polyfill": "^6.26.0",
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
-    "eosjs-api": "6.0.2",
+    "eosjs-api": "6.1.0",
     "eosjs-ecc": "4.0.1",
     "fcbuffer": "2.2.0"
   },
