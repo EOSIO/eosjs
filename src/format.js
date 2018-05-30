@@ -256,11 +256,11 @@ function parseExtendedAsset(str) {
   const precisionMatch = str.match(/(^| )([0-9]+),([A-Z]+)(@|$)/)
   const precision = precisionMatch ? Number(precisionMatch[2]) : null
 
-  const symbolMatch = str.match(/([A-Z]+)(@|$)/)
-  const symbol = symbolMatch ? symbolMatch[1] : null
+  const symbolMatch = str.match(/(^| |,)([A-Z]+)(@|$)/)
+  const symbol = symbolMatch ? symbolMatch[2] : null
 
   const [, contractRaw] = str.split('@')
-  const contract = /[a-z0-5]+(\.[a-z0-5]+])?$/.test(contractRaw) ? contractRaw : null
+  const contract = /^[a-z0-5]+(\.[a-z0-5]+])?$/.test(contractRaw) ? contractRaw : null
 
   const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
   const asset = join(precision, ',') + symbol
