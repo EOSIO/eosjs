@@ -251,8 +251,8 @@ if(process.env['NODE_ENV'] === 'development') {
         tr.delegatebw({
           from: 'eosio',
           receiver: name,
-          stake_net_quantity: '100.0000 SYS',
-          stake_cpu_quantity: '100.0000 SYS',
+          stake_net_quantity: '1.0000 SYS',
+          stake_cpu_quantity: '1.0000 SYS',
           transfer: 0
         })
       })
