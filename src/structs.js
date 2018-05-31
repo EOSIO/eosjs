@@ -40,7 +40,7 @@ module.exports = (config = {}, extendedSchema) => {
   // an error: `Invalid cast from object_type to string` .. forceActionDataHex
   // may be used to until native ABI is added or fixed.
   const forceActionDataHex = config.forceActionDataHex != null ?
-    config.forceActionDataHex : false
+    config.forceActionDataHex : true
 
   const override = Object.assign({},
     authorityOverride,
