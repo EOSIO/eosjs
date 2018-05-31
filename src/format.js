@@ -260,7 +260,7 @@ function parseExtendedAsset(str) {
   const symbol = symbolMatch ? symbolMatch[2] : null
 
   const [, contractRaw] = str.split('@')
-  const contract = /^[a-z0-5]+(\.[a-z0-5]+])?$/.test(contractRaw) ? contractRaw : null
+  const contract = /^[a-z0-5]+(\.[a-z0-5]+)*$/.test(contractRaw) ? contractRaw : null
 
   const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
   const asset = join(precision, ',') + symbol

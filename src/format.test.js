@@ -117,6 +117,8 @@ describe('format', () => {
       ['1 SYM', '1', null, 'SYM', null],
       ['1.0 SYM', '1.0', null, 'SYM', null],
       ['1.0 4,SYM@contract', '1.0', 4, 'SYM', 'contract'],
+      ['1.0 4,SYM@tract.token', '1.0', 4, 'SYM', 'tract.token'],
+      ['1.0 4,SYM@tr.act.token', '1.0', 4, 'SYM', 'tr.act.token'],
       ['1.0 4,SYM', '1.0', 4, 'SYM', null],
     ]
     for(const [str, amount, precision, symbol, contract] of parseExtendedAssets) {
