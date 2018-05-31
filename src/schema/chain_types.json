@@ -124,7 +124,7 @@
     "fields": {
       "name": "type_name",
       "base": "type_name",
-      "fields": "fields"
+      "fields": "field_def[]"
     }
   },
   "clause_pair": {
@@ -134,6 +134,13 @@
       "body": "string"
     }
   },
+  "error_message": {
+    "base": "",
+    "fields": {
+      "error_code": "uint64",
+      "error_msg": "string"
+    }
+  },
   "abi_def": {
     "base": "",
     "fields": {
@@ -141,7 +148,10 @@
       "types": "type_def[]",
       "structs": "struct_def[]",
       "actions": "action_def[]",
-      "tables": "table_def[]"
+      "tables": "table_def[]",
+      "ricardian_clauses": "clause_pair[]",
+      "error_messages": "error_message[]",
+      "abi_extensions": "extensions_type[]"
     }
   },
   "table_def": {
