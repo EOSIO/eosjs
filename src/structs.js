@@ -256,7 +256,7 @@ const Symbol = assetCache => validation => {
 
     appendByteBuffer (b, value) {
       const {symbol, precision} = precisionCache(assetCache, value)
-      assert(precision != null, `Precision unknown for asset: ${symbol}@eosio.token`)
+      assert(precision != null, `Precision unknown for asset: ${value}`)
       const pad = '\0'.repeat(7 - symbol.length)
       b.append(String.fromCharCode(precision) + symbol + pad)
     },
