@@ -89,22 +89,22 @@ if(process.env['NODE_ENV'] === 'development') {
     })
   })
 
-  describe('Contracts Deploy', () => {
+  describe('Contract', () => {
     function deploy(contract, account = 'inita') {
-      it(`${contract}@${account}`, async function() {
+      it(`deploy ${contract}@${account}`, async function() {
         this.timeout(4000)
-        console.log('todo, skipping deploy ' + `${contract}@${account}`)
-        // const config = {binaryen: require("binaryen"), keyProvider: wif}
-        // const eos = Eos.Localnet(config)
-        //
-        // const wasm = fs.readFileSync(`docker/contracts/${contract}/${contract}.wasm`)
-        // const abi = fs.readFileSync(`docker/contracts/${contract}/${contract}.abi`)
-        //
-        // // When ran multiple times, deploying to the same account
-        // // avoids a same contract version deploy error.
-        // // TODO: undeploy contract instead
-        // await eos.setcode(account, 0, 0, wasm)
-        // await eos.setabi(account, JSON.parse(abi))
+        // console.log('todo, skipping deploy ' + `${contract}@${account}`)
+        const config = {binaryen: require("binaryen"), keyProvider: wif}
+        const eos = Eos.Localnet(config)
+
+        const wasm = fs.readFileSync(`docker/contracts/${contract}/${contract}.wasm`)
+        const abi = fs.readFileSync(`docker/contracts/${contract}/${contract}.abi`)
+
+        // When ran multiple times, deploying to the same account
+        // avoids a same contract version deploy error.
+        // TODO: undeploy contract instead
+        await eos.setcode(account, 0, 0, wasm)
+        await eos.setabi(account, JSON.parse(abi))
       })
     }
     deploy('eosio.msig')
