@@ -3,7 +3,11 @@
   <meta charset="utf-8">
   <script src="eos.js"></script>
   <script>
-  eos = Eos.Testnet()
+  eos = Eos({
+    httpEndpoint: 'http://ayeaye.cypherglass.com:8888',
+    chainId: 'a628a5a6123d6ed60242560f23354c557f4a02826e223bb38aad79ddeb9afbca',
+    debug: true
+  })
   </script>
 </head>
 <body>

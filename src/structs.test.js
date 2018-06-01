@@ -9,7 +9,7 @@ const AssetCache = require('./asset-cache')
 describe('shorthand', () => {
 
   it('authority', () => {
-    const eos = Eos.Localnet()
+    const eos = Eos()
     const {authority} = eos.fc.structs
 
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
@@ -23,7 +23,7 @@ describe('shorthand', () => {
   })
 
   it('PublicKey sorting', () => {
-    const eos = Eos.Localnet()
+    const eos = Eos()
     const {authority} = eos.fc.structs
 
     const pubkeys = [
@@ -46,7 +46,7 @@ describe('shorthand', () => {
   })
 
   it('public_key', () => {
-    const eos = Eos.Localnet()
+    const eos = Eos()
     const {structs, types} = eos.fc
     const PublicKeyType = types.public_key()
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
@@ -55,7 +55,7 @@ describe('shorthand', () => {
   })
 
   it('symbol', () => {
-    const eos = Eos.Localnet()
+    const eos = Eos()
     const {types} = eos.fc
     const Symbol = types.symbol()
 
@@ -63,28 +63,28 @@ describe('shorthand', () => {
   })
 
   it('extended_symbol', () => {
-    const eos = Eos.Localnet({defaults: true})
+    const eos = Eos({defaults: true})
     const esType = eos.fc.types.extended_symbol()
     const esString = esType.toObject()
     assertSerializer(esType, esString)
   })
 
   it('asset', () => {
-    const eos = Eos.Localnet()
+    const eos = Eos()
     const {types} = eos.fc
     const AssetType = types.asset()
     assertSerializer(AssetType, '1.1 4,SYS@eosio.token', '1.1000 SYS@eosio.token', '1.1000 SYS')
   })
 
   it('extended_asset', () => {
-    const eos = Eos.Localnet({defaults: true})
+    const eos = Eos({defaults: true})
     const eaType = eos.fc.types.extended_asset()
     const eaString = eaType.toObject()
     assertSerializer(eaType, eaString)
   })
 
   it('signature', () => {
-    const eos = Eos.Localnet()
+    const eos = Eos()
     const {types} = eos.fc
     const SignatureType = types.signature()
     const signatureString = 'SIG_K1_JwxtqesXpPdaZB9fdoVyzmbWkd8tuX742EQfnQNexTBfqryt2nn9PomT5xwsVnUB4m7KqTgTBQKYf2FTYbhkB5c7Kk9EsH'
@@ -99,7 +99,7 @@ if(process.env['NODE_ENV'] === 'development') {
   describe('Eosio Abi', () => {
 
     it('Eosio token contract parses', (done) => {
-      const eos = Eos.Localnet()
+      const eos = Eos()
 
       eos.contract('eosio.token', (error, eosio_token) => {
         assert(!error, error)
@@ -114,7 +114,7 @@ if(process.env['NODE_ENV'] === 'development') {
 
 describe('Action.data', () => {
   it('json', () => {
-    const eos = Eos.Localnet({forceActionDataHex: false})
+    const eos = Eos({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
       account: 'eosio.token',
@@ -131,7 +131,7 @@ describe('Action.data', () => {
   })
 
   it('force hex', () => {
-    const eos = Eos.Localnet({forceActionDataHex: true})
+    const eos = Eos({forceActionDataHex: true})
     const {structs, types} = eos.fc
     const value = {
       account: 'eosio.token',
@@ -148,7 +148,7 @@ describe('Action.data', () => {
   })
 
   it('unknown type', () => {
-    const eos = Eos.Localnet({forceActionDataHex: false})
+    const eos = Eos({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
       account: 'eosio.token',

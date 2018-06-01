@@ -10,7 +10,7 @@ module.exports = writeApiGen
 
 const {sign} = ecc
 
-function writeApiGen(Network, network, structs, config) {
+function writeApiGen(Network, network, structs, config, schemaDef) {
   if(typeof config.chainId !== 'string') {
     throw new TypeError('config.chainId is required')
   }
@@ -23,8 +23,8 @@ function writeApiGen(Network, network, structs, config) {
   merge.transaction = writeApi.genTransaction(structs, merge)
 
   // Immediate send operations automatically calls merge.transaction
-  for(let type in Network.schema) {
-    const schema = Network.schema[type]
+  for(let type in schemaDef) {
+    const schema = schemaDef[type]
     if(schema.action == null) {
       continue
     }
@@ -37,7 +37,7 @@ function writeApiGen(Network, network, structs, config) {
     if(struct == null) {
       continue
     }
-    const definition = schemaFields(Network.schema, type)
+    const definition = schemaFields(schemaDef, type)
     merge[actionName] = writeApi.genMethod(type, definition, merge.transaction, schema.action.account)
   }
 

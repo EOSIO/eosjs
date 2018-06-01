@@ -7,35 +7,17 @@ try {
 }
 
 const ecc = require('eosjs-ecc')
-const json = {
-  api: require('eosjs-api').api,
-  schema: require('./schema')
-}
-
 const Fcbuffer = require('fcbuffer')
-const api = require('eosjs-api')
+const EosApi = require('eosjs-api')
+const assert = require('assert')
 
 const Structs = require('./structs')
 const AbiCache = require('./abi-cache')
 const AssetCache = require('./asset-cache')
 const writeApiGen = require('./write-api')
-const assert = require('assert')
 const format = require('./format')
-
+const schema = require('./schema')
 const pkg = require('../package.json')
-const Eos = {
-  version: pkg.version
-}
-
-module.exports = Eos
-
-Eos.modules = {
-  json,
-  ecc,
-  api,
-  Fcbuffer,
-  format
-}
 
 const configDefaults = {
   broadcast: true,
@@ -43,28 +25,53 @@ const configDefaults = {
   sign: true
 }
 
-function development(Network) {
-  Network.schema = json.schema
-  return (config = {}) => {
-    config = Object.assign({}, configDefaults, config)
-    const network = Network(Object.assign({}, {
-      apiLog: consoleObjCallbackLog(config.verbose)},
-      config
-    ))
-    const eosConfig = Object.assign({}, {
-      transactionLog: consoleObjCallbackLog(config.verbose)},
-      config
-    )
-    return createEos(eosConfig, Network, network)
+const Eos = (config = {}) => createEos(
+  Object.assign(
+    {},
+    {
+      apiLog: consoleObjCallbackLog(config.verbose),
+      transactionLog: consoleObjCallbackLog(config.verbose),
+    },
+    configDefaults,
+    config
+  )
+)
+
+module.exports = Eos
+
+Object.assign(
+  Eos,
+  {
+    version: pkg.version,
+    modules: {
+      format,
+      api: EosApi,
+      ecc,
+      json: {
+        api: EosApi.api,
+        schema
+      },
+      Fcbuffer
+    },
+
+    /** @deprecated */
+    Testnet: function (config) {
+      console.error('deprecated, change Eos.Testnet(..) to just Eos(..)')
+      return Eos(config)
+    },
+
+    /** @deprecated */
+    Localnet: function (config) {
+      console.error('deprecated, change Eos.Localnet(..) to just Eos(..)')
+      return Eos(config)
+    }
   }
-}
+)
 
-Eos.Testnet = development(api.Testnet)
-Eos.Localnet = development(api.Localnet)
-// Eos.Mainnet = config => ..
 
-function createEos(config, Network, network) {
-  config = Object.assign({}, config, {network})
+function createEos(config) {
+  const network = EosApi(config)
+  config.network = network
 
   config.assetCache = AssetCache(network)
   config.abiCache = AbiCache(network, config)
@@ -84,7 +91,7 @@ function createEos(config, Network, network) {
   }
 
   const {structs, types, fromBuffer, toBuffer} = Structs(config)
-  const eos = mergeWriteFunctions(config, Network, structs)
+  const eos = mergeWriteFunctions(config, EosApi, structs)
 
   Object.assign(eos, {fc: {
     structs,
@@ -121,18 +128,18 @@ function consoleObjCallbackLog(verbose = false) {
   name conflicts.
 
   @arg {object} config.network - read-only api calls
-  @arg {object} Network - api[Network] read-only api calls
+  @arg {object} EosApi - api[EosApi] read-only api calls
   @return {object} - read and write method calls (create and sign transactions)
   @throw {TypeError} if a funciton name conflicts
 */
-function mergeWriteFunctions(config, Network, structs) {
+function mergeWriteFunctions(config, EosApi, structs) {
   assert(config.network, 'network instance required')
   const {network} = config
 
   const merge = Object.assign({}, network)
 
-  const writeApi = writeApiGen(Network, network, structs, config)
-  throwOnDuplicate(merge, writeApi, 'Conflicting methods in Network Api and Transaction Api')
+  const writeApi = writeApiGen(EosApi, network, structs, config, schema)
+  throwOnDuplicate(merge, writeApi, 'Conflicting methods in EosApi and Transaction Api')
   Object.assign(merge, writeApi)
 
   return merge
