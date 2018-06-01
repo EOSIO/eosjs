@@ -1,2 +1,2 @@
-FROM eosio/eos:20180526
+FROM eosio/eos:20180601
 COPY config.ini /

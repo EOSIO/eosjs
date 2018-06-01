@@ -2,7 +2,7 @@ version: "3"
 
 services:
   nodeosd:
-    image: eosio/eos:20180526
+    image: eosio/eos:20180601
     build:
       context: .
       dockerfile: Dockerfile
