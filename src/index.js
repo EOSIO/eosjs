@@ -66,12 +66,14 @@ Eos.Localnet = development(api.Localnet)
 function createEos(config, Network, network) {
   config = Object.assign({}, config, {network})
 
-  config.assetCache =AssetCache(network)
+  config.assetCache = AssetCache(network)
   config.abiCache = AbiCache(network, config)
 
   if(!config.chainId) {
     config.chainId = 'a4fe43c897279a677025624555f3835b949f995f87923c97f0392dcff835bfd0'
   }
+
+  checkChainId(network, config.chainId)
 
   if(config.mockTransactions != null) {
     if(typeof config.mockTransactions === 'string') {
@@ -242,5 +244,15 @@ const defaultSignProvider = (eos, config) => async function({sign, buf, transact
     }
 
     return sigs
+  })
+}
+
+function checkChainId(network, chainId) {
+  network.getInfo({}).then(info => {
+    assert.equal(info.chain_id, chainId,
+      'chainId mismatch, signatures will not match transaction authority'
+    )
+  }).catch(error => {
+    console.error(error)
   })
 }
