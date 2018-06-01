@@ -89,6 +89,13 @@
       "owner": "account_name"
     }
   },
+  "connector": {
+    "base": "",
+    "fields": {
+      "balance": "asset",
+      "weight": "float64"
+    }
+  },
   "delegatebw": {
     "base": "",
     "action": {
@@ -124,27 +131,29 @@
     }
   },
   "eosio_global_state": {
-    "base": "eosio_parameters",
+    "base": "blockchain_parameters",
     "fields": {
+      "max_ram_size": "uint64",
       "total_ram_bytes_reserved": "uint64",
       "total_ram_stake": "int64",
       "last_producer_schedule_update": "time_point_sec",
       "last_pervote_bucket_fill": "uint64",
       "pervote_bucket": "int64",
       "perblock_bucket": "int64",
-      "savings": "int64",
       "total_unpaid_blocks": "uint32",
       "total_activated_stake": "int64",
       "thresh_activated_stake_time": "uint64",
-      "last_producer_schedule_id": "checksum160",
+      "last_producer_schedule_size": "uint16",
       "total_producer_vote_weight": "float64",
       "last_name_close": "block_timestamp_type"
     }
   },
-  "eosio_parameters": {
-    "base": "blockchain_parameters",
+  "exchange_state": {
+    "base": "",
     "fields": {
-      "max_ram_size": "uint64"
+      "supply": "asset",
+      "base": "connector",
+      "quote": "connector"
     }
   },
   "key_weight": {
@@ -212,12 +221,11 @@
       "owner": "account_name",
       "total_votes": "float64",
       "producer_key": "public_key",
+      "is_active": "bool",
       "url": "string",
       "unpaid_blocks": "uint32",
       "last_claim_time": "uint64",
-      "location": "uint16",
-      "time_became_active": "uint32",
-      "last_produced_block_time": "uint32"
+      "location": "uint16"
     }
   },
   "producer_key": {
@@ -280,6 +288,16 @@
       "from": "account_name"
     }
   },
+  "rmvproducer": {
+    "base": "",
+    "action": {
+      "name": "rmvproducer",
+      "account": "eosio"
+    },
+    "fields": {
+      "producer": "account_name"
+    }
+  },
   "sellram": {
     "base": "",
     "action": {
@@ -332,7 +350,7 @@
     },
     "fields": {
       "account": "account_name",
-      "abi": "abi_def"
+      "abi": "bytes"
     }
   },
   "setcode": {
@@ -355,7 +373,7 @@
       "account": "eosio"
     },
     "fields": {
-      "params": "eosio_parameters"
+      "params": "blockchain_parameters"
     }
   },
   "setpriv": {
