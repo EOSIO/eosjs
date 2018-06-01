@@ -8,18 +8,9 @@ services:
       dockerfile: Dockerfile
       #args:
       #  branch: master
-
     command: /opt/eosio/bin/nodeosd.sh --max-transaction-time=1000
     ports:
       - 8888:8888
       - 9876:9876
     expose:
       - "8888"
-
-  keosd:
-    image: eosio/eos:20180526
-    command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir
-    hostname: keosd
-    links:
-      - nodeosd
-
