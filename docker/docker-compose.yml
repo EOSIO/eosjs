@@ -2,15 +2,24 @@ version: "3"
 
 services:
   nodeosd:
-    image: eosio/eos:20180601
+    image: eosio/eos:v1.0.0
     build:
       context: .
       dockerfile: Dockerfile
       #args:
       #  branch: master
-    command: /opt/eosio/bin/nodeosd.sh --max-transaction-time=1000
+
+    command: /opt/eosio/bin/nodeosd.sh --max-transaction-time=1000 --data-dir /opt/eosio/bin/data-dir -e
+    hostname: nodeosd
     ports:
       - 8888:8888
       - 9876:9876
     expose:
       - "8888"
+
+  keosd:
+    image: eosio/eos:v1.0.0
+    command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address=127.0.0.1:8900
+    hostname: keosd
+    links:
+      - nodeosd

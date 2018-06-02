@@ -5,12 +5,8 @@
 export owner_pubkey=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 export active_pubkey=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
-function nodeosd() {
-  docker exec docker_nodeosd_1 "$@"
-}
-
 function cleos() {
-  nodeosd cleos -u http://nodeosd:8888 "$@"
+  docker exec docker_keosd_1 cleos -u http://nodeosd:8888 "$@"
 }
 
 function newaccount() {

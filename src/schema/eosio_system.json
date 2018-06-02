@@ -136,7 +136,7 @@
       "max_ram_size": "uint64",
       "total_ram_bytes_reserved": "uint64",
       "total_ram_stake": "int64",
-      "last_producer_schedule_update": "time_point_sec",
+      "last_producer_schedule_update": "block_timestamp_type",
       "last_pervote_bucket_fill": "uint64",
       "pervote_bucket": "int64",
       "perblock_bucket": "int64",

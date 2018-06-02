@@ -77,7 +77,7 @@ function createEos(config) {
   config.abiCache = AbiCache(network, config)
 
   if(!config.chainId) {
-    config.chainId = 'a4fe43c897279a677025624555f3835b949f995f87923c97f0392dcff835bfd0'
+    config.chainId = 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f'
   }
 
   checkChainId(network, config.chainId)
