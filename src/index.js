@@ -256,9 +256,12 @@ const defaultSignProvider = (eos, config) => async function({sign, buf, transact
 
 function checkChainId(network, chainId) {
   network.getInfo({}).then(info => {
-    assert.equal(info.chain_id, chainId,
-      'chainId mismatch, signatures will not match transaction authority'
-    )
+    if(info.chain_id !== chainId) {
+      console.warn(
+        'WARN: chainId mismatch, signatures will not match transaction authority. ' +
+        `expected ${chainId} !== actual ${info.chain_id}`
+      )
+    }
   }).catch(error => {
     console.error(error)
   })
