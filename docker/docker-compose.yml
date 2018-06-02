@@ -19,7 +19,9 @@ services:
 
   keosd:
     image: eosio/eos:v1.0.0
-    command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address=127.0.0.1:8900
+    command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address=0.0.0.0:8900
     hostname: keosd
+    ports:
+      - 8900:8900
     links:
       - nodeosd
