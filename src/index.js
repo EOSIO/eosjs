@@ -76,7 +76,7 @@ function createEos(config) {
   config.assetCache = AssetCache(network)
   config.abiCache = AbiCache(network, config)
 
-  if(config.hasOwnPropety('chainId'))
+  if(config.hasOwnProperty('chainId'))
      checkChainId(network, config.chainId)
 
   if(config.mockTransactions != null) {
