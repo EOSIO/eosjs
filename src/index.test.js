@@ -100,13 +100,26 @@ if(process.env['NODE_ENV'] === 'development') {
         const wasm = fs.readFileSync(`docker/contracts/${contract}/${contract}.wasm`)
         const abi = fs.readFileSync(`docker/contracts/${contract}/${contract}.abi`)
 
-        // When ran multiple times, deploying to the same account
-        // avoids a same contract version deploy error.
-        // TODO: undeploy contract instead
+
         await eos.setcode(account, 0, 0, wasm)
         await eos.setabi(account, JSON.parse(abi))
+
+        const code = await eos.getCode(account)
+
+        const diskAbi = JSON.parse(abi)
+        delete diskAbi.____comment
+        if(!diskAbi.error_messages) {
+          diskAbi.error_messages = []
+        }
+
+        assert.deepEqual(diskAbi, code.abi)
       })
     }
+
+    // When ran multiple times, deploying to the same account
+    // avoids a same contract version deploy error.
+    // TODO: undeploy contract instead (when API allows this)
+
     deploy('eosio.msig')
     deploy('eosio.token')
     deploy('eosio.bios')

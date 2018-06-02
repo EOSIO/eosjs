@@ -44,7 +44,7 @@ module.exports = (config = {}, extendedSchema) => {
 
   const override = Object.assign({},
     authorityOverride,
-    abiOverride,
+    abiOverride(structLookup),
     wasmCodeOverride(config),
     actionDataOverride(structLookup, forceActionDataHex),
     config.override
@@ -484,7 +484,7 @@ const authorityOverride = ({
   }
 })
 
-const abiOverride = ({
+const abiOverride = structLookup => ({
   'abi.fromObject': (value) => {
     if(typeof value === 'string') {
       return JSON.parse(value)
@@ -492,6 +492,13 @@ const abiOverride = ({
     if(Buffer.isBuffer(value)) {
       return JSON.parse(value.toString())
     }
+  },
+  'setabi.abi.appendByteBuffer': ({fields, object, b}) => {
+    const ser = structLookup('abi_def', 'eosio')
+    const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
+    ser.appendByteBuffer(b2, object.abi)
+    b.writeVarint32(b2.offset) // length prefix
+    b.append(b2.copy(0, b2.offset), 'binary')
   }
 })
 
