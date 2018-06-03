@@ -69,6 +69,10 @@ config = {
 eos = Eos(config)
 ```
 
+* **chainId** - Unique ID for the blockchain your connecting too.  This is
+  required for valid transaction signing.  The chainId is provided via the
+  [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
+
 * `mockTransactions` (optional)
   * `pass` - do not broadcast, always pretend that the transaction worked
   * `fail` - do not broadcast, pretend the transaction failed
@@ -92,10 +96,6 @@ options = {
   authorization: null
 }
 ```
-
-* **chainId** - Unique ID for the blockchain your connecting too.  This is
-  required for valid transaction signing.  The chainId is provided via the
-  [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
 
 * **authorization** `{array<auth>|auth}` - identifies the
   signing account and permission typically in a multi-sig
