@@ -1,11 +1,11 @@
 {
-  "name": "eos-altjs",
+  "name": "eosjs2",
   "version": "0.0.0",
   "description": "Talk to eos API",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack -o dist/eos-altjs-rel.js -p && webpack -o dist/eos-altjs-debug.js --mode development --debug --devtool inline-source-map --output-pathinfo"
+    "build": "webpack -o dist/eosjs2-rel.js -p --output-library eosjs2 && webpack -o dist/eosjs2-debug.js --mode development --debug --devtool inline-source-map --output-pathinfo --output-library eosjs2"
   },
   "author": "block.one",
   "license": "MIT",

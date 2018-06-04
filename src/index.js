@@ -4,9 +4,11 @@
 
 import * as ecc from 'eosjs-ecc';
 
-class EosError extends Error {
+export class EosError extends Error {
     constructor(json) {
-        if (json.processed && json.processed.except && json.processed.except.message)
+        if (json.error && json.error.details && json.error.details.length && json.error.details[0].message)
+            super(json.error.details[0].message)
+        else if (json.processed && json.processed.except && json.processed.except.message)
             super(json.processed.except.message);
         else
             super(json.message);
@@ -14,7 +16,7 @@ class EosError extends Error {
     }
 }
 
-class EosBuffer {
+export class EosBuffer {
     constructor() {
         this.length = 0;
         this.array = new Uint8Array(1024);
@@ -274,11 +276,11 @@ function numberToInt64(n) {
     return numberToUint64(n);
 }
 
-function dateToSec(date) {
+function dateToTimePointSec(date) {
     return Math.round(Date.parse(date + 'Z') / 1000);
 }
 
-function secToDate(sec) {
+function timePointSecToDate(sec) {
     let s = (new Date(sec * 1000)).toISOString();
     return s.substr(0, s.length - 1);
 }
@@ -428,8 +430,8 @@ function createInitialTypes() {
         }),
         time_point_sec: createType({
             name: 'time_point_sec',
-            serialize(buffer, data) { buffer.pushUint32(dateToSec(data)); return buffer; },
-            deserialize(buffer) { return secToDate(buffer.getUint32()); },
+            serialize(buffer, data) { buffer.pushUint32(dateToTimePointSec(data)); return buffer; },
+            deserialize(buffer) { return timePointSecToDate(buffer.getUint32()); },
         }),
         symbol: createType({
             name: 'symbol',
@@ -503,7 +505,7 @@ function getTypesFromAbi(initialTypes, abi) {
 
 function transactionHeader(refBlock, expireSeconds) {
     return {
-        expiration: secToDate(dateToSec(refBlock.timestamp) + expireSeconds),
+        expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
         ref_block_num: refBlock.block_num,
         ref_block_prefix: refBlock.ref_block_prefix,
     };
@@ -516,8 +518,31 @@ function arrayToHex(data) {
     return result;
 }
 
-class Api {
-    constructor({ endpoint, chainId = '00'.repeat(32) }) {
+function serializeActionData(contract, account, name, data) {
+    let action = contract.actions[name];
+    if (!action)
+        throw new Error('Unknown action ' + name + ' in contract ' + account);
+    return action.serialize(new EosBuffer, data);
+}
+
+function serializeAction(contract, account, name, authorization, data) {
+    return {
+        account,
+        name,
+        authorization,
+        data: serializeActionData(contract, account, name, data),
+    };
+}
+
+function signTransaction(privateKeys, chainId, serializedTransaction) {
+    let signBuf = Buffer.concat([new Buffer(chainId, 'hex'), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32))]);
+    return privateKeys.map(key => {
+        return ecc.Signature.sign(signBuf, key).toString();
+    });
+}
+
+export class Api {
+    constructor({ endpoint, chainId }) {
         this.endpoint = endpoint;
         this.chainId = chainId;
         this.contracts = {};
@@ -577,7 +602,13 @@ class Api {
         let initialTypes = accountName === 'eosio.msig' ?
             createInitialTypes() :
             (await this.getContract('eosio.msig')).types;
-        let abi = (await this.get_code(accountName)).abi;
+        let abi;
+        try {
+            abi = (await this.get_code(accountName)).abi;
+        } catch (e) {
+            e.message = 'fetching abi for ' + accountName + ': ' + e.message;
+            throw e;
+        }
         if (!abi)
             throw new Error("Missing abi for " + accountName);
         let types = getTypesFromAbi(initialTypes, abi);
@@ -585,53 +616,6 @@ class Api {
         for (let { name, type } of abi.actions)
             actions[name] = getType(types, type);
         return this.contracts[accountName] = { types, actions };
-    }
-
-    // User doesn't have to call get_info() and get_block() ahead of time
-    async easyTransactionHeader(behind, expireSeconds) {
-        let info = await this.get_info();
-        let refBlock = await this.get_block(info.head_block_num - behind);
-        return transactionHeader(refBlock, expireSeconds);
-    };
-
-    async pushTransaction(privateKeys, transaction) {
-        let tx = this.serializeTransaction(transaction).asUint8Array()
-        let signatures = privateKeys.map(key => {
-            let chainIdBuf = new Buffer(this.chainId, 'hex');
-            let signBuf = Buffer.concat([chainIdBuf, new Buffer(tx), new Buffer(new Uint8Array(32))]);
-            return ecc.Signature.sign(signBuf, key).toString();
-        });
-        return await this.fetch('/v1/chain/push_transaction', {
-            signatures,
-            compression: 0,
-            packed_context_free_data: '',
-            packed_trx: arrayToHex(tx),
-        });
-    }
-
-    serializeActionData(accountName, actionName, data) {
-        let contract = this.contracts[accountName];
-        if (!contract)
-            throw new Error('Missing contract for ' + accountName + '; call getContract() to fix')
-        let action = contract.actions[actionName];
-        if (!action)
-            throw new Error('Unknown action ' + actionName + ' in contract ' + accountName);
-        return action.serialize(new EosBuffer, data);
-    }
-
-    createAction(accountName, actionName, authorization, data) {
-        return {
-            account: accountName,
-            name: actionName,
-            authorization,
-            data: this.serializeActionData(accountName, actionName, data),
-        };
-    }
-
-    // User doesn't have to call getContract() ahead of time
-    async easyCreateAction(accountName, actionName, authorization, data) {
-        await this.getContract(accountName);
-        return this.createAction(accountName, actionName, authorization, data);
     }
 
     serializeTransaction(transaction) {
@@ -646,7 +630,33 @@ class Api {
                 ...transaction,
             });
     }
-} // Api
 
-export { ecc, EosError, EosBuffer, Api, numberToUint64, uint64ToNumber, numberToInt64, dateToSec, secToDate, serializeUnknown, deserializeUnknown, serializeStruct, deserializeStruct, serializeArray, deserializeArray, createType, getType, getTypesFromAbi, createInitialTypes, transactionHeader, };
-global.eos_altjs = { ecc, EosError, EosBuffer, Api, numberToUint64, uint64ToNumber, numberToInt64, dateToSec, secToDate, serializeUnknown, deserializeUnknown, serializeStruct, deserializeStruct, serializeArray, deserializeArray, createType, getType, getTypesFromAbi, createInitialTypes, transactionHeader, };
+    async serializeActions(actions) {
+        return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
+            return serializeAction(await this.getContract(account), account, name, authorization, data);
+        }));
+    }
+
+    async pushTransaction(privateKeys, { blocksBehind, expireSeconds, actions, ...transaction }) {
+        let info;
+        if (!this.chainId) {
+            info = await this.get_info();
+            this.chainId = info.chain_id;
+        }
+        if (blocksBehind !== undefined && expireSeconds !== undefined) {
+            if (!info)
+                info = await this.get_info();
+            let refBlock = await this.get_block(info.head_block_num - blocksBehind);
+            transaction = { ...transactionHeader(refBlock, expireSeconds), ...transaction };
+        }
+        transaction = { ...transaction, actions: await this.serializeActions(actions) };
+        let serializedTransaction = this.serializeTransaction(transaction).asUint8Array();
+        let signatures = signTransaction(privateKeys, this.chainId, serializedTransaction);
+        return await this.fetch('/v1/chain/push_transaction', {
+            signatures,
+            compression: 0,
+            packed_context_free_data: '',
+            packed_trx: arrayToHex(serializedTransaction),
+        });
+    }
+} // Api

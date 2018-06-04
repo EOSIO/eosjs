@@ -17,34 +17,34 @@ Limitations:
 ```html
 <pre style="width: 100%; height: 100%; margin:0px; "></pre>
 
-<script src='https://.../eos-altjs-debug.js'></script>
+<script src='https://.../eosjs2-debug.js'></script>
 <script>
-    let eos = window.eos_altjs;
     let pre = document.getElementsByTagName('pre')[0];
 
     (async () => {
-        let endpoint = 'https://...:8888';
-        let privateKeys = ['...'];
+        let endpoint = 'http://localhost:8000';
+        let privateKeys = ['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr'];
 
         try {
-            let api = new eos.Api({ endpoint });
-            api.chainId = (await api.get_info()).chain_id;
+            let api = new eosjs2.Api({ endpoint });
             let result = await api.pushTransaction(privateKeys, {
-                // Reference 3 blocks behind the head and expire 10 seconds after
-                ...await api.easyTransactionHeader(3, 10),
-                actions: [
-                    await api.easyCreateAction('test', 'dosomething',
-                        [{
-                            actor: 'test',
-                            permission: 'active',
-                        }],
-                        {
-                            user: 'test',
-                            other_data: 1234,
-                        }),
-                ],
+                blocksBehind: 3,
+                expireSeconds: 10,
+                actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'useraaaaaaaa',
+                        permission: 'active',
+                    }],
+                    data: {
+                        from: 'useraaaaaaaa',
+                        to: 'useraaaaaaab',
+                        quantity: '0.0001 SYS',
+                        memo: '',
+                    },
+                }],
             });
-
             pre.textContent += '\n\nTransaction pushed!\n\n' + JSON.stringify(result, null, 4);
         } catch (e) {
             pre.textContent += '\nCaught exception: ' + e;
