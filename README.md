@@ -28,6 +28,7 @@ Limitations:
 
         try {
             let api = new eos.Api({ endpoint });
+            api.chainId = (await api.get_info()).chain_id;
             let result = await api.pushTransaction(privateKeys, {
                 // Reference 3 blocks behind the head and expire 10 seconds after
                 ...await api.easyTransactionHeader(3, 10),

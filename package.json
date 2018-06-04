@@ -7,11 +7,15 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack -o dist/eos-altjs-rel.js -p && webpack -o dist/eos-altjs-debug.js --mode development --debug --devtool inline-source-map --output-pathinfo"
   },
-  "author": "Todd Fleming",
+  "author": "block.one",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EOSIO/eosjs2.git"
+  },
   "devDependencies": {
-    "eosjs-ecc": "^4.0.0",
-    "webpack": "^4.6.0",
-    "webpack-cli": "^2.0.14"
+    "eosjs-ecc": "^4.0.1",
+    "webpack": "^4.10.2",
+    "webpack-cli": "^3.0.1"
   }
 }

@@ -360,6 +360,11 @@ function createInitialTypes() {
         permission_name: createType({ name: 'permission_name', aliasOfName: 'name' }),
         type_name: createType({ name: 'type_name', aliasOfName: 'string' }),
 
+        bool: createType({
+            name: 'bool',
+            serialize(buffer, data) { buffer.push(data ? 1 : 0); return buffer; },
+            deserialize(buffer) { return !!buffer.get(); },
+        }),
         uint8: createType({
             name: 'uint8',
             serialize(buffer, data) { buffer.push(data); return buffer; },
@@ -421,8 +426,8 @@ function createInitialTypes() {
             serialize(buffer, data) { buffer.pushName(data); return buffer; },
             deserialize(buffer) { return buffer.getName(); },
         }),
-        time: createType({
-            name: 'time',
+        time_point_sec: createType({
+            name: 'time_point_sec',
             serialize(buffer, data) { buffer.pushUint32(dateToSec(data)); return buffer; },
             deserialize(buffer) { return secToDate(buffer.getUint32()); },
         }),
@@ -478,10 +483,6 @@ function getTypesFromAbi(initialTypes, abi) {
         types[new_type_name] =
             createType({ name: new_type_name, aliasOfName: type, });
     for (let { name, base, fields } of abi.structs) {
-        // HACK: dawn4: abi is missing extensions_type and transaction.transaction_extensions.
-        //              populate with dummy array
-        if (name === 'transaction' && !fields.find(({ name }) => name === 'transaction_extensions'))
-            fields.push({ name: 'transaction_extensions', type: 'bytes' });
         types[name] = createType({
             name,
             baseName: base,
@@ -572,9 +573,10 @@ class Api {
     async getContract(accountName, reload = false) {
         if (!reload && this.contracts[accountName])
             return this.contracts[accountName];
-        let initialTypes = accountName === 'eosio' ?
+        // HACK: transaction lives in msig's api
+        let initialTypes = accountName === 'eosio.msig' ?
             createInitialTypes() :
-            (await this.getContract('eosio')).types;
+            (await this.getContract('eosio.msig')).types;
         let abi = (await this.get_code(accountName)).abi;
         if (!abi)
             throw new Error("Missing abi for " + accountName);
@@ -633,7 +635,7 @@ class Api {
     }
 
     serializeTransaction(transaction) {
-        return this.contracts.eosio.types.transaction.serialize(
+        return this.contracts['eosio.msig'].types.transaction.serialize(
             new EosBuffer, {
                 max_net_usage_words: 0,
                 max_cpu_usage_ms: 0,
