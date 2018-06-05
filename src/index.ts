@@ -2,10 +2,11 @@
 
 'use strict';
 
-import * as ecc from 'eosjs-ecc';
+const ecc = require('eosjs-ecc');
 
 export class EosError extends Error {
-    constructor(json) {
+    json: object;
+    constructor(json: any) {
         if (json.error && json.error.details && json.error.details.length && json.error.details[0].message)
             super(json.error.details[0].message)
         else if (json.processed && json.processed.except && json.processed.except.message)
@@ -16,14 +17,113 @@ export class EosError extends Error {
     }
 }
 
-export class EosBuffer {
-    constructor() {
-        this.length = 0;
-        this.array = new Uint8Array(1024);
-        this.readPos = 0;
-    }
+export interface Info {
+    server_version: string;
+    chain_id: string;
+    head_block_num: number;
+    last_irreversible_block_num: number;
+    last_irreversible_block_id: string;
+    head_block_id: string;
+    head_block_time: string;
+    head_block_producer: string;
+    virtual_block_cpu_limit: number;
+    virtual_block_net_limit: number;
+    block_cpu_limit: number;
+    block_net_limit: number;
+}
 
-    reserve(size) {
+export interface Block {
+    timestamp: string;
+    producer: string;
+    confirmed: number;
+    previous: string;
+    transaction_mroot: string;
+    action_mroot: string;
+    schedule_version: number;
+    producer_signature: string;
+    id: string;
+    block_num: number;
+    ref_block_prefix: number;
+}
+
+export interface Abi {
+    version: string;
+    types: { new_type_name: string, type: string }[];
+    structs: { name: string, base: string, fields: { name: string, type: string }[] }[];
+    actions: { name: string, type: string, ricardian_contract: string }[];
+}
+
+export interface Code {
+    account_name: string;
+    code_hash: string;
+    wast: string;
+    wasm: string;
+    abi: Abi;
+}
+
+export interface SerializableField {
+    name: string;
+    typeName: string;
+    type: SerializableType;
+}
+
+export interface SerializableType {
+    name: string;
+    aliasOfName: string;
+    arrayOf: SerializableType;
+    optionalOf: SerializableType;
+    baseName: string;
+    base: SerializableType;
+    fields: SerializableField[];
+    serialize: (buffer: EosBuffer, data: any) => void;
+    deserialize: (buffer: EosBuffer) => any;
+}
+
+export interface Uint64 {
+    low: number;
+    high: number;
+}
+
+export interface Int64 {
+    low: number;
+    high: number;
+}
+
+export interface Symbol {
+    name: string;
+    precision: number;
+}
+
+export interface Contract {
+    actions: Map<string, SerializableType>;
+    types: Map<string, SerializableType>;
+}
+
+export interface Authorization {
+    actor: string;
+    permission: string;
+}
+
+export interface Action {
+    account: string;
+    name: string;
+    authorization: Authorization[];
+    data: any;
+}
+
+export interface SerializedAction {
+    account: string;
+    name: string;
+    authorization: Authorization[];
+    data: Uint8Array;
+}
+
+export class EosBuffer {
+    length = 0;
+    array = new Uint8Array(1024);
+    readPos = 0;
+
+    reserve(size: number) {
         if (this.length + size <= this.array.length)
             return;
         let l = this.array.length;
@@ -38,15 +138,13 @@ export class EosBuffer {
         return new Uint8Array(this.array.buffer, 0, this.length);
     }
 
-    pushArray(v) {
-        if (v instanceof EosBuffer)
-            v = v.asUint8Array();
+    pushArray(v: number[] | Uint8Array) {
         this.reserve(v.length);
         this.array.set(v, this.length);
         this.length += v.length;
     }
 
-    push(...v) {
+    push(...v: number[]) {
         this.pushArray(v);
     }
 
@@ -56,7 +154,7 @@ export class EosBuffer {
         throw new Error('Read past end of buffer');
     }
 
-    getUint8Array(len) {
+    getUint8Array(len: number) {
         if (this.readPos + len > this.length)
             throw new Error('Read past end of buffer');
         let result = new Uint8Array(this.array.buffer, this.readPos, len);
@@ -64,7 +162,7 @@ export class EosBuffer {
         return result;
     }
 
-    pushUint16(v) {
+    pushUint16(v: number) {
         this.push((v >> 0) & 0xff, (v >> 8) & 0xff);
     }
 
@@ -75,7 +173,7 @@ export class EosBuffer {
         return v;
     }
 
-    pushUint32(v) {
+    pushUint32(v: number) {
         this.push((v >> 0) & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff);
     }
 
@@ -88,31 +186,27 @@ export class EosBuffer {
         return v >>> 0;
     }
 
-    pushUint64(v) {
-        if (typeof v === 'number')
-            v = numberToUint64(v);
+    pushUint64(v: Uint64) {
         this.pushUint32(v.low);
         this.pushUint32(v.high);
     }
 
-    getUint64() {
+    getUint64(): Uint64 {
         let low = this.getUint32();
         let high = this.getUint32();
         return { low, high };
     }
 
-    pushInt64(v) {
-        if (typeof v === 'number')
-            v = numberToInt64(v);
+    pushInt64(v: Int64) {
         this.pushUint32(v.low);
         this.pushUint32(v.high);
     }
 
-    getInt64() {
-        return getUint64();
+    getInt64(): Int64 {
+        return this.getUint64();
     }
 
-    pushVaruint32(v) {
+    pushVaruint32(v: number) {
         while (true) {
             if (v >>> 7) {
                 this.push(0x80 | (v & 0x7f));
@@ -137,8 +231,8 @@ export class EosBuffer {
         return v >>> 0;
     }
 
-    pushName(s) {
-        function charToSymbol(c) {
+    pushName(s: string) {
+        function charToSymbol(c: number) {
             if (c >= 'a'.charCodeAt(0) && c <= 'z'.charCodeAt(0))
                 return (c - 'a'.charCodeAt(0)) + 6;
             if (c >= '1'.charCodeAt(0) && c <= '5'.charCodeAt(0))
@@ -158,7 +252,7 @@ export class EosBuffer {
                 }
             }
         }
-        this.push(...a);
+        this.pushArray(a);
     }
 
     getName() {
@@ -184,7 +278,7 @@ export class EosBuffer {
         return result;
     }
 
-    pushBytes(v) {
+    pushBytes(v: number[] | Uint8Array) {
         this.pushVaruint32(v.length);
         this.pushArray(v);
     }
@@ -193,7 +287,7 @@ export class EosBuffer {
         return this.getUint8Array(this.getVaruint32());
     }
 
-    pushString(v) {
+    pushString(v: string) {
         this.pushBytes((new TextEncoder()).encode(v));
     }
 
@@ -201,7 +295,7 @@ export class EosBuffer {
         return ((new TextDecoder('utf-8', { fatal: true })).decode(this.getBytes()));
     }
 
-    pushSymbol({ name, precision }) {
+    pushSymbol({ name, precision }: Symbol) {
         let a = [precision & 0xff];
         a.push(...(new TextEncoder()).encode(name));
         while (a.length < 8)
@@ -209,7 +303,7 @@ export class EosBuffer {
         this.pushArray(a.slice(0, 8));
     }
 
-    getSymbol() {
+    getSymbol(): Symbol {
         let precision = this.get();
         let a = this.getUint8Array(7);
         let len;
@@ -220,7 +314,7 @@ export class EosBuffer {
         return { name, precision };
     }
 
-    pushAsset(s) {
+    pushAsset(s: string) {
         // TODO: 56-bit precision loss
         s = s.trim();
         let pos = 0;
@@ -248,7 +342,7 @@ export class EosBuffer {
             }
         }
         let name = s.substr(pos).trim();
-        this.pushInt64(sign * amount);
+        this.pushInt64(numberToInt64(sign * amount));
         this.pushSymbol({ name, precision });
     }
 
@@ -258,42 +352,42 @@ export class EosBuffer {
     }
 } // EosBuffer
 
-function numberToUint64(n) {
+function numberToUint64(n: number) {
     return {
         low: n >>> 0,
         high: Math.floor(n / 0x100000000) >>> 0
     };
 }
 
-function uint64ToNumber({ low, high }) {
+function uint64ToNumber({ low, high }: Uint64) {
     return (high | 0) * 0x100000000 + (low | 0);
 }
 
-function numberToInt64(n) {
+function numberToInt64(n: number) {
     // TODO
     if (n < 0)
         throw new Error("Don't know how to convert negative 64-bit integers")
     return numberToUint64(n);
 }
 
-function dateToTimePointSec(date) {
+function dateToTimePointSec(date: string) {
     return Math.round(Date.parse(date + 'Z') / 1000);
 }
 
-function timePointSecToDate(sec) {
+function timePointSecToDate(sec: number) {
     let s = (new Date(sec * 1000)).toISOString();
     return s.substr(0, s.length - 1);
 }
 
-function serializeUnknown(buffer, data) {
+function serializeUnknown(buffer: EosBuffer, data: any): EosBuffer {
     throw new Error("Don't know how to serialize " + this.name);
 }
 
-function deserializeUnknown(buffer) {
+function deserializeUnknown(buffer: EosBuffer): EosBuffer {
     throw new Error("Don't know how to deserialize " + this.name);
 }
 
-function serializeStruct(buffer, data) {
+function serializeStruct(buffer: EosBuffer, data: any) {
     if (this.base)
         this.base.serialize(buffer, data);
     for (let field of this.fields) {
@@ -301,10 +395,9 @@ function serializeStruct(buffer, data) {
             throw new Error('missing ' + this.name + '.' + field.name + ' (type=' + field.type.name + ')');
         field.type.serialize(buffer, data[field.name]);
     }
-    return buffer;
 }
 
-function deserializeStruct(buffer) {
+function deserializeStruct(buffer: EosBuffer) {
     let result;
     if (this.base)
         result = this.base.deserialize(buffer);
@@ -315,14 +408,13 @@ function deserializeStruct(buffer) {
     return result;
 }
 
-function serializeArray(buffer, data) {
+function serializeArray(buffer: EosBuffer, data: any[]) {
     buffer.pushVaruint32(data.length);
     for (let item of data)
         this.arrayOf.serialize(buffer, item);
-    return buffer;
 }
 
-function deserializeArray(buffer) {
+function deserializeArray(buffer: EosBuffer) {
     let len = buffer.getVaruint32();
     let result = [];
     for (let i = 0; i < len; ++i)
@@ -330,17 +422,29 @@ function deserializeArray(buffer) {
     return result;
 }
 
-function serializeOptional(buffer, data) {
+function serializeOptional(buffer: EosBuffer, data: any) {
     // TODO
     throw new Error("Don't know how to serialize " + this.name);
 }
 
-function deserializeOptional(buffer) {
+function deserializeOptional(buffer: EosBuffer) {
     // TODO
     throw new Error("Don't know how to deserialize " + this.name);
 }
 
-function createType(attrs = {}) {
+interface CreateTypeArgs {
+    name?: string;
+    aliasOfName?: string;
+    arrayOf?: SerializableType;
+    optionalOf?: SerializableType;
+    baseName?: string;
+    base?: SerializableType;
+    fields?: SerializableField[];
+    serialize?: (buffer: EosBuffer, data: any) => void;
+    deserialize?: (buffer: EosBuffer) => any;
+}
+
+function createType(attrs: CreateTypeArgs): SerializableType {
     return {
         name: '<missing name>',
         aliasOfName: '',
@@ -355,8 +459,8 @@ function createType(attrs = {}) {
     };
 }
 
-function createInitialTypes() {
-    return {
+function createInitialTypes(): Map<string, SerializableType> {
+    return new Map(Object.entries({
         action_name: createType({ name: 'action_name', aliasOfName: 'name' }),
         field_name: createType({ name: 'field_name', aliasOfName: 'string' }),
         permission_name: createType({ name: 'permission_name', aliasOfName: 'name' }),
@@ -364,84 +468,84 @@ function createInitialTypes() {
 
         bool: createType({
             name: 'bool',
-            serialize(buffer, data) { buffer.push(data ? 1 : 0); return buffer; },
-            deserialize(buffer) { return !!buffer.get(); },
+            serialize(buffer: EosBuffer, data: boolean) { buffer.push(data ? 1 : 0); },
+            deserialize(buffer: EosBuffer) { return !!buffer.get(); },
         }),
         uint8: createType({
             name: 'uint8',
-            serialize(buffer, data) { buffer.push(data); return buffer; },
-            deserialize(buffer) { return buffer.get(); },
+            serialize(buffer: EosBuffer, data: number) { buffer.push(data); },
+            deserialize(buffer: EosBuffer) { return buffer.get(); },
         }),
         int8: createType({
             name: 'int8',
-            serialize(buffer, data) { buffer.push(data); return buffer; },
-            deserialize(buffer) { return buffer.get() << 24 >> 24; },
+            serialize(buffer: EosBuffer, data: number) { buffer.push(data); },
+            deserialize(buffer: EosBuffer) { return buffer.get() << 24 >> 24; },
         }),
         uint16: createType({
             name: 'uint16',
-            serialize(buffer, data) { buffer.pushUint16(data); return buffer; },
-            deserialize(buffer) { return buffer.getUint16(); },
+            serialize(buffer: EosBuffer, data: number) { buffer.pushUint16(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getUint16(); },
         }),
         int16: createType({
             name: 'int16',
-            serialize(buffer, data) { buffer.pushUint16(data); return buffer; },
-            deserialize(buffer) { return buffer.getUint16() << 16 >> 16; },
+            serialize(buffer: EosBuffer, data: number) { buffer.pushUint16(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getUint16() << 16 >> 16; },
         }),
         uint32: createType({
             name: 'uint32',
-            serialize(buffer, data) { buffer.pushUint32(data); return buffer; },
-            deserialize(buffer) { return buffer.getUint32(); },
+            serialize(buffer: EosBuffer, data: number) { buffer.pushUint32(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getUint32(); },
         }),
         uint64: createType({
             name: 'uint64',
-            serialize(buffer, data) { buffer.pushUint64(data); return buffer; },
-            deserialize(buffer) { return buffer.getUint64(); },
+            serialize(buffer: EosBuffer, data: Uint64) { buffer.pushUint64(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getUint64(); },
         }),
         int64: createType({
             name: 'int64',
-            serialize(buffer, data) { buffer.pushInt64(data); return buffer; },
-            deserialize(buffer) { return buffer.getInt64(); },
+            serialize(buffer: EosBuffer, data: Int64) { buffer.pushInt64(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getInt64(); },
         }),
         int32: createType({
             name: 'int32',
-            serialize(buffer, data) { buffer.pushUint32(data); return buffer; },
-            deserialize(buffer) { return buffer.getUint32() | 0; },
+            serialize(buffer: EosBuffer, data: number) { buffer.pushUint32(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getUint32() | 0; },
         }),
         varuint32: createType({
             name: 'varuint32',
-            serialize(buffer, data) { buffer.pushVaruint32(data); return buffer; },
-            deserialize(buffer) { return buffer.getVaruint32(); },
+            serialize(buffer: EosBuffer, data: number) { buffer.pushVaruint32(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getVaruint32(); },
         }),
 
         bytes: createType({
             name: 'bytes',
-            serialize(buffer, data) { buffer.pushBytes(data); return buffer; },
-            deserialize(buffer) { return buffer.getBytes(); },
+            serialize(buffer: EosBuffer, data: number[] | Uint8Array) { buffer.pushBytes(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getBytes(); },
         }),
         string: createType({
             name: 'string',
-            serialize(buffer, data) { buffer.pushString(data); return buffer; },
-            deserialize(buffer) { return buffer.getString(); },
+            serialize(buffer: EosBuffer, data: string) { buffer.pushString(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getString(); },
         }),
         name: createType({
             name: 'name',
-            serialize(buffer, data) { buffer.pushName(data); return buffer; },
-            deserialize(buffer) { return buffer.getName(); },
+            serialize(buffer: EosBuffer, data: string) { buffer.pushName(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getName(); },
         }),
         time_point_sec: createType({
             name: 'time_point_sec',
-            serialize(buffer, data) { buffer.pushUint32(dateToTimePointSec(data)); return buffer; },
-            deserialize(buffer) { return timePointSecToDate(buffer.getUint32()); },
+            serialize(buffer: EosBuffer, data: string) { buffer.pushUint32(dateToTimePointSec(data)); },
+            deserialize(buffer: EosBuffer) { return timePointSecToDate(buffer.getUint32()); },
         }),
         symbol: createType({
             name: 'symbol',
-            serialize(buffer, data) { buffer.pushSymbol(data); return buffer; },
-            deserialize(buffer) { return buffer.getSymbol(); },
+            serialize(buffer: EosBuffer, data: Symbol) { buffer.pushSymbol(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getSymbol(); },
         }),
         asset: createType({
             name: 'asset',
-            serialize(buffer, data) { buffer.pushAsset(data); return buffer; },
-            deserialize(buffer) { return buffer.getAsset(); },
+            serialize(buffer: EosBuffer, data: string) { buffer.pushAsset(data); },
+            deserialize(buffer: EosBuffer) { return buffer.getAsset(); },
         }),
 
         // TODO: implement these types
@@ -451,11 +555,11 @@ function createInitialTypes() {
         signature: createType({ name: 'signature' }),
         transaction_id_type: createType({ name: 'transaction_id_type' }),
         uint128: createType({ name: 'uint128' }),
-    };
+    }));
 } // createInitialTypes()
 
-function getType(types, name) {
-    let type = types[name];
+function getType(types: Map<string, SerializableType>, name: string): SerializableType {
+    let type = types.get(name);
     if (type && type.aliasOfName)
         return getType(types, type.aliasOfName);
     if (type)
@@ -479,22 +583,21 @@ function getType(types, name) {
     throw new Error('Unknown type: ' + name);
 }
 
-function getTypesFromAbi(initialTypes, abi) {
-    let types = { ...initialTypes };
+function getTypesFromAbi(initialTypes: Map<string, SerializableType>, abi: Abi) {
+    let types = new Map(initialTypes);
     for (let { new_type_name, type } of abi.types)
-        types[new_type_name] =
-            createType({ name: new_type_name, aliasOfName: type, });
+        types.set(new_type_name,
+            createType({ name: new_type_name, aliasOfName: type, }));
     for (let { name, base, fields } of abi.structs) {
-        types[name] = createType({
+        types.set(name, createType({
             name,
             baseName: base,
             fields: fields.map(({ name, type }) => ({ name, typeName: type, type: null })),
             serialize: serializeStruct,
             deserialize: deserializeStruct,
-        });
+        }));
     }
-    for (let name in types) {
-        let type = types[name];
+    for (let [name, type] of types) {
         if (type.baseName)
             type.base = getType(types, type.baseName);
         for (let field of type.fields)
@@ -503,7 +606,7 @@ function getTypesFromAbi(initialTypes, abi) {
     return types;
 } // getTypesFromAbi
 
-function transactionHeader(refBlock, expireSeconds) {
+function transactionHeader(refBlock: Block, expireSeconds: number) {
     return {
         expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
         ref_block_num: refBlock.block_num,
@@ -511,21 +614,23 @@ function transactionHeader(refBlock, expireSeconds) {
     };
 };
 
-function arrayToHex(data) {
+function arrayToHex(data: Uint8Array) {
     let result = '';
     for (let x of data)
         result += ('00' + x.toString(16)).slice(-2);
     return result;
 }
 
-function serializeActionData(contract, account, name, data) {
-    let action = contract.actions[name];
+function serializeActionData(contract: Contract, account: string, name: string, data: any) {
+    let action = contract.actions.get(name);
     if (!action)
         throw new Error('Unknown action ' + name + ' in contract ' + account);
-    return action.serialize(new EosBuffer, data);
+    let buffer = new EosBuffer;
+    action.serialize(buffer, data);
+    return buffer.asUint8Array();
 }
 
-function serializeAction(contract, account, name, authorization, data) {
+function serializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any): SerializedAction {
     return {
         account,
         name,
@@ -534,7 +639,7 @@ function serializeAction(contract, account, name, authorization, data) {
     };
 }
 
-function signTransaction(privateKeys, chainId, serializedTransaction) {
+function signTransaction(privateKeys: string[], chainId: string, serializedTransaction: Uint8Array): string[] {
     let signBuf = Buffer.concat([new Buffer(chainId, 'hex'), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32))]);
     return privateKeys.map(key => {
         return ecc.Signature.sign(signBuf, key).toString();
@@ -542,13 +647,16 @@ function signTransaction(privateKeys, chainId, serializedTransaction) {
 }
 
 export class Api {
-    constructor({ endpoint, chainId }) {
-        this.endpoint = endpoint;
-        this.chainId = chainId;
-        this.contracts = {};
+    endpoint: string;
+    chainId: string;
+    contracts = new Map<string, Contract>();
+
+    constructor(args: { endpoint: string, chainId: string }) {
+        this.endpoint = args.endpoint;
+        this.chainId = args.chainId;
     }
 
-    async fetch(path, body) {
+    async fetch(path: string, body: any) {
         let response, json;
         try {
             response = await fetch(this.endpoint + path, {
@@ -567,10 +675,10 @@ export class Api {
         return json;
     }
 
-    async get_info() { return await this.fetch('/v1/chain/get_info', {}); }
-    async get_code(account_name) { return await this.fetch('/v1/chain/get_code', { account_name }); }
-    async get_block(block_num_or_id) { return await this.fetch('/v1/chain/get_block', { block_num_or_id }); }
-    async get_account(account_name) { return await this.fetch('/v1/chain/get_account', { account_name }); }
+    async get_info(): Promise<Info> { return await this.fetch('/v1/chain/get_info', {}); }
+    async get_code(account_name: string): Promise<Code> { return await this.fetch('/v1/chain/get_code', { account_name }); }
+    async get_block(block_num_or_id: number | string): Promise<Block> { return await this.fetch('/v1/chain/get_block', { block_num_or_id }); }
+    async get_account(account_name: string) { return await this.fetch('/v1/chain/get_account', { account_name }); }
 
     async get_table_rows({
         json = true,
@@ -580,7 +688,7 @@ export class Api {
         table_key = '',
         lower_bound = '',
         upper_bound = '',
-        limit = 10 }) {
+        limit = 10 }: any) {
 
         return await this.fetch(
             '/v1/chain/get_table_rows', {
@@ -595,14 +703,14 @@ export class Api {
             });
     }
 
-    async getContract(accountName, reload = false) {
-        if (!reload && this.contracts[accountName])
-            return this.contracts[accountName];
+    async getContract(accountName: string, reload = false): Promise<Contract> {
+        if (!reload && this.contracts.get(accountName))
+            return this.contracts.get(accountName);
         // HACK: transaction lives in msig's api
         let initialTypes = accountName === 'eosio.msig' ?
             createInitialTypes() :
             (await this.getContract('eosio.msig')).types;
-        let abi;
+        let abi: Abi;
         try {
             abi = (await this.get_code(accountName)).abi;
         } catch (e) {
@@ -612,15 +720,18 @@ export class Api {
         if (!abi)
             throw new Error("Missing abi for " + accountName);
         let types = getTypesFromAbi(initialTypes, abi);
-        let actions = {};
+        let actions = new Map<string, SerializableType>();
         for (let { name, type } of abi.actions)
-            actions[name] = getType(types, type);
-        return this.contracts[accountName] = { types, actions };
+            actions.set(name, getType(types, type));
+        let result = { types, actions };
+        this.contracts.set(accountName, result);
+        return result;
     }
 
-    serializeTransaction(transaction) {
-        return this.contracts['eosio.msig'].types.transaction.serialize(
-            new EosBuffer, {
+    serializeTransaction(transaction: any) {
+        let buffer = new EosBuffer;
+        this.contracts.get('eosio.msig').types.get('transaction').serialize(
+            buffer, {
                 max_net_usage_words: 0,
                 max_cpu_usage_ms: 0,
                 delay_sec: 0,
@@ -629,16 +740,17 @@ export class Api {
                 transaction_extensions: [],
                 ...transaction,
             });
+        return buffer.asUint8Array();
     }
 
-    async serializeActions(actions) {
+    async serializeActions(actions: Action[]) {
         return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
             return serializeAction(await this.getContract(account), account, name, authorization, data);
         }));
     }
 
-    async pushTransaction(privateKeys, { blocksBehind, expireSeconds, actions, ...transaction }) {
-        let info;
+    async pushTransaction(privateKeys: string[], { blocksBehind, expireSeconds, actions, ...transaction }: any) {
+        let info: Info;
         if (!this.chainId) {
             info = await this.get_info();
             this.chainId = info.chain_id;
@@ -650,7 +762,7 @@ export class Api {
             transaction = { ...transactionHeader(refBlock, expireSeconds), ...transaction };
         }
         transaction = { ...transaction, actions: await this.serializeActions(actions) };
-        let serializedTransaction = this.serializeTransaction(transaction).asUint8Array();
+        let serializedTransaction = this.serializeTransaction(transaction);
         let signatures = signTransaction(privateKeys, this.chainId, serializedTransaction);
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,
