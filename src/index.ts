@@ -53,11 +53,16 @@ export interface Abi {
     actions: { name: string, type: string, ricardian_contract: string }[];
 }
 
-export interface Code {
+export interface GetCodeResult {
     account_name: string;
     code_hash: string;
     wast: string;
     wasm: string;
+    abi: Abi;
+}
+
+export interface GetAbiResult {
+    account_name: string;
     abi: Abi;
 }
 
@@ -676,7 +681,8 @@ export class Api {
     }
 
     async get_info(): Promise<Info> { return await this.fetch('/v1/chain/get_info', {}); }
-    async get_code(account_name: string): Promise<Code> { return await this.fetch('/v1/chain/get_code', { account_name }); }
+    async get_code(account_name: string): Promise<GetCodeResult> { return await this.fetch('/v1/chain/get_code', { account_name }); }
+    async get_abi(account_name: string): Promise<GetAbiResult> { return await this.fetch('/v1/chain/get_abi', { account_name }); }
     async get_block(block_num_or_id: number | string): Promise<Block> { return await this.fetch('/v1/chain/get_block', { block_num_or_id }); }
     async get_account(account_name: string) { return await this.fetch('/v1/chain/get_account', { account_name }); }
 
@@ -712,7 +718,7 @@ export class Api {
             (await this.getContract('eosio.msig')).types;
         let abi: Abi;
         try {
-            abi = (await this.get_code(accountName)).abi;
+            abi = (await this.get_abi(accountName)).abi;
         } catch (e) {
             e.message = 'fetching abi for ' + accountName + ': ' + e.message;
             throw e;
