@@ -16,6 +16,7 @@
   "devDependencies": {
     "@types/node": "^10.3.1",
     "eosjs-ecc": "^4.0.1",
+    "json-loader": "^0.5.7",
     "ts-loader": "^4.3.1",
     "typescript": "^2.9.1",
     "webpack": "^4.11.0",

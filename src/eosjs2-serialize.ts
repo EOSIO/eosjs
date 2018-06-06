@@ -404,11 +404,6 @@ function createType(attrs: CreateTypeArgs): Type {
 
 export function createInitialTypes(): Map<string, Type> {
     return new Map(Object.entries({
-        action_name: createType({ name: 'action_name', aliasOfName: 'name' }),
-        field_name: createType({ name: 'field_name', aliasOfName: 'string' }),
-        permission_name: createType({ name: 'permission_name', aliasOfName: 'name' }),
-        type_name: createType({ name: 'type_name', aliasOfName: 'string' }),
-
         bool: createType({
             name: 'bool',
             serialize(buffer: SerialBuffer, data: boolean) { buffer.push(data ? 1 : 0); },

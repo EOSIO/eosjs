@@ -4,6 +4,7 @@
 
 import { Abi, GetInfoResult, JsonRpc } from './eosjs2-jsonrpc';
 import * as ser from './eosjs2-serialize';
+const transactionAbi = require('json-loader!./transaction.abi');
 
 export interface SignatureProviderArgs {
     chainId: string;
@@ -18,21 +19,19 @@ export class Api {
     rpc: JsonRpc;
     signatureProvider: SignatureProvider;
     chainId: string;
+    transactionTypes: Map<string, ser.Type>;
     contracts = new Map<string, ser.Contract>();
 
     constructor(args: { rpc: JsonRpc, signatureProvider: SignatureProvider, chainId: string }) {
         this.rpc = args.rpc;
         this.signatureProvider = args.signatureProvider;
         this.chainId = args.chainId;
+        this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
     }
 
     async getContract(accountName: string, reload = false): Promise<ser.Contract> {
         if (!reload && this.contracts.get(accountName))
             return this.contracts.get(accountName);
-        // HACK: transaction lives in msig's api
-        let initialTypes = accountName === 'eosio.msig' ?
-            ser.createInitialTypes() :
-            (await this.getContract('eosio.msig')).types;
         let abi: Abi;
         try {
             abi = (await this.rpc.get_abi(accountName)).abi;
@@ -42,7 +41,7 @@ export class Api {
         }
         if (!abi)
             throw new Error("Missing abi for " + accountName);
-        let types = ser.getTypesFromAbi(initialTypes, abi);
+        let types = ser.getTypesFromAbi(ser.createInitialTypes(), abi);
         let actions = new Map<string, ser.Type>();
         for (let { name, type } of abi.actions)
             actions.set(name, ser.getType(types, type));
@@ -53,7 +52,7 @@ export class Api {
 
     serializeTransaction(transaction: any) {
         let buffer = new ser.SerialBuffer;
-        this.contracts.get('eosio.msig').types.get('transaction').serialize(
+        this.transactionTypes.get('transaction').serialize(
             buffer, {
                 max_net_usage_words: 0,
                 max_cpu_usage_ms: 0,
