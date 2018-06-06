@@ -6,9 +6,7 @@
         "sourceMap": true,
         "noImplicitAny": true,
     },
-    "files": [
-        "src/index.ts",
-        "src/eosjs2-jsonrpc.ts",
-        "src/eosjs2-jssig.ts"
+    "include": [
+        "src/*.ts"
     ]
 }
