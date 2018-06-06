@@ -2,67 +2,7 @@
 
 'use strict';
 
-export class EosError extends Error {
-    json: object;
-    constructor(json: any) {
-        if (json.error && json.error.details && json.error.details.length && json.error.details[0].message)
-            super(json.error.details[0].message)
-        else if (json.processed && json.processed.except && json.processed.except.message)
-            super(json.processed.except.message);
-        else
-            super(json.message);
-        this.json = json;
-    }
-}
-
-export interface Info {
-    server_version: string;
-    chain_id: string;
-    head_block_num: number;
-    last_irreversible_block_num: number;
-    last_irreversible_block_id: string;
-    head_block_id: string;
-    head_block_time: string;
-    head_block_producer: string;
-    virtual_block_cpu_limit: number;
-    virtual_block_net_limit: number;
-    block_cpu_limit: number;
-    block_net_limit: number;
-}
-
-export interface Block {
-    timestamp: string;
-    producer: string;
-    confirmed: number;
-    previous: string;
-    transaction_mroot: string;
-    action_mroot: string;
-    schedule_version: number;
-    producer_signature: string;
-    id: string;
-    block_num: number;
-    ref_block_prefix: number;
-}
-
-export interface Abi {
-    version: string;
-    types: { new_type_name: string, type: string }[];
-    structs: { name: string, base: string, fields: { name: string, type: string }[] }[];
-    actions: { name: string, type: string, ricardian_contract: string }[];
-}
-
-export interface GetCodeResult {
-    account_name: string;
-    code_hash: string;
-    wast: string;
-    wasm: string;
-    abi: Abi;
-}
-
-export interface GetAbiResult {
-    account_name: string;
-    abi: Abi;
-}
+import { Abi, BlockTaposInfo, GetInfoResult, JsonRpc } from './eosjs2-jsonrpc'
 
 export interface SerializableField {
     name: string;
@@ -618,20 +558,13 @@ function getTypesFromAbi(initialTypes: Map<string, SerializableType>, abi: Abi) 
     return types;
 } // getTypesFromAbi
 
-function transactionHeader(refBlock: Block, expireSeconds: number) {
+function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: number) {
     return {
         expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
         ref_block_num: refBlock.block_num,
         ref_block_prefix: refBlock.ref_block_prefix,
     };
 };
-
-function arrayToHex(data: Uint8Array) {
-    let result = '';
-    for (let x of data)
-        result += ('00' + x.toString(16)).slice(-2);
-    return result;
-}
 
 function serializeActionData(contract: Contract, account: string, name: string, data: any) {
     let action = contract.actions.get(name);
@@ -652,63 +585,15 @@ function serializeAction(contract: Contract, account: string, name: string, auth
 }
 
 export class Api {
-    endpoint: string;
+    rpc: JsonRpc;
     signatureProvider: SignatureProvider;
     chainId: string;
     contracts = new Map<string, Contract>();
 
-    constructor(args: { endpoint: string, signatureProvider: SignatureProvider, chainId: string }) {
-        this.endpoint = args.endpoint;
+    constructor(args: { rpc: JsonRpc, signatureProvider: SignatureProvider, chainId: string }) {
+        this.rpc = args.rpc;
         this.signatureProvider = args.signatureProvider;
         this.chainId = args.chainId;
-    }
-
-    async fetch(path: string, body: any) {
-        let response, json;
-        try {
-            response = await fetch(this.endpoint + path, {
-                body: JSON.stringify(body),
-                method: 'POST',
-            });
-            json = await response.json();
-            if (json.processed && json.processed.except)
-                throw new EosError(json);
-        } catch (e) {
-            e.isFetchError = true;
-            throw e;
-        }
-        if (!response.ok)
-            throw new EosError(json);
-        return json;
-    }
-
-    async get_info(): Promise<Info> { return await this.fetch('/v1/chain/get_info', {}); }
-    async get_code(account_name: string): Promise<GetCodeResult> { return await this.fetch('/v1/chain/get_code', { account_name }); }
-    async get_abi(account_name: string): Promise<GetAbiResult> { return await this.fetch('/v1/chain/get_abi', { account_name }); }
-    async get_block(block_num_or_id: number | string): Promise<Block> { return await this.fetch('/v1/chain/get_block', { block_num_or_id }); }
-    async get_account(account_name: string) { return await this.fetch('/v1/chain/get_account', { account_name }); }
-
-    async get_table_rows({
-        json = true,
-        code,
-        scope,
-        table,
-        table_key = '',
-        lower_bound = '',
-        upper_bound = '',
-        limit = 10 }: any) {
-
-        return await this.fetch(
-            '/v1/chain/get_table_rows', {
-                json,
-                code,
-                scope,
-                table,
-                table_key,
-                lower_bound,
-                upper_bound,
-                limit
-            });
     }
 
     async getContract(accountName: string, reload = false): Promise<Contract> {
@@ -720,7 +605,7 @@ export class Api {
             (await this.getContract('eosio.msig')).types;
         let abi: Abi;
         try {
-            abi = (await this.get_abi(accountName)).abi;
+            abi = (await this.rpc.get_abi(accountName)).abi;
         } catch (e) {
             e.message = 'fetching abi for ' + accountName + ': ' + e.message;
             throw e;
@@ -758,25 +643,23 @@ export class Api {
     }
 
     async pushTransaction({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
-        let info: Info;
+        let info: GetInfoResult;
         if (!this.chainId) {
-            info = await this.get_info();
+            info = await this.rpc.get_info();
             this.chainId = info.chain_id;
         }
         if (blocksBehind !== undefined && expireSeconds !== undefined) {
             if (!info)
-                info = await this.get_info();
-            let refBlock = await this.get_block(info.head_block_num - blocksBehind);
+                info = await this.rpc.get_info();
+            let refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
             transaction = { ...transactionHeader(refBlock, expireSeconds), ...transaction };
         }
         transaction = { ...transaction, actions: await this.serializeActions(actions) };
         let serializedTransaction = this.serializeTransaction(transaction);
         let signatures = await this.signatureProvider.sign({ chainId: this.chainId, serializedTransaction: serializedTransaction });
-        return await this.fetch('/v1/chain/push_transaction', {
+        return await this.rpc.push_transaction({
             signatures,
-            compression: 0,
-            packed_context_free_data: '',
-            packed_trx: arrayToHex(serializedTransaction),
+            serializedTransaction,
         });
     }
 } // Api

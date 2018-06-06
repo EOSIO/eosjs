@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = {
     entry: {
         eosjs2: './src/index.ts',
+        eosjs2_jsonrpc: './src/eosjs2-jsonrpc.ts',
         eosjs2_jssig: './src/eosjs2-jssig.ts',
     },
     devtool: 'inline-source-map',
