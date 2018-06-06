@@ -2,8 +2,6 @@
 
 'use strict';
 
-const ecc = require('eosjs-ecc');
-
 export class EosError extends Error {
     json: object;
     constructor(json: any) {
@@ -121,6 +119,15 @@ export interface SerializedAction {
     name: string;
     authorization: Authorization[];
     data: Uint8Array;
+}
+
+export interface SignatureProviderArgs {
+    chainId: string;
+    serializedTransaction: Uint8Array;
+}
+
+export interface SignatureProvider {
+    sign: (args: SignatureProviderArgs) => Promise<string[]>;
 }
 
 export class EosBuffer {
@@ -644,20 +651,15 @@ function serializeAction(contract: Contract, account: string, name: string, auth
     };
 }
 
-function signTransaction(privateKeys: string[], chainId: string, serializedTransaction: Uint8Array): string[] {
-    let signBuf = Buffer.concat([new Buffer(chainId, 'hex'), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32))]);
-    return privateKeys.map(key => {
-        return ecc.Signature.sign(signBuf, key).toString();
-    });
-}
-
 export class Api {
     endpoint: string;
+    signatureProvider: SignatureProvider;
     chainId: string;
     contracts = new Map<string, Contract>();
 
-    constructor(args: { endpoint: string, chainId: string }) {
+    constructor(args: { endpoint: string, signatureProvider: SignatureProvider, chainId: string }) {
         this.endpoint = args.endpoint;
+        this.signatureProvider = args.signatureProvider;
         this.chainId = args.chainId;
     }
 
@@ -755,7 +757,7 @@ export class Api {
         }));
     }
 
-    async pushTransaction(privateKeys: string[], { blocksBehind, expireSeconds, actions, ...transaction }: any) {
+    async pushTransaction({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
         let info: Info;
         if (!this.chainId) {
             info = await this.get_info();
@@ -769,7 +771,7 @@ export class Api {
         }
         transaction = { ...transaction, actions: await this.serializeActions(actions) };
         let serializedTransaction = this.serializeTransaction(transaction);
-        let signatures = signTransaction(privateKeys, this.chainId, serializedTransaction);
+        let signatures = await this.signatureProvider.sign({ chainId: this.chainId, serializedTransaction: serializedTransaction });
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,
             compression: 0,

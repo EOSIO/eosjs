@@ -1,7 +1,10 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/index.ts',
+    entry: {
+        eosjs2: './src/index.ts',
+        eosjs2_jssig: './src/eosjs2-jssig.ts',
+    },
     devtool: 'inline-source-map',
     mode: 'development',
     output: {
@@ -21,7 +24,8 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js']
     },
     output: {
-        filename: 'eosjs2-debug.js',
-        path: path.resolve(__dirname, 'dist')
+        filename: x => x.chunk.id.replace('_', '-') + '-debug.js',
+        library: '[id]',
+        path: path.resolve(__dirname, 'dist'),
     }
 };
