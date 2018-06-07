@@ -97,6 +97,12 @@ export class SerialBuffer {
         throw new Error('Read past end of buffer');
     }
 
+    pushUint8ArrayChecked(v: Uint8Array, len: number) {
+        if (v.length !== len)
+            throw new Error('Binary data has incorrect size');
+        this.pushArray(v);
+    }
+
     getUint8Array(len: number) {
         if (this.readPos + len > this.length)
             throw new Error('Read past end of buffer');
@@ -172,6 +178,22 @@ export class SerialBuffer {
                 break;
         }
         return v >>> 0;
+    }
+
+    pushFloat32(v: number) {
+        this.pushArray(new Uint8Array(new Float32Array([v])));
+    }
+
+    getFloat32() {
+        new Float32Array(this.getUint8Array(4).slice())[0];
+    }
+
+    pushFloat64(v: number) {
+        this.pushArray(new Uint8Array(new Float64Array([v])));
+    }
+
+    getFloat64() {
+        new Float64Array(this.getUint8Array(8).slice())[0];
     }
 
     pushName(s: string) {
@@ -454,6 +476,31 @@ export function createInitialTypes(): Map<string, Type> {
             serialize(buffer: SerialBuffer, data: number) { buffer.pushVaruint32(data); },
             deserialize(buffer: SerialBuffer) { return buffer.getVaruint32(); },
         }),
+        uint128: createType({
+            name: 'uint128',
+            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 16); },
+            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(16); },
+        }),
+        int128: createType({
+            name: 'int128',
+            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 16); },
+            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(16); },
+        }),
+        float32: createType({
+            name: 'float32',
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushFloat32(data); },
+            deserialize(buffer: SerialBuffer) { return buffer.getFloat32(); },
+        }),
+        float64: createType({
+            name: 'float64',
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushFloat64(data); },
+            deserialize(buffer: SerialBuffer) { return buffer.getFloat64(); },
+        }),
+        float128: createType({
+            name: 'float128',
+            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 16); },
+            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(16); },
+        }),
 
         bytes: createType({
             name: 'bytes',
@@ -485,14 +532,30 @@ export function createInitialTypes(): Map<string, Type> {
             serialize(buffer: SerialBuffer, data: string) { buffer.pushAsset(data); },
             deserialize(buffer: SerialBuffer) { return buffer.getAsset(); },
         }),
+        checksum160: createType({
+            name: 'checksum160',
+            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 20); },
+            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(20); },
+        }),
+        checksum256: createType({
+            name: 'checksum256',
+            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 32); },
+            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(32); },
+        }),
+        checksum512: createType({
+            name: 'checksum512',
+            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 64); },
+            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(64); },
+        }),
 
         // TODO: implement these types
-        checksum256: createType({ name: 'checksum256' }),
-        producer_schedule: createType({ name: 'producer_schedule' }),
         public_key: createType({ name: 'public_key' }),
         signature: createType({ name: 'signature' }),
-        transaction_id_type: createType({ name: 'transaction_id_type' }),
-        uint128: createType({ name: 'uint128' }),
+        varint32: createType({ name: 'varint32' }),
+        time_point: createType({ name: 'time_point' }),
+        block_timestamp_type: createType({ name: 'block_timestamp_type' }),
+        symbol_code: createType({ name: 'symbol_code' }),
+        extended_asset: createType({ name: 'extended_asset' }),
     }));
 } // createInitialTypes()
 
