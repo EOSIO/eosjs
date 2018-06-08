@@ -13,6 +13,7 @@ module.exports = {
   UDecimalPad,
   UDecimalImply,
   UDecimalUnimply,
+  joinAssetString,
   parseExtendedAsset
 }
 
@@ -240,6 +241,19 @@ function UDecimalUnimply(value, precision) {
   return UDecimalPad(value, precision) // Normalize
 }
 
+/** @private for now, support for asset strings is limited
+*/
+function joinAssetString({amount, precision, symbol, contract}) {
+  assert.equal(typeof symbol, 'string', 'symbol is a required string')
+
+  const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
+
+  const asset = join(precision, ',') + symbol
+  // const extendedAsset = join(symbol, '') + join('@', contract)
+  return join(amount, ' ') + asset + join('@', contract)
+}
+
+
 /**
   Attempts to parse all forms of the asset strings (symbol, asset, or extended
   versions).  If the provided string contains any additional or appears to have
@@ -262,9 +276,8 @@ function parseExtendedAsset(str) {
   const [, contractRaw] = str.split('@')
   const contract = /^[a-z0-5]+(\.[a-z0-5]+)*$/.test(contractRaw) ? contractRaw : null
 
-  const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
-  const asset = join(precision, ',') + symbol
-  const check = join(amount, ' ') + asset + join('@', contract)
+  const check = joinAssetString({amount, precision, symbol, contract})
+
   assert.equal(str, check,  `Invalid extended asset string: ${str} !== ${check}`)
 
   if(precision != null) {
@@ -277,6 +290,5 @@ function parseExtendedAsset(str) {
     assert(contract.length <= 12, `Contract is 12 characters or less`)
   }
 
-  const extendedAsset = join(symbol, '') + join('@', contract)
   return {amount, precision, symbol, contract}
 }

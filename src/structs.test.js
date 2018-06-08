@@ -79,8 +79,8 @@ describe('shorthand', () => {
   it('extended_asset', () => {
     const eos = Eos({defaults: true})
     const eaType = eos.fc.types.extended_asset()
-    const eaString = eaType.toObject()
-    assertSerializer(eaType, eaString)
+    const eaObject = eaType.fromObject('1.0000 4,SYS@eosio.token')
+    assertSerializer(eaType, eaObject)
   })
 
   it('signature', () => {

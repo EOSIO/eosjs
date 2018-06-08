@@ -8,7 +8,7 @@ const json = {schema: require('./schema')}
 const {
   isName, encodeName, decodeName,
   UDecimalPad, UDecimalImply, UDecimalUnimply,
-  parseExtendedAsset
+  joinAssetString, parseExtendedAsset
 } = require('./format')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
@@ -401,31 +401,65 @@ const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
     fromByteBuffer (b) {
       const asset = assetType.fromByteBuffer(b)
       const contract = contractName.fromByteBuffer(b)
-      return `${asset}@${contract}`
+      return parseExtendedAsset(`${asset}@${contract}`)
     },
 
     appendByteBuffer (b, value) {
-      assert.equal(typeof value, 'string', 'Invalid extended asset: ' + value)
+      assert.equal(typeof value, 'object', 'expecting extended_asset object, got ' + typeof value)
 
-      const [asset, contract] = value.split('@')
+      const asset = joinAssetString(value)
+
+      const [, contract] = asset.split('@')
       assert.equal(typeof contract, 'string', 'Invalid extended asset: ' + value)
 
+      // asset includes contract (assetType needs this)
       assetType.appendByteBuffer(b, asset)
       contractName.appendByteBuffer(b, contract)
     },
 
     fromObject (value) {
       // like: 1.0000 SYS@contract or 1 SYS@contract
-      assert(/^\d+(\.\d+)* [A-Z]+@[a-z0-5]+(\.[a-z0-5]+)*$/.test(value),
-        'Invalid extended asset: ' + value)
-      return toAssetString(value, assetCache, 'full_extended_asset')
+      const asset = {}
+      if(typeof value === 'string') {
+        Object.assign(asset, parseExtendedAsset(value))
+      } else if (typeof value === 'object') {
+        Object.assign(asset, value)
+      } else {
+        assert(false, 'expecting extended_asset<object|string>, got: ' + typeof value)
+      }
+
+      const {amount, precision, symbol, contract} = asset
+
+      assert(amount != null, 'missing amount')
+      assert(precision == null || typeof precision === 'number',
+        'precision is an optional number'
+      ) // pending async lookup or still offchain
+      assert(symbol != null, 'missing symbol')
+      assert(contract != null, 'missing contract')
+
+      return {amount, precision, symbol, contract}
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '1.0000 SYS@eosio.token'
+        return {
+          amount: '1.0000',
+          precision: 4,
+          symbol: 'SYS',
+          contract: 'eosio.token'
+        }
       }
-      return toAssetString(value, assetCache, 'extended_asset')
+
+      assert.equal(typeof value, 'object', 'expecting extended_asset object')
+      const {precision, symbol, amount, contract} =
+        precisionCache(assetCache, joinAssetString(value))
+
+      return {
+        amount: UDecimalPad(amount, precision),
+        precision,
+        symbol,
+        contract
+      }
     }
   }
 }
