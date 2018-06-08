@@ -25,7 +25,7 @@ eos = Eos() // 127.0.0.1:8888
 // All API methods print help when called with no-arguments.
 eos.getBlock()
 
-// Next, your going to need nodeosd running on localhost:8888 (see ./docker)
+// Next, you're going to need nodeosd running on localhost:8888 (see ./docker)
 
 // If a callback is not provided, a Promise is returned
 eos.getBlock(1).then(result => {console.log(result)})
@@ -69,7 +69,7 @@ config = {
 eos = Eos(config)
 ```
 
-* **chainId** - Unique ID for the blockchain your connecting too.  This is
+* **chainId** - Unique ID for the blockchain you're connecting too.  This is
   required for valid transaction signing.  The chainId is provided via the
   [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
 
@@ -210,7 +210,7 @@ Eos = require('eosjs') // Eos = require('./src')
 
 keyProvider = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 
-// If your loading a wasm file, you do not need binaryen.  If your loading
+// If you're loading a wasm file, you do not need binaryen. If you're loading
 // a "wast" file you can include and configure the binaryen compiler:
 //
 // $ npm install binaryen@37.0.0
@@ -319,7 +319,7 @@ so you may need to start `nodeos` with the `--skip-transaction-signatures` param
 to get your transactions to pass.
 
 Note, `package.json` has a "main" pointing to `./lib`.  The `./lib` folder is for
-es2015 code built in a separate step.  If your changing and testing code,
+es2015 code built in a separate step. If you're changing and testing code,
 import from `./src` instead.
 
 ```javascript
