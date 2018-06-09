@@ -56,10 +56,6 @@ config = {
   chainId: null, // 32 byte (64 char) hex string
   keyProvider: ['PrivateKeys...'], // WIF string or array of keys..
   httpEndpoint: 'http://127.0.0.1:8888',
-  mockTransactions: () => 'pass', // or 'fail'
-  transactionHeaders: (expireInSeconds, callback) => {
-    callback(null/*error*/, headers)
-  },
   expireInSeconds: 60,
   broadcast: true,
   debug: false, // API and transactions
@@ -73,15 +69,17 @@ eos = Eos(config)
   required for valid transaction signing.  The chainId is provided via the
   [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
 
-* `mockTransactions` (optional)
+* `mockTransactions` (advanced)
+  * `mockTransactions: () => null // 'pass',  or 'fail'`
   * `pass` - do not broadcast, always pretend that the transaction worked
   * `fail` - do not broadcast, pretend the transaction failed
   * `null|undefined` - broadcast as usual
 
-* `transactionHeaders` (optional) - manually calculate transaction header.  This
+* `transactionHeaders` (advanced) - manually calculate transaction header.  This
   may be provided so eosjs does not need to make header related API calls to
-  nodeos.  This callback is called for every transaction.
-  Headers are documented here [eosjs-api#headers](https://github.com/EOSIO/eosjs-api/blob/HEAD/docs/index.md#headers--object).
+  nodeos.  Used in environments like cold-storage.  This callback is called for
+  every transaction. Headers are documented here [eosjs-api#headers](https://github.com/EOSIO/eosjs-api/blob/HEAD/docs/index.md#headers--object).
+  * `transactionHeaders: (expireInSeconds, callback) => {callback(null/*error*/, headers)}`
 
 ### Options
 
