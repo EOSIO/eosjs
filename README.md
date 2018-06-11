@@ -17,10 +17,18 @@ General purpose library for the EOS blockchain.
 
 ### Usage (read-only)
 
+Chain and history API functions are available after creating the `eos` object.
+
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 
-eos = Eos() // 127.0.0.1:8888
+// Remote host
+// eos = Eos({httpEndpoint: 'https://example.org'})
+
+// Read-only instance (never used to send transactions)
+// eos = Eos.modules.api()
+
+eos = Eos() // http://127.0.0.1:8888 is the default
 
 // All API methods print help when called with no-arguments.
 eos.getBlock()
@@ -65,17 +73,41 @@ config = {
 eos = Eos(config)
 ```
 
-* **chainId** - Unique ID for the blockchain you're connecting too.  This is
-  required for valid transaction signing.  The chainId is provided via the
+* **chainId** `hex` - Unique ID for the blockchain you're connecting too.  This
+  is required for valid transaction signing.  The chainId is provided via the
   [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
 
-* `mockTransactions` (advanced)
+* **keyProvider** `[array<string>|string|function]` - Provides private keys
+  used to sign transaction.  If multiple private keys are found, the API
+  `get_required_keys` is called to discover which signing keys to use.  If a
+  function is provided, this function is called for each transaction.
+
+* **httpEndpoint** `string` - http or https location of a nodeosd server
+  providing a chain API.  When using eosjs from a browser remember to configure
+  the same origin policy in nodeosd or proxy server.  For testing, nodeosd
+  configuration `access-control-allow-origin = *` could be used.
+
+* **expireInSeconds** `number` - number of seconds before the transaction
+  will expire.  The time is based on the nodeosd's clock.  An unexpired
+  transaction that may have had an error is a liability until the expiration
+  is reached, this time should be brief.
+
+* **broadcast** `[boolean=true]` - post the transaction to
+  the blockchain.  Use false to obtain a fully signed transaction.
+
+* **debug** `[boolean=false]` - console log additional information when getting
+  unusual errors.
+
+* **sign** `[boolean=true]` - sign the transaction with a private key.  Leaving
+  a transaction unsigned avoids the need to provide a private key.
+
+* **mockTransactions** (advanced)
   * `mockTransactions: () => null // 'pass',  or 'fail'`
   * `pass` - do not broadcast, always pretend that the transaction worked
   * `fail` - do not broadcast, pretend the transaction failed
   * `null|undefined` - broadcast as usual
 
-* `transactionHeaders` (advanced) - manually calculate transaction header.  This
+* **transactionHeaders** (advanced) - manually calculate transaction header.  This
   may be provided so eosjs does not need to make header related API calls to
   nodeos.  Used in environments like cold-storage.  This callback is called for
   every transaction. Headers are documented here [eosjs-api#headers](https://github.com/EOSIO/eosjs-api/blob/HEAD/docs/index.md#headers--object).
@@ -85,27 +117,68 @@ eos = Eos(config)
 
 Options may be provided immediately after parameters.
 
-Example: `eos.transfer(params, options)`
-
 ```js
 options = {
+  authorization: null,
   broadcast: true,
-  sign: true,
-  authorization: null
+  sign: true
 }
 ```
 
-* **authorization** `{array<auth>|auth}` - identifies the
-  signing account and permission typically in a multi-sig
+```js
+eos.transfer('alice', 'bob', '1 SYS', '', {authorization: 'alice'})
+```
+
+* **authorization** `[array<auth>|auth]` - identifies the
+  signing account and permission typically in a multisig
   configuration.  Authorization may be a string formatted as
   `account@permission` or an `object<{actor: account, permission}>`.
   * If missing default authorizations will be calculated.
   * If provided additional authorizations will not be added.
   * Sorting is always performed (by account name).
 
-### Usage (read/write)
+* **broadcast** `[boolean=true]` - post the transaction to
+  the blockchain.  Use false to obtain a fully signed transaction.
 
-You'll need to provide the private key in keyProvider.
+* **sign** `[boolean=true]` - sign the transaction with a private key.  Leaving
+  a transaction unsigned avoids the need to provide a private key.
+
+### Transaction
+
+The transaction function accepts the standard blockchain transaction.  If
+required transaction header fields are missing they will be added.
+
+```javascript
+Eos = require('eosjs') // Eos = require('./src')
+
+eos = Eos({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
+
+/** @return {Promise} */
+eos.transaction({
+  actions: [
+    {
+      account: 'eosio.token',
+      name: 'transfer',
+      authorization: [{
+        actor: 'inita',
+        permission: 'active'
+      }],
+      data: {
+        from: 'inita',
+        to: 'initb',
+        quantity: '7 SYS',
+        memo: ''
+      }
+    }
+  ]
+}) // `options` can be a second parameter
+
+```
+
+### Named action functions
+
+More concise functions are provided for applications that may use actions
+more frequently.  This avoids having lots of JSON in the code.
 
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
@@ -118,12 +191,13 @@ eos.transfer()
 // Usage with options (options are always optional)
 options = {broadcast: false}
 
+// named parameters
 eos.transfer({from: 'inita', to: 'initb', quantity: '1 SYS', memo: ''}, options)
 
-// Object or ordered args may be used.
+// ordered parameters
 eos.transfer('inita', 'initb', '2 SYS', 'memo', options)
 
-// A broadcast boolean may be provided as a shortcut for {broadcast: false}
+// `false` is a shortcut for: options = {broadcast: false}
 eos.transfer('inita', 'initb', '1 SYS', '', false)
 ```
 
@@ -135,15 +209,15 @@ For more advanced signing, see `keyProvider` in
 
 ### Shorthand
 
-Shorthand is available for some types such as Asset and Authority.
+Shorthand is available for some types such as Asset and Authority.  This syntax
+is only for concise functions and does not work in `eos.transaction`.
 
 For example:
-* stake_net_quantity: `'1 SYS'` is shorthand for `1.0000 SYS`
+* stake_net_quantity: `'10 SYS'` is shorthand for `10.0000 SYS`
 * owner: `'EOS6MRy..'` is shorthand for `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
 * active: `inita` or `inita@active` is shorthand for
   * `{{threshold: 1, accounts: [..actor: inita, permission: active, weight: 1]}}`
   * `inita@other` would replace the permission `active` with `other`
-
 
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
@@ -160,16 +234,18 @@ eos.transaction(tr => {
     owner: pubkey,
     active: pubkey
   })
+
   tr.buyrambytes({
     payer: 'inita',
     receiver: 'mycontract11',
     bytes: 8192
   })
+
   tr.delegatebw({
     from: 'inita',
     receiver: 'mycontract11',
-    stake_net_quantity: '100.0000 SYS',
-    stake_cpu_quantity: '100.0000 SYS',
+    stake_net_quantity: '10 SYS',
+    stake_cpu_quantity: '10 SYS',
     transfer: 0
   })
 })
@@ -180,40 +256,10 @@ eos.transaction(tr => {
 
 Deploy a smart contract.
 
-The `setcode` command accepts WASM text and converts this to binary before
-signing and broadcasting.  For this, the Binaryen library is used.  Because
-this is a large library it is not included in `eosjs` by default.
-
-Add binaryen to your project:
-
-```bash
-npm i binaryen@37.0.0
-```
-
-Although the EOS back-end does seek to be up-to-date and have
-binaryen backwards compatibility, new versions of binaryen may be
-[problematic](https://github.com/EOSIO/eos/issues/2187).
-
-Import and include the library when you configure Eos:
-
-```javascript
-binaryen = require('binaryen')
-eos = Eos({..., binaryen})
-```
-
-Complete example:
-
 ```javascript
 Eos = require('eosjs') // Eos = require('./src')
 
 keyProvider = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
-
-// If you're loading a wasm file, you do not need binaryen. If you're loading
-// a "wast" file you can include and configure the binaryen compiler:
-//
-// $ npm install binaryen@37.0.0
-// binaryen = require('binaryen')
-// eos = Eos({keyProvider, binaryen})
 
 eos = Eos({keyProvider})
 
@@ -227,6 +273,22 @@ eos.setabi('inita', JSON.parse(abi))
 // Error reading contract; https://github.com/EOSIO/eos/issues/3159
 eos.contract('inita').then(c => inita = c)
 inita.create('inita', '1000.0000 CUR', {authorization: 'inita'})
+```
+
+### Contract (binaryen)
+
+If you're loading a "wasm" file, you do not need binaryen. If you're loading
+a "wast" file you can include and configure the binaryen compiler
+
+Versions of binaryen may be [problematic](https://github.com/EOSIO/eos/issues/2187).
+
+```bash
+$ npm install binaryen@37.0.0
+```
+
+```js
+binaryen = require('binaryen')
+eos = Eos({keyProvider, binaryen})
 ```
 
 ### Atomic Operations
@@ -265,7 +327,8 @@ eos.transaction(['currency', 'eosio.token'], ({currency, eosio_token}) => {
   eosio_token.transfer('inita', 'initb', '1 SYS', '')
 })
 
-// contract lookups then transactions
+// The contract method does not take an array so must be called once for
+// each contract that is needed.
 eos.contract('currency').then(currency => {
   currency.transaction(cur => {
     cur.transfer('inita', 'initb', '1 CUR', '')
@@ -273,41 +336,6 @@ eos.contract('currency').then(currency => {
   })
   currency.transfer('inita', 'initb', '1 CUR', '')
 })
-
-// Note, the contract method does not take an array.  Just use Await or yield
-// if multiple contracts are needed outside of a transaction.
-
-```
-
-### Usage (manual)
-
-A manual transaction provides for more flexibility.
-
-```javascript
-Eos = require('eosjs') // Eos = require('./src')
-
-eos = Eos({keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'})
-
-// returns Promise
-eos.transaction({
-  actions: [
-    {
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-        actor: 'inita',
-        permission: 'active'
-      }],
-      data: {
-        from: 'inita',
-        to: 'initb',
-        quantity: '7 SYS',
-        memo: ''
-      }
-    }
-  ]
-})
-
 ```
 
 # Development
