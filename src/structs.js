@@ -220,6 +220,11 @@ function precisionCache(assetCache, value) {
     precision = symbolInfo.precision
   }
 
+  if(precision == null && symbolInfo.amount != null) {
+    const part = symbolInfo.amount.split('.')
+    precision = part.length === 1 ? 0 : part[1].length
+  }
+
   const pc = Object.assign({}, symbolInfo, {contract})
   if(precision != null) {
     pc.precision = precision
@@ -372,6 +377,7 @@ const Asset = assetCache => (validation, baseTypes, customTypes) => {
     appendByteBuffer (b, value) {
       assert.equal(typeof value, 'string', `expecting asset string, got ` + (typeof value))
       const {amount, precision, symbol} = precisionCache(assetCache, value)
+
       assert(precision != null, `Precision unknown for asset: ${value}`)
       amountType.appendByteBuffer(b, UDecimalImply(amount, precision))
       symbolType.appendByteBuffer(b, value)
