@@ -17,21 +17,21 @@ function AssetCache(network) {
     assert(symbol, 'required symbol')
     assert(contract, 'required contract')
 
-    if(contract === 'eosio') {
-      contract = 'eosio.token'
-    }
+    // if(contract === 'eosio') {
+    //   contract = 'eosio.token'
+    // }
 
-    const extendedAsset = `${symbol}@${contract}`
+    const extendedSymbol = `${symbol}@${contract}`
 
-    if(cache[extendedAsset] != null) {
-      return Promise.resolve(cache[extendedAsset])
+    if(cache[extendedSymbol] != null) {
+      return Promise.resolve(cache[extendedSymbol])
     }
 
     const statsPromise = network.getCurrencyStats(contract, symbol).then(result => {
       const stats = result[symbol]
       if(!stats) {
-        cache[extendedAsset] = null // retry (null means no asset was observed)
-        // console.log(`Missing currency stats for asset: ${extendedAsset}`)
+        cache[extendedSymbol] = null // retry (null means no asset was observed)
+        // console.log(`Missing currency stats for asset: ${extendedSymbol}`)
         return
       }
 
@@ -50,12 +50,12 @@ function AssetCache(network) {
       assert(precision >= 0 && precision <= 18,
         'unable to determine precision from string: ' + max_supply)
 
-      return cache[extendedAsset] = {precision}
+      return cache[extendedSymbol] = {precision}
     })
 
     promises.push(statsPromise)
 
-    return cache[extendedAsset] = statsPromise
+    return cache[extendedSymbol] = statsPromise
   }
 
   /**
@@ -66,13 +66,13 @@ function AssetCache(network) {
     assert(symbol, 'required symbol')
     assert(contract, 'required contract')
 
-    if(contract === 'eosio') {
-      contract = 'eosio.token'
-    }
+    // if(contract === 'eosio') {
+    //   contract = 'eosio.token'
+    // }
 
-    const extendedAsset = `${symbol}@${contract}`
+    const extendedSymbol = `${symbol}@${contract}`
 
-    const c = cache[extendedAsset]
+    const c = cache[extendedSymbol]
 
     if(c instanceof Promise) {
       return undefined // pending

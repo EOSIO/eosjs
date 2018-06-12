@@ -256,16 +256,18 @@ if(process.env['NODE_ENV'] === 'development') {
           owner: pubkey,
           active: pubkey
         })
+
         tr.buyrambytes({
           payer: 'eosio',
           receiver: name,
           bytes: 8192
         })
+
         tr.delegatebw({
           from: 'eosio',
           receiver: name,
-          stake_net_quantity: '1.0000 SYS',
-          stake_cpu_quantity: '1.0000 SYS',
+          stake_net_quantity: '10.0000 SYS',
+          stake_cpu_quantity: '10.0000 SYS',
           transfer: 0
         })
       })
@@ -447,6 +449,13 @@ if(process.env['NODE_ENV'] === 'development') {
           ]
         },
         {broadcast: false}
+      )
+    })
+
+    it('custom contract transfer', async function() {
+      const eos = Eos({signProvider})
+      await eos.contract('currency').then(currency =>
+        currency.transfer('currency', 'inita', '1.0000 CUR', '')
       )
     })
   })

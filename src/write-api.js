@@ -45,7 +45,7 @@ function writeApiGen(Network, network, structs, config, schemaDef) {
     Immedate send contract actions.
 
     @example eos.contract('mycontract', [options], [callback])
-    @example eos.contract('mycontract').then(mycontract => mycontract.action(...))
+    @example eos.contract('mycontract').then(mycontract => mycontract.myaction(...))
   */
   merge.contract = (...args) => {
     const {params, options, returnPromise, callback} =

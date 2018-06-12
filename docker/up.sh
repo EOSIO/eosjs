@@ -41,22 +41,14 @@ cleos set contract eosio.token contracts/eosio.token -p eosio.token@active
 cleos push action eosio.token create\
   '{"issuer":"eosio.token", "maximum_supply": "1000000000.0000 SYS"}' -p eosio.token@active
 cleos push action eosio.token issue\
-  '{"to":"eosio.token", "quantity": "1000000000.0000 SYS", "memo": "issue"}' -p eosio.token@active
+  '{"to":"eosio.token", "quantity": "10000.0000 SYS", "memo": "issue"}' -p eosio.token@active
 
-# Deprecated: `currency` will be replaced by `currency3.14` below
-cleos create account eosio currency $owner_pubkey $active_pubkey
-cleos set contract currency contracts/eosio.token -p currency@active
-cleos push action currency create\
-  '{"issuer":"currency", "maximum_supply": "1000000000.0000 CUR"}' -p currency@active
-cleos push action currency issue\
-  '{"to":"currency", "quantity": "1000000000.0000 CUR", "memo": "issue"}' -p currency@active
 
-# eosio.* accounts  allowed only before lockdown
-
-# Lockdown (deploy eosio.system or eosio.bios to the eosio account)
-cleos set contract eosio contracts/eosio.system -p eosio@active
-
-# Non-privileged operations (after lockdown)
+# Either the eosio.bios or eosio.system contract may be deployed to the eosio
+# account.  System contain everything bios has but adds additional constraints
+# such as ram and cpu limits.
+# eosio.* accounts  allowed only until eosio.system is deployed
+cleos set contract eosio contracts/eosio.bios -p eosio@active
 
 # SYS (main token)
 cleos transfer eosio.token eosio '1000 SYS'
@@ -64,24 +56,20 @@ cleos transfer eosio.token inita '1000 SYS'
 cleos transfer eosio.token initb '1000 SYS'
 cleos transfer eosio.token initc '1000 SYS'
 
-# User-issued asset(s)..
-
-# PHI (user-issued main token)
+# User-issued asset
 cleos push action eosio.token create\
   '{"issuer":"eosio.token", "maximum_supply": "1000000000.000 PHI"}' -p eosio.token@active
 cleos push action eosio.token issue\
-  '{"to":"eosio.token", "quantity": "1000000000.000 PHI", "memo": "issue"}' -p eosio.token@active
-cleos transfer eosio.token inita '100000 PHI'
-cleos transfer eosio.token initb '100000 PHI'
+  '{"to":"eosio.token", "quantity": "10000.000 PHI", "memo": "issue"}' -p eosio.token@active
+cleos transfer eosio.token inita '100 PHI'
+cleos transfer eosio.token initb '100 PHI'
 
-# CUR (user issued own contract)
-# newaccount eosio currency3.14 $owner_pubkey $active_pubkey
-# cleos set contract currency3.14 contracts/eosio.token -p currency3.14@active
-# cleos push action currency3.14 create\
-#   '{"issuer":"currency3.14", "maximum_supply": "1000000000.0000 CUR"}' -p currency3.14@active
-# cleos push action currency3.14 issue\
-#   '{"to":"currency3.14", "quantity": "1000000000.0000 CUR", "memo": "issue"}' -p currency3.14@active
-#
-# # Nodeosd error: "Symbol CUR is not supported by token contract eosio.token"
-# cleos transfer currency3.14 inita '100000 CUR'
-# cleos transfer currency3.14 initb '100000 CUR'
+# Custom asset
+cleos create account eosio currency $owner_pubkey $active_pubkey
+cleos set contract currency contracts/eosio.token -p currency@active
+cleos push action currency create\
+  '{"issuer":"currency", "maximum_supply": "1000000000.0000 CUR"}' -p currency@active
+cleos push action currency issue '{"to":"currency", "quantity": "10000.0000 CUR", "memo": "issue"}' -p currency@active
+
+cleos push action currency transfer\
+  '{"from":"currency", "to": "inita", "quantity": "100.0000 CUR", "memo": "issue"}' -p currency
