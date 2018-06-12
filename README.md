@@ -240,7 +240,7 @@ eos.transfer('inita', 'initb', '1.4 SYS', '', false)
 
 Read-write API methods and documentation are generated from the eosio
 [token](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_token.json) and
-[schema](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_schema.json).
+[system](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_system.json).
 
 For more advanced signing, see `keyProvider` and `signProvider` in
 [index.test.js](https://github.com/EOSIO/eosjs/blob/master/src/index.test.js).
@@ -323,10 +323,20 @@ eos.setabi('myaccount', JSON.parse(abi)) // @returns {Promise}
 #### Fetch a smart contract
 
 ```js
+// @returns {Promise}
 eos.contract('myaccount', [options], [callback])
 
-// myaction returns a Promise
+// Run immediately, `myaction` returns a Promise
 eos.contract('myaccount').then(myaccount => myaccount.myaction(..))
+
+// Group actions. `transaction` returns a Promise but `myaction` does not
+eos.transaction('myaccount', myaccount => { myaccount.myaction(..) })
+
+// Transaction with multiple contracts
+eos.transaction(['myaccount', 'myaccount2'], ({myaccount, myaccount2}) => {
+   myaccount.myaction(..)
+   myaccount2.myaction(..)
+})
 ```
 
 #### Custom Token
@@ -357,7 +367,7 @@ eos.contract('myaccount').then(myaccount => myaccount.myaction(..))
 
 ### Calling Actions
 
-Blockchain level atomic operations.  All will pass or fail.
+Other ways to use contracts and transactions.
 
 ```javascript
 (async function() {
@@ -400,7 +410,6 @@ Blockchain level atomic operations.  All will pass or fail.
 
 })()
 ```
-
 
 # Development
 
