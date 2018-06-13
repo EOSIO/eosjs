@@ -82,15 +82,20 @@ function arrayToHex(data: Uint8Array) {
 
 export class JsonRpc {
     endpoint: string;
+    fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
 
-    constructor(endpoint: string) {
+    constructor(endpoint: string, args: any = {}) {
         this.endpoint = endpoint;
+        if (args.fetch)
+            this.fetchBuiltin = args.fetch;
+        else
+            this.fetchBuiltin = (<any>global).fetch;
     }
 
     async fetch(path: string, body: any) {
         let response, json;
         try {
-            response = await fetch(this.endpoint + path, {
+            response = await this.fetchBuiltin(this.endpoint + path, {
                 body: JSON.stringify(body),
                 method: 'POST',
             });
