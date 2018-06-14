@@ -18,7 +18,7 @@ services:
       - "8888"
 
   keosd:
-    image: eosio/eos:v1.0.1
+    image: eosio/eos:v1.0.3
     command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address=0.0.0.0:8900
     hostname: keosd
     ports:
