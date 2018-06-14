@@ -14,7 +14,8 @@ const pkg = require('../package.json')
 const configDefaults = {
   broadcast: true,
   debug: false,
-  sign: true
+  sign: true,
+  checkChainId: true
 }
 
 const Eos = (config = {}) => createEos(
@@ -72,7 +73,10 @@ function createEos(config) {
     config.chainId = 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f'
   }
 
-  checkChainId(network, config.chainId)
+  // for offline use
+  if(config.checkChainId) {
+      checkChainId(network, config.chainId)
+  }
 
   if(config.mockTransactions != null) {
     if(typeof config.mockTransactions === 'string') {
