@@ -95,7 +95,7 @@ function WriteApi(Network, network, config, Transaction) {
 
       const abiPromises = []
       // Eos contract operations are cached (efficient and offline transactions)
-      const cachedCode = new Set(['eosio', 'eosio.token'])
+      const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.null'])
       accounts.forEach(account => {
         if(!cachedCode.has(account)) {
           abiPromises.push(config.abiCache.abiAsync(account))

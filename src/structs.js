@@ -14,7 +14,7 @@ const {
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
-    const cachedCode = new Set(['eosio', 'eosio.token'])
+    const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.null'])
     if(cachedCode.has(account)) {
       return structs[lookupName]
     }

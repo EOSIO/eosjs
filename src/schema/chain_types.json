@@ -201,5 +201,14 @@
       "packed_context_free_data": "bytes",
       "packed_trx": "bytes"
     }
+  },
+  "nonce": {
+    "action": {
+      "name": "nonce",
+      "account": "eosio.null"
+    },
+    "fields": {
+      "value": "string"
+    }
   }
 }
