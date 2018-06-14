@@ -15,6 +15,35 @@ describe('version', () => {
 })
 
 describe('offline', () => {
+  const headers = {
+    expiration: new Date().toISOString().split('.')[0], // Don't use `new Date` in production
+    ref_block_num: 1,
+    ref_block_prefix: 452435776,
+    net_usage_words: 0,
+    max_cpu_usage_ms: 0,
+    delay_sec: 0,
+    context_free_actions: [],
+    transaction_extensions: []
+  }
+
+  const transactionHeaders = (expireInSeconds, callback) => {
+    callback(null/*error*/, headers)
+  }
+
+  it('multi-signature', async function() {
+    const eos = Eos({
+      keyProvider: [
+        ecc.seedPrivate('key1'),
+        ecc.seedPrivate('key2')
+      ],
+      httpEndpoint: null,
+      transactionHeaders
+    })
+
+    const trx = await eos.nonce(1, {authorization: 'inita'})
+
+    assert.equal(trx.transaction.signatures.length, 2, 'signature count')
+  })
 
   it('transaction', async function() {
     const eos = Eos({
@@ -37,27 +66,14 @@ describe('offline', () => {
       }]
     })
 
-    assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
+    assert.equal(trx.transaction.signatures.length, 1, 'signature count')
   })
 
   it('transactionHeaders callback', async function() {
-    const headers = {
-      expiration: new Date().toISOString().split('.')[0], // Don't use `new Date` in production
-      ref_block_num: 1,
-      ref_block_prefix: 452435776,
-      net_usage_words: 0,
-      max_cpu_usage_ms: 0,
-      delay_sec: 0,
-      context_free_actions: [],
-      transaction_extensions: []
-    }
-
     const eos = Eos({
       keyProvider: wif,
       httpEndpoint: null,
-      transactionHeaders: (expireInSeconds, callback) => {
-        callback(null/*error*/, headers)
-      }
+      transactionHeaders
     })
 
     const memo = ''
@@ -74,7 +90,7 @@ describe('offline', () => {
       transaction_extensions: []
     }, headers)
 
-    assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
+    assert.equal(trx.transaction.signatures.length, 1, 'signature count')
   })
 })
 

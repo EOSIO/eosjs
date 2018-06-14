@@ -195,6 +195,15 @@ const defaultSignProvider = (eos, config) => async function({sign, buf, transact
     return sign(buf, pvt)
   }
 
+  // offline signing assumes all keys provided need to sign
+  if(config.httpEndpoint == null) {
+    const sigs = []
+    for(const key of keys) {
+      sigs.push(sign(buf, key.private))
+    }
+    return sigs
+  }
+
   const keyMap = new Map()
 
   // keys are either public or private keys
