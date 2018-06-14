@@ -200,7 +200,7 @@ Required transaction header fields will be added unless your signing without a
 network connection (httpEndpoint == null). In that case provide you own headers:
 
 ```js
-// only needed in cold-storage or for off-line transactions
+// only needed in cold-storage or for offline transactions
 const headers = {
   expiration: '2018-06-14T18:16:10'
   ref_block_num: 1,
