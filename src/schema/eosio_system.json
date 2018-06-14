@@ -176,6 +176,15 @@
       "requirement": "permission_name"
     }
   },
+  "namebid_info": {
+    "base": "",
+    "fields": {
+      "newname": "account_name",
+      "high_bidder": "account_name",
+      "high_bid": "int64",
+      "last_bid_time": "uint64"
+    }
+  },
   "newaccount": {
     "base": "",
     "action": {
