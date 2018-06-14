@@ -23,7 +23,7 @@ describe('offline', () => {
     })
 
     const trx = await eos.transaction({
-      expiration: new Date().toISOString().split('.')[0],
+      expiration: new Date().toISOString().split('.')[0], // Don't use `new Date` in production
       ref_block_num: 1,
       ref_block_prefix: 452435776,
       actions: [{
@@ -42,7 +42,7 @@ describe('offline', () => {
 
   it('transactionHeaders callback', async function() {
     const headers = {
-      expiration: new Date().toISOString().split('.')[0],
+      expiration: new Date().toISOString().split('.')[0], // Don't use `new Date` in production
       ref_block_num: 1,
       ref_block_prefix: 452435776,
       net_usage_words: 0,
