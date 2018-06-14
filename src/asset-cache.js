@@ -27,6 +27,7 @@ function AssetCache(network) {
       return Promise.resolve(cache[extendedSymbol])
     }
 
+    assert(network, 'Network is required, provide an httpEndpoint')
     const statsPromise = network.getCurrencyStats(contract, symbol).then(result => {
       const stats = result[symbol]
       if(!stats) {

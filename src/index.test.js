@@ -26,17 +26,15 @@ describe('offline', () => {
     transaction_extensions: []
   }
 
-  it('transaction', async function() {
+  it('transactionHeaders callback', async function() {
     const privateKey = await ecc.unsafeRandomKey()
 
     const eos = Eos({
       keyProvider: privateKey,
-      // httpEndpoint: 'https://doesnotexist.example.org',
+      httpEndpoint: null,
       transactionHeaders: (expireInSeconds, callback) => {
         callback(null/*error*/, headers)
-      },
-      broadcast: false,
-      sign: true
+      }
     })
 
     const memo = ''

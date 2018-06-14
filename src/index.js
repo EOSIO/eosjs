@@ -12,6 +12,7 @@ const schema = require('./schema')
 const pkg = require('../package.json')
 
 const configDefaults = {
+  httpEndpoint: 'http://127.0.0.1:8888',
   broadcast: true,
   debug: false,
   sign: true
@@ -62,7 +63,7 @@ Object.assign(
 
 
 function createEos(config) {
-  const network = EosApi(config)
+  const network = config.httpEndpoint != null ? EosApi(config) : null
   config.network = network
 
   config.assetCache = AssetCache(network)
@@ -72,7 +73,9 @@ function createEos(config) {
     config.chainId = 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f'
   }
 
-  checkChainId(network, config.chainId)
+  if(network) {
+    checkChainId(network, config.chainId)
+  }
 
   if(config.mockTransactions != null) {
     if(typeof config.mockTransactions === 'string') {
@@ -125,7 +128,6 @@ function consoleObjCallbackLog(verbose = false) {
   @throw {TypeError} if a funciton name conflicts
 */
 function mergeWriteFunctions(config, EosApi, structs) {
-  assert(config.network, 'network instance required')
   const {network} = config
 
   const merge = Object.assign({}, network)

@@ -454,7 +454,7 @@ function WriteApi(Network, network, config, Transaction) {
           return
         }
 
-        if(!options.broadcast) {
+        if(!options.broadcast || !network) {
           callback(null, {
             transaction_id: transactionId,
             broadcast: false,

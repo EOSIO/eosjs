@@ -26,9 +26,14 @@ Eos = require('eosjs')
 // For multiple keys, the get_required_keys API is used (more on that below).
 keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
 
-eos = Eos({keyProvider}) // Localhost Testnet (run ./docker/up.sh)
+// Localhost Testnet (run ./docker/up.sh)
+eos = Eos({keyProvider})
 
-eos = Eos({httpEndpoint, chainId, keyProvider}) // Any other chain
+// Connect to a testnet or mainnet
+eos = Eos({httpEndpoint, chainId, keyProvider})
+
+// Cold-storage
+eos = Eos({httpEndpoint: null, chainId, keyProvider})
 
 // Read-only instance when 'eosjs' is already a dependency
 eos = Eos.modules.api({/*config*/})
@@ -124,6 +129,8 @@ eos = Eos(config)
   providing a chain API.  When using eosjs from a browser remember to configure
   the same origin policy in nodeosd or proxy server.  For testing, nodeosd
   configuration `access-control-allow-origin = *` could be used.
+
+  Set this value to **null** for a cold-storage (no network) configuration.
 
 * **expireInSeconds** `number` - number of seconds before the transaction
   will expire.  The time is based on the nodeosd's clock.  An unexpired
