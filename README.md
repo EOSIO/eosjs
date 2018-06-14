@@ -98,7 +98,7 @@ json to camel case functions.
 ```js
 Eos = require('eosjs')
 
-// Default configuration
+// Default configuration (additional options below)
 config = {
   chainId: null, // 32 byte (64 char) hex string
   keyProvider: ['PrivateKeys...'], // WIF string or array of keys..
@@ -194,29 +194,46 @@ eos.transfer('alice', 'bob', '1 SYS', '', options)
 
 ### Transaction
 
-The transaction function accepts the standard blockchain transaction. Required
-transaction header fields will be added.
+The transaction function accepts the standard blockchain transaction.
+
+Required transaction header fields will be added unless your signing without a
+network connection (httpEndpoint == null). In that case provide you own headers:
+
+```js
+// only needed in cold-storage or for off-line transactions
+const headers = {
+  expiration: '2018-06-14T18:16:10'
+  ref_block_num: 1,
+  ref_block_prefix: 452435776
+}
+```
+
+Create and send (broadcast) a transaction:
 
 ```javascript
 /** @return {Promise} */
-eos.transaction({
-  actions: [
-    {
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-        actor: 'inita',
-        permission: 'active'
-      }],
-      data: {
-        from: 'inita',
-        to: 'initb',
-        quantity: '7 SYS',
-        memo: ''
+eos.transaction(
+  {
+    // ...headers,
+    actions: [
+      {
+        account: 'eosio.token',
+        name: 'transfer',
+        authorization: [{
+          actor: 'inita',
+          permission: 'active'
+        }],
+        data: {
+          from: 'inita',
+          to: 'initb',
+          quantity: '7 SYS',
+          memo: ''
+        }
       }
-    }
-  ]
-}) // `options` can be a second parameter
+    ]
+  }
+  // options -- example: {broadcast: false}
+)
 ```
 
 ### Named action functions

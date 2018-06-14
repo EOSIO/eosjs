@@ -15,22 +15,45 @@ describe('version', () => {
 })
 
 describe('offline', () => {
-  const headers = {
-    expiration: new Date().toISOString().split('.')[0],
-    ref_block_num: 1,
-    ref_block_prefix: 452435776,
-    net_usage_words: 0,
-    max_cpu_usage_ms: 0,
-    delay_sec: 0,
-    context_free_actions: [],
-    transaction_extensions: []
-  }
+
+  it('transaction', async function() {
+    const eos = Eos({
+      keyProvider: wif,
+      httpEndpoint: null
+    })
+
+    const trx = await eos.transaction({
+      expiration: new Date().toISOString().split('.')[0],
+      ref_block_num: 1,
+      ref_block_prefix: 452435776,
+      actions: [{
+        account: 'eosio.null',
+        name: 'nonce',
+        authorization:[{
+          actor: 'inita',
+          permission: 'active'
+        }],
+        data: '0131' //hex
+      }]
+    })
+
+    assert.equal(trx.transaction.signatures.length, 1, 'expecting 1 signature')
+  })
 
   it('transactionHeaders callback', async function() {
-    const privateKey = await ecc.unsafeRandomKey()
+    const headers = {
+      expiration: new Date().toISOString().split('.')[0],
+      ref_block_num: 1,
+      ref_block_prefix: 452435776,
+      net_usage_words: 0,
+      max_cpu_usage_ms: 0,
+      delay_sec: 0,
+      context_free_actions: [],
+      transaction_extensions: []
+    }
 
     const eos = Eos({
-      keyProvider: privateKey,
+      keyProvider: wif,
       httpEndpoint: null,
       transactionHeaders: (expireInSeconds, callback) => {
         callback(null/*error*/, headers)

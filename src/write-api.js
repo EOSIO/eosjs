@@ -377,9 +377,40 @@ function WriteApi(Network, network, config, Transaction) {
       throw new TypeError('Expecting config.signProvider function (disable using {sign: false})')
     }
 
-    const headers = config.transactionHeaders ?
-      config.transactionHeaders :
-      network.createTransaction
+    let argHeaders = null
+    if( // minimum required headers
+      arg.expiration != null &&
+      arg.ref_block_num != null &&
+      arg.ref_block_prefix != null
+    ) {
+      const {
+        expiration,
+        ref_block_num,
+        ref_block_prefix,
+        net_usage_words = 0,
+        max_cpu_usage_ms = 0,
+        delay_sec = 0
+      } = arg
+      argHeaders = {
+        expiration,
+        ref_block_num,
+        ref_block_prefix,
+        net_usage_words,
+        max_cpu_usage_ms,
+        delay_sec
+      }
+    }
+
+    let headers
+    if(argHeaders) {
+      headers = (expireInSeconds, callback) => callback(null, argHeaders)
+    } else if(config.transactionHeaders) {
+      assert.equal(typeof config.transactionHeaders, 'function', 'config.transactionHeaders')
+      headers = config.transactionHeaders
+    } else {
+      assert(network, 'Network is required, provide config.httpEndpoint')
+      headers = network.createTransaction
+    }
 
     headers(options.expireInSeconds, checkError(callback, async function(rawTx) {
       // console.log('rawTx', rawTx)

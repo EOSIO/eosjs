@@ -19,7 +19,7 @@ function AbiCache(network, config) {
       return Promise.resolve(cache[account])
     }
 
-    assert(network, 'Network is required, provide an httpEndpoint')
+    assert(network, 'Network is required, provide config.httpEndpoint')
     return network.getCode(account).then(({abi}) => {
       assert(abi, `Missing ABI for account: ${account}`)
       const schema = abiToFcSchema(abi)
