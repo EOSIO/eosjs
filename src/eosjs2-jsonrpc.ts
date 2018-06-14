@@ -95,7 +95,8 @@ export class JsonRpc {
     async fetch(path: string, body: any) {
         let response, json;
         try {
-            response = await this.fetchBuiltin(this.endpoint + path, {
+            let f = this.fetchBuiltin;
+            response = await f(this.endpoint + path, {
                 body: JSON.stringify(body),
                 method: 'POST',
             });
