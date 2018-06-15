@@ -167,7 +167,7 @@ function WriteApi(Network, network, config, Transaction) {
   function genMethod(type, definition, transactionArg, account = 'eosio.token', name = type) {
     return function (...args) {
       if (args.length === 0) {
-        console.error(usage(type, definition, Network, account, config))
+        console.log(usage(type, definition, Network, account, config))
         return
       }
 
@@ -354,14 +354,15 @@ function WriteApi(Network, network, config, Transaction) {
       throw new TypeError('Expecting actions array')
     }
 
-    if(config.transactionLog) {
+    if(config.logger.log || config.logger.error) {
       // wrap the callback with the logger
       const superCallback = callback
       callback = (error, tr) => {
-        if(error) {
-          config.transactionLog(error)
-        } else {
-          config.transactionLog(null, tr)
+        if(error && config.logger.error) {
+          config.logger.error(error)
+        }
+        if(config.logger.log){
+          config.logger.log(JSON.stringify(tr))
         }
         superCallback(error, tr)
       }
@@ -412,7 +413,7 @@ function WriteApi(Network, network, config, Transaction) {
       headers = network.createTransaction
     }
 
-    headers(options.expireInSeconds, checkError(callback, async function(rawTx) {
+    headers(options.expireInSeconds, checkError(callback, config.logger, async function(rawTx) {
       // console.log('rawTx', rawTx)
       assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
       assert.equal(typeof rawTx.expiration, 'string', 'expecting expiration: iso date time string')
@@ -479,8 +480,13 @@ function WriteApi(Network, network, config, Transaction) {
             })
           }
           if(mock === 'fail') {
-            console.error(`[push_transaction mock error] 'fake error', digest '${buf.toString('hex')}'`)
-            callback('fake error')
+            const error = `[push_transaction mock error] 'fake error', digest '${buf.toString('hex')}'`
+
+            if(config.logger.error) {
+              config.logger.error(error)
+            }
+
+            callback(error)
           }
           return
         }
@@ -500,13 +506,20 @@ function WriteApi(Network, network, config, Transaction) {
                 transaction: packedTr
               })
             } else {
-              console.error(`[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`)
+              const error = `[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`
+
+              if(config.logger.error) {
+                config.logger.error(error)
+              }
+
               callback(error.message)
             }
           })
         }
       }).catch(error => {
-        console.error(error)
+        if(config.logger.error) {
+          config.logger.error(error)
+        }
         callback(error)
       })
     }))
@@ -581,9 +594,11 @@ function usage (type, definition, Network, account, config) {
   return usage
 }
 
-const checkError = (parentErr, parrentRes) => (error, result) => {
+const checkError = (parentErr, logger, parrentRes) => (error, result) => {
   if (error) {
-    console.log('error', error)
+    if(logger.error) {
+      logger.error('error', error)
+    }
     parentErr(error)
   } else {
     Promise.resolve(parrentRes(result)).catch(error => {

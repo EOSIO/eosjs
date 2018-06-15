@@ -105,7 +105,7 @@ config = {
   httpEndpoint: 'http://127.0.0.1:8888',
   expireInSeconds: 60,
   broadcast: true,
-  debug: false, // API and transaction binary
+  verbose: false, // API activity
   sign: true
 }
 
@@ -140,8 +140,9 @@ eos = Eos(config)
 * **broadcast** `[boolean=true]` - post the transaction to
   the blockchain.  Use false to obtain a fully signed transaction.
 
-* **debug** `[boolean=false]` - console log additional information when getting
-  unusual errors.
+* **verbose** `[boolean=false]` - verbose logging such as API activity.
+
+* **debug** `[boolean=false]` - low level debug logging.
 
 * **sign** `[boolean=true]` - sign the transaction with a private key.  Leaving
   a transaction unsigned avoids the need to provide a private key.
@@ -157,6 +158,17 @@ eos = Eos(config)
   nodeos.  Used in environments like cold-storage.  This callback is called for
   every transaction. Headers are documented here [eosjs-api#headers](https://github.com/EOSIO/eosjs-api/blob/HEAD/docs/index.md#headers--object).
   * `transactionHeaders: (expireInSeconds, callback) => {callback(null/*error*/, headers)}`
+
+* **logger** - default logging configuration.
+  ```js
+  logger: {
+    log: config.verbose ? console.log : null,
+    debug: config.debug ? console.log : null,
+    error: console.error // null to disable
+  }
+  ```
+
+  Turn off all error logging: `config.logger = {error: null}`
 
 ### Options
 

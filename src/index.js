@@ -11,24 +11,25 @@ const format = require('./format')
 const schema = require('./schema')
 const pkg = require('../package.json')
 
-const configDefaults = {
-  httpEndpoint: 'http://127.0.0.1:8888',
-  broadcast: true,
-  debug: false,
-  sign: true
-}
+const Eos = (config = {}) => {
 
-const Eos = (config = {}) => createEos(
-  Object.assign(
-    {},
-    {
-      apiLog: consoleObjCallbackLog(config.verbose),
-      transactionLog: consoleObjCallbackLog(config.verbose),
-    },
-    configDefaults,
-    config
-  )
-)
+  const defaultLogger = {
+    log: config.verbose ? console.log : null,
+    debug: config.debug ? console.log : null,
+    error: console.error
+  }
+
+  config = Object.assign({}, {
+    httpEndpoint: 'http://127.0.0.1:8888',
+    broadcast: true,
+    debug: false,
+    sign: true
+  }, config)
+
+  config.logger = Object.assign({}, defaultLogger, config.logger)
+
+  return createEos(config)
+}
 
 module.exports = Eos
 
@@ -74,7 +75,7 @@ function createEos(config) {
   }
 
   if(network) {
-    checkChainId(network, config.chainId)
+    checkChainId(network, config.chainId, config.logger)
   }
 
   if(config.mockTransactions != null) {
@@ -100,22 +101,6 @@ function createEos(config) {
   }
 
   return eos
-}
-
-function consoleObjCallbackLog(verbose = false) {
-  return (error, result, name) => {
-    if(error) {
-      if(name) {
-        console.error(name, 'error')
-      }
-      console.error(error);
-    } else if(verbose) {
-      if(name) {
-        console.log(name, 'reply:')
-      }
-      console.log(JSON.stringify(result, null, 4))
-    }
-  }
 }
 
 /**
@@ -257,15 +242,19 @@ const defaultSignProvider = (eos, config) => async function({sign, buf, transact
   })
 }
 
-function checkChainId(network, chainId) {
+function checkChainId(network, chainId, logger) {
   network.getInfo({}).then(info => {
     if(info.chain_id !== chainId) {
-      console.warn(
-        'WARN: chainId mismatch, signatures will not match transaction authority. ' +
-        `expected ${chainId} !== actual ${info.chain_id}`
-      )
+      if(logger.error) {
+        logger.error(
+          'chainId mismatch, signatures will not match transaction authority. ' +
+          `expected ${chainId} !== actual ${info.chain_id}`
+        )
+      }
     }
   }).catch(error => {
-    console.error(error)
+    if(logger.error) {
+      logger.error(error)
+    }
   })
 }
