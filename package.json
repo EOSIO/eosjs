@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "14.2.0",
+  "version": "15.0.0",
   "description": "General purpose library for the EOS blockchain.",
   "main": "lib/index.js",
   "scripts": {
