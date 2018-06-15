@@ -5,7 +5,6 @@ const assert = require('assert')
 
 const Structs = require('./structs')
 const AbiCache = require('./abi-cache')
-const AssetCache = require('./asset-cache')
 const writeApiGen = require('./write-api')
 const format = require('./format')
 const schema = require('./schema')
@@ -65,7 +64,6 @@ function createEos(config) {
   const network = config.httpEndpoint != null ? EosApi(config) : null
   config.network = network
 
-  config.assetCache = AssetCache(network)
   config.abiCache = AbiCache(network, config)
 
   if(!config.chainId) {

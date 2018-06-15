@@ -4,7 +4,6 @@ const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
 
 const Eos = require('.')
-const AssetCache = require('./asset-cache')
 
 describe('shorthand', () => {
 

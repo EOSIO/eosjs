@@ -4,7 +4,6 @@ const Fcbuffer = require('fcbuffer')
 const createHash = require('create-hash')
 const {processArgs} = require('eosjs-api')
 const Structs = require('./structs')
-const AssetCache = require('./asset-cache')
 
 module.exports = writeApiGen
 
@@ -424,16 +423,8 @@ function WriteApi(Network, network, config, Transaction) {
 
       rawTx.actions = arg.actions
 
-      // Resolve shorthand, queue requests
-      let txObject = Transaction.fromObject(rawTx)
-
-      // After fromObject ensure any async actions are finished
-      if(AssetCache.pending()) {
-        await AssetCache.resolve()
-
-        // Create the object again with resolved data
-        txObject = Transaction.fromObject(rawTx)
-      }
+      // Resolve shorthand
+      const txObject = Transaction.fromObject(rawTx)
 
       const buf = Fcbuffer.toBuffer(Transaction, txObject)
       const tr = Transaction.toObject(txObject)

@@ -50,8 +50,6 @@ module.exports = (config = {}, extendedSchema) => {
     config.override
   )
 
-  const {assetCache} = config
-
   const eosTypes = {
     name: ()=> [Name],
     public_key: () => [variant(PublicKeyEcc)],
@@ -60,7 +58,7 @@ module.exports = (config = {}, extendedSchema) => {
     extended_symbol: () => [ExtendedSymbol],
 
     asset: () => [Asset], // After Symbol: amount, precision, symbol, contract
-    extended_asset: () => [ExtendedAsset(assetCache)], // After Asset: amount, precision, symbol, contract
+    extended_asset: () => [ExtendedAsset], // After Asset: amount, precision, symbol, contract
 
     signature: () => [variant(SignatureType)]
   }
@@ -182,57 +180,6 @@ const PublicKeyEcc = (validation) => {
     }
   }
 }
-
-/** @private */
-function precisionCache(assetCache, value) {
-  const symbolInfo = parseAsset(value)
-  const contract = symbolInfo.contract || 'eosio.token'
-
-  let precision
-
-  if(contract) {
-    const asset = assetCache.lookup(symbolInfo.symbol, contract)
-
-    if(asset != null) {
-      if(symbolInfo.precision != null) {
-        assert.equal(asset.precision, symbolInfo.precision,
-          `Precision mismatch for asset: ${value}`)
-      }
-      precision = asset.precision
-
-    } else {
-      // Lookup for later (appendByteBuffer)
-      assetCache.lookupAsync(symbolInfo.symbol, contract)
-
-      // asset === null is a confirmation that the asset did not exist on the blockchain
-      if(asset === null) {
-        if(symbolInfo.precision == null && symbolInfo.amount != null) {
-          // no blockchain asset, no explicit precision .. derive from amount
-          const [, decimalstr = ''] = symbolInfo.amount.split('.')
-          precision = decimalstr.length
-          // console.log('derivied precision for new asset: ' + precision + ',' + symbolInfo.symbol)
-        }
-      }
-    }
-  }
-
-  if(precision == null) {
-    precision = symbolInfo.precision
-  }
-
-  if(precision == null && symbolInfo.amount != null) {
-    const part = symbolInfo.amount.split('.')
-    precision = part.length === 1 ? 0 : part[1].length
-  }
-
-  const pc = Object.assign({}, symbolInfo, {contract})
-  if(precision != null) {
-    pc.precision = precision
-  }
-  // console.log('precisionCache', pc)
-  return pc
-}
-
 
 /**
   Internal: precision, symbol
@@ -383,7 +330,7 @@ const Asset = (validation, baseTypes, customTypes) => {
 /**
   @example '1.0000 SYS@contract'
 */
-const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
+const ExtendedAsset = (validation, baseTypes, customTypes) => {
   const assetType = customTypes.asset(validation)
   const contractName = customTypes.name(validation)
 
@@ -419,11 +366,8 @@ const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
       }
 
       const {amount, precision, symbol, contract} = asset
-
       assert(amount != null, 'missing amount')
-      assert(precision == null || typeof precision === 'number',
-        'precision is an optional number'
-      ) // pending async lookup or still offchain
+      assert(precision != null, 'missing precision')
       assert(symbol != null, 'missing symbol')
       assert(contract != null, 'missing contract')
 
@@ -441,8 +385,7 @@ const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
       }
 
       assert.equal(typeof value, 'object', 'expecting extended_asset object')
-      const {precision, symbol, amount, contract} =
-        precisionCache(assetCache, printAsset(value))
+      const {amount, precision, symbol, contract} = value
 
       return {
         amount: UDecimalPad(amount, precision),
