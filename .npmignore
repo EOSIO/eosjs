@@ -7,3 +7,5 @@ src
 docker
 dist
 bin
+dev
+.travis.yml
