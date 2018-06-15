@@ -142,7 +142,7 @@ eos = Eos(config)
 
 * **verbose** `[boolean=false]` - verbose logging such as API activity.
 
-* **debug** `[boolean=false]` - low level debug logging.
+* **debug** `[boolean=false]` - low level debug logging (serialization).
 
 * **sign** `[boolean=true]` - sign the transaction with a private key.  Leaving
   a transaction unsigned avoids the need to provide a private key.
@@ -163,7 +163,6 @@ eos = Eos(config)
   ```js
   logger: {
     log: config.verbose ? console.log : null,
-    debug: config.debug ? console.log : null,
     error: console.error // null to disable
   }
   ```

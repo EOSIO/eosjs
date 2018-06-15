@@ -506,10 +506,11 @@ function WriteApi(Network, network, config, Transaction) {
                 transaction: packedTr
               })
             } else {
-              const error = `[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`
 
               if(config.logger.error) {
-                config.logger.error(error)
+                config.logger.error(
+                  `[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`
+                )
               }
 
               callback(error.message)

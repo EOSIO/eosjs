@@ -12,20 +12,18 @@ const schema = require('./schema')
 const pkg = require('../package.json')
 
 const Eos = (config = {}) => {
-
-  const defaultLogger = {
-    log: config.verbose ? console.log : null,
-    debug: config.debug ? console.log : null,
-    error: console.error
-  }
-
   config = Object.assign({}, {
     httpEndpoint: 'http://127.0.0.1:8888',
-    broadcast: true,
     debug: false,
+    verbose: false,
+    broadcast: true,
     sign: true
   }, config)
 
+  const defaultLogger = {
+    log: config.verbose ? console.log : null,
+    error: console.error
+  }
   config.logger = Object.assign({}, defaultLogger, config.logger)
 
   return createEos(config)
