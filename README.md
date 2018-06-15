@@ -266,7 +266,7 @@ eos.transfer('inita', 'initb', '1.2 SYS', '')
 // named parameters
 eos.transfer({from: 'inita', to: 'initb', quantity: '1.3 SYS', memo: ''})
 
-// options appear after parameters but before
+// options appear after parameters
 options = {broadcast: true, sign: true}
 
 // `false` is a shortcut for {broadcast: false}
@@ -283,7 +283,8 @@ For more advanced signing, see `keyProvider` and `signProvider` in
 ### Shorthand
 
 Shorthand is available for some types such as Asset and Authority.  This syntax
-is only for concise functions and does not work in `eos.transaction`.
+is only for concise functions and does not work when providing entire transaction
+objects to `eos.transaction`..
 
 For example:
 * asset `'10 SYS'` resolves `10.0000 SYS`
@@ -460,12 +461,12 @@ import from `./src` instead.
 Eos = require('./src')
 
 // forceActionDataHex = false helps transaction readability but may trigger back-end bugs
-config = {debug: false, broadcast: true, forceActionDataHex: true, keyProvider}
+config = {verbose: true, debug: false, broadcast: true, forceActionDataHex: true, keyProvider}
 
 eos = Eos(config)
 ```
 
-* Fcbuffer
+#### Fcbuffer
 
 The `eos` instance can provide serialization:
 
@@ -483,7 +484,7 @@ eos.contract('eosio.token', (error, eosio_token) => {
 })
 ```
 
-Use Node v8+ for `package-lock.json`.
+Use Node v10+ for `package-lock.json`.
 
 # Related Libraries
 
