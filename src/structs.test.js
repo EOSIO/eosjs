@@ -58,29 +58,27 @@ describe('shorthand', () => {
     const eos = Eos()
     const {types} = eos.fc
     const Symbol = types.symbol()
-
     assertSerializer(Symbol, '4,SYS', '4,SYS', 'SYS')
   })
 
   it('extended_symbol', () => {
     const eos = Eos({defaults: true})
     const esType = eos.fc.types.extended_symbol()
-    const esString = esType.toObject()
-    assertSerializer(esType, esString)
+    // const esString = esType.toObject()
+    assertSerializer(esType, '4,SYS@contract')
   })
 
   it('asset', () => {
     const eos = Eos()
     const {types} = eos.fc
-    const AssetType = types.asset()
-    assertSerializer(AssetType, '1.1 4,SYS@eosio.token', '1.1000 SYS@eosio.token', '1.1000 SYS')
+    const aType = types.asset()
+    assertSerializer(aType, '1.0001 SYS')
   })
 
   it('extended_asset', () => {
     const eos = Eos({defaults: true})
     const eaType = eos.fc.types.extended_asset()
-    const eaObject = eaType.fromObject('1.0000 4,SYS@eosio.token')
-    assertSerializer(eaType, eaObject)
+    assertSerializer(eaType, eaType.toObject())
   })
 
   it('signature', () => {

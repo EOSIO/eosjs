@@ -3,7 +3,7 @@ const assert = require('assert')
 const {
   encodeName, decodeName, encodeNameHex, decodeNameHex,
   isName, UDecimalPad, UDecimalUnimply,
-  parseExtendedAsset
+  parseAsset
 } = require('./format')
 
 describe('format', () => {
@@ -108,23 +108,24 @@ describe('format', () => {
     }
   })
 
-  it('parseExtendedAsset', () => {
+  it('parseAsset', () => {
     const parseExtendedAssets = [
       ['SYM', null, null, 'SYM', null],
       ['SYM@contract', null, null, 'SYM', 'contract'],
       ['4,SYM', null, 4, 'SYM', null],
       ['4,SYM@contract', null, 4, 'SYM', 'contract'],
-      ['1 SYM', '1', null, 'SYM', null],
-      ['1.0 SYM', '1.0', null, 'SYM', null],
-      ['1.0 4,SYM@contract', '1.0', 4, 'SYM', 'contract'],
-      ['1.0 4,SYM@tract.token', '1.0', 4, 'SYM', 'tract.token'],
-      ['1.0 4,SYM@tr.act.token', '1.0', 4, 'SYM', 'tr.act.token'],
-      ['1.0 4,SYM', '1.0', 4, 'SYM', null],
+      ['1 SYM', '1', 0, 'SYM', null],
+      ['1.0 SYM', '1.0', 1, 'SYM', null],
+      ['1.0000 SYM@contract', '1.0000', 4, 'SYM', 'contract'],
+      ['1.0000 SYM@tract.token', '1.0000', 4, 'SYM', 'tract.token'],
+      ['1.0000 SYM@tr.act.token', '1.0000', 4, 'SYM', 'tr.act.token'],
+      ['1.0000 SYM', '1.0000', 4, 'SYM', null],
     ]
     for(const [str, amount, precision, symbol, contract] of parseExtendedAssets) {
       assert.deepEqual(
-        parseExtendedAsset(str),
-        {amount, precision, symbol, contract}
+        parseAsset(str),
+        {amount, precision, symbol, contract},
+        JSON.stringify([str, amount, precision, symbol, contract])
       )
     }
   })

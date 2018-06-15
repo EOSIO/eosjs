@@ -13,8 +13,8 @@ module.exports = {
   UDecimalPad,
   UDecimalImply,
   UDecimalUnimply,
-  joinAssetString,
-  parseExtendedAsset
+  printAsset,
+  parseAsset
 }
 
 function ULong(value, unsigned = true, radix = 10) {
@@ -243,14 +243,21 @@ function UDecimalUnimply(value, precision) {
 
 /** @private for now, support for asset strings is limited
 */
-function joinAssetString({amount, precision, symbol, contract}) {
+function printAsset({amount, precision, symbol, contract}) {
   assert.equal(typeof symbol, 'string', 'symbol is a required string')
+
+  if(amount != null && precision != null) {
+    amount = UDecimalPad(amount, precision)
+  }
 
   const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
 
-  const asset = join(precision, ',') + symbol
-  // const extendedAsset = join(symbol, '') + join('@', contract)
-  return join(amount, ' ') + asset + join('@', contract)
+  if(amount != null) {
+    // the amount contains the precision
+    return join(amount, ' ') + symbol + join('@', contract)
+  }
+
+  return join(precision, ',') + symbol + join('@', contract)
 }
 
 
@@ -262,13 +269,15 @@ function joinAssetString({amount, precision, symbol, contract}) {
   @return {object} {amount, precision, symbol, contract}
   @throws AssertionError
 */
-function parseExtendedAsset(str) {
+function parseAsset(str) {
   const [amountRaw] = str.split(' ')
   const amountMatch = amountRaw.match(/^([0-9]+(\.[0-9]+)?)( |$)/)
   const amount = amountMatch ? amountMatch[1] : null
 
   const precisionMatch = str.match(/(^| )([0-9]+),([A-Z]+)(@|$)/)
-  const precision = precisionMatch ? Number(precisionMatch[2]) : null
+  const precisionSymbol = precisionMatch ? Number(precisionMatch[2]) : null
+  const precisionAmount = amount ? (amount.split('.')[1] || '').length : null
+  const precision = precisionSymbol != null ? precisionSymbol : precisionAmount
 
   const symbolMatch = str.match(/(^| |,)([A-Z]+)(@|$)/)
   const symbol = symbolMatch ? symbolMatch[2] : null
@@ -276,7 +285,7 @@ function parseExtendedAsset(str) {
   const [, contractRaw] = str.split('@')
   const contract = /^[a-z0-5]+(\.[a-z0-5]+)*$/.test(contractRaw) ? contractRaw : null
 
-  const check = joinAssetString({amount, precision, symbol, contract})
+  const check = printAsset({amount, precision, symbol, contract})
 
   assert.equal(str, check,  `Invalid extended asset string: ${str} !== ${check}`)
 

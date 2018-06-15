@@ -8,7 +8,7 @@ const json = {schema: require('./schema')}
 const {
   isName, encodeName, decodeName,
   UDecimalPad, UDecimalImply, UDecimalUnimply,
-  joinAssetString, parseExtendedAsset
+  printAsset, parseAsset
 } = require('./format')
 
 /** Configures Fcbuffer for EOS specific structs and types. */
@@ -56,10 +56,10 @@ module.exports = (config = {}, extendedSchema) => {
     name: ()=> [Name],
     public_key: () => [variant(PublicKeyEcc)],
 
-    symbol: () => [Symbol(assetCache)],
-    extended_symbol: () => [ExtendedSymbol(assetCache)],
+    symbol: () => [Symbol],
+    extended_symbol: () => [ExtendedSymbol],
 
-    asset: () => [Asset(assetCache)], // After Symbol: amount, precision, symbol, contract
+    asset: () => [Asset], // After Symbol: amount, precision, symbol, contract
     extended_asset: () => [ExtendedAsset(assetCache)], // After Asset: amount, precision, symbol, contract
 
     signature: () => [variant(SignatureType)]
@@ -185,7 +185,7 @@ const PublicKeyEcc = (validation) => {
 
 /** @private */
 function precisionCache(assetCache, value) {
-  const symbolInfo = parseExtendedAsset(value)
+  const symbolInfo = parseAsset(value)
   const contract = symbolInfo.contract || 'eosio.token'
 
   let precision
@@ -239,7 +239,7 @@ function precisionCache(assetCache, value) {
   External: symbol
   @example 'SYS'
 */
-const Symbol = assetCache => validation => {
+const Symbol = validation => {
   return {
     fromByteBuffer (b) {
       const bcopy = b.copy(b.offset, b.offset + 8)
@@ -255,20 +255,19 @@ const Symbol = assetCache => validation => {
         }
         symbol += code
       }
-      precisionCache(assetCache, `${precision},${symbol}`) // validate
       return `${precision},${symbol}`
     },
 
     appendByteBuffer (b, value) {
-      const {symbol, precision} = precisionCache(assetCache, value)
-      assert(precision != null, `Precision unknown for asset: ${value}`)
+      const {symbol, precision} = parseAsset(value)
+      assert(precision != null, `Precision unknown for symbol: ${value}`)
       const pad = '\0'.repeat(7 - symbol.length)
       b.append(String.fromCharCode(precision) + symbol + pad)
     },
 
     fromObject (value) {
       assert(value != null, `Symbol is required: ` + value)
-      const {symbol, precision} = precisionCache(assetCache, value)
+      const {symbol, precision} = parseAsset(value)
       if(precision == null) {
         return symbol
       } else {
@@ -282,7 +281,7 @@ const Symbol = assetCache => validation => {
         return 'SYS'
       }
       // symbol only (without precision prefix)
-      return precisionCache(assetCache, value).symbol
+      return parseAsset(value).symbol
     }
   }
 }
@@ -292,7 +291,7 @@ const Symbol = assetCache => validation => {
   External: symbol, contract
   @example 'SYS@contract'
 */
-const ExtendedSymbol = assetCache => (validation, baseTypes, customTypes) => {
+const ExtendedSymbol = (validation, baseTypes, customTypes) => {
   const symbolType = customTypes.symbol(validation)
   const contractName = customTypes.name(validation)
 
@@ -319,79 +318,64 @@ const ExtendedSymbol = assetCache => (validation, baseTypes, customTypes) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return '4,SYS@contract'
+        return 'SYS@contract'
       }
       return value
     }
   }
 }
 
-function toAssetString(value, assetCache, format = '') {
-  assert.equal(typeof value, 'string', `expecting asset string, got ` + (typeof value))
-
-  const {precision, symbol, amount, contract} = precisionCache(assetCache, value)
-
-  if(format === 'plain_asset') {
-    return `${UDecimalPad(amount, precision)} ${symbol}`
-  }
-
-  if(format === 'extended_asset') {
-    const contractSuffix = contract ? `@${contract}` : ''
-    return `${UDecimalPad(amount, precision)} ${symbol}${contractSuffix}`
-  }
-
-  if(format === 'full_asset') {
-    const precisionPrefix = precision != null ? `${precision},` : ''
-    const full = `${UDecimalPad(amount, precision)} ${precisionPrefix}${symbol}`
-    // console.log('full_asset', full)
-    return full
-  }
-
-  if(format === 'full_extended_asset') {
-    const contractSuffix = contract ? `@${contract}` : ''
-    const precisionPrefix = precision != null ? `${precision},` : ''
-    const full = `${UDecimalPad(amount, precision)} ${precisionPrefix}${symbol}${contractSuffix}`
-    // console.log('full_extended_asset', full)
-    return full
-  }
-
-  assert(false, 'format should be: plain, extended, or full')
-}
-
 /**
   Internal: amount, precision, symbol, contract
   @example '1.0000 SYS'
 */
-const Asset = assetCache => (validation, baseTypes, customTypes) => {
+const Asset = (validation, baseTypes, customTypes) => {
   const amountType = baseTypes.int64(validation)
   const symbolType = customTypes.symbol(validation)
 
   return {
     fromByteBuffer (b) {
       const amount = amountType.fromByteBuffer(b)
+      assert(amount != null, 'amount')
+
       const sym = symbolType.fromByteBuffer(b)
-      const {precision, symbol} = precisionCache(assetCache, sym)
-      return toAssetString(`${UDecimalUnimply(amount, precision)} ${precision},${symbol}`, assetCache, 'full_asset')
+      const {precision, symbol} = parseAsset(`${sym}`)
+      assert(precision != null, 'precision')
+      assert(symbol != null, 'symbol')
+
+      return `${UDecimalUnimply(amount, precision)} ${symbol}`
     },
 
     appendByteBuffer (b, value) {
-      assert.equal(typeof value, 'string', `expecting asset string, got ` + (typeof value))
-      const {amount, precision, symbol} = precisionCache(assetCache, value)
+      const {amount, precision, symbol} = parseAsset(value)
+      assert(amount != null, 'amount')
+      assert(precision != null, 'precision')
+      assert(symbol != null, 'symbol')
 
-      assert(precision != null, `Precision unknown for asset: ${value}`)
       amountType.appendByteBuffer(b, UDecimalImply(amount, precision))
-      symbolType.appendByteBuffer(b, value)
+      symbolType.appendByteBuffer(b, `${precision},${symbol}`)
     },
 
     fromObject (value) {
-      return toAssetString(value, assetCache, 'full_asset')
+      const {amount, precision, symbol} = parseAsset(value)
+      assert(amount != null, 'amount')
+      assert(precision != null, 'precision')
+      assert(symbol != null, 'symbol')
+
+      return `${UDecimalPad(amount, precision)} ${symbol}`
     },
 
     toObject (value) {
       if (validation.defaults && value == null) {
         return '0.0001 SYS'
       }
-      return toAssetString(value, assetCache, 'plain_asset')
+
+      const {amount, precision, symbol} = parseAsset(value)
+      assert(amount != null, 'amount')
+      assert(precision != null, 'precision')
+      assert(symbol != null, 'symbol')
+
+      return `${UDecimalPad(amount, precision)} ${symbol}`
     }
   }
 }
@@ -407,13 +391,13 @@ const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
     fromByteBuffer (b) {
       const asset = assetType.fromByteBuffer(b)
       const contract = contractName.fromByteBuffer(b)
-      return parseExtendedAsset(`${asset}@${contract}`)
+      return parseAsset(`${asset}@${contract}`)
     },
 
     appendByteBuffer (b, value) {
       assert.equal(typeof value, 'object', 'expecting extended_asset object, got ' + typeof value)
 
-      const asset = joinAssetString(value)
+      const asset = printAsset(value)
 
       const [, contract] = asset.split('@')
       assert.equal(typeof contract, 'string', 'Invalid extended asset: ' + value)
@@ -427,7 +411,7 @@ const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
       // like: 1.0000 SYS@contract or 1 SYS@contract
       const asset = {}
       if(typeof value === 'string') {
-        Object.assign(asset, parseExtendedAsset(value))
+        Object.assign(asset, parseAsset(value))
       } else if (typeof value === 'object') {
         Object.assign(asset, value)
       } else {
@@ -458,7 +442,7 @@ const ExtendedAsset = assetCache => (validation, baseTypes, customTypes) => {
 
       assert.equal(typeof value, 'object', 'expecting extended_asset object')
       const {precision, symbol, amount, contract} =
-        precisionCache(assetCache, joinAssetString(value))
+        precisionCache(assetCache, printAsset(value))
 
       return {
         amount: UDecimalPad(amount, precision),

@@ -182,7 +182,7 @@ options = {
 ```
 
 ```js
-eos.transfer('alice', 'bob', '1 SYS', '', options)
+eos.transfer('alice', 'bob', '1.0000 SYS', '', options)
 ```
 
 * **authorization** `[array<auth>|auth]` - identifies the
@@ -237,7 +237,7 @@ eos.transaction(
         data: {
           from: 'inita',
           to: 'initb',
-          quantity: '7 SYS',
+          quantity: '7.0000 SYS',
           memo: ''
         }
       }
@@ -257,20 +257,20 @@ more frequently.  This avoids having lots of JSON in the code.
 eos.transfer()
 
 // Callback is last, when omitted a promise is returned
-eos.transfer('inita', 'initb', '1 SYS', '', (error, result) => {})
-eos.transfer('inita', 'initb', '1.1 SYS', '') // @returns {Promise}
+eos.transfer('inita', 'initb', '1.0000 SYS', '', (error, result) => {})
+eos.transfer('inita', 'initb', '1.1000 SYS', '') // @returns {Promise}
 
 // positional parameters
-eos.transfer('inita', 'initb', '1.2 SYS', '')
+eos.transfer('inita', 'initb', '1.2000 SYS', '')
 
 // named parameters
-eos.transfer({from: 'inita', to: 'initb', quantity: '1.3 SYS', memo: ''})
+eos.transfer({from: 'inita', to: 'initb', quantity: '1.3000 SYS', memo: ''})
 
 // options appear after parameters
 options = {broadcast: true, sign: true}
 
 // `false` is a shortcut for {broadcast: false}
-eos.transfer('inita', 'initb', '1.4 SYS', '', false)
+eos.transfer('inita', 'initb', '1.4000 SYS', '', false)
 ```
 
 Read-write API methods and documentation are generated from the eosio
@@ -287,7 +287,6 @@ is only for concise functions and does not work when providing entire transactio
 objects to `eos.transaction`..
 
 For example:
-* asset `'10 SYS'` resolves `10.0000 SYS`
 * permission `inita` defaults `inita@active`
 * authority `'EOS6MRy..'` expands `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
 * authority `inita` expands `{{threshold: 1, accounts: [..actor: 'inita', permission: 'active', weight: 1]}}`
@@ -388,9 +387,6 @@ eos.transaction(['myaccount', 'myaccount2'], ({myaccount, myaccount2}) => {
     // const options = {authorization: 'myaccount'} // default
     myaccount.create('myaccount', '10000000.000 TOK')//, options)
 
-    // NOTE: the TOK@myaccount behavior is being defined and
-    // may change in a future "major" eosjs version release.
-
     // Issue some of the max supply for circulation into an arbitrary account
     myaccount.issue('myaccount', '10000.000 TOK', 'issue')
   })
@@ -411,26 +407,23 @@ Other ways to use contracts and transactions.
   // if either transfer fails, both will fail (1 transaction, 2 messages)
   await eos.transaction(eos =>
     {
-      eos.transfer('inita', 'initb', '1 SYS', ''/*memo*/)
-      eos.transfer('inita', 'initc', '1 SYS', ''/*memo*/)
+      eos.transfer('inita', 'initb', '1.0000 SYS', ''/*memo*/)
+      eos.transfer('inita', 'initc', '1.0000 SYS', ''/*memo*/)
       // Returning a promise is optional (but handled as expected)
     }
     // [options],
     // [callback]
   )
 
-  // NOTE: the TOK@myaccount behavior is being defined and
-  // may change in a future "major" eosjs version release.
-
   // transaction on a single contract
   await eos.transaction('myaccount', myaccount => {
-    myaccount.transfer('myaccount', 'inita', '10 TOK@myaccount', '')
+    myaccount.transfer('myaccount', 'inita', '10.000 TOK@myaccount', '')
   })
 
   // mix contracts in the same transaction
   await eos.transaction(['myaccount', 'eosio.token'], ({myaccount, eosio_token}) => {
-    myaccount.transfer('inita', 'initb', '1 TOK@myaccount', '')
-    eosio_token.transfer('inita', 'initb', '1 SYS', '')
+    myaccount.transfer('inita', 'initb', '1.000 TOK@myaccount', '')
+    eosio_token.transfer('inita', 'initb', '1.0000 SYS', '')
   })
 
   // The contract method does not take an array so must be called once for
