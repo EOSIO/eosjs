@@ -92,6 +92,10 @@ function createEos(config) {
     toBuffer
   }})
 
+  Object.assign(eos, {modules: {
+    format
+  }})
+
   if(!config.signProvider) {
     config.signProvider = defaultSignProvider(eos, config)
   }
