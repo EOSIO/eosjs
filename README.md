@@ -3,7 +3,7 @@
 
 | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
 | --- | --- | --- | --- |
-| tag: 15.x.x | `npm install eosjs` (version 15) | tag: v1.0.3 | eosio/eos:v1.0.3 |
+| tag: 15.x.x | `npm install eosjs` (version 15) | tag: v1.0.3 | eosio/eos:v1.x.x |
 
 * eosjs@15
   * All `asset` and `extended_asset` amounts require exact decimal places (Change `1 SYS` to `1.0000 SYS`)
