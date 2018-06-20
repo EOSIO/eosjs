@@ -64,7 +64,8 @@ function createEos(config) {
   const network = config.httpEndpoint != null ? EosApi(config) : null
   config.network = network
 
-  config.abiCache = AbiCache(network, config)
+  const abiCache = AbiCache(network, config)
+  config.abiCache = abiCache
 
   if(!config.chainId) {
     config.chainId = 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f'
@@ -89,7 +90,8 @@ function createEos(config) {
     structs,
     types,
     fromBuffer,
-    toBuffer
+    toBuffer,
+    abiCache
   }})
 
   Object.assign(eos, {modules: {

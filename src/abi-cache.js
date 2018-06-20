@@ -9,26 +9,39 @@ function AbiCache(network, config) {
   const cache = {}
 
   /**
-    @arg {boolean} force false when ABI is immutable.  When force is true, API
-    user is still free to cache the contract object returned by eosjs.
+    Asynchronously fetch and cache an ABI from the blockchain.
+
+    @arg {string} account - blockchain account with deployed contract
+    @arg {boolean} [force = true] false when ABI is immutable.
   */
   function abiAsync(account, force = true) {
-    assert(account, 'required account')
+    assert.equal(typeof account, 'string', 'account string required')
 
     if(force == false && cache[account] != null) {
       return Promise.resolve(cache[account])
     }
 
     assert(network, 'Network is required, provide config.httpEndpoint')
-    return network.getCode(account).then(({abi}) => {
-      assert(abi, `Missing ABI for account: ${account}`)
-      const schema = abiToFcSchema(abi)
-      const structs = Structs(config, schema) // structs = {structs, types}
-      return cache[account] = Object.assign({abi, schema}, structs)
+    return network.getCode(account).then(code => {
+      assert(code.abi, `Missing ABI for account: ${account}`)
+      return abi(account, code.abi)
+
     })
   }
 
-  function abi(account) {
+  /**
+    Synchronously set or fetch an ABI from local cache.
+
+    @arg {string} account - blockchain account with deployed contract
+    @arg {string} [abi] - blockchain ABI json data.  Null to fetch or non-null to cache
+  */
+  function abi(account, abi) {
+    assert.equal(typeof account, 'string', 'account string required')
+    if(abi) {
+      const schema = abiToFcSchema(abi)
+      const structs = Structs(config, schema) // structs = {structs, types}
+      return cache[account] = Object.assign({abi, schema}, structs)
+    }
     const c = cache[account]
     if(c == null) {
       throw new Error(`Abi '${account}' is not cached`)
