@@ -1,20 +1,21 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
-| [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
-| --- | --- | --- | --- |
-| tag: 15.x.x | `npm install eosjs` (version 15) | tag: v1.0.3 | eosio/eos:v1.x.x |
-
-* eosjs@15
-  * All `asset` and `extended_asset` amounts require exact decimal places (Change `1 SYS` to `1.0000 SYS`)
-* eosjs@14.1
-  * Use `config.verbose` instead of `config.debug`
-
-Prior [versions](./docs/prior_versions.md).
-
 # Eosjs
 
 General purpose library for EOSIO blockchains.
+
+### Versions
+
+| [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
+| --- | --- | --- | --- |
+| tag: 15.0.1 | `npm install eosjs` (version 15) | tag: v1.0.5 | eosio/eos:v1.0.5 |
+
+Upgrade notes:
+* All `asset` and `extended_asset` amounts require exact decimal places (Change `1 SYS` to `1.0000 SYS`) (15.0.0)
+* Use `config.verbose` instead of `config.debug` (14.1.0)
+
+Prior [version](./docs/prior_versions.md) matrix.
 
 ### Usage
 
