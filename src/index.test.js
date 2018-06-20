@@ -141,7 +141,7 @@ if(process.env['NODE_ENV'] === 'development') {
         await eos.setcode(account, 0, 0, wasm)
         await eos.setabi(account, JSON.parse(abi))
 
-        const code = await eos.getCode(account)
+        const code = await eos.getAbi(account)
 
         const diskAbi = JSON.parse(abi)
         delete diskAbi.____comment

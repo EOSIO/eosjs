@@ -22,7 +22,7 @@ function AbiCache(network, config) {
     }
 
     assert(network, 'Network is required, provide config.httpEndpoint')
-    return network.getCode(account).then(code => {
+    return network.getAbi(account).then(code => {
       assert(code.abi, `Missing ABI for account: ${account}`)
       return abi(account, code.abi)
 
