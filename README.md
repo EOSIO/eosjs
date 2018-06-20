@@ -7,22 +7,10 @@
 
 * eosjs@15
   * All `asset` and `extended_asset` amounts require exact decimal places (Change `1 SYS` to `1.0000 SYS`)
-
-| [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
-| --- | --- | --- | --- |
-| tag: 14.x.x | `npm install eosjs` (version 14) | tag: v1.0.3 | eosio/eos:v1.0.3 |
-
 * eosjs@14.1
   * Use `config.verbose` instead of `config.debug`
 
-| [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
-| --- | --- | --- | --- |
-| tag: 13.x.x | `npm install eosjs` (version 13) | tag: dawn-v4.2.0 | eosio/eos:20180526 |
-| tag: 12.x.x | `npm install eosjs` (version 12) | tag: dawn-v4.1.0 | eosio/eos:20180519 |
-| tag: 11.x.x | `npm install eosjs@dawn4` (version 11) | tag: dawn-v4.0.0 | eosio/eos:dawn-v4.0.0 |
-| tag: 9.x.x | `npm install eosjs@dawn3` (version 9) | tag: DAWN-2018-04-23-ALPHA | eosio/eos:DAWN-2018-04-23-ALPHA | [local docker](https://github.com/EOSIO/eosjs/tree/DAWN-2018-04-23-ALPHA/docker) |
-| tag: 8.x.x | `npm install eosjs@8` (version 8) | tag: dawn-v3.0.0 | eosio/eos:dawn3x |
-| branch: dawn2 | `npm install eosjs` | branch: dawn-2.x | eosio/eos:dawn2x |
+Prior [versions](./docs/prior_versions.md).
 
 # Eosjs
 
@@ -390,24 +378,20 @@ eos.transaction(['myaccount', 'myaccount2'], ({myaccount, myaccount2}) => {
 #### Custom Token
 
 ```js
-(async function() {
+// more on the contract / transaction syntax
 
-  // more on the contract / transaction syntax below
+await eos.transaction('myaccount', myaccount => {
 
-  await eos.transaction('myaccount', myaccount => {
+  // Create the initial token with its max supply
+  // const options = {authorization: 'myaccount'} // default
+  myaccount.create('myaccount', '10000000.000 TOK')//, options)
 
-    // Create the initial token with its max supply
-    // const options = {authorization: 'myaccount'} // default
-    myaccount.create('myaccount', '10000000.000 TOK')//, options)
+  // Issue some of the max supply for circulation into an arbitrary account
+  myaccount.issue('myaccount', '10000.000 TOK', 'issue')
+})
 
-    // Issue some of the max supply for circulation into an arbitrary account
-    myaccount.issue('myaccount', '10000.000 TOK', 'issue')
-  })
-
-  const balance = await eos.getCurrencyBalance('myaccount', 'myaccount', 'TOK')
-  console.log('Currency Balance', balance)
-
-})()
+const balance = await eos.getCurrencyBalance('myaccount', 'myaccount', 'TOK')
+console.log('Currency Balance', balance)
 ```
 
 ### Calling Actions
@@ -415,42 +399,38 @@ eos.transaction(['myaccount', 'myaccount2'], ({myaccount, myaccount2}) => {
 Other ways to use contracts and transactions.
 
 ```javascript
-(async function() {
+// if either transfer fails, both will fail (1 transaction, 2 messages)
+await eos.transaction(eos =>
+  {
+    eos.transfer('inita', 'initb', '1.0000 SYS', ''/*memo*/)
+    eos.transfer('inita', 'initc', '1.0000 SYS', ''/*memo*/)
+    // Returning a promise is optional (but handled as expected)
+  }
+  // [options],
+  // [callback]
+)
 
-  // if either transfer fails, both will fail (1 transaction, 2 messages)
-  await eos.transaction(eos =>
-    {
-      eos.transfer('inita', 'initb', '1.0000 SYS', ''/*memo*/)
-      eos.transfer('inita', 'initc', '1.0000 SYS', ''/*memo*/)
-      // Returning a promise is optional (but handled as expected)
-    }
-    // [options],
-    // [callback]
-  )
+// transaction on a single contract
+await eos.transaction('myaccount', myaccount => {
+  myaccount.transfer('myaccount', 'inita', '10.000 TOK@myaccount', '')
+})
 
-  // transaction on a single contract
-  await eos.transaction('myaccount', myaccount => {
-    myaccount.transfer('myaccount', 'inita', '10.000 TOK@myaccount', '')
-  })
+// mix contracts in the same transaction
+await eos.transaction(['myaccount', 'eosio.token'], ({myaccount, eosio_token}) => {
+  myaccount.transfer('inita', 'initb', '1.000 TOK@myaccount', '')
+  eosio_token.transfer('inita', 'initb', '1.0000 SYS', '')
+})
 
-  // mix contracts in the same transaction
-  await eos.transaction(['myaccount', 'eosio.token'], ({myaccount, eosio_token}) => {
-    myaccount.transfer('inita', 'initb', '1.000 TOK@myaccount', '')
-    eosio_token.transfer('inita', 'initb', '1.0000 SYS', '')
-  })
+// The contract method does not take an array so must be called once for
+// each contract that is needed.
+const myaccount = await eos.contract('myaccount')
+await myaccount.transfer('myaccount', 'inita', '1.000 TOK', '')
 
-  // The contract method does not take an array so must be called once for
-  // each contract that is needed.
-  const myaccount = await eos.contract('myaccount')
-  await myaccount.transfer('myaccount', 'inita', '1.000 TOK', '')
-
-  // a transaction to a contract instance can specify multiple actions
-  await myaccount.transaction(myaccountTr => {
-    myaccountTr.transfer('inita', 'initb', '1.000 TOK', '')
-    myaccountTr.transfer('initb', 'inita', '1.000 TOK', '')
-  })
-
-})()
+// a transaction to a contract instance can specify multiple actions
+await myaccount.transaction(myaccountTr => {
+  myaccountTr.transfer('inita', 'initb', '1.000 TOK', '')
+  myaccountTr.transfer('initb', 'inita', '1.000 TOK', '')
+})
 ```
 
 # Development
