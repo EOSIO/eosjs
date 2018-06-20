@@ -92,6 +92,20 @@ describe('offline', () => {
 
     assert.equal(trx.transaction.signatures.length, 1, 'signature count')
   })
+
+  it('abi', async function() {
+    const eos = Eos({httpEndpoint: null})
+
+    const abiBuffer = fs.readFileSync(`docker/contracts/eosio.bios/eosio.bios.abi`)
+    const abiObject = JSON.parse(abiBuffer)
+
+    assert.deepEqual(abiObject, eos.fc.abiCache.abi('eosio.bios', abiBuffer).abi)
+    assert.deepEqual(abiObject, eos.fc.abiCache.abi('eosio.bios', abiObject).abi)
+
+    const bios = await eos.contract('eosio.bios')
+    assert(typeof bios.newaccount === 'function', 'unrecognized contract')
+  })
+
 })
 
 // some transactions that don't broadcast may require Api lookups
@@ -496,12 +510,12 @@ if(process.env['NODE_ENV'] === 'development') {
     })
   })
 
-  // ./eosioc set contract currency build/contracts/currency/currency.wasm build/contracts/currency/currency.abi
-  it('load abi', async function() {
+  it('Transaction ABI cache', async function() {
     const eos = Eos()
-    const abi = fs.readFileSync(`docker/contracts/eosio.bios/eosio.bios.abi`)
-    const cachedAbi = eos.fc.abiCache.abi('eosio.bios', abi)
-    assert.deepEqual(cachedAbi, eos.fc.abiCache.abi('eosio.bios'))
+    assert.throws(() => eos.fc.abiCache.abi('eosio'), /not cached/)
+    const abi = await eos.fc.abiCache.abiAsync('eosio')
+    assert.deepEqual(abi, await eos.fc.abiCache.abiAsync('eosio', false/*force*/))
+    assert.deepEqual(abi, eos.fc.abiCache.abi('eosio'))
   })
 
   it('Transaction ABI lookup', async function() {

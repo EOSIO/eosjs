@@ -376,6 +376,18 @@ eos.transaction(['myaccount', 'myaccount2'], ({myaccount, myaccount2}) => {
 })
 ```
 
+#### Offline or cold-storage contract
+
+```js
+eos = Eos({httpEndpoint: null})
+
+abi = fs.readFileSync(`docker/contracts/eosio.token/eosio.token.abi`)
+eos.fc.abiCache.abi('myaccount', JSON.parse(abi))
+
+// Check that the ABI is available (print usage)
+eos.contract('myaccount').then(myaccount => myaccount.create())
+```
+
 #### Custom Token
 
 ```js

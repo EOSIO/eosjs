@@ -21,7 +21,12 @@ function AbiCache(network, config) {
       return Promise.resolve(cache[account])
     }
 
-    assert(network, 'Network is required, provide config.httpEndpoint')
+    if(network == null) {
+      const abi = cache[account]
+      assert(abi, `Missing ABI for account: ${account}, provide httpEndpoint or add to abiCache`)
+      return Promise.resolve(abi)
+    }
+
     return network.getAbi(account).then(code => {
       assert(code.abi, `Missing ABI for account: ${account}`)
       return abi(account, code.abi)
@@ -38,6 +43,10 @@ function AbiCache(network, config) {
   function abi(account, abi) {
     assert.equal(typeof account, 'string', 'account string required')
     if(abi) {
+      assert.equal(typeof abi, 'object', 'abi')
+      if(Buffer.isBuffer(abi)) {
+        abi = JSON.parse(abi)
+      }
       const schema = abiToFcSchema(abi)
       const structs = Structs(config, schema) // structs = {structs, types}
       return cache[account] = Object.assign({abi, schema}, structs)
