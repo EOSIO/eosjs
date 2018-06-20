@@ -499,7 +499,6 @@ if(process.env['NODE_ENV'] === 'development') {
   // ./eosioc set contract currency build/contracts/currency/currency.wasm build/contracts/currency/currency.abi
   it('load abi', async function() {
     const eos = Eos()
-    const tokenAbi = require('./schema/eosio.token.abi.json')
     const abi = fs.readFileSync(`docker/contracts/eosio.bios/eosio.bios.abi`)
     const cachedAbi = eos.fc.abiCache.abi('eosio.bios', abi)
     assert.deepEqual(cachedAbi, eos.fc.abiCache.abi('eosio.bios'))
