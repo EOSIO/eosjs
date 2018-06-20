@@ -494,10 +494,7 @@
       "staked": "int64",
       "last_vote_weight": "float64",
       "proxied_vote_weight": "float64",
-      "is_proxy": "bool",
-      "deferred_trx_id": "uint32",
-      "last_unstake_time": "time_point_sec",
-      "unstaking": "asset"
+      "is_proxy": "bool"
     }
   },
   "wait_weight": {
