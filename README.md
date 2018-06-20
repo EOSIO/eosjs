@@ -12,6 +12,7 @@ General purpose library for EOSIO blockchains.
 | tag: 15.0.1 | `npm install eosjs` (version 15) | tag: v1.0.5 | eosio/eos:v1.0.5 |
 
 Upgrade notes:
+* Converted some types in **format** module from unsigned to signed: UDecimalPad -> DecimalPad for example (15.0.1)
 * All `asset` and `extended_asset` amounts require exact decimal places (Change `1 SYS` to `1.0000 SYS`) (15.0.0)
 * Use `config.verbose` instead of `config.debug` (14.1.0)
 
