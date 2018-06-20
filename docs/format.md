@@ -8,19 +8,19 @@
 </dd>
 <dt><a href="#decodeName">decodeName(value)</a> ⇒ <code>string</code></dt>
 <dd></dd>
-<dt><a href="#UDecimalString">UDecimalString()</a> ⇒ <code>string</code></dt>
+<dt><a href="#DecimalString">DecimalString()</a> ⇒ <code>string</code></dt>
 <dd><p>Normalize and validate decimal string (potentially large values).  Should
   avoid internationalization issues if possible but will be safe and
   throw an error for an invalid number.</p>
 <p>  Normalization removes extra zeros or decimal.</p>
 </dd>
-<dt><a href="#UDecimalPad">UDecimalPad(value, precision)</a> ⇒ <code>string</code></dt>
+<dt><a href="#DecimalPad">DecimalPad(value, precision)</a> ⇒ <code>string</code></dt>
 <dd><p>Ensure a fixed number of decimal places.  Safe for large numbers.</p>
 </dd>
-<dt><a href="#UDecimalImply">UDecimalImply()</a></dt>
+<dt><a href="#DecimalImply">DecimalImply()</a></dt>
 <dd><p>Ensures proper trailing zeros then removes decimal place.</p>
 </dd>
-<dt><a href="#UDecimalUnimply">UDecimalUnimply(value, precision)</a> ⇒ <code>number</code></dt>
+<dt><a href="#DecimalUnimply">DecimalUnimply(value, precision)</a> ⇒ <code>number</code></dt>
 <dd><p>Put the decimal place back in its position and return the normalized number
   string (with any unnecessary zeros or an unnecessary decimal removed).</p>
 </dd>
@@ -52,9 +52,9 @@ Encode a name (a base32 string) to a number.
 | --- | --- | --- |
 | value | <code>Long</code> \| <code>String</code> \| <code>number</code> | uint64 |
 
-<a name="UDecimalString"></a>
+<a name="DecimalString"></a>
 
-## UDecimalString() ⇒ <code>string</code>
+## DecimalString() ⇒ <code>string</code>
 Normalize and validate decimal string (potentially large values).  Should
   avoid internationalization issues if possible but will be safe and
   throw an error for an invalid number.
@@ -63,9 +63,9 @@ Normalize and validate decimal string (potentially large values).  Should
 
 **Kind**: global function  
 **Returns**: <code>string</code> - value  
-<a name="UDecimalPad"></a>
+<a name="DecimalPad"></a>
 
-## UDecimalPad(value, precision) ⇒ <code>string</code>
+## DecimalPad(value, precision) ⇒ <code>string</code>
 Ensure a fixed number of decimal places.  Safe for large numbers.
 
 **Kind**: global function  
@@ -79,19 +79,19 @@ Ensure a fixed number of decimal places.  Safe for large numbers.
 
 **Example**  
 ```js
-UDecimalPad(10.2, 3) === '10.200'
+DecimalPad(10.2, 3) === '10.200'
 
   
 ```
-<a name="UDecimalImply"></a>
+<a name="DecimalImply"></a>
 
-## UDecimalImply()
+## DecimalImply()
 Ensures proper trailing zeros then removes decimal place.
 
 **Kind**: global function  
-<a name="UDecimalUnimply"></a>
+<a name="DecimalUnimply"></a>
 
-## UDecimalUnimply(value, precision) ⇒ <code>number</code>
+## DecimalUnimply(value, precision) ⇒ <code>number</code>
 Put the decimal place back in its position and return the normalized number
   string (with any unnecessary zeros or an unnecessary decimal removed).
 

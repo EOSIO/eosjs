@@ -7,7 +7,7 @@ const json = {schema: require('./schema')}
 
 const {
   isName, encodeName, decodeName,
-  UDecimalPad, UDecimalImply, UDecimalUnimply,
+  DecimalPad, DecimalImply, DecimalUnimply,
   printAsset, parseAsset
 } = require('./format')
 
@@ -290,7 +290,7 @@ const Asset = (validation, baseTypes, customTypes) => {
       assert(precision != null, 'precision')
       assert(symbol != null, 'symbol')
 
-      return `${UDecimalUnimply(amount, precision)} ${symbol}`
+      return `${DecimalUnimply(amount, precision)} ${symbol}`
     },
 
     appendByteBuffer (b, value) {
@@ -299,7 +299,7 @@ const Asset = (validation, baseTypes, customTypes) => {
       assert(precision != null, 'precision')
       assert(symbol != null, 'symbol')
 
-      amountType.appendByteBuffer(b, UDecimalImply(amount, precision))
+      amountType.appendByteBuffer(b, DecimalImply(amount, precision))
       symbolType.appendByteBuffer(b, `${precision},${symbol}`)
     },
 
@@ -309,7 +309,7 @@ const Asset = (validation, baseTypes, customTypes) => {
       assert(precision != null, 'precision')
       assert(symbol != null, 'symbol')
 
-      return `${UDecimalPad(amount, precision)} ${symbol}`
+      return `${DecimalPad(amount, precision)} ${symbol}`
     },
 
     toObject (value) {
@@ -322,7 +322,7 @@ const Asset = (validation, baseTypes, customTypes) => {
       assert(precision != null, 'precision')
       assert(symbol != null, 'symbol')
 
-      return `${UDecimalPad(amount, precision)} ${symbol}`
+      return `${DecimalPad(amount, precision)} ${symbol}`
     }
   }
 }
@@ -388,7 +388,7 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
       const {amount, precision, symbol, contract} = value
 
       return {
-        amount: UDecimalPad(amount, precision),
+        amount: DecimalPad(amount, precision),
         precision,
         symbol,
         contract
