@@ -388,6 +388,43 @@ eos.fc.abiCache.abi('myaccount', JSON.parse(abi))
 // Check that the ABI is available (print usage)
 eos.contract('myaccount').then(myaccount => myaccount.create())
 ```
+#### Offline or cold-storage transaction
+
+```js
+// ONLINE
+
+// Prepare headers
+expireInSeconds = 60 * 60 // 1 hour
+
+eos = Eos(/* {httpEndpoint: 'https://..'} */)
+
+info = await eos.getInfo({})
+chainDate = new Date(info.head_block_time + 'Z')
+expiration = new Date(chainDate.getTime() + expireInSeconds * 1000)
+expiration = expiration.toISOString().split('.')[0]
+
+block = await eos.getBlock(info.last_irreversible_block_num)
+
+transactionHeaders = {
+  expiration,
+  ref_block_num: info.last_irreversible_block_num & 0xFFFF,
+  ref_block_prefix: block.ref_block_prefix
+}
+
+// OFFLINE (bring `transactionHeaders`)
+
+// All keys in keyProvider will sign.
+eos = Eos({httpEndpoint: null, chainId, keyProvider, transactionHeaders})
+
+transfer = await eos.transfer('inita', 'initb', '1.0000 SYS', '')
+transferTransaction = transfer.transaction
+
+// ONLINE (bring `transferTransaction`)
+
+eos = Eos(/* {httpEndpoint: 'https://..'} */)
+
+processedTransaction = await eos.pushTransaction(transferTransaction)
+```
 
 #### Custom Token
 

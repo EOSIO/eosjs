@@ -405,13 +405,16 @@ function WriteApi(Network, network, config, Transaction) {
     if(argHeaders) {
       headers = (expireInSeconds, callback) => callback(null, argHeaders)
     } else if(config.transactionHeaders) {
-      assert.equal(typeof config.transactionHeaders, 'function', 'config.transactionHeaders')
-      headers = config.transactionHeaders
+      if(typeof config.transactionHeaders === 'object') {
+        headers = (exp, callback) => callback(null, config.transactionHeaders)
+      } else {
+        assert.equal(typeof config.transactionHeaders, 'function', 'config.transactionHeaders')
+        headers = config.transactionHeaders
+      }
     } else {
-      assert(network, 'Network is required, provide config.httpEndpoint')
+      assert(network, 'Network is required, provide httpEndpoint or own transaction headers')
       headers = network.createTransaction
     }
-
     headers(options.expireInSeconds, checkError(callback, config.logger, async function(rawTx) {
       // console.log('rawTx', rawTx)
       assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
@@ -419,7 +422,13 @@ function WriteApi(Network, network, config, Transaction) {
       assert.equal(typeof rawTx.ref_block_num, 'number', 'expecting ref_block_num number')
       assert.equal(typeof rawTx.ref_block_prefix, 'number', 'expecting ref_block_prefix number')
 
-      rawTx = Object.assign({}, rawTx)
+      const defaultHeaders = {
+        net_usage_words: 0,
+        max_cpu_usage_ms: 0,
+        delay_sec: 0
+      }
+
+      rawTx = Object.assign({}, defaultHeaders, rawTx)
 
       rawTx.actions = arg.actions
 

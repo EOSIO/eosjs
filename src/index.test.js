@@ -26,11 +26,11 @@ describe('offline', () => {
     transaction_extensions: []
   }
 
-  const transactionHeaders = (expireInSeconds, callback) => {
-    callback(null/*error*/, headers)
-  }
 
   it('multi-signature', async function() {
+    const transactionHeaders = (expireInSeconds, callback) => {
+      callback(null/*error*/, headers)
+    }
     const eos = Eos({
       keyProvider: [
         ecc.seedPrivate('key1'),
@@ -69,11 +69,11 @@ describe('offline', () => {
     assert.equal(trx.transaction.signatures.length, 1, 'signature count')
   })
 
-  it('transactionHeaders callback', async function() {
+  it('transactionHeaders object', async function() {
     const eos = Eos({
       keyProvider: wif,
       httpEndpoint: null,
-      transactionHeaders
+      transactionHeaders: headers
     })
 
     const memo = ''
