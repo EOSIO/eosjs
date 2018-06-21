@@ -344,6 +344,21 @@ export function timePointSecToDate(sec: number) {
     return s.substr(0, s.length - 1);
 }
 
+export function arrayToHex(data: Uint8Array) {
+    let result = '';
+    for (let x of data)
+        result += ('00' + x.toString(16)).slice(-2);
+    return result;
+}
+
+export function hexToUint8Array(hex: string) {
+    let l = hex.length / 2;
+    let result = new Uint8Array(l);
+    for (let i = 0; i < l; ++i)
+        result[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return result;
+}
+
 function serializeUnknown(buffer: SerialBuffer, data: any): SerialBuffer {
     throw new Error("Don't know how to serialize " + this.name);
 }
@@ -534,18 +549,18 @@ export function createInitialTypes(): Map<string, Type> {
         }),
         checksum160: createType({
             name: 'checksum160',
-            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 20); },
-            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(20); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 20); },
+            deserialize(buffer: SerialBuffer) { return arrayToHex(buffer.getUint8Array(20)); },
         }),
         checksum256: createType({
             name: 'checksum256',
-            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 32); },
-            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(32); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 32); },
+            deserialize(buffer: SerialBuffer) { return arrayToHex(buffer.getUint8Array(32)); },
         }),
         checksum512: createType({
             name: 'checksum512',
-            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 64); },
-            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(64); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 64); },
+            deserialize(buffer: SerialBuffer) { return arrayToHex(buffer.getUint8Array(64)); },
         }),
 
         // TODO: implement these types
