@@ -498,21 +498,25 @@ function WriteApi(Network, network, config, Transaction) {
             transaction: packedTr
           })
         } else {
-          network.pushTransaction(packedTr, error => {
+          network.pushTransaction(packedTr, (error, processedTransaction) => {
             if(!error) {
-              callback(null, {
-                transaction_id: transactionId,
-                broadcast: true,
-                transaction: packedTr
-              })
+              callback(
+                null,
+                Object.assign(
+                  {
+                    broadcast: true,
+                    transaction: packedTr,
+                    transaction_id: transactionId
+                  },
+                  processedTransaction
+                )
+              )
             } else {
-
               if(config.logger.error) {
                 config.logger.error(
                   `[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`
                 )
               }
-
               callback(error.message)
             }
           })
