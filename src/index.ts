@@ -6,6 +6,8 @@ import { Abi, GetInfoResult, JsonRpc } from './eosjs2-jsonrpc';
 import * as ser from './eosjs2-serialize';
 const transactionAbi = require('json-loader!./transaction.abi');
 
+export const serialize = ser;
+
 export interface SignatureProviderArgs {
     chainId: string;
     serializedTransaction: Uint8Array;
@@ -50,18 +52,25 @@ export class Api {
         return result;
     }
 
+    serialize(buffer: ser.SerialBuffer, type: string, value: any) {
+        this.transactionTypes.get(type).serialize(buffer, value);
+    }
+
+    deserialize(buffer: ser.SerialBuffer, type: string, value: any) {
+        return this.transactionTypes.get(type).deserialize(buffer);
+    }
+
     serializeTransaction(transaction: any) {
         let buffer = new ser.SerialBuffer;
-        this.transactionTypes.get('transaction').serialize(
-            buffer, {
-                max_net_usage_words: 0,
-                max_cpu_usage_ms: 0,
-                delay_sec: 0,
-                context_free_actions: [],
-                actions: [],
-                transaction_extensions: [],
-                ...transaction,
-            });
+        this.serialize(buffer, 'transaction', {
+            max_net_usage_words: 0,
+            max_cpu_usage_ms: 0,
+            delay_sec: 0,
+            context_free_actions: [],
+            actions: [],
+            transaction_extensions: [],
+            ...transaction,
+        });
         return buffer.asUint8Array();
     }
 

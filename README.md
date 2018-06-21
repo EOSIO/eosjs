@@ -39,7 +39,7 @@ Library for talking to the eos api.
             pre.textContent += '\n\nTransaction pushed!\n\n' + JSON.stringify(result, null, 4);
         } catch (e) {
             pre.textContent += '\nCaught exception: ' + e;
-            if (e instanceof eosjs2.EosError)
+            if (e instanceof eosjs2_jsonrpc.RpcError)
                 pre.textContent += '\n\n' + JSON.stringify(e.json, null, 4);
         }
     })();
