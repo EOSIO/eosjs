@@ -20,7 +20,7 @@ cd ..
 npm install
 NODE_ENV=development npm run test
 
-# Create
+npm i uglifyjs
 npm run build_browser
 npm run minimize
 
