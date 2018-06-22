@@ -280,6 +280,16 @@ Read-write API methods and documentation are generated from the eosio
 [token](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_token.json) and
 [system](https://github.com/EOSIO/eosjs/blob/master/src/schema/eosio_system.json).
 
+Assets amounts require zero padding.  For a better user-experience, if you know
+the correct precision you may use DecimalPad to add the padding.
+
+```js
+DecimalPad = Eos.modules.format.DecimalPad
+userInput = '10.2'
+precision = 4
+assert.equal('10.2000', DecimalPad(userInput, precision))
+```
+
 For more advanced signing, see `keyProvider` and `signProvider` in
 [index.test.js](https://github.com/EOSIO/eosjs/blob/master/src/index.test.js).
 
