@@ -3,16 +3,18 @@
   "version": "15.0.2",
   "description": "General purpose library for the EOS blockchain.",
   "main": "lib/index.js",
+  "files": ["README.md", "docs", "lib"],
   "scripts": {
     "test": "mocha --use_strict src/*.test.js",
     "test_lib": "mocha --use_strict lib/*.test.js",
     "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "build": "babel --copy-files src --out-dir lib",
-    "build_browser": "npm run build && mkdir -p dist && browserify -o dist/eos.js -s Eos lib/index.js",
-    "build_browser_test": "npm run build && mkdir -p dist && browserify -o dist/test.js lib/*.test.js",
+    "build_browser": "npm run build && browserify -o lib/eos.js -s Eos lib/index.js",
+    "build_browser_test": "npm run build && browserify -o dist/test.js lib/*.test.js",
+    "minimize": "uglifyjs lib/eos.js -o lib/eos.min.js --source-map --compress --mangle",
     "docs": "jsdoc2md src/format.js > docs/index.md",
-    "prepublishOnly": "npm run build_browser && npm run test_lib && npm run docs"
+    "prepublishOnly": "npm run build_browser && npm run test_lib && npm run minimize && npm run docs"
   },
   "repository": {
     "type": "git",
