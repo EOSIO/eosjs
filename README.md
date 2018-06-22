@@ -9,7 +9,7 @@ General purpose library for EOSIO blockchains.
 
 | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
 | --- | --- | --- | --- |
-| tag: 15.0.1 | `npm install eosjs` (version 15) | tag: v1.0.5 | eosio/eos:v1.0.5 |
+| tag: 15.0.2 | `npm install eosjs` (version 15) | tag: v1.0.5 | eosio/eos:v1.0.5 |
 
 Upgrade notes:
 * Converted some types in **format** module from unsigned to signed: UDecimalPad -> DecimalPad for example (15.0.1)
