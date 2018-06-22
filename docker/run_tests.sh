@@ -19,3 +19,10 @@ docker cp docker_nodeosd_1:/contracts .
 cd ..
 npm install
 NODE_ENV=development npm run test
+
+# Create
+npm run build_browser
+npm run minimize
+
+echo "Subresource Integrity"
+npx srisum lib/eos.*
