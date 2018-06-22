@@ -1,9 +1,13 @@
 {
   "name": "eosjs",
-  "version": "15.0.2",
+  "version": "15.0.3",
   "description": "General purpose library for the EOS blockchain.",
   "main": "lib/index.js",
-  "files": ["README.md", "docs", "lib"],
+  "files": [
+    "README.md",
+    "docs",
+    "lib"
+  ],
   "scripts": {
     "test": "mocha --use_strict src/*.test.js",
     "test_lib": "mocha --use_strict lib/*.test.js",
