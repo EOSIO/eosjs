@@ -181,19 +181,19 @@ export class SerialBuffer {
     }
 
     pushFloat32(v: number) {
-        this.pushArray(new Uint8Array(new Float32Array([v])));
+        this.pushArray(new Uint8Array((new Float32Array([v])).buffer));
     }
 
     getFloat32() {
-        new Float32Array(this.getUint8Array(4).slice())[0];
+        return new Float32Array(this.getUint8Array(4).slice().buffer)[0];
     }
 
     pushFloat64(v: number) {
-        this.pushArray(new Uint8Array(new Float64Array([v])));
+        this.pushArray(new Uint8Array((new Float64Array([v])).buffer));
     }
 
     getFloat64() {
-        new Float64Array(this.getUint8Array(8).slice())[0];
+        return new Float64Array(this.getUint8Array(8).slice().buffer)[0];
     }
 
     pushName(s: string) {
@@ -238,6 +238,8 @@ export class SerialBuffer {
             else
                 result += '.';
         }
+        if (result === '.............')
+            return result;
         while (result.endsWith('.'))
             result = result.substr(0, result.length - 1);
         return result;
@@ -348,7 +350,7 @@ export function arrayToHex(data: Uint8Array) {
     let result = '';
     for (let x of data)
         result += ('00' + x.toString(16)).slice(-2);
-    return result;
+    return result.toUpperCase();
 }
 
 export function hexToUint8Array(hex: string) {
@@ -513,14 +515,14 @@ export function createInitialTypes(): Map<string, Type> {
         }),
         float128: createType({
             name: 'float128',
-            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 16); },
-            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(16); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 16); },
+            deserialize(buffer: SerialBuffer) { return arrayToHex(buffer.getUint8Array(16)); },
         }),
 
         bytes: createType({
             name: 'bytes',
-            serialize(buffer: SerialBuffer, data: number[] | Uint8Array) { buffer.pushBytes(data); },
-            deserialize(buffer: SerialBuffer) { return buffer.getBytes(); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushBytes(hexToUint8Array(data)); },
+            deserialize(buffer: SerialBuffer) { return arrayToHex(buffer.getBytes()); },
         }),
         string: createType({
             name: 'string',
