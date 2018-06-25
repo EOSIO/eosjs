@@ -65,6 +65,13 @@ export class SerialBuffer {
     length = 0;
     array = new Uint8Array(1024);
     readPos = 0;
+    textEncoder: TextEncoder;
+    textDecoder: TextDecoder;
+
+    constructor({ textEncoder, textDecoder } = {} as { textEncoder: TextEncoder, textDecoder: TextDecoder }) {
+        this.textEncoder = textEncoder || new TextEncoder;
+        this.textDecoder = textDecoder || new TextDecoder('utf-8', { fatal: true });
+    }
 
     reserve(size: number) {
         if (this.length + size <= this.array.length)
@@ -255,16 +262,16 @@ export class SerialBuffer {
     }
 
     pushString(v: string) {
-        this.pushBytes((new TextEncoder()).encode(v));
+        this.pushBytes(this.textEncoder.encode(v));
     }
 
     getString() {
-        return ((new TextDecoder('utf-8', { fatal: true })).decode(this.getBytes()));
+        return this.textDecoder.decode(this.getBytes());
     }
 
     pushSymbol({ name, precision }: Symbol) {
         let a = [precision & 0xff];
-        a.push(...(new TextEncoder()).encode(name));
+        a.push(...this.textEncoder.encode(name));
         while (a.length < 8)
             a.push(0);
         this.pushArray(a.slice(0, 8));
@@ -277,7 +284,7 @@ export class SerialBuffer {
         for (len = 0; len < a.length; ++len)
             if (!a[len])
                 break;
-        let name = (new TextDecoder('utf-8', { fatal: true })).decode(new Uint8Array(a.buffer, 0, len));
+        let name = this.textDecoder.decode(new Uint8Array(a.buffer, 0, len));
         return { name, precision };
     }
 
