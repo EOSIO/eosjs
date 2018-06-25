@@ -240,6 +240,24 @@ export class SerialBuffer {
         return this.textDecoder.decode(this.getBytes());
     }
 
+    pushSymbolCode(name: string) {
+        let a = [];
+        a.push(...this.textEncoder.encode(name));
+        while (a.length < 8)
+            a.push(0);
+        this.pushArray(a.slice(0, 8));
+    }
+
+    getSymbolCode() {
+        let a = this.getUint8Array(8);
+        let len;
+        for (len = 0; len < a.length; ++len)
+            if (!a[len])
+                break;
+        let name = this.textDecoder.decode(new Uint8Array(a.buffer, a.byteOffset, len));
+        return name;
+    }
+
     pushSymbol({ name, precision }: Symbol) {
         let a = [precision & 0xff];
         a.push(...this.textEncoder.encode(name));
@@ -306,6 +324,17 @@ export function dateToTimePointSec(date: string) {
 export function timePointSecToDate(sec: number) {
     let s = (new Date(sec * 1000)).toISOString();
     return s.substr(0, s.length - 1);
+}
+
+export function stringToSymbol(s: string): Symbol {
+    let m = s.match(/^([0-9]+),([A-Z]+)$/);
+    if (!m)
+        throw new Error('Invalid symbol');
+    return { name: m[2], precision: +m[1] };
+}
+
+export function symbolToString({ name, precision }: Symbol) {
+    return precision + ',' + name;
 }
 
 export function arrayToHex(data: Uint8Array) {
@@ -501,10 +530,15 @@ export function createInitialTypes(): Map<string, Type> {
             serialize(buffer: SerialBuffer, data: string) { buffer.pushUint32(dateToTimePointSec(data)); },
             deserialize(buffer: SerialBuffer) { return timePointSecToDate(buffer.getUint32()); },
         }),
+        symbol_code: createType({
+            name: 'symbol_code',
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushSymbolCode(data); },
+            deserialize(buffer: SerialBuffer) { return buffer.getSymbolCode(); },
+        }),
         symbol: createType({
             name: 'symbol',
-            serialize(buffer: SerialBuffer, data: Symbol) { buffer.pushSymbol(data); },
-            deserialize(buffer: SerialBuffer) { return buffer.getSymbol(); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushSymbol(stringToSymbol(data)); },
+            deserialize(buffer: SerialBuffer) { return symbolToString(buffer.getSymbol()); },
         }),
         asset: createType({
             name: 'asset',
@@ -533,7 +567,6 @@ export function createInitialTypes(): Map<string, Type> {
         varint32: createType({ name: 'varint32' }),
         time_point: createType({ name: 'time_point' }),
         block_timestamp_type: createType({ name: 'block_timestamp_type' }),
-        symbol_code: createType({ name: 'symbol_code' }),
         extended_asset: createType({ name: 'extended_asset' }),
     }));
 } // createInitialTypes()
