@@ -3,6 +3,7 @@
 'use strict';
 
 import { Abi, BlockTaposInfo } from './eosjs2-jsonrpc';
+import * as numeric from './eosjs2-numeric';
 
 export interface Field {
     name: string;
@@ -20,16 +21,6 @@ export interface Type {
     fields: Field[];
     serialize: (buffer: SerialBuffer, data: any) => void;
     deserialize: (buffer: SerialBuffer) => any;
-}
-
-export interface Uint64 {
-    low: number;
-    high: number;
-}
-
-export interface Int64 {
-    low: number;
-    high: number;
 }
 
 export interface Symbol {
@@ -140,26 +131,6 @@ export class SerialBuffer {
         v |= this.get() << 16;
         v |= this.get() << 24;
         return v >>> 0;
-    }
-
-    pushUint64(v: Uint64) {
-        this.pushUint32(v.low);
-        this.pushUint32(v.high);
-    }
-
-    getUint64(): Uint64 {
-        let low = this.getUint32();
-        let high = this.getUint32();
-        return { low, high };
-    }
-
-    pushInt64(v: Int64) {
-        this.pushUint32(v.low);
-        this.pushUint32(v.high);
-    }
-
-    getInt64(): Int64 {
-        return this.getUint64();
     }
 
     pushVaruint32(v: number) {
@@ -284,25 +255,23 @@ export class SerialBuffer {
         for (len = 0; len < a.length; ++len)
             if (!a[len])
                 break;
-        let name = this.textDecoder.decode(new Uint8Array(a.buffer, 0, len));
+        let name = this.textDecoder.decode(new Uint8Array(a.buffer, a.byteOffset, len));
         return { name, precision };
     }
 
     pushAsset(s: string) {
-        // TODO: 56-bit precision loss
         s = s.trim();
         let pos = 0;
-        let sign = 1;
-        let amount = 0;
+        let amount = '';
         let precision = 0;
         if (s[pos] === '-') {
-            sign = -1;
+            amount += '-';
             ++pos;
         }
         let foundDigit = false;
         while (pos < s.length && s.charCodeAt(pos) >= '0'.charCodeAt(0) && s.charCodeAt(pos) <= '9'.charCodeAt(0)) {
             foundDigit = true;
-            amount = amount * 10 + s.charCodeAt(pos) - '0'.charCodeAt(0);
+            amount += s[pos];
             ++pos;
         }
         if (!foundDigit)
@@ -310,39 +279,25 @@ export class SerialBuffer {
         if (s[pos] === '.') {
             ++pos;
             while (pos < s.length && s.charCodeAt(pos) >= '0'.charCodeAt(0) && s.charCodeAt(pos) <= '9'.charCodeAt(0)) {
-                amount = amount * 10 + s.charCodeAt(pos) - '0'.charCodeAt(0);
+                amount += s[pos];
                 ++precision;
                 ++pos;
             }
         }
         let name = s.substr(pos).trim();
-        this.pushInt64(numberToInt64(sign * amount));
+        this.pushArray(numeric.signedDecimalToBinary(8, amount));
         this.pushSymbol({ name, precision });
     }
 
     getAsset() {
-        // TODO
-        throw new Error("Don't know how to deserialize asset");
+        let amount = this.getUint8Array(8);
+        let { name, precision } = this.getSymbol();
+        let s = numeric.signedBinaryToDecimal(amount, precision + 1);
+        if (precision)
+            s = s.substr(0, s.length - precision) + '.' + s.substr(s.length - precision);
+        return s + ' ' + name;
     }
 } // SerialBuffer
-
-export function numberToUint64(n: number) {
-    return {
-        low: n >>> 0,
-        high: Math.floor(n / 0x100000000) >>> 0
-    };
-}
-
-export function uint64ToNumber({ low, high }: Uint64) {
-    return (high | 0) * 0x100000000 + (low | 0);
-}
-
-export function numberToInt64(n: number) {
-    // TODO
-    if (n < 0)
-        throw new Error("Don't know how to convert negative 64-bit integers")
-    return numberToUint64(n);
-}
 
 export function dateToTimePointSec(date: string) {
     return Math.round(Date.parse(date + 'Z') / 1000);
@@ -482,13 +437,13 @@ export function createInitialTypes(): Map<string, Type> {
         }),
         uint64: createType({
             name: 'uint64',
-            serialize(buffer: SerialBuffer, data: Uint64) { buffer.pushUint64(data); },
-            deserialize(buffer: SerialBuffer) { return buffer.getUint64(); },
+            serialize(buffer: SerialBuffer, data: string | number) { buffer.pushArray(numeric.decimalToBinary(8, '' + data)); },
+            deserialize(buffer: SerialBuffer) { return numeric.binaryToDecimal(buffer.getUint8Array(8)); },
         }),
         int64: createType({
             name: 'int64',
-            serialize(buffer: SerialBuffer, data: Int64) { buffer.pushInt64(data); },
-            deserialize(buffer: SerialBuffer) { return buffer.getInt64(); },
+            serialize(buffer: SerialBuffer, data: string | number) { buffer.pushArray(numeric.signedDecimalToBinary(8, '' + data)); },
+            deserialize(buffer: SerialBuffer) { return numeric.signedBinaryToDecimal(buffer.getUint8Array(8)); },
         }),
         int32: createType({
             name: 'int32',
@@ -502,13 +457,13 @@ export function createInitialTypes(): Map<string, Type> {
         }),
         uint128: createType({
             name: 'uint128',
-            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 16); },
-            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(16); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushArray(numeric.decimalToBinary(16, data)); },
+            deserialize(buffer: SerialBuffer) { return numeric.binaryToDecimal(buffer.getUint8Array(16)); },
         }),
         int128: createType({
             name: 'int128',
-            serialize(buffer: SerialBuffer, data: Uint8Array) { buffer.pushUint8ArrayChecked(data, 16); },
-            deserialize(buffer: SerialBuffer) { return buffer.getUint8Array(16); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushArray(numeric.signedDecimalToBinary(16, data)); },
+            deserialize(buffer: SerialBuffer) { return numeric.signedBinaryToDecimal(buffer.getUint8Array(16)); },
         }),
         float32: createType({
             name: 'float32',
