@@ -338,6 +338,30 @@ export class SerialBuffer {
             s = s.substr(0, s.length - precision) + '.' + s.substr(s.length - precision);
         return s + ' ' + name;
     }
+
+    pushPublicKey(s: string) {
+        let key = numeric.stringToPublicKey(s);
+        this.push(key.type);
+        this.pushArray(key.data);
+    }
+
+    getPublicKey() {
+        let type = this.get();
+        let data = this.getUint8Array(numeric.publicKeyDataSize);
+        return numeric.publicKeyToString({ type, data });
+    }
+
+    pushSignature(s: string) {
+        let key = numeric.stringToSignature(s);
+        this.push(key.type);
+        this.pushArray(key.data);
+    }
+
+    getSignature() {
+        let type = this.get();
+        let data = this.getUint8Array(numeric.signatureDataSize);
+        return numeric.signatureToString({ type, data });
+    }
 } // SerialBuffer
 
 export function dateToTimePoint(date: string) {
@@ -622,10 +646,16 @@ export function createInitialTypes(): Map<string, Type> {
             serialize(buffer: SerialBuffer, data: string) { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 64); },
             deserialize(buffer: SerialBuffer) { return arrayToHex(buffer.getUint8Array(64)); },
         }),
-
-        // TODO: implement these types
-        public_key: createType({ name: 'public_key' }),
-        signature: createType({ name: 'signature' }),
+        public_key: createType({
+            name: 'public_key',
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushPublicKey(data); },
+            deserialize(buffer: SerialBuffer) { return buffer.getPublicKey(); },
+        }),
+        signature: createType({
+            name: 'signature',
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushSignature(data); },
+            deserialize(buffer: SerialBuffer) { return buffer.getSignature(); },
+        }),
     }));
 
     result.set('extended_asset', createType({
