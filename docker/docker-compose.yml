@@ -9,7 +9,7 @@ services:
       #args:
       #  branch: master
 
-    command: /opt/eosio/bin/nodeosd.sh --max-transaction-time=1000 --data-dir /opt/eosio/bin/data-dir -e
+    command: /opt/eosio/bin/nodeosd.sh --verbose-http-errors --max-transaction-time=1000 --data-dir /opt/eosio/bin/data-dir -e
     hostname: nodeosd
     ports:
       - 8888:8888
