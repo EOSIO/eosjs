@@ -133,6 +133,17 @@ export class SerialBuffer {
         return v >>> 0;
     }
 
+    pushNumberAsUint64(v: number) {
+        this.pushUint32(v >>> 0);
+        this.pushUint32(Math.floor(v / 0x10000_0000) >>> 0);
+    }
+
+    getUint64AsNumber() {
+        let low = this.getUint32();
+        let high = this.getUint32();
+        return (high >>> 0) * 0x10000_0000 + (low >>> 0);
+    }
+
     pushVaruint32(v: number) {
         while (true) {
             if (v >>> 7) {
@@ -156,6 +167,18 @@ export class SerialBuffer {
                 break;
         }
         return v >>> 0;
+    }
+
+    pushVarint32(v: number) {
+        this.pushVaruint32((v << 1) ^ (v >> 31));
+    }
+
+    getVarint32() {
+        let v = this.getVaruint32();
+        if (v & 1)
+            return ((~v) >> 1) | 0x8000_0000;
+        else
+            return v >>> 1;
     }
 
     pushFloat32(v: number) {
@@ -317,12 +340,30 @@ export class SerialBuffer {
     }
 } // SerialBuffer
 
+export function dateToTimePoint(date: string) {
+    return Math.round(Date.parse(date + 'Z') * 1000);
+}
+
+export function timePointToDate(us: number) {
+    let s = (new Date(us / 1000)).toISOString();
+    return s.substr(0, s.length - 1);
+}
+
 export function dateToTimePointSec(date: string) {
     return Math.round(Date.parse(date + 'Z') / 1000);
 }
 
 export function timePointSecToDate(sec: number) {
     let s = (new Date(sec * 1000)).toISOString();
+    return s.substr(0, s.length - 1);
+}
+
+export function dateToBlockTimestamp(date: string) {
+    return Math.round((Date.parse(date + 'Z') - 946684800000) / 500);
+}
+
+export function blockTimestampToDate(slot: number) {
+    let s = (new Date(slot * 500 + 946684800000)).toISOString();
     return s.substr(0, s.length - 1);
 }
 
@@ -396,13 +437,19 @@ function deserializeArray(buffer: SerialBuffer) {
 }
 
 function serializeOptional(buffer: SerialBuffer, data: any) {
-    // TODO
-    throw new Error("Don't know how to serialize " + this.name);
+    if (data === null || data === undefined) {
+        buffer.push(0);
+    } else {
+        buffer.push(1);
+        this.optionalOf.serialize(buffer, data);
+    }
 }
 
 function deserializeOptional(buffer: SerialBuffer) {
-    // TODO
-    throw new Error("Don't know how to deserialize " + this.name);
+    if (buffer.get())
+        return this.optionalOf.deserialize(buffer);
+    else
+        return null;
 }
 
 interface CreateTypeArgs {
@@ -433,7 +480,7 @@ function createType(attrs: CreateTypeArgs): Type {
 }
 
 export function createInitialTypes(): Map<string, Type> {
-    return new Map(Object.entries({
+    let result = new Map(Object.entries({
         bool: createType({
             name: 'bool',
             serialize(buffer: SerialBuffer, data: boolean) { buffer.push(data ? 1 : 0); },
@@ -484,6 +531,11 @@ export function createInitialTypes(): Map<string, Type> {
             serialize(buffer: SerialBuffer, data: number) { buffer.pushVaruint32(data); },
             deserialize(buffer: SerialBuffer) { return buffer.getVaruint32(); },
         }),
+        varint32: createType({
+            name: 'varint32',
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushVarint32(data); },
+            deserialize(buffer: SerialBuffer) { return buffer.getVarint32(); },
+        }),
         uint128: createType({
             name: 'uint128',
             serialize(buffer: SerialBuffer, data: string) { buffer.pushArray(numeric.decimalToBinary(16, data)); },
@@ -525,10 +577,20 @@ export function createInitialTypes(): Map<string, Type> {
             serialize(buffer: SerialBuffer, data: string) { buffer.pushName(data); },
             deserialize(buffer: SerialBuffer) { return buffer.getName(); },
         }),
+        time_point: createType({
+            name: 'time_point',
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushNumberAsUint64(dateToTimePoint(data)); },
+            deserialize(buffer: SerialBuffer) { return timePointToDate(buffer.getUint64AsNumber()); },
+        }),
         time_point_sec: createType({
             name: 'time_point_sec',
             serialize(buffer: SerialBuffer, data: string) { buffer.pushUint32(dateToTimePointSec(data)); },
             deserialize(buffer: SerialBuffer) { return timePointSecToDate(buffer.getUint32()); },
+        }),
+        block_timestamp_type: createType({
+            name: 'block_timestamp_type',
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushUint32(dateToBlockTimestamp(data)); },
+            deserialize(buffer: SerialBuffer) { return blockTimestampToDate(buffer.getUint32()); },
         }),
         symbol_code: createType({
             name: 'symbol_code',
@@ -564,11 +626,20 @@ export function createInitialTypes(): Map<string, Type> {
         // TODO: implement these types
         public_key: createType({ name: 'public_key' }),
         signature: createType({ name: 'signature' }),
-        varint32: createType({ name: 'varint32' }),
-        time_point: createType({ name: 'time_point' }),
-        block_timestamp_type: createType({ name: 'block_timestamp_type' }),
-        extended_asset: createType({ name: 'extended_asset' }),
     }));
+
+    result.set('extended_asset', createType({
+        name: 'extended_asset',
+        baseName: '',
+        fields: [
+            { name: 'quantity', typeName: 'asset', type: result.get('asset') },
+            { name: 'contract', typeName: 'name', type: result.get('name') },
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+
+    return result;
 } // createInitialTypes()
 
 export function getType(types: Map<string, Type>, name: string): Type {
