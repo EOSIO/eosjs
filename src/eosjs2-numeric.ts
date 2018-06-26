@@ -130,6 +130,7 @@ export const enum KeyType {
 };
 
 export const publicKeyDataSize = 33;
+export const privateKeyDataSize = 32;
 export const signatureDataSize = 65;
 
 export interface Key {
@@ -198,13 +199,27 @@ export function publicKeyToString(key: Key) {
     }
 }
 
+export function stringToPrivateKey(s: string): Key {
+    if (s.substr(0, 7) == "PVT_R1_")
+        return stringToKey(s.substr(7), KeyType.r1, privateKeyDataSize, "R1");
+    else
+        throw new Error("unrecognized private key format");
+}
+
+export function privateKeyToString(signature: Key) {
+    if (signature.type == KeyType.r1)
+        return keyToString(signature, "R1", "PVT_R1_");
+    else
+        throw new Error("unrecognized private key format");
+}
+
 export function stringToSignature(s: string): Key {
     if (s.substr(0, 7) == "SIG_K1_")
         return stringToKey(s.substr(7), KeyType.k1, signatureDataSize, "K1");
     else if (s.substr(0, 7) == "SIG_R1_")
         return stringToKey(s.substr(7), KeyType.r1, signatureDataSize, "R1");
     else
-        throw new Error("unrecognized public key format");
+        throw new Error("unrecognized signature format");
 }
 
 export function signatureToString(signature: Key) {

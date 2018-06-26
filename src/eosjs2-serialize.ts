@@ -351,6 +351,18 @@ export class SerialBuffer {
         return numeric.publicKeyToString({ type, data });
     }
 
+    pushPrivateKey(s: string) {
+        let key = numeric.stringToPrivateKey(s);
+        this.push(key.type);
+        this.pushArray(key.data);
+    }
+
+    getPrivateKey() {
+        let type = this.get();
+        let data = this.getUint8Array(numeric.privateKeyDataSize);
+        return numeric.privateKeyToString({ type, data });
+    }
+
     pushSignature(s: string) {
         let key = numeric.stringToSignature(s);
         this.push(key.type);
@@ -650,6 +662,11 @@ export function createInitialTypes(): Map<string, Type> {
             name: 'public_key',
             serialize(buffer: SerialBuffer, data: string) { buffer.pushPublicKey(data); },
             deserialize(buffer: SerialBuffer) { return buffer.getPublicKey(); },
+        }),
+        private_key: createType({
+            name: 'private_key',
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushPrivateKey(data); },
+            deserialize(buffer: SerialBuffer) { return buffer.getPrivateKey(); },
         }),
         signature: createType({
             name: 'signature',
