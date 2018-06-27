@@ -49,7 +49,7 @@ export interface SerializedAction {
     account: string;
     name: string;
     authorization: Authorization[];
-    data: Uint8Array;
+    data: string;
 }
 
 export class SerialBuffer {
@@ -751,7 +751,7 @@ export function serializeActionData(contract: Contract, account: string, name: s
         throw new Error('Unknown action ' + name + ' in contract ' + account);
     let buffer = new SerialBuffer;
     action.serialize(buffer, data);
-    return buffer.asUint8Array();
+    return arrayToHex(buffer.asUint8Array());
 }
 
 export function serializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any): SerializedAction {
