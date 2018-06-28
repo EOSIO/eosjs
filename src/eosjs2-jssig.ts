@@ -3,7 +3,7 @@
 'use strict';
 
 const ecc = require('eosjs-ecc');
-import { SignatureProvider, SignatureProviderArgs } from './index';
+import { SignatureProvider, SignatureProviderArgs } from './eosjs2-api';
 
 export default class JsSignatureProvider implements SignatureProvider {
     privateKeys: string[];
