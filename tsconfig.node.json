@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "es2015",
+        "target": "es2017",
+        "outDir": "dist",
+        "sourceMap": true,
+        "noImplicitAny": true,
+        "moduleResolution": "node",
+        "allowJs": true
+    },
+    "include": [
+        "src/*.ts",
+        "src/*.js"
+    ]
+}

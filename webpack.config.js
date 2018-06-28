@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        eosjs2: './src/index.ts',
+        eosjs2: './src/eosjs2-api.ts',
         eosjs2_jsonrpc: './src/eosjs2-jsonrpc.ts',
         eosjs2_jssig: './src/eosjs2-jssig.ts',
     },
@@ -16,8 +16,13 @@ module.exports = {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: 'ts-loader',
-                exclude: /node_modules/
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        configFile: 'tsconfig.web.json'
+                    }
+                },
+                exclude: /node_modules/,
             }
         ]
     },
@@ -27,6 +32,6 @@ module.exports = {
     output: {
         filename: x => x.chunk.id.replace('_', '-') + '-debug.js',
         library: '[id]',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist-web'),
     }
 };
