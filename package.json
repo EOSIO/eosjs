@@ -9,8 +9,8 @@
     "lib"
   ],
   "scripts": {
-    "test": "mocha --use_strict src/*.test.js",
-    "test_lib": "mocha --use_strict lib/*.test.js",
+    "test": "mocha --exit --use_strict src/*.test.js",
+    "test_lib": "mocha --exit --use_strict lib/*.test.js",
     "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "build": "babel --copy-files src --out-dir lib",
@@ -46,7 +46,7 @@
     "coveralls": "^3.0.0",
     "eosjs-keygen": "^1.3.2",
     "jsdoc-to-markdown": "^3.0.4",
-    "mocha": "^3.4.2",
+    "mocha": "^5.2.0",
     "nyc": "^11.4.1",
     "uglify-js": "^3.4.1"
   },
