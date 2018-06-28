@@ -8,24 +8,37 @@ const transactionAbi = require('../src/transaction.abi.json');
 
 export const serialize = ser;
 
+export interface AuthorityProviderArgs {
+    transaction: any;
+    availableKeys: string[];
+}
+
+export interface AuthorityProvider {
+    getRequiredKeys: (args: AuthorityProviderArgs) => Promise<string[]>;
+}
+
 export interface SignatureProviderArgs {
     chainId: string;
+    requiredKeys: string[];
     serializedTransaction: Uint8Array;
 }
 
 export interface SignatureProvider {
+    getAvailableKeys: () => Promise<string[]>;
     sign: (args: SignatureProviderArgs) => Promise<string[]>;
 }
 
 export class Api {
     rpc: JsonRpc;
+    authorityProvider: AuthorityProvider;
     signatureProvider: SignatureProvider;
     chainId: string;
     transactionTypes: Map<string, ser.Type>;
     contracts = new Map<string, ser.Contract>();
 
-    constructor(args: { rpc: JsonRpc, signatureProvider: SignatureProvider, chainId: string }) {
+    constructor(args: { rpc: JsonRpc, authorityProvider?: AuthorityProvider, signatureProvider: SignatureProvider, chainId: string }) {
         this.rpc = args.rpc;
+        this.authorityProvider = args.authorityProvider || args.rpc;
         this.signatureProvider = args.signatureProvider;
         this.chainId = args.chainId;
         this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
@@ -94,7 +107,9 @@ export class Api {
         }
         transaction = { ...transaction, actions: await this.serializeActions(actions) };
         let serializedTransaction = this.serializeTransaction(transaction);
-        let signatures = await this.signatureProvider.sign({ chainId: this.chainId, serializedTransaction: serializedTransaction });
+        let availableKeys = await this.signatureProvider.getAvailableKeys();
+        let requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+        let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction: serializedTransaction });
         return await this.rpc.push_transaction({
             signatures,
             serializedTransaction,

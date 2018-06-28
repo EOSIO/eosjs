@@ -1,4 +1,4 @@
-## eos-altjs
+## eosjs2
 
 Library for talking to the eos api.
 

@@ -6,16 +6,23 @@ const ecc = require('eosjs-ecc');
 import { SignatureProvider, SignatureProviderArgs } from './eosjs2-api';
 
 export default class JsSignatureProvider implements SignatureProvider {
-    privateKeys: string[];
+    keys = new Map<string, string>();
+    availableKeys = [] as string[];
 
     constructor(privateKeys: string[]) {
-        this.privateKeys = privateKeys;
+        for (let k of privateKeys) {
+            let pub = ecc.PrivateKey.fromString(k).toPublic().toString();
+            this.keys.set(pub, k);
+            this.availableKeys.push(pub);
+        }
     }
 
-    async sign({ chainId, serializedTransaction }: SignatureProviderArgs) {
+    async getAvailableKeys() {
+        return this.availableKeys;
+    }
+
+    async sign({ chainId, requiredKeys, serializedTransaction }: SignatureProviderArgs) {
         let signBuf = Buffer.concat([new Buffer(chainId, 'hex'), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32))]);
-        return this.privateKeys.map(key => {
-            return ecc.Signature.sign(signBuf, key).toString();
-        });
+        return requiredKeys.map(pub => ecc.Signature.sign(signBuf, this.keys.get(pub)).toString());
     }
 }

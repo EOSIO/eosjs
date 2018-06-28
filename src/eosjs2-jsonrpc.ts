@@ -1,5 +1,7 @@
 // copyright defined in eosjs2/LICENSE.txt
 
+import { AuthorityProvider, AuthorityProviderArgs } from './eosjs2-api';
+
 export class RpcError extends Error {
     json: any;
     constructor(json: any) {
@@ -80,7 +82,7 @@ function arrayToHex(data: Uint8Array) {
     return result;
 }
 
-export class JsonRpc {
+export class JsonRpc implements AuthorityProvider {
     endpoint: string;
     fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
 
@@ -139,6 +141,13 @@ export class JsonRpc {
                 upper_bound,
                 limit
             });
+    }
+
+    async getRequiredKeys(args: AuthorityProviderArgs): Promise<string[]> {
+        return (await this.fetch('/v1/chain/get_required_keys', {
+            transaction: args.transaction,
+            available_keys: args.availableKeys
+        })).required_keys;
     }
 
     async push_transaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
