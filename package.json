@@ -1,6 +1,6 @@
 {
   "name": "eosjs2",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -14,9 +14,11 @@
     "type": "git",
     "url": "https://github.com/EOSIO/eosjs2.git"
   },
+  "dependencies": {
+    "eosjs-ecc": "^4.0.1"
+  },
   "devDependencies": {
     "@types/node": "^10.3.1",
-    "eosjs-ecc": "^4.0.1",
     "json-loader": "^0.5.7",
     "ts-loader": "^4.3.1",
     "typescript": "^2.9.1",
