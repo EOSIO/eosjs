@@ -50,7 +50,7 @@ Library for talking to the eos api.
 
 ## Node / ES2015
 
-`npm install eosjs2` or `yarn add eosjs2` (will only work once `eosjs2` is available on npm)
+`npm install eosjs2` or `yarn add eosjs2`
 
 ```javascript
 import eosjs from 'eosjs2';
