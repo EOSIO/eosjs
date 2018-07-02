@@ -163,4 +163,11 @@ export class JsonRpc implements AuthorityProvider {
             packed_trx: arrayToHex(serializedTransaction),
         });
     }
+
+    async db_size_get() { return await this.fetch('/v1/db_size/get', {}); }
+
+    async history_get_actions(account_name: string, pos: number = null, offset: number = null) { return await this.fetch('/v1/history/get_actions', { account_name, pos, offset }); }
+    async history_get_transaction(id: string, block_num_hint: number = null) { return await this.fetch('/v1/history/get_transaction', { id, block_num_hint }); }
+    async history_get_key_accounts(public_key: string) { return await this.fetch('/v1/history/get_key_accounts', { public_key }); }
+    async history_get_controlled_accounts(controlling_account: string) { return await this.fetch('/v1/history/get_controlled_accounts', { controlling_account }); }
 } // JsonRpc
