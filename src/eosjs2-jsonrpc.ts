@@ -116,9 +116,14 @@ export class JsonRpc implements AuthorityProvider {
 
     async get_abi(account_name: string): Promise<GetAbiResult> { return await this.fetch('/v1/chain/get_abi', { account_name }); }
     async get_account(account_name: string): Promise<any> { return await this.fetch('/v1/chain/get_account', { account_name }); }
+    async get_block_header_state(block_num_or_id: number | string): Promise<any> { return await this.fetch('/v1/chain/get_block_header_state', { block_num_or_id }); }
     async get_block(block_num_or_id: number | string): Promise<GetBlockResult> { return await this.fetch('/v1/chain/get_block', { block_num_or_id }); }
     async get_code(account_name: string): Promise<GetCodeResult> { return await this.fetch('/v1/chain/get_code', { account_name }); }
+    async get_currency_balance(code: string, account: string, symbol: string = null): Promise<any> { return await this.fetch('/v1/chain/get_currency_balance', { code, account, symbol }); }
+    async get_currency_stats(code: string, symbol: string): Promise<any> { return await this.fetch('/v1/chain/get_currency_stats', { code, symbol }); }
     async get_info(): Promise<GetInfoResult> { return await this.fetch('/v1/chain/get_info', {}); }
+    async get_producer_schedule(): Promise<any> { return await this.fetch('/v1/chain/get_producer_schedule', {}); }
+    async get_producers(json = true, lower_bound = '', limit = 50): Promise<any> { return await this.fetch('/v1/chain/get_producers', { json, lower_bound, limit }); }
 
     async get_table_rows({
         json = true,
