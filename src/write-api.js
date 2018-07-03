@@ -85,7 +85,7 @@ function WriteApi(Network, network, config, Transaction) {
     } else if(typeof args[0] === 'string') {
       contracts = [args[0]]
       args = args.slice(1)
-    } else if(typeof args[0] === 'object' && typeof Array.isArray(args[0].actions)) {
+    } else if(typeof args[0] === 'object' && Array.isArray(args[0].actions)) {
       // full transaction, lookup ABIs used by each action
       const accounts = new Set() // make a unique list
       for(const action of args[0].actions) {
