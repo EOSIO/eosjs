@@ -53,7 +53,7 @@ Library for talking to the eos api.
 `npm install eosjs2` or `yarn add eosjs2`
 
 ```javascript
-import eosjs from 'eosjs2';
+import eosjs2 from 'eosjs2';
 
 // or use named imports
 // import { Api, Rpc, SignatureProvider } from 'eosjs2';
