@@ -740,7 +740,7 @@ export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
 export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: number) {
     return {
         expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
-        ref_block_num: refBlock.block_num,
+        ref_block_num: refBlock.block_num & 0xffff,
         ref_block_prefix: refBlock.ref_block_prefix,
     };
 };
