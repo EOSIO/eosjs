@@ -19,6 +19,33 @@ Release notes:
 
 Prior [version](./docs/prior_versions.md) matrix.
 
+
+### Usage
+
+* Install with: `npm install eosjs`
+* Html script tag, see [releases](https://github.com/EOSIO/eosjs/releases) for the correct **version** and its matching script **integrity** hash. 
+
+```html
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://cdn.jsdelivr.net/npm/eosjs@15.0.3/lib/eos.min.js"
+        integrity="sha512-QX0dPq5pyX33coEuy5x1UqKHFDeveQYMp7Sz+qOUwRL9mol4QDvViU+QAjd+k6P7QjPjrDCoyhK1kz2GDxCP9A=="
+        crossorigin="anonymous"></script>
+  <script>
+  eos = Eos({
+    httpEndpoint: 'http://ayeaye.cypherglass.com:8888',
+    chainId: '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca',
+    verbose: true
+  })
+  </script>
+</head>
+<body>
+  See console object: Eos
+</body>
+</html>
+```
+
 ### Usage
 
 Ways to instantiate eosjs.
@@ -569,8 +596,7 @@ var {format, api, ecc, json, Fcbuffer} = Eos.modules
   * Clients sign the binary form of the transaction
   * Allows client to know what it is signing
 
-
-# Browser
+# Build (development)
 
 ```bash
 git clone https://github.com/EOSIO/eosjs.git
@@ -581,14 +607,6 @@ npm run build_browser
 
 npm run build_browser_test
 # builds: ./dist/test.js run with ./dist/test.html
-```
-
-```html
-<script src="eos.js"></script>
-<script>
-var eos = Eos()
-//...
-</script>
 ```
 
 # Environment
