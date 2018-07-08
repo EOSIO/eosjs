@@ -329,8 +329,8 @@ objects to `eos.transaction`..
 
 For example:
 * permission `inita` defaults `inita@active`
-* authority `'EOS6MRy..'` expands `{threshold: 1, keys: [key: 'EOS6MRy..', weight: 1]}`
-* authority `inita` expands `{{threshold: 1, accounts: [..actor: 'inita', permission: 'active', weight: 1]}}`
+* authority `'EOS6MRy..'` expands `{threshold: 1, keys: [{key: 'EOS6MRy..', weight: 1}]}`
+* authority `inita` expands `{threshold: 1, accounts: [{permission: {actor: 'inita', permission: 'active'}, weight: 1}]}`
 
 ### New Account
 
