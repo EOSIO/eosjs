@@ -596,19 +596,6 @@ var {format, api, ecc, json, Fcbuffer} = Eos.modules
   * Clients sign the binary form of the transaction
   * Allows client to know what it is signing
 
-# Build (development)
-
-```bash
-git clone https://github.com/EOSIO/eosjs.git
-cd eosjs
-npm install
-npm run build_browser
-# builds: ./dist/eos.js load with ./dist/index.html
-
-npm run build_browser_test
-# builds: ./dist/test.js run with ./dist/test.html
-```
-
 # Environment
 
 Node and browser (es2015)
