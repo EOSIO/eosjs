@@ -91,23 +91,20 @@ describe('shorthand', () => {
 
 })
 
-if(process.env['NODE_ENV'] === 'development') {
+describe('Eosio Abi', () => {
 
-  describe('Eosio Abi', () => {
+  it('Eosio token contract parses', (done) => {
+    const eos = Eos()
 
-    it('Eosio token contract parses', (done) => {
-      const eos = Eos()
-
-      eos.contract('eosio.token', (error, eosio_token) => {
-        assert(!error, error)
-        assert(eosio_token.transfer, 'eosio.token contract')
-        assert(eosio_token.issue, 'eosio.token contract')
-        done()
-      })
+    eos.contract('eosio.token', (error, eosio_token) => {
+      assert(!error, error)
+      assert(eosio_token.transfer, 'eosio.token contract')
+      assert(eosio_token.issue, 'eosio.token contract')
+      done()
     })
-
   })
-}
+
+})
 
 describe('Action.data', () => {
   it('json', () => {
