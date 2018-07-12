@@ -90,7 +90,7 @@ PARAMETERS
 ```
 
 Start a nodeosd process.  The docker in this repository provides a setup
-the supports the examples in this README.
+that supports the examples in this README.
 
 ```bash
 cd ./docker && ./up.sh
@@ -143,7 +143,7 @@ config = {
 eos = Eos(config)
 ```
 
-* **chainId** `hex` - Unique ID for the blockchain you're connecting too.  This
+* **chainId** `hex` - Unique ID for the blockchain you're connecting to.  This
   is required for valid transaction signing.  The chainId is provided via the
   [get_info](http://ayeaye.cypherglass.com:8888/v1/chain/get_info) API call.
 
@@ -238,7 +238,7 @@ eos.transfer('alice', 'bob', '1.0000 SYS', '', options)
 
 The transaction function accepts the standard blockchain transaction.
 
-Required transaction header fields will be added unless your signing without a
+Required transaction header fields will be added unless you are signing without a
 network connection (httpEndpoint == null). In that case provide you own headers:
 
 ```js
