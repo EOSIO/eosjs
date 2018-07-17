@@ -1,2 +1,2 @@
-FROM eosio/eos:v1.0.7
+FROM eosio/eos:v1.0.10
 COPY config.ini /

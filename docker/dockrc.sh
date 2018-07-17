@@ -6,11 +6,13 @@ export owner_pubkey=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 export active_pubkey=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
 function cleos() {
-  docker exec docker_keosd_1 cleos -u http://nodeosd:8888 "$@"
+  docker-compose exec keosd cleos -u http://nodeosd:8888 --wallet-url http://localhost:8900 "$@"
 }
 
-function newaccount() {
-  cleos system newaccount\
-    --stake-net "10 SYS" --stake-cpu "100 SYS" --buy-ram-bytes 256\
-    "$@"
+function keosd() {
+  docker exec docker_nodeosd_1 keosd "$@"
+}
+
+function pkill() {
+  docker exec docker_nodeosd_1 pkill "$@"
 }
