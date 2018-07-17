@@ -8,7 +8,6 @@ const AbiCache = require('./abi-cache')
 const writeApiGen = require('./write-api')
 const format = require('./format')
 const schema = require('./schema')
-const pkg = require('../package.json')
 
 const Eos = (config = {}) => {
   config = Object.assign({}, {
@@ -33,7 +32,7 @@ module.exports = Eos
 Object.assign(
   Eos,
   {
-    version: pkg.version,
+    version: '15.0.6',
     modules: {
       format,
       api: EosApi,
