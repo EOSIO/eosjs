@@ -27,15 +27,15 @@ Prior [version](./docs/prior_versions.md) matrix.
 
 ```html
 <!--
-sha512-UQLchw9QzS3ZJYX+kmbGuMUdBS7BrajPphsZibuTTS27EXxcXns3ITRfOPvSZ/xPd5DhIckmvYj0FXWUa8gE5Q== lib/eos.js
-sha512-KpODfN4HS8hjaWn6oZeUx/UIlIZ8mbS3EnylJ4is1GvSQ9mfuth7RhRCFPn2QQNvFtHAfVgRn4V3ithCWWVeGA== lib/eos.min.js
+sha512-UbN49QFVHmkVHWB/Akk/kBPRtfqBCa76e+1B11mW7DJgi1r6p6xA+U+uFH/FN0hkgT1Oe8Hc7g9oG5fIeeWF+A== lib/eos.js
+sha512-NlFuwWgo6K0P1CtVwkXZbFoX+rgR8cv04uJGNrvlRjbfzLLcviYY8rf8kgOtoZqx5ZJarwU8WkihAlyoUXL2oQ== lib/eos.min.js
 sha512-VjGIVy6TjlKenLPbOAf+/TeD5ny96ebeWhDJMfmLtkUuzSVohM79d7vwPbBEtBO5wrr23qKPV1HJK2WbfP6rpg== lib/eos.min.js.map
 -->
 <html>
 <head>
   <meta charset="utf-8">
   <script src="https://cdn.jsdelivr.net/npm/eosjs@15.0.4/lib/eos.min.js"
-        integrity="sha512-KpODfN4HS8hjaWn6oZeUx/UIlIZ8mbS3EnylJ4is1GvSQ9mfuth7RhRCFPn2QQNvFtHAfVgRn4V3ithCWWVeGA=="
+        integrity="sha512-NlFuwWgo6K0P1CtVwkXZbFoX+rgR8cv04uJGNrvlRjbfzLLcviYY8rf8kgOtoZqx5ZJarwU8WkihAlyoUXL2oQ=="
         crossorigin="anonymous"></script>
   <script>
   eos = Eos({
