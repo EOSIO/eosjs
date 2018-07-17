@@ -2,7 +2,7 @@
 
 'use strict';
 
-import { Abi, GetInfoResult, JsonRpc } from './eosjs2-jsonrpc';
+import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from './eosjs2-jsonrpc';
 import * as ser from './eosjs2-serialize';
 const transactionAbi = require('../src/transaction.abi.json');
 
@@ -93,26 +93,41 @@ export class Api {
         }));
     }
 
-    async pushTransaction({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
-        let info: GetInfoResult;
-        if (!this.chainId) {
-            info = await this.rpc.get_info();
-            this.chainId = info.chain_id;
-        }
-        if (blocksBehind !== undefined && expireSeconds !== undefined) {
-            if (!info)
-                info = await this.rpc.get_info();
-            let refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
-            transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
-        }
-        transaction = { ...transaction, actions: await this.serializeActions(actions) };
-        let serializedTransaction = this.serializeTransaction(transaction);
-        let availableKeys = await this.signatureProvider.getAvailableKeys();
-        let requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
-        let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction: serializedTransaction });
-        return await this.rpc.push_transaction({
-            signatures,
-            serializedTransaction,
-        });
+    async fillTaposFields({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
+      let info: GetInfoResult;
+      if (!this.chainId) {
+          info = await this.rpc.get_info();
+          this.chainId = info.chain_id;
+      }
+      if (blocksBehind !== undefined && expireSeconds !== undefined) {
+          if (!info)
+              info = await this.rpc.get_info();
+          let refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
+          transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
+      }
+      return { ...transaction, actions: await this.serializeActions(actions) };
+    }
+
+    async signTransaction({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
+      transaction = await this.fillTaposFields({ blocksBehind, expireSeconds, actions, ...transaction });
+      let serializedTransaction = this.serializeTransaction(transaction);
+      let availableKeys = await this.signatureProvider.getAvailableKeys();
+      let requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+      let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction });
+      return {
+        signatures,
+        serializedTransaction,
+      };
+    }
+
+    async pushTransaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+      return await this.rpc.push_transaction({
+          signatures,
+          serializedTransaction,
+      });
+    }
+
+    async signAndPushTransaction({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
+      return await this.pushTransaction( await this.signTransaction({ blocksBehind, expireSeconds, actions, ...transaction }));
     }
 } // Api
