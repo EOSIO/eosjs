@@ -9,10 +9,10 @@ General purpose library for EOSIO blockchains.
 
 | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
 | --- | --- | --- | --- |
-| tag: 15.0.4 | `npm install eosjs` (version 15) | tag: v1.0.10 | eosio/eos:v1.0.10 |
+| tag: 15.0.5 | `npm install eosjs` (version 15) | tag: v1.0.10 | eosio/eos:v1.0.10 |
 
 Release notes:
-* eosjs@15.0.4 is compatible with eosio v1.0.5 - v1.0.10
+* eosjs@15.0.5 is compatible with eosio v1.0.5 - v1.0.10
 * Converted some types in **format** module from unsigned to signed: UDecimalPad -> DecimalPad for example (15.0.1)
 * All `asset` and `extended_asset` amounts require exact decimal places (Change `1 SYS` to `1.0000 SYS`) (15.0.0)
 * Use `config.verbose` instead of `config.debug` (14.1.0)
@@ -27,15 +27,15 @@ Prior [version](./docs/prior_versions.md) matrix.
 
 ```html
 <!--
-sha512-UQLchw9QzS3ZJYX+kmbGuMUdBS7BrajPphsZibuTTS27EXxcXns3ITRfOPvSZ/xPd5DhIckmvYj0FXWUa8gE5Q== lib/eos.js
-sha512-KpODfN4HS8hjaWn6oZeUx/UIlIZ8mbS3EnylJ4is1GvSQ9mfuth7RhRCFPn2QQNvFtHAfVgRn4V3ithCWWVeGA== lib/eos.min.js
+sha512-ai45284Aqpa8O+wxR7/aevdeGmgYkc2sZ27r+CAaADuu3rusBtZ+syXqhzwDucBsQdNhmLOaae42vSOEdmkiIA== lib/eos.js
+sha512-EpymRDmpHwTXG0LT+mQZ10/m1XAsTxj74bZ9uiDJm9CUGmNX+qkrNC/GMU6R/c5ayB0LGBTSUeJDnQYlc58g4w== lib/eos.min.js
 sha512-VjGIVy6TjlKenLPbOAf+/TeD5ny96ebeWhDJMfmLtkUuzSVohM79d7vwPbBEtBO5wrr23qKPV1HJK2WbfP6rpg== lib/eos.min.js.map
 -->
 <html>
 <head>
   <meta charset="utf-8">
-  <script src="https://cdn.jsdelivr.net/npm/eosjs@15.0.4/lib/eos.min.js"
-        integrity="sha512-KpODfN4HS8hjaWn6oZeUx/UIlIZ8mbS3EnylJ4is1GvSQ9mfuth7RhRCFPn2QQNvFtHAfVgRn4V3ithCWWVeGA=="
+  <script src="https://cdn.jsdelivr.net/npm/eosjs@15.0.5/lib/eos.min.js"
+        integrity="sha512-EpymRDmpHwTXG0LT+mQZ10/m1XAsTxj74bZ9uiDJm9CUGmNX+qkrNC/GMU6R/c5ayB0LGBTSUeJDnQYlc58g4w=="
         crossorigin="anonymous"></script>
   <script>
   eos = Eos({
