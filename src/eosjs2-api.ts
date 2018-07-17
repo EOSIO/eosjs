@@ -108,8 +108,7 @@ export class Api {
         return { ...transaction, actions: await this.serializeActions(actions) };
     }
 
-    async signTransaction({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
-        transaction = await this.fillTaposFields({ blocksBehind, expireSeconds, actions, ...transaction });
+    async signTransaction(transaction: any) {
         let serializedTransaction = this.serializeTransaction(transaction);
         let availableKeys = await this.signatureProvider.getAvailableKeys();
         let requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
@@ -120,14 +119,7 @@ export class Api {
         };
     }
 
-    async pushTransaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
-        return await this.rpc.push_transaction({
-            signatures,
-            serializedTransaction,
-        });
-    }
-
     async signAndPushTransaction(transaction: any) {
-        return await this.pushTransaction(await this.signTransaction(transaction));
+        return await this.rpc.push_transaction(await this.signTransaction(await this.fillTaposFields(transaction)));
     }
 } // Api
