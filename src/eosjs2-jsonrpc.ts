@@ -70,10 +70,16 @@ export interface GetInfoResult {
     block_net_limit: number;
 }
 
+export interface TransactionConfig {
+  broadcast?: boolean;
+  blocksBehind?: number;
+  expireSeconds?: number;
+}
+
 export interface PushTransactionArgs {
     signatures: string[];
     serializedTransaction: Uint8Array;
-};
+}
 
 function arrayToHex(data: Uint8Array) {
     let result = '';
