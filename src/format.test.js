@@ -2,15 +2,16 @@
 const assert = require('assert')
 const {
   encodeName, decodeName, encodeNameHex, decodeNameHex,
-  isName, UDecimalPad, UDecimalUnimply
+  isName, DecimalPad, DecimalUnimply,
+  parseAsset
 } = require('./format')
 
 describe('format', () => {
   // In isname111111k, 'k' overflows the last 4 bits of the name
   describe('name', () => {
     const nameFixture = {
-      isname: ['isname111111j', 'a', '1', '5', 'sam5', 'sam', 'adam.applejjj'],
-      noname: ['isname111111k', undefined, null, 1, '6', 'a6', ' ']
+      isname: ['isname111111', 'a', '1', '5', 'sam5', 'sam', 'adam.applejj'],
+      noname: ['isname111111j', undefined, null, 1, '6', 'a6', ' ']
     }
 
     it('isName', () => {
@@ -43,15 +44,17 @@ describe('format', () => {
     })
   })
 
-  it('UDecimalPad', () => {
-    assert.throws(() => UDecimalPad(), /value is required/)
-    assert.throws(() => UDecimalPad(1), /precision/)
-    assert.throws(() => UDecimalPad('$10', 0), /invalid decimal/)
-    assert.throws(() => UDecimalPad('1.1.', 0), /invalid decimal/)
-    assert.throws(() => UDecimalPad('1.1,1', 0), /invalid decimal/)
-    assert.throws(() => UDecimalPad('1.11', 1), /exceeds precision/)
+  it('DecimalPad', () => {
+    assert.throws(() => DecimalPad(), /value is required/)
+    assert.throws(() => DecimalPad('$10', 0), /invalid decimal/)
+    assert.throws(() => DecimalPad('1.1.', 0), /invalid decimal/)
+    assert.throws(() => DecimalPad('1.1,1', 0), /invalid decimal/)
+    assert.throws(() => DecimalPad('1.11', 1), /exceeds precision/)
 
     const decFixtures = [
+      {value: -1, precision: null, answer: '-1'},
+      {value: 1, precision: null, answer: '1'},
+
       {value: 1, precision: 0, answer: '1'},
       {value: '1', precision: 0, answer: '1'},
       {value: '1.', precision: 0, answer: '1'},
@@ -78,31 +81,56 @@ describe('format', () => {
     ]
     for(const test of decFixtures) {
       const {answer, value, precision} = test
-      assert.equal(UDecimalPad(value, precision), answer, JSON.stringify(test))
+      assert.equal(DecimalPad(value, precision), answer, JSON.stringify(test))
     }
   })
 
-  it('UDecimalUnimply', () => {
-    assert.throws(() => UDecimalUnimply('1.', 1), /invalid whole number/)
-    assert.throws(() => UDecimalUnimply('.1', 1), /invalid whole number/)
-    assert.throws(() => UDecimalUnimply('1.1', 1), /invalid whole number/)
-  
+  it('DecimalUnimply', () => {
+    assert.throws(() => DecimalUnimply('1.', 1), /invalid whole number/)
+    assert.throws(() => DecimalUnimply('.1', 1), /invalid whole number/)
+    assert.throws(() => DecimalUnimply('1.1', 1), /invalid whole number/)
+
     const decFixtures = [
+      {value: -1, precision: 0, answer: '-1'},
       {value: 1, precision: 0, answer: '1'},
       {value: '1', precision: 0, answer: '1'},
       {value: '10', precision: 0, answer: '10'},
-  
+
       {value: 1, precision: 1, answer: '0.1'},
-      {value: '10', precision: 1, answer: '1'},
-  
+      {value: '10', precision: 1, answer: '1.0'},
+
       {value: '11', precision: 2, answer: '0.11'},
-      {value: '110', precision: 2, answer: '1.1'},
+      {value: '110', precision: 2, answer: '1.10'},
       {value: '101', precision: 2, answer: '1.01'},
       {value: '0101', precision: 2, answer: '1.01'},
+      {value: '1', precision: 5, answer: '0.00001'},
     ]
     for(const test of decFixtures) {
       const {answer, value, precision} = test
-      assert.equal(UDecimalUnimply(value, precision), answer, JSON.stringify(test))
+      assert.equal(DecimalUnimply(value, precision), answer, JSON.stringify(test))
+    }
+  })
+
+  it('parseAsset', () => {
+    const parseExtendedAssets = [
+      ['SYM', null, null, 'SYM', null],
+      ['SYM@contract', null, null, 'SYM', 'contract'],
+      ['4,SYM', null, 4, 'SYM', null],
+      ['4,SYM@contract', null, 4, 'SYM', 'contract'],
+      ['1 SYM', '1', 0, 'SYM', null],
+      ['-1 SYM', '-1', 0, 'SYM', null],
+      ['1.0 SYM', '1.0', 1, 'SYM', null],
+      ['1.0000 SYM@contract', '1.0000', 4, 'SYM', 'contract'],
+      ['1.0000 SYM@tract.token', '1.0000', 4, 'SYM', 'tract.token'],
+      ['1.0000 SYM@tr.act.token', '1.0000', 4, 'SYM', 'tr.act.token'],
+      ['1.0000 SYM', '1.0000', 4, 'SYM', null],
+    ]
+    for(const [str, amount, precision, symbol, contract] of parseExtendedAssets) {
+      assert.deepEqual(
+        parseAsset(str),
+        {amount, precision, symbol, contract},
+        JSON.stringify([str, amount, precision, symbol, contract])
+      )
     }
   })
 })

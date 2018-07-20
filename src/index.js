@@ -1,51 +1,101 @@
 const ecc = require('eosjs-ecc')
-const json = require('eosjs-json')
 const Fcbuffer = require('fcbuffer')
-const api = require('eosjs-api')
+const EosApi = require('eosjs-api')
+const assert = require('assert')
 
 const Structs = require('./structs')
 const AbiCache = require('./abi-cache')
 const writeApiGen = require('./write-api')
-const assert = require('assert')
+const format = require('./format')
+const schema = require('./schema')
 
-const Eos = {}
+const Eos = (config = {}) => {
+  config = Object.assign({}, {
+    httpEndpoint: 'http://127.0.0.1:8888',
+    debug: false,
+    verbose: false,
+    broadcast: true,
+    sign: true
+  }, config)
+
+  const defaultLogger = {
+    log: config.verbose ? console.log : null,
+    error: console.error
+  }
+  config.logger = Object.assign({}, defaultLogger, config.logger)
+
+  return createEos(config)
+}
 
 module.exports = Eos
 
-Eos.modules = {
-  json,
-  ecc,
-  api,
-  Fcbuffer
-}
+Object.assign(
+  Eos,
+  {
+    version: '15.0.6',
+    modules: {
+      format,
+      api: EosApi,
+      ecc,
+      json: {
+        api: EosApi.api,
+        schema
+      },
+      Fcbuffer
+    },
 
-function development(Network) {
-  return (config = {}) => {
-    const network = Network(Object.assign({}, {
-      apiLog: consoleObjCallbackLog(config.verbose)},
-      config
-    ))
-    const eosConfig = Object.assign({}, {
-      transactionLog: consoleObjCallbackLog(config.verbose)},
-      config
-    )
-    return createEos(eosConfig, Network, network)
+    /** @deprecated */
+    Testnet: function (config) {
+      console.error('deprecated, change Eos.Testnet(..) to just Eos(..)')
+      return Eos(config)
+    },
+
+    /** @deprecated */
+    Localnet: function (config) {
+      console.error('deprecated, change Eos.Localnet(..) to just Eos(..)')
+      return Eos(config)
+    }
   }
-}
+)
 
-Eos.Testnet = development(api.Testnet)
-Eos.Localnet = development(api.Localnet)
-// Eos.Mainnet = config => ..
 
-function createEos(config, Network, network) {
+function createEos(config) {
+  const network = config.httpEndpoint != null ? EosApi(config) : null
+  config.network = network
+
   const abiCache = AbiCache(network, config)
-  config = Object.assign({}, config, {network, abiCache})
+  config.abiCache = abiCache
 
   if(!config.chainId) {
-    config.chainId = '00'.repeat(32)
+    config.chainId = 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f'
   }
 
-  const eos = mergeWriteFunctions(config, Network)
+  if(network) {
+    checkChainId(network, config.chainId, config.logger)
+  }
+
+  if(config.mockTransactions != null) {
+    if(typeof config.mockTransactions === 'string') {
+      const mock = config.mockTransactions
+      config.mockTransactions = () => mock
+    }
+    assert.equal(typeof config.mockTransactions, 'function', 'config.mockTransactions')
+  }
+
+  const {structs, types, fromBuffer, toBuffer} = Structs(config)
+  const eos = mergeWriteFunctions(config, EosApi, structs)
+
+  Object.assign(eos, {fc: {
+    structs,
+    types,
+    fromBuffer,
+    toBuffer,
+    abiCache
+  }})
+
+  Object.assign(eos, {modules: {
+    format
+  }})
 
   if(!config.signProvider) {
     config.signProvider = defaultSignProvider(eos, config)
@@ -54,43 +104,22 @@ function createEos(config, Network, network) {
   return eos
 }
 
-function consoleObjCallbackLog(verbose = false) {
-  return (error, result, name) => {
-    if(error) {
-      if(name) {
-        console.error(name, 'error')
-      }
-      console.error(error);
-    } else if(verbose) {
-      if(name) {
-        console.log(name, 'reply:')
-      }
-      console.log(JSON.stringify(result, null, 4))
-    }
-  }
-}
-
 /**
   Merge in write functions (operations).  Tested against existing methods for
   name conflicts.
 
   @arg {object} config.network - read-only api calls
-  @arg {object} Network - api[Network] read-only api calls
+  @arg {object} EosApi - api[EosApi] read-only api calls
   @return {object} - read and write method calls (create and sign transactions)
   @throw {TypeError} if a funciton name conflicts
 */
-function mergeWriteFunctions(config, Network) {
-  assert(config.network, 'network instance required')
-
+function mergeWriteFunctions(config, EosApi, structs) {
   const {network} = config
-  const {structs, types} = Structs(config)
-  const merge = Object.assign({}, {fc: {structs, types}})
 
-  throwOnDuplicate(merge, network, 'Conflicting methods in Eos and Network Api')
-  Object.assign(merge, network)
+  const merge = Object.assign({}, network)
 
-  const writeApi = writeApiGen(Network, network, structs, config)
-  throwOnDuplicate(merge, writeApi, 'Conflicting methods in Eos and Transaction Api')
+  const writeApi = writeApiGen(EosApi, network, structs, config, schema)
+  throwOnDuplicate(merge, writeApi, 'Conflicting methods in EosApi and Transaction Api')
   Object.assign(merge, writeApi)
 
   return merge
@@ -104,7 +133,15 @@ function throwOnDuplicate(o1, o2, msg) {
   }
 }
 
-const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
+/**
+  The default sign provider is designed to interact with the available public
+  keys (maybe just one), the transaction, and the blockchain to figure out
+  the minimum set of signing keys.
+
+  If only one key is available, the blockchain API calls are skipped and that
+  key is used to sign the transaction.
+*/
+const defaultSignProvider = (eos, config) => async function({sign, buf, transaction}) {
   const {keyProvider} = config
 
   if(!keyProvider) {
@@ -116,30 +153,54 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
     keys = keyProvider({transaction})
   }
 
+  // keyProvider may return keys or Promise<keys>
+  keys = await Promise.resolve(keys)
+
   if(!Array.isArray(keys)) {
     keys = [keys]
   }
 
+  keys = keys.map(key => {
+    try {
+      // normalize format (WIF => PVT_K1_base58privateKey)
+      return {private: ecc.PrivateKey(key).toString()}
+    } catch(e) {
+      // normalize format (EOSKey => PUB_K1_base58publicKey)
+      return {public: ecc.PublicKey(key).toString()}
+    }
+    assert(false, 'expecting public or private keys from keyProvider')
+  })
+
   if(!keys.length) {
     throw new Error('missing key, check your keyProvider')
+  }
+
+  // simplify default signing #17
+  if(keys.length === 1 && keys[0].private) {
+    const pvt = keys[0].private
+    return sign(buf, pvt)
+  }
+
+  // offline signing assumes all keys provided need to sign
+  if(config.httpEndpoint == null) {
+    const sigs = []
+    for(const key of keys) {
+      sigs.push(sign(buf, key.private))
+    }
+    return sigs
   }
 
   const keyMap = new Map()
 
   // keys are either public or private keys
   for(const key of keys) {
-    const isPrivate = ecc.isValidPrivate(key)
-    const isPublic = ecc.isValidPublic(key)
-
-    assert(
-      isPrivate || isPublic,
-      'expecting public or private keys from keyProvider'
-    )
+    const isPrivate = key.private != null
+    const isPublic = key.public != null
 
     if(isPrivate) {
-      keyMap.set(ecc.privateToPublic(key), key)
+      keyMap.set(ecc.privateToPublic(key.private), key.private)
     } else {
-      keyMap.set(key, null)
+      keyMap.set(key.public, null)
     }
   }
 
@@ -147,15 +208,18 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
 
   return eos.getRequiredKeys(transaction, pubkeys).then(({required_keys}) => {
     if(!required_keys.length) {
-      throw new Error('missing required keys ')
+      throw new Error('missing required keys for ' + JSON.stringify(transaction))
     }
 
-    const wifs = [], missingKeys = []
+    const pvts = [], missingKeys = []
 
-    for(const requiredKey of required_keys) {
+    for(let requiredKey of required_keys) {
+      // normalize (EOSKey.. => PUB_K1_Key..)
+      requiredKey = ecc.PublicKey(requiredKey).toString()
+
       const wif = keyMap.get(requiredKey)
       if(wif) {
-        wifs.push(wif)
+        pvts.push(wif)
       } else {
         missingKeys.push(requiredKey)
       }
@@ -165,15 +229,33 @@ const defaultSignProvider = (eos, config) => ({sign, buf, transaction}) => {
       assert(typeof keyProvider === 'function',
         'keyProvider function is needed for private key lookup')
 
+      // const pubkeys = missingKeys.map(key => ecc.PublicKey(key).toStringLegacy())
       keyProvider({pubkeys: missingKeys})
-        .forEach(wif => { wifs.push(wif) })
+        .forEach(pvt => { pvts.push(pvt) })
     }
 
     const sigs = []
-    for(const wif of wifs) {
-      sigs.push(sign(buf, wif))
+    for(const pvt of pvts) {
+      sigs.push(sign(buf, pvt))
     }
 
     return sigs
+  })
+}
+
+function checkChainId(network, chainId, logger) {
+  network.getInfo({}).then(info => {
+    if(info.chain_id !== chainId) {
+      if(logger.log) {
+        logger.log(
+          'chainId mismatch, signatures will not match transaction authority. ' +
+          `expected ${chainId} !== actual ${info.chain_id}`
+        )
+      }
+    }
+  }).catch(error => {
+    if(logger.error) {
+      logger.error('Warning, unable to validate chainId: ' + error.message)
+    }
   })
 }

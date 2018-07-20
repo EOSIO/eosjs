@@ -9,10 +9,17 @@ module.exports = {
   encodeNameHex: name => Long.fromString(encodeName(name), true).toString(16),
   decodeNameHex: (hex, littleEndian = true) =>
     decodeName(Long.fromString(hex, true, 16).toString(), littleEndian),
-  UDecimalString,
-  UDecimalPad,
-  UDecimalImply,
-  UDecimalUnimply
+  DecimalString,
+  DecimalPad,
+  DecimalImply,
+  DecimalUnimply,
+  printAsset,
+  parseAsset
+}
+
+/** @private */
+const signed = fn => (...args) => {
+
 }
 
 function ULong(value, unsigned = true, radix = 10) {
@@ -63,6 +70,7 @@ const charidx = ch => {
   @see types.hpp string_to_name
 
   @arg {string} name - A string to encode, up to 12 characters long.
+
   @return {string<uint64>} - compressed string (from name arg).  A string is
     always used because a number could exceed JavaScript's 52 bit limit.
 */
@@ -70,8 +78,8 @@ function encodeName(name, littleEndian = true) {
   if(typeof name !== 'string')
     throw new TypeError('name parameter is a required string')
 
-  if(name.length > 13)
-    throw new TypeError('A name can be up to 13 characters long')
+  if(name.length > 12)
+    throw new TypeError('A name can be up to 12 characters long')
 
   let bitstr = ''
   for(let i = 0; i <= 12; i++) { // process all 64 bits (even if name is short)
@@ -143,13 +151,17 @@ function decodeName(value, littleEndian = true) {
   throw an error for an invalid number.
 
   Normalization removes extra zeros or decimal.
-  
+
   @return {string} value
 */
-function UDecimalString(value) {
+function DecimalString(value) {
   assert(value != null, 'value is required')
   value = value === 'object' && value.toString ? value.toString() : String(value)
 
+  const neg = /^-/.test(value)
+  if(neg) {
+    value = value.substring(1)
+  }
 
   if(value[0] === '.') {
     value = `0${value}`
@@ -171,22 +183,27 @@ function UDecimalString(value) {
   if(part[0] === '') {
     part[0] = '0'
   }
-  return part.join('.')
+  return (neg ? '-' : '') + part.join('.')
 }
 
 /**
   Ensure a fixed number of decimal places.  Safe for large numbers.
 
   @see ./format.test.js
-  @example UDecimalString(10, 3) === '10.300'
+
+  @example DecimalPad(10.2, 3) === '10.200'
 
   @arg {number|string|object.toString} value
-  @arg {number} precision - number of decimal places
+  @arg {number} [precision = null] - number of decimal places (null skips padding)
   @return {string} decimal part is added and zero padded to match precision
 */
-function UDecimalPad(num, precision) {
-  const value = UDecimalString(num)
-  assert.equal('number', typeof precision, 'precision')
+function DecimalPad(num, precision) {
+  const value = DecimalString(num)
+  if(precision == null) {
+    return num
+  }
+
+  assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)
 
   const part = value.split('.')
 
@@ -204,8 +221,8 @@ function UDecimalPad(num, precision) {
 }
 
 /** Ensures proper trailing zeros then removes decimal place. */
-function UDecimalImply(value, precision) {
-  return UDecimalPad(value, precision).replace('.', '')
+function DecimalImply(value, precision) {
+  return DecimalPad(value, precision).replace('.', '')
 }
 
 /**
@@ -216,10 +233,16 @@ function UDecimalImply(value, precision) {
   @arg {number} precision 4
   @return {number} 1.0000
 */
-function UDecimalUnimply(value, precision) {
+function DecimalUnimply(value, precision) {
   assert(value != null, 'value is required')
   value = value === 'object' && value.toString ? value.toString() : String(value)
+  const neg = /^-/.test(value)
+  if(neg) {
+    value = value.substring(1)
+  }
   assert(/^\d+$/.test(value), `invalid whole number ${value}`)
+  assert(precision != null, 'precision required')
+  assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)
 
   // Ensure minimum length
   const pad = precision - value.length
@@ -229,5 +252,66 @@ function UDecimalUnimply(value, precision) {
 
   const dotIdx = value.length - precision
   value = `${value.slice(0, dotIdx)}.${value.slice(dotIdx)}`
-  return UDecimalString(value) // Normalize
+  return (neg ? '-' : '') + DecimalPad(value, precision) // Normalize
+}
+
+/** @private for now, support for asset strings is limited
+*/
+function printAsset({amount, precision, symbol, contract}) {
+  assert.equal(typeof symbol, 'string', 'symbol is a required string')
+
+  if(amount != null && precision != null) {
+    amount = DecimalPad(amount, precision)
+  }
+
+  const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
+
+  if(amount != null) {
+    // the amount contains the precision
+    return join(amount, ' ') + symbol + join('@', contract)
+  }
+
+  return join(precision, ',') + symbol + join('@', contract)
+}
+
+
+/**
+  Attempts to parse all forms of the asset strings (symbol, asset, or extended
+  versions).  If the provided string contains any additional or appears to have
+  invalid information an error is thrown.
+
+  @return {object} {amount, precision, symbol, contract}
+  @throws AssertionError
+*/
+function parseAsset(str) {
+  const [amountRaw] = str.split(' ')
+  const amountMatch = amountRaw.match(/^(-?[0-9]+(\.[0-9]+)?)( |$)/)
+  const amount = amountMatch ? amountMatch[1] : null
+
+  const precisionMatch = str.match(/(^| )([0-9]+),([A-Z]+)(@|$)/)
+  const precisionSymbol = precisionMatch ? Number(precisionMatch[2]) : null
+  const precisionAmount = amount ? (amount.split('.')[1] || '').length : null
+  const precision = precisionSymbol != null ? precisionSymbol : precisionAmount
+
+  const symbolMatch = str.match(/(^| |,)([A-Z]+)(@|$)/)
+  const symbol = symbolMatch ? symbolMatch[2] : null
+
+  const [, contractRaw] = str.split('@')
+  const contract = /^[a-z0-5]+(\.[a-z0-5]+)*$/.test(contractRaw) ? contractRaw : null
+
+  const check = printAsset({amount, precision, symbol, contract})
+
+  assert.equal(str, check,  `Invalid asset string: ${str} !== ${check}`)
+
+  if(precision != null) {
+    assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)
+  }
+  if(symbol != null) {
+    assert(symbol.length <= 7, `Asset symbol is 7 characters or less`)
+  }
+  if(contract != null) {
+    assert(contract.length <= 12, `Contract is 12 characters or less`)
+  }
+
+  return {amount, precision, symbol, contract}
 }

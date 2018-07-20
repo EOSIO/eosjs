@@ -1,18 +1,25 @@
 {
   "name": "eosjs",
-  "version": "6.0.1",
+  "version": "15.0.6",
   "description": "General purpose library for the EOS blockchain.",
   "main": "lib/index.js",
+  "files": [
+    "README.md",
+    "docs",
+    "lib"
+  ],
   "scripts": {
-    "test": "mocha --use_strict src/*.test.js",
-    "coverage": "istanbul cover _mocha -- -R spec src/*.test.js",
+    "test": "mocha --exit --use_strict src/*.test.js",
+    "test_lib": "mocha --exit --use_strict lib/*.test.js",
+    "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "prepublish": "npm run prepublish_lib && npm run prepublish_test",
-    "prepublish_lib": "babel src --out-dir lib",
-    "prepublish_test": "mocha --use_strict lib/*.test.js",
-    "browserify": "mkdir -p dist && browserify -o dist/eos.js -s Eos src/index.js",
-    "build": "npm run prepublish && npm run browserify",
-    "build_browser_test": "mkdir -p dist && browserify -o dist/mocha-test.js src/*.test.js"
+    "build": "babel --copy-files src --out-dir lib",
+    "build_browser": "npm run build && browserify -o lib/eos.js -s Eos lib/index.js",
+    "build_browser_test": "npm run build && browserify -o dist/test.js lib/*.test.js",
+    "minimize": "uglifyjs lib/eos.js -o lib/eos.min.js --source-map --compress --mangle",
+    "docs": "jsdoc2md src/format.js > docs/index.md",
+    "srisum": "npx srisum lib/eos.*",
+    "prepublishOnly": "npm run build_browser && npm run test_lib && npm run minimize && npm run docs && npm run srisum"
   },
   "repository": {
     "type": "git",
@@ -30,25 +37,42 @@
   "homepage": "https://github.com/EOSIO/eosjs#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-syntax-async-functions": "^6.13.0",
+    "babel-plugin-transform-regenerator": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
     "browserify": "^14.4.0",
-    "coveralls": "^2.13.1",
-    "eosjs-keygen": "^1.2.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^3.4.2"
+    "camel-case": "^3.0.0",
+    "coveralls": "^3.0.0",
+    "eosjs-keygen": "^1.3.2",
+    "jsdoc-to-markdown": "^3.0.4",
+    "mocha": "^5.2.0",
+    "nyc": "^11.4.1",
+    "uglify-js": "^3.4.1"
   },
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "binaryen": "^37.0.0",
     "create-hash": "^1.1.3",
-    "eosjs-api": "^3.0.0",
-    "eosjs-ecc": "^2.0.1",
-    "eosjs-json": "^2.0.2",
-    "fcbuffer": "^2.0.1"
+    "eosjs-api": "6.3.2",
+    "eosjs-ecc": "4.0.2",
+    "fcbuffer": "2.2.0"
   },
   "babel": {
     "presets": [
       "es2015"
+    ],
+    "plugins": [
+      "syntax-async-functions",
+      "transform-regenerator",
+      [
+        "transform-runtime",
+        {
+          "polyfill": false,
+          "regenerator": true
+        }
+      ]
     ]
   }
 }

@@ -1,3 +1,11 @@
+sudo: required
+
+services:
+  - docker
+
 language: node_js
 node_js:
-  - "6"
+  - "10"
+
+script:
+  - cd docker && ./run_tests.sh
