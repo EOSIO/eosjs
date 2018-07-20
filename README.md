@@ -101,7 +101,7 @@ that supports the examples in this README.
 cd ./docker && ./up.sh
 ```
 
-All functions read only or transactional follow this pattern for parameters.
+All blockchain functions (read and write) follow this pattern:
 
 ```js
 // If the last argument is a function it is treated as a callback
