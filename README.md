@@ -20,7 +20,7 @@ Library for talking to the eos api.
 
     (async () => {
         try {
-            let result = await api.pushTransaction({
+            let result = await api.signAndPushTransaction({
                 blocksBehind: 3,
                 expireSeconds: 10,
                 actions: [{
@@ -64,7 +64,7 @@ const api = new eosjs2.Api({ rpc, signatureProvider });
 
 (async () => {
     try {
-        const result = await api.pushTransaction({
+        const result = await api.signAndPushTransaction({
             blocksBehind: 3,
             expireSeconds: 10,
             actions: [{
