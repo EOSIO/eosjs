@@ -100,10 +100,7 @@ export class Api {
 
     async transact(transaction: any, config: TransactionConfig): Promise<any>  {
       let info: GetInfoResult;
-      const { broadcast, blocksBehind, expireSeconds } = Object.assign({},
-        { broadcast: true }, // default value of true
-        config // if config contains broadcast: false, it will overwrite the default
-      );
+      const { broadcast, blocksBehind, expireSeconds } = { broadcast: true, ...config };
 
       if (!this.chainId) {
         info = await this.rpc.get_info();
@@ -111,14 +108,16 @@ export class Api {
       }
 
       if (typeof blocksBehind === "number" && expireSeconds) { // use config fields to generate TAPOS if they exist
-        if (!info)
+        if (!info) {
           info = await this.rpc.get_info();
+        }
         let refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
         transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
       }
 
-      if (!this.hasRequiredTaposFields(transaction))
+      if (!this.hasRequiredTaposFields(transaction)) {
         throw new Error("Required configuration or TAPOS fields are not present")
+      }
 
       transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
       let serializedTransaction = this.serializeTransaction(transaction);
@@ -127,13 +126,13 @@ export class Api {
       let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction });
       let pushTransactionArgs = { signatures, serializedTransaction };
       if (broadcast) {
-        return await this.rpc.push_transaction(pushTransactionArgs);
+        return this.pushSignedTransaction(pushTransactionArgs);
       }
       return pushTransactionArgs;
     }
 
     async pushSignedTransaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
-      return await this.rpc.push_transaction({
+      return this.rpc.push_transaction({
           signatures,
           serializedTransaction,
       });

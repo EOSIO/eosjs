@@ -5,10 +5,17 @@
 <script src='dist-web/eosjs2-jssig-debug.js'></script>
 <script>
   let pre = document.getElementsByTagName('pre')[0];
-  const defaultPrivateKey = "5JmqocoeJ1ury2SdjVNVgNL1n4qR2sse5cxN4upvspU2R5PEnxP";// thegazelle
+  const defaultPrivateKey = "5JmqocoeJ1ury2SdjVNVgNL1n4qR2sse5cxN4upvspU2R5PEnxP"; // thegazelle
   const rpc = new eosjs2_jsonrpc.JsonRpc('http://dev.cryptolions.io:18888');
   const signatureProvider = new eosjs2_jssig.default([defaultPrivateKey]);
-  const api = new eosjs2.Api({ rpc, signatureProvider });
+  const api = new eosjs2.Api({
+    rpc,
+    signatureProvider
+  });
+
+  function waitTwoSeconds() {
+    return new Promise(resolve => setTimeout(resolve, 2000));
+  }
 
   (async () => {
     try {
@@ -32,86 +39,81 @@
         expireSeconds: 30,
       });
       pre.textContent += '\n\nTransaction with configured TAPOS pushed!\n\n' + JSON.stringify(resultWithConfig, null, 2);
+      await waitTwoSeconds(); // run additional tests after 2 second delay
 
-      // run additional tests after 2 second delay
-      setTimeout( async () => {
-        const resultWithoutBroadcast = await api.transact({
-            actions: [{
-              account: "testeostoken",
-              name: "transfer",
-              authorization: [{
-                actor: "thegazelle",
-                permission: "active"
-              }],
-              data: {
-                from: "thegazelle",
-                to: "remasteryoda",
-                quantity: "1.0000 EOS",
-                memo: "For the future of chains around the world"
-              }
-            }]
-        }, {
-          broadcast: false,
-          blocksBehind: 3,
-          expireSeconds: 30,
-        });
-        pre.textContent = '\n\nTransaction serialized and signed but not pushed!\n\n' + JSON.stringify(resultWithoutBroadcast, null, 2);
+      const resultWithoutBroadcast = await api.transact({
+        actions: [{
+          account: "testeostoken",
+          name: "transfer",
+          authorization: [{
+            actor: "thegazelle",
+            permission: "active"
+          }],
+          data: {
+            from: "thegazelle",
+            to: "remasteryoda",
+            quantity: "1.0000 EOS",
+            memo: "For the future of chains around the world"
+          }
+        }]
+      }, {
+        broadcast: false,
+        blocksBehind: 3,
+        expireSeconds: 30,
+      });
+      pre.textContent = '\n\nTransaction serialized and signed but not pushed!\n\n' + JSON.stringify(resultWithoutBroadcast, null, 2);
+      await waitTwoSeconds();
 
-        setTimeout( async () => {
-          const broadcastResult = await api.pushSignedTransaction(resultWithoutBroadcast);
-          pre.textContent = '\n\nSerialized Transaction and signatures pushed!\n\n' + JSON.stringify(broadcastResult, null, 2);
+      const broadcastResult = await api.pushSignedTransaction(resultWithoutBroadcast);
+      pre.textContent = '\n\nSerialized Transaction and signatures pushed!\n\n' + JSON.stringify(broadcastResult, null, 2);
+      await waitTwoSeconds();
 
-          setTimeout( async () => {
-            const currentDate = new Date();
-            const timePlusTen = currentDate.getTime() + 10000;
-            const timeInISOString = (new Date(timePlusTen)).toISOString();
-            const expiration = timeInISOString.substr(0, timeInISOString.length - 1);
-            const resultWithoutConfig = await api.transact({
-              expiration,
-              ref_block_num: 33609,
-              ref_block_prefix: 1692338825,
-                actions: [{
-                  account: "testeostoken",
-                  name: "transfer",
-                  authorization: [{
-                    actor: "thegazelle",
-                    permission: "active"
-                  }],
-                  data: {
-                    from: "thegazelle",
-                    to: "remasteryoda",
-                    quantity: "1.0000 EOS",
-                    memo: "For the future of chains around the world"
-                  }
-                }]
-              });
-              pre.textContent = '\n\nTransaction with manual TAPOS pushed!\n\n' + JSON.stringify(resultWithoutConfig, null, 2);
-              setTimeout( async () => {
-                const resultShouldFail= await api.transact({
-                    actions: [{
-                      account: "testeostoken",
-                      name: "transfer",
-                      authorization: [{
-                        actor: "thegazelle",
-                        permission: "active"
-                      }],
-                      data: {
-                        from: "thegazelle",
-                        to: "remasteryoda",
-                        quantity: "1.0000 EOS",
-                        memo: "For the future of chains around the world"
-                      }
-                    }]
-                  });
-              }, 2000);
-            }, 2000);
-        }, 1000);
-      }, 2000);
+      const currentDate = new Date();
+      const timePlusTen = currentDate.getTime() + 10000;
+      const timeInISOString = (new Date(timePlusTen)).toISOString();
+      const expiration = timeInISOString.substr(0, timeInISOString.length - 1);
+      const resultWithoutConfig = await api.transact({
+        expiration,
+        ref_block_num: 33609,
+        ref_block_prefix: 1692338825,
+        actions: [{
+          account: "testeostoken",
+          name: "transfer",
+          authorization: [{
+            actor: "thegazelle",
+            permission: "active"
+          }],
+          data: {
+            from: "thegazelle",
+            to: "remasteryoda",
+            quantity: "1.0000 EOS",
+            memo: "For the future of chains around the world"
+          }
+        }]
+      });
+      pre.textContent = '\n\nTransaction with manual TAPOS pushed!\n\n' + JSON.stringify(resultWithoutConfig, null, 2);
 
+      await waitTwoSeconds();
+      const resultShouldFail = await api.transact({
+        actions: [{
+          account: "testeostoken",
+          name: "transfer",
+          authorization: [{
+            actor: "thegazelle",
+            permission: "active"
+          }],
+          data: {
+            from: "thegazelle",
+            to: "remasteryoda",
+            quantity: "1.0000 EOS",
+            memo: "For the future of chains around the world"
+          }
+        }]
+      });
     } catch (e) {
       pre.textContent = '\nCaught exception: ' + e;
       if (e instanceof eosjs2_jsonrpc.RpcError)
-        pre.textContent += '\n\n' + JSON.stringify(e.json, null, 4);
+        pre.textContent += '\n\n' + JSON.stringify(e.json, null, 2);
     }
   })();
 </script>
