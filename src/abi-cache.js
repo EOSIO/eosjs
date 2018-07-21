@@ -4,8 +4,14 @@ const Structs = require('./structs')
 module.exports = AbiCache
 
 function AbiCache(network, config) {
+  config.abiCache = {
+    abiAsync,
+    abi
+  }
+
   // Help (or "usage") needs {defaults: true}
-  config = Object.assign({}, {defaults: true}, config)
+  const abiCacheConfig = Object.assign({}, {defaults: true}, config)
+
   const cache = {}
 
   /**
@@ -48,7 +54,7 @@ function AbiCache(network, config) {
         abi = JSON.parse(abi)
       }
       const schema = abiToFcSchema(abi)
-      const structs = Structs(config, schema) // structs = {structs, types}
+      const structs = Structs(abiCacheConfig, schema) // structs = {structs, types}
       return cache[account] = Object.assign({abi, schema}, structs)
     }
     const c = cache[account]
@@ -58,12 +64,8 @@ function AbiCache(network, config) {
     return c
   }
 
-  return {
-    abiAsync,
-    abi
-  }
+  return config.abiCache
 }
-
 
 function abiToFcSchema(abi) {
   // customTypes
