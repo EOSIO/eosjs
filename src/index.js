@@ -10,19 +10,26 @@ const format = require('./format')
 const schema = require('./schema')
 
 const Eos = (config = {}) => {
-  config = Object.assign({}, {
+  const configDefaults = {
     httpEndpoint: 'http://127.0.0.1:8888',
     debug: false,
     verbose: false,
     broadcast: true,
+    logger: {},
     sign: true
-  }, config)
+  }
+
+  Object.keys(configDefaults).forEach(key => {
+    if(config[key] === undefined) {
+      config[key] = configDefaults[key]
+    }
+  })
 
   const defaultLogger = {
-    log: config.verbose ? console.log : null,
+    log: (...args) => config.verbose ? console.log(...args) : null,
     error: console.error
   }
-  config.logger = Object.assign({}, defaultLogger, config.logger)
+  Object.assign(config.logger, defaultLogger, config.logger)
 
   return createEos(config)
 }
@@ -84,17 +91,19 @@ function createEos(config) {
   const {structs, types, fromBuffer, toBuffer} = Structs(config)
   const eos = mergeWriteFunctions(config, EosApi, structs)
 
-  Object.assign(eos, {fc: {
-    structs,
-    types,
-    fromBuffer,
-    toBuffer,
-    abiCache
-  }})
-
-  Object.assign(eos, {modules: {
-    format
-  }})
+  Object.assign(eos, {
+    config,
+    fc: {
+      structs,
+      types,
+      fromBuffer,
+      toBuffer,
+      abiCache
+    },
+    modules: {
+      format
+    }
+  })
 
   if(!config.signProvider) {
     config.signProvider = defaultSignProvider(eos, config)
