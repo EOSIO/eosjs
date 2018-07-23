@@ -65,7 +65,6 @@ Object.assign(
   }
 )
 
-
 function createEos(config) {
   const network = config.httpEndpoint != null ? EosApi(config) : null
   config.network = network
@@ -92,7 +91,7 @@ function createEos(config) {
   const eos = mergeWriteFunctions(config, EosApi, structs)
 
   Object.assign(eos, {
-    config,
+    config: safeConfig(config),
     fc: {
       structs,
       types,
@@ -110,6 +109,38 @@ function createEos(config) {
   }
 
   return eos
+}
+
+/**
+  Set each property as read-only, read-write, no-access.  This is shallow
+  in that it applies only to the root object and does not limit access
+  to properties under a given object.
+*/
+function safeConfig(config) {
+  // access control is shallow references only
+  const readOnly = new Set(['httpEndpoint', 'abiCache'])
+  const readWrite = new Set(['verbose', 'debug', 'broadcast', 'logger', 'sign'])
+  const protectedConfig = {}
+
+  Object.keys(config).forEach(key => {
+    Object.defineProperty(protectedConfig, key, {
+      set: function(value) {
+        if(readWrite.has(key)) {
+          config[key] = value
+          return
+        }
+        throw new Error('Access denied')
+      },
+
+      get: function() {
+        if(readOnly.has(key) || readWrite.has(key)) {
+          return config[key]
+        }
+        throw new Error('Access denied')
+      }
+    })
+  })
+  return protectedConfig
 }
 
 /**
