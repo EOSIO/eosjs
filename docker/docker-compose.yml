@@ -2,7 +2,7 @@ version: "2"
 
 services:
   nodeosd:
-    image: eosio/eos:v1.0.10
+    image: eosio/eos:v1.1.0
     build:
       context: .
       dockerfile: Dockerfile
@@ -18,7 +18,7 @@ services:
       - "8888"
 
   keosd:
-    image: eosio/eos:v1.0.10
+    image: eosio/eos:v1.1.0
     command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address=127.0.0.1:8900 --http-alias=keosd:8900 --http-alias=localhost:8900
     hostname: keosd
     ports:

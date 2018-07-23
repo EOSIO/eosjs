@@ -9,16 +9,9 @@ General purpose library for EOSIO blockchains.
 
 | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
 | --- | --- | --- | --- |
-| tag: 15.0.6 | `npm install eosjs` (version 15) | tag: v1.0.10 | eosio/eos:v1.0.10 |
-
-Release notes:
-* eosjs@15.0.6 is compatible with eosio v1.0.5 - v1.0.10
-* Converted some types in **format** module from unsigned to signed: UDecimalPad -> DecimalPad for example (15.0.1)
-* All `asset` and `extended_asset` amounts require exact decimal places (Change `1 SYS` to `1.0000 SYS`) (15.0.0)
-* Use `config.verbose` instead of `config.debug` (14.1.0)
+| tag: 16.0.0 | `npm install eosjs` | tag: v1.1.0 | eosio/eos:v1.1.0 |
 
 Prior [version](./docs/prior_versions.md) matrix.
-
 
 ### Usage
 
@@ -27,16 +20,18 @@ Prior [version](./docs/prior_versions.md) matrix.
 
 ```html
 <!--
-sha512-4M+2te9VpDRu+8YD2sJtPjUo92WfNcUcD3jzwe5gcyjevGmqBuZpSpN2UbUtiJl1fNOqkJO8VQ2y3rfFatc6ZQ== lib/eos.js
-sha512-IDRAIcOGQTZN3jE/TvTiG3czpjzmWPiYi0+mwWbJVdYwPfbhD2YtzlpD4+rKE+MIuysseAenToyLNoO1whNFUg== lib/eos.min.js
-sha512-eqTZ81MJdAliK6erbjeUgKF/ShmhUsSo7LL1GX6KRYsYDFVm0kL6eETHVJl6JBITVLXWMJZ6oFfh1wronuTgqA== lib/eos.min.js.map
+sha512-WVarvM+kg5FyfhRnQH8ZjSswAaUctdOxvsXCXWWwfpV7/vb3Phy5KB3rjKwV8h3+9evInAsyLnxvDsdD+Fd6BA== lib/eos.js
+sha512-vNyLnOEb7uFmEtVbLnyZQ9/k4zckM2Vu3jJOKq6XfWEVZG0yKcjDExVN4EQ7e3F+rePWRncMolI2xFi/3qo62A== lib/eos.min.js
+sha512-ZhiO8AyYgrZOyDo3y40LVg1YkjqjUr9hYO+te8IYHU1gfAmyZxfut9CQj73+mEgC9u7GV2Gttr3cxTh7QH0rkw== lib/eos.min.js.map
 -->
 <html>
 <head>
   <meta charset="utf-8">
-  <script src="https://cdn.jsdelivr.net/npm/eosjs@15.0.6/lib/eos.min.js"
-        integrity="sha512-IDRAIcOGQTZN3jE/TvTiG3czpjzmWPiYi0+mwWbJVdYwPfbhD2YtzlpD4+rKE+MIuysseAenToyLNoO1whNFUg=="
-        crossorigin="anonymous"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/eosjs@16.0.0/lib/eos.min.js"
+    integrity="sha512-vNyLnOEb7uFmEtVbLnyZQ9/k4zckM2Vu3jJOKq6XfWEVZG0yKcjDExVN4EQ7e3F+rePWRncMolI2xFi/3qo62A=="
+    crossorigin="anonymous"></script>
+
   <script>
   eos = Eos({
     httpEndpoint: 'http://ayeaye.cypherglass.com:8888',
