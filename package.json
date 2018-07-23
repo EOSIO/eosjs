@@ -1,6 +1,6 @@
 {
   "name": "eosjs2",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -16,12 +16,12 @@
     "url": "https://github.com/EOSIO/eosjs2.git"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "eosjs-ecc": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^10.3.1",
     "babel-cli": "^6.26.0",
-    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-1": "^6.24.1",
     "json-loader": "^0.5.7",
