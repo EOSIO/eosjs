@@ -2,7 +2,7 @@
 
 'use strict';
 
-import { Abi, GetInfoResult, JsonRpc } from './eosjs2-jsonrpc';
+import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs, TransactionConfig } from './eosjs2-jsonrpc';
 import * as ser from './eosjs2-serialize';
 const transactionAbi = require('../src/transaction.abi.json');
 
@@ -93,26 +93,48 @@ export class Api {
         }));
     }
 
-    async pushTransaction({ blocksBehind, expireSeconds, actions, ...transaction }: any) {
+    // eventually break out into TransactionValidator class
+    private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix, ...transaction }: any): boolean {
+        return !!(expiration && ref_block_num && ref_block_prefix);
+    }
+
+    async transact(transaction: any, { broadcast = true, blocksBehind, expireSeconds }: TransactionConfig = {}): Promise<any> {
         let info: GetInfoResult;
+
         if (!this.chainId) {
             info = await this.rpc.get_info();
             this.chainId = info.chain_id;
         }
-        if (blocksBehind !== undefined && expireSeconds !== undefined) {
-            if (!info)
+
+        if (typeof blocksBehind === "number" && expireSeconds) { // use config fields to generate TAPOS if they exist
+            if (!info) {
                 info = await this.rpc.get_info();
+            }
             let refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
             transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
         }
-        transaction = { ...transaction, actions: await this.serializeActions(actions) };
+
+        if (!this.hasRequiredTaposFields(transaction)) {
+            throw new Error("Required configuration or TAPOS fields are not present")
+        }
+
+        transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
         let serializedTransaction = this.serializeTransaction(transaction);
         let availableKeys = await this.signatureProvider.getAvailableKeys();
         let requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
-        let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction: serializedTransaction });
-        return await this.rpc.push_transaction({
+        let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction });
+        let pushTransactionArgs = { signatures, serializedTransaction };
+        if (broadcast) {
+            return this.pushSignedTransaction(pushTransactionArgs);
+        }
+        return pushTransactionArgs;
+    }
+
+    async pushSignedTransaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+        return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
         });
     }
+
 } // Api
