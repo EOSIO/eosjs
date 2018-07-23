@@ -5,13 +5,10 @@
 <script src='dist-web/eosjs2-jssig-debug.js'></script>
 <script>
   let pre = document.getElementsByTagName('pre')[0];
-  const defaultPrivateKey = "5JmqocoeJ1ury2SdjVNVgNL1n4qR2sse5cxN4upvspU2R5PEnxP"; // thegazelle
-  const rpc = new eosjs2_jsonrpc.JsonRpc('http://dev.cryptolions.io:18888');
+  const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
+  const rpc = new eosjs2_jsonrpc.JsonRpc('http://localhost:8000');
   const signatureProvider = new eosjs2_jssig.default([defaultPrivateKey]);
-  const api = new eosjs2.Api({
-    rpc,
-    signatureProvider
-  });
+  const api = new eosjs2.Api({ rpc, signatureProvider });
 
   function waitTwoSeconds() {
     return new Promise(resolve => setTimeout(resolve, 2000));
@@ -21,18 +18,18 @@
     try {
       const resultWithConfig = await api.transact({
         actions: [{
-          account: "testeostoken",
-          name: "transfer",
-          authorization: [{
-            actor: "thegazelle",
-            permission: "active"
-          }],
-          data: {
-            from: "thegazelle",
-            to: "remasteryoda",
-            quantity: "1.0000 EOS",
-            memo: "For the future of chains around the world"
-          }
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'useraaaaaaaa',
+                permission: 'active',
+            }],
+            data: {
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
+                memo: '',
+            },
         }]
       }, {
         blocksBehind: 3,
@@ -43,18 +40,18 @@
 
       const resultWithoutBroadcast = await api.transact({
         actions: [{
-          account: "testeostoken",
-          name: "transfer",
-          authorization: [{
-            actor: "thegazelle",
-            permission: "active"
-          }],
-          data: {
-            from: "thegazelle",
-            to: "remasteryoda",
-            quantity: "1.0000 EOS",
-            memo: "For the future of chains around the world"
-          }
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'useraaaaaaaa',
+                permission: 'active',
+            }],
+            data: {
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
+                memo: '',
+            },
         }]
       }, {
         broadcast: false,
@@ -66,6 +63,9 @@
 
       const broadcastResult = await api.pushSignedTransaction(resultWithoutBroadcast);
       pre.textContent = '\n\nSerialized Transaction and signatures pushed!\n\n' + JSON.stringify(broadcastResult, null, 2);
+
+      /* The test below will not work with hardcoded values for ref_block_num and prefix, we need to use the response from the previous test to retrieve those when full test suite is implemented
+
       await waitTwoSeconds();
 
       const currentDate = new Date();
@@ -74,40 +74,41 @@
       const expiration = timeInISOString.substr(0, timeInISOString.length - 1);
       const resultWithoutConfig = await api.transact({
         expiration,
-        ref_block_num: 33609,
-        ref_block_prefix: 1692338825,
+        ref_block_num: 47657,
+        ref_block_prefix: 3285495572,
         actions: [{
-          account: "testeostoken",
-          name: "transfer",
-          authorization: [{
-            actor: "thegazelle",
-            permission: "active"
-          }],
-          data: {
-            from: "thegazelle",
-            to: "remasteryoda",
-            quantity: "1.0000 EOS",
-            memo: "For the future of chains around the world"
-          }
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'useraaaaaaaa',
+                permission: 'active',
+            }],
+            data: {
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
+                memo: '',
+            },
         }]
       });
       pre.textContent = '\n\nTransaction with manual TAPOS pushed!\n\n' + JSON.stringify(resultWithoutConfig, null, 2);
+      */
 
       await waitTwoSeconds();
       const resultShouldFail = await api.transact({
         actions: [{
-          account: "testeostoken",
-          name: "transfer",
-          authorization: [{
-            actor: "thegazelle",
-            permission: "active"
-          }],
-          data: {
-            from: "thegazelle",
-            to: "remasteryoda",
-            quantity: "1.0000 EOS",
-            memo: "For the future of chains around the world"
-          }
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'useraaaaaaaa',
+                permission: 'active',
+            }],
+            data: {
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
+                memo: '',
+            },
         }]
       });
     } catch (e) {

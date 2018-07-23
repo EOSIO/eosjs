@@ -98,9 +98,8 @@ export class Api {
         return !!(expiration && ref_block_num && ref_block_prefix);
     }
 
-    async transact(transaction: any, config: TransactionConfig): Promise<any> {
+    async transact(transaction: any, { broadcast = true, blocksBehind, expireSeconds }: TransactionConfig = {}): Promise<any> {
         let info: GetInfoResult;
-        const { broadcast, blocksBehind, expireSeconds } = { broadcast: true, ...config };
 
         if (!this.chainId) {
             info = await this.rpc.get_info();

@@ -7,7 +7,7 @@ Library for talking to the eos api. transact() is used to sign and push transact
 `npm run build-web` or `yarn build-web`
 Open `test.html` in your browser of choice
 
-*This should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
+*These tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
 
 
 ## Browser Usage Example
@@ -22,8 +22,8 @@ Open `test.html` in your browser of choice
 <script src='dist-web/eosjs2-jssig-debug.js'></script>
 <script>
   let pre = document.getElementsByTagName('pre')[0];
-  const defaultPrivateKey = "5JmqocoeJ1ury2SdjVNVgNL1n4qR2sse5cxN4upvspU2R5PEnxP"; // thegazelle
-  const rpc = new eosjs2_jsonrpc.JsonRpc('http://dev.cryptolions.io:18888');
+  const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
+  const rpc = new eosjs2_jsonrpc.JsonRpc('http://localhost:8000');
   const signatureProvider = new eosjs2_jssig.default([defaultPrivateKey]);
   const api = new eosjs2.Api({ rpc, signatureProvider });
 
@@ -31,18 +31,18 @@ Open `test.html` in your browser of choice
     try {
       const resultWithConfig = await api.transact({
         actions: [{
-          account: "testeostoken",
-          name: "transfer",
-          authorization: [{
-            actor: "thegazelle",
-            permission: "active"
-          }],
-          data: {
-            from: "thegazelle",
-            to: "remasteryoda",
-            quantity: "1.0000 EOS",
-            memo: "For the future of chains around the world"
-          }
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'useraaaaaaaa',
+                permission: 'active',
+            }],
+            data: {
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
+                memo: '',
+            },
         }]
       }, {
         blocksBehind: 3,
@@ -77,18 +77,18 @@ const api = new eosjs2.Api({ rpc, signatureProvider });
   try {
     const resultWithConfig = await api.transact({
       actions: [{
-        account: "testeostoken",
-        name: "transfer",
-        authorization: [{
-          actor: "thegazelle",
-          permission: "active"
-        }],
-        data: {
-          from: "thegazelle",
-          to: "remasteryoda",
-          quantity: "1.0000 EOS",
-          memo: "For the future of chains around the world"
-        }
+          account: 'eosio.token',
+          name: 'transfer',
+          authorization: [{
+              actor: 'useraaaaaaaa',
+              permission: 'active',
+          }],
+          data: {
+              from: 'useraaaaaaaa',
+              to: 'useraaaaaaab',
+              quantity: '0.0001 SYS',
+              memo: '',
+          },
       }]
     }, {
       blocksBehind: 3,
