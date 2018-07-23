@@ -15,21 +15,23 @@ const Eos = (config = {}) => {
     debug: false,
     verbose: false,
     broadcast: true,
-    logger: {},
+    logger: {
+      log: (...args) => config.verbose ? console.log(...args) : null,
+      error: console.error
+    },
     sign: true
   }
 
-  Object.keys(configDefaults).forEach(key => {
-    if(config[key] === undefined) {
-      config[key] = configDefaults[key]
-    }
-  })
-
-  const defaultLogger = {
-    log: (...args) => config.verbose ? console.log(...args) : null,
-    error: console.error
+  function applyDefaults(target, defaults) {
+    Object.keys(defaults).forEach(key => {
+      if(target[key] === undefined) {
+        target[key] = defaults[key]
+      }
+    })
   }
-  Object.assign(config.logger, defaultLogger, config.logger)
+
+  applyDefaults(config, configDefaults)
+  applyDefaults(config.logger, configDefaults.logger)
 
   return createEos(config)
 }
