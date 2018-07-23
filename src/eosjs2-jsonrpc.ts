@@ -71,9 +71,9 @@ export interface GetInfoResult {
 }
 
 export interface TransactionConfig {
-  broadcast?: boolean;
-  blocksBehind?: number;
-  expireSeconds?: number;
+    broadcast?: boolean;
+    blocksBehind?: number;
+    expireSeconds?: number;
 }
 
 export interface PushTransactionArgs {
