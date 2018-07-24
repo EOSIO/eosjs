@@ -65,15 +65,15 @@ export class Api {
     return result;
   }
 
-  serialize(buffer: ser.SerialBuffer, type: string, value: any) {
+  serialize(buffer: ser.SerialBuffer, type: string, value: any): void {
     this.transactionTypes.get(type).serialize(buffer, value);
   }
 
-  deserialize(buffer: ser.SerialBuffer, type: string, value: any) {
+  deserialize(buffer: ser.SerialBuffer, type: string): any {
     return this.transactionTypes.get(type).deserialize(buffer);
   }
 
-  serializeTransaction(transaction: any) {
+  serializeTransaction(transaction: any): Uint8Array {
     let buffer = new ser.SerialBuffer;
     this.serialize(buffer, 'transaction', {
       max_net_usage_words: 0,
@@ -87,10 +87,33 @@ export class Api {
     return buffer.asUint8Array();
   }
 
-  async serializeActions(actions: ser.Action[]) {
+  deserializeTransaction(transaction: Uint8Array): any {
+    const buffer = new ser.SerialBuffer();
+    buffer.pushArray(transaction)
+    return this.deserialize(buffer, 'transaction');
+  }
+
+  async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
     return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
-      return ser.serializeAction(await this.getContract(account), account, name, authorization, data);
+      const contract = await this.getContract(account)
+      return ser.serializeAction(contract, account, name, authorization, data);
     }));
+  }
+
+  async deserializeActions(actions: ser.Action[]): Promise<ser.Action[]> {
+    return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
+      const contract = await this.getContract(account)
+      return ser.deserializeAction(contract, account, name, authorization, data);
+    }));
+  }
+
+  async deserializeTransactionWithActions(transaction: Uint8Array | string): Promise<any> {
+    if (typeof transaction === "string") {
+      transaction = ser.hexToUint8Array(transaction)
+    }
+    let deserializedTransaction = this.deserializeTransaction(transaction)
+    const deserializedActions = await this.deserializeActions(deserializedTransaction.actions)
+    return { ...deserializedTransaction, actions: deserializedActions }
   }
 
   // eventually break out into TransactionValidator class

@@ -745,10 +745,11 @@ export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: numbe
   };
 };
 
-export function serializeActionData(contract: Contract, account: string, name: string, data: any) {
+export function serializeActionData(contract: Contract, account: string, name: string, data: any): string {
   let action = contract.actions.get(name);
-  if (!action)
-    throw new Error('Unknown action ' + name + ' in contract ' + account);
+  if (!action) {
+    throw new Error(`Unknown action ${name} in contract ${account}`);
+  }
   let buffer = new SerialBuffer;
   action.serialize(buffer, data);
   return arrayToHex(buffer.asUint8Array());
@@ -760,5 +761,27 @@ export function serializeAction(contract: Contract, account: string, name: strin
     name,
     authorization,
     data: serializeActionData(contract, account, name, data),
+  };
+}
+
+export function deserializeActionData(contract: Contract, account: string, name: string, data: any): any {
+  const action = contract.actions.get(name);
+  if (typeof data === "string") {
+    data = hexToUint8Array(data)
+  }
+  if (!action) {
+    throw new Error(`Unknown action ${name} in contract ${account}`);
+  }
+  let buffer = new SerialBuffer;
+  buffer.pushArray(data)
+  return action.deserialize(buffer);
+}
+
+export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any): Action {
+  return {
+    account,
+    name,
+    authorization,
+    data: deserializeActionData(contract, account, name, data),
   };
 }
