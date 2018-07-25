@@ -113,16 +113,11 @@ eos.getInfo({}) // @returns {Promise}
 eos.getInfo((error, result) => { console.log(error, result) })
 ```
 
+### API Documentation
+
 Chain and history API functions are available after creating the `eos` object.
-API methods and documentation are generated from the chain and history json files.
 
-* [chain.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/chain.json)
-* [history.json](https://github.com/EOSIO/eosjs-api/blob/master/src/api/v1/history.json)
-
-Until we generate a markdown for these, please convert the names in these
-json to camel case functions.
-
-* `"get_info": ..` is `eos.getInfo(..)`
+* [API](https://github.com/EOSIO/eosjs-api/blob/master/docs/api.md#objects)
 
 ### Configuration
 
