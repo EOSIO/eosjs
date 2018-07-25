@@ -117,7 +117,7 @@ eos.getInfo((error, result) => { console.log(error, result) })
 
 Chain and history API functions are available after creating the `eos` object.
 
-* [API](https://github.com/EOSIO/eosjs-api/blob/master/docs/api.md#objects)
+* [API](https://github.com/EOSIO/eosjs-api/blob/master/docs/api.md#eos--object)
 
 ### Configuration
 
