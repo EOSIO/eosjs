@@ -1,4 +1,4 @@
-*Important* : EosJs2 is under active development and should be considered beta, improvements and enhancements may break or remove existing functionality, be sure to lock your dependencies.
+*Important*: eosjs2 is under active development and should be considered beta. Improvements and enhancements may break or remove existing functionality. Be sure to lock your dependencies.
 
 ## eosjs2
 
