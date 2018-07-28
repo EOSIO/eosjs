@@ -101,6 +101,7 @@ function createEos(config) {
       toBuffer,
       abiCache
     },
+    // Repeat of static Eos.modules, help apps that use dependency injection
     modules: {
       format
     }
