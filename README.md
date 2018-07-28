@@ -188,12 +188,12 @@ eos = Eos(config)
 * **logger** - default logging configuration.
   ```js
   logger: {
-    log: config.verbose ? console.log : null,
-    error: console.error // null to disable
+    log: config.verbose ? console.log : null,  // null to disable
+    error: config.verbose ? console.error : null,
   }
   ```
 
-  Turn off all error logging: `config.logger = {error: null}`
+  Turn off just API logging: `config.logger = {log: null}`
 
 ### Options
 

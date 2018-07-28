@@ -17,7 +17,7 @@ const Eos = (config = {}) => {
     broadcast: true,
     logger: {
       log: (...args) => config.verbose ? console.log(...args) : null,
-      error: console.error
+      error: (...args) => config.verbose ? console.error(...args) : null
     },
     sign: true
   }

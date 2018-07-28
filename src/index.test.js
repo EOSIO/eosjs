@@ -329,8 +329,7 @@ describe('transactions', () => {
   })
 
   it('mockTransactions fail', () => {
-    const logger = { error: null }
-    const eos = Eos({signProvider, mockTransactions: 'fail', logger})
+    const eos = Eos({signProvider, mockTransactions: 'fail'})
     return eos.transfer('inita', 'initb', '1.0000 SYS', '').catch(error => {
       assert(error.indexOf('fake error') !== -1, 'expecting: fake error')
     })
@@ -383,8 +382,7 @@ describe('transactions', () => {
   })
 
   it('action to unknown contract', done => {
-    const logger = { error: null }
-    Eos({signProvider, logger}).contract('unknown432')
+    Eos({signProvider}).contract('unknown432')
     .then(() => {throw 'expecting error'})
     .catch(error => {
       done()
