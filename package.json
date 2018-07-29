@@ -20,7 +20,8 @@
     "minimize": "uglifyjs lib/eos.js -o lib/eos.min.js --source-map --compress --mangle",
     "docs": "jsdoc2md src/format.js > docs/index.md",
     "srisum": "npx srisum lib/eos.*",
-    "prepublishOnly": "npm run build_browser && npm run test_lib && npm run minimize && npm run docs && npm run srisum"
+    "prepublishOnly": "npm run build_browser && npm run test_lib && npm run minimize && npm run docs && npm run srisum",
+    "precommit": "lint-staged"
   },
   "repository": {
     "type": "git",
@@ -53,7 +54,9 @@
     "eslint-plugin-node": "^7.0.1",
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
+    "husky": "^0.14.3",
     "jsdoc-to-markdown": "^3.0.4",
+    "lint-staged": "^7.2.0",
     "mocha": "^5.2.0",
     "nyc": "^11.4.1",
     "uglify-js": "^3.4.1"
@@ -88,5 +91,11 @@
       "camelcase": "off",
       "no-throw-literal": "off"
     }
+  },
+  "lint-staged": {
+    "src/**/*.{js,json}": [
+      "npm run lint",
+      "git add"
+    ]
   }
 }
