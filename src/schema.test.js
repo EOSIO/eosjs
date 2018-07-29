@@ -8,8 +8,6 @@ describe('schema', () => {
   it('parses', () => {
     const fcbuffer = Fcbuffer(schema)
     const errors = JSON.stringify(fcbuffer.errors, null, 4)
-    assert.equal(errors, '[]')
+    assert.strictEqual(errors, '[]')
   })
-
 })
-

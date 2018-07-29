@@ -3,7 +3,7 @@ const Structs = require('./structs')
 
 module.exports = AbiCache
 
-function AbiCache(network, config) {
+function AbiCache (network, config) {
   config.abiCache = {
     abiAsync,
     abi
@@ -20,14 +20,14 @@ function AbiCache(network, config) {
     @arg {string} account - blockchain account with deployed contract
     @arg {boolean} [force = true] false when ABI is immutable.
   */
-  function abiAsync(account, force = true) {
-    assert.equal(typeof account, 'string', 'account string required')
+  function abiAsync (account, force = true) {
+    assert.strictEqual(typeof account, 'string', 'account string required')
 
-    if(force == false && cache[account] != null) {
+    if (force === false && cache[account] !== null) {
       return Promise.resolve(cache[account])
     }
 
-    if(network == null) {
+    if (network == null) {
       const abi = cache[account]
       assert(abi, `Missing ABI for account: ${account}, provide httpEndpoint or add to abiCache`)
       return Promise.resolve(abi)
@@ -36,7 +36,6 @@ function AbiCache(network, config) {
     return network.getAbi(account).then(code => {
       assert(code.abi, `Missing ABI for account: ${account}`)
       return abi(account, code.abi)
-
     })
   }
 
@@ -46,19 +45,20 @@ function AbiCache(network, config) {
     @arg {string} account - blockchain account with deployed contract
     @arg {string} [abi] - blockchain ABI json data.  Null to fetch or non-null to cache
   */
-  function abi(account, abi) {
-    assert.equal(typeof account, 'string', 'account string required')
-    if(abi) {
-      assert.equal(typeof abi, 'object', 'abi')
-      if(Buffer.isBuffer(abi)) {
+  function abi (account, abi) {
+    assert.strictEqual(typeof account, 'string', 'account string required')
+    if (abi) {
+      assert.strictEqual(typeof abi, 'object', 'abi')
+      if (Buffer.isBuffer(abi)) {
         abi = JSON.parse(abi)
       }
       const schema = abiToFcSchema(abi)
       const structs = Structs(abiCacheConfig, schema) // structs = {structs, types}
-      return cache[account] = Object.assign({abi, schema}, structs)
+      cache[account] = Object.assign({abi, schema}, structs)
+      return cache[account]
     }
     const c = cache[account]
-    if(c == null) {
+    if (c == null) {
       throw new Error(`Abi '${account}' is not cached`)
     }
     return c
@@ -67,26 +67,26 @@ function AbiCache(network, config) {
   return config.abiCache
 }
 
-function abiToFcSchema(abi) {
+function abiToFcSchema (abi) {
   // customTypes
   // For FcBuffer
   const abiSchema = {}
 
   // convert abi types to Fcbuffer schema
-  if(abi.types) { // aliases
+  if (abi.types) { // aliases
     abi.types.forEach(e => {
       abiSchema[e.new_type_name] = e.type
     })
   }
 
-  if(abi.structs) {
+  if (abi.structs) {
     abi.structs.forEach(e => {
       const fields = {}
-      for(const field of e.fields) {
+      for (const field of e.fields) {
         fields[field.name] = field.type
       }
       abiSchema[e.name] = {base: e.base, fields}
-      if(e.base === '') {
+      if (e.base === '') {
         delete abiSchema[e.name].base
       }
     })

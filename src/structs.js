@@ -6,7 +6,7 @@ const assert = require('assert')
 const json = {schema: require('./schema')}
 
 const {
-  isName, encodeName, decodeName,
+  encodeName, decodeName,
   DecimalPad, DecimalImply, DecimalUnimply,
   printAsset, parseAsset
 } = require('./format')
@@ -15,20 +15,20 @@ const {
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
     const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.null'])
-    if(cachedCode.has(account)) {
+    if (cachedCode.has(account)) {
       return structs[lookupName]
     }
     const abi = config.abiCache.abi(account)
     const struct = abi.structs[lookupName]
-    if(struct != null) {
+    if (struct != null) {
       return struct
     }
     // TODO: move up (before `const struct = abi.structs[lookupName]`)
-    for(const action of abi.abi.actions) {
+    for (const action of abi.abi.actions) {
       const {name, type} = action
-      if(name === lookupName) {
+      if (name === lookupName) {
         const struct = abi.structs[type]
-        if(struct != null) {
+        if (struct != null) {
           return struct
         }
       }
@@ -39,8 +39,8 @@ module.exports = (config = {}, extendedSchema) => {
   // If nodeos does not have an ABI setup for a certain action.type, it will throw
   // an error: `Invalid cast from object_type to string` .. forceActionDataHex
   // may be used to until native ABI is added or fixed.
-  const forceActionDataHex = config.forceActionDataHex != null ?
-    config.forceActionDataHex : true
+  const forceActionDataHex = config.forceActionDataHex != null
+    ? config.forceActionDataHex : true
 
   const override = Object.assign({},
     authorityOverride,
@@ -51,7 +51,7 @@ module.exports = (config = {}, extendedSchema) => {
   )
 
   const eosTypes = {
-    name: ()=> [Name],
+    name: () => [Name],
     public_key: () => [variant(PublicKeyEcc)],
 
     symbol: () => [Symbol],
@@ -76,7 +76,7 @@ module.exports = (config = {}, extendedSchema) => {
   const schema = Object.assign({}, json.schema, extendedSchema)
 
   const {structs, types, errors, fromBuffer, toBuffer} = Fcbuffer(schema, config)
-  if(errors.length !== 0) {
+  if (errors.length !== 0) {
     throw new Error(JSON.stringify(errors, null, 4))
   }
 
@@ -131,19 +131,19 @@ const variant = (...variantArray) => (validation, baseTypes, customTypes) => {
       return staticVariant.fromByteBuffer(b)
     },
     appendByteBuffer (b, value) {
-      if(!Array.isArray(value)) {
+      if (!Array.isArray(value)) {
         value = [0, value]
       }
       staticVariant.appendByteBuffer(b, value)
     },
     fromObject (value) {
-      if(!Array.isArray(value)) {
+      if (!Array.isArray(value)) {
         value = [0, value]
       }
       return staticVariant.fromObject(value)[1]
     },
     toObject (value) {
-      if(!Array.isArray(value)) {
+      if (!Array.isArray(value)) {
         value = [0, value]
       }
       return staticVariant.toObject(value)[1]
@@ -196,8 +196,8 @@ const Symbol = validation => {
       const bin = bcopy.toBinary()
 
       let symbol = ''
-      for(const code of bin)  {
-        if(code == '\0') {
+      for (const code of bin) {
+        if (code === '\0') {
           break
         }
         symbol += code
@@ -215,7 +215,7 @@ const Symbol = validation => {
     fromObject (value) {
       assert(value != null, `Symbol is required: ` + value)
       const {symbol, precision} = parseAsset(value)
-      if(precision == null) {
+      if (precision == null) {
         return symbol
       } else {
         // Internal object, this can have the precision prefix
@@ -250,7 +250,7 @@ const ExtendedSymbol = (validation, baseTypes, customTypes) => {
     },
 
     appendByteBuffer (b, value) {
-      assert.equal(typeof value, 'string', 'Invalid extended symbol: ' + value)
+      assert.strictEqual(typeof value, 'string', 'Invalid extended symbol: ' + value)
 
       const [symbol, contract] = value.split('@')
       assert(contract != null, 'Missing @contract suffix in extended symbol: ' + value)
@@ -342,12 +342,12 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
     },
 
     appendByteBuffer (b, value) {
-      assert.equal(typeof value, 'object', 'expecting extended_asset object, got ' + typeof value)
+      assert.strictEqual(typeof value, 'object', 'expecting extended_asset object, got ' + typeof value)
 
       const asset = printAsset(value)
 
       const [, contract] = asset.split('@')
-      assert.equal(typeof contract, 'string', 'Invalid extended asset: ' + value)
+      assert.strictEqual(typeof contract, 'string', 'Invalid extended asset: ' + value)
 
       // asset includes contract (assetType needs this)
       assetType.appendByteBuffer(b, asset)
@@ -357,7 +357,7 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
     fromObject (value) {
       // like: 1.0000 SYS@contract or 1 SYS@contract
       const asset = {}
-      if(typeof value === 'string') {
+      if (typeof value === 'string') {
         Object.assign(asset, parseAsset(value))
       } else if (typeof value === 'object') {
         Object.assign(asset, value)
@@ -384,7 +384,7 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
         }
       }
 
-      assert.equal(typeof value, 'object', 'expecting extended_asset object')
+      assert.strictEqual(typeof value, 'object', 'expecting extended_asset object')
       const {amount, precision, symbol, contract} = value
 
       return {
@@ -429,13 +429,13 @@ const SignatureType = (validation, baseTypes) => {
 const authorityOverride = ({
   /** shorthand `EOS6MRyAj..` */
   'authority.fromObject': (value) => {
-    if(PublicKey.fromString(value)) {
+    if (PublicKey.fromString(value)) {
       return {
         threshold: 1,
         keys: [{key: value, weight: 1}]
       }
     }
-    if(typeof value === 'string') {
+    if (typeof value === 'string') {
       const [account, permission = 'active'] = value.split('@')
       return {
         threshold: 1,
@@ -453,10 +453,10 @@ const authorityOverride = ({
 
 const abiOverride = structLookup => ({
   'abi.fromObject': (value) => {
-    if(typeof value === 'string') {
+    if (typeof value === 'string') {
       return JSON.parse(value)
     }
-    if(Buffer.isBuffer(value)) {
+    if (Buffer.isBuffer(value)) {
       return JSON.parse(value.toString())
     }
   },
@@ -473,10 +473,10 @@ const wasmCodeOverride = config => ({
   'setcode.code.fromObject': ({object, result}) => {
     try {
       const code = object.code.toString()
-      if(/^\s*\(module/.test(code)) {
+      if (/^\s*\(module/.test(code)) {
         const {binaryen} = config
         assert(binaryen != null, 'required: config.binaryen = require("binaryen")')
-        if(config.debug) {
+        if (config.debug) {
           console.log('Assembling WASM..')
         }
         const wasm = Buffer.from(binaryen.parseText(code).emitBinary())
@@ -484,7 +484,7 @@ const wasmCodeOverride = config => ({
       } else {
         result.code = object.code
       }
-    } catch(error) {
+    } catch (error) {
       console.error(error, object.code)
       throw error
     }
@@ -496,8 +496,8 @@ const wasmCodeOverride = config => ({
 */
 const actionDataOverride = (structLookup, forceActionDataHex) => ({
   'action.data.fromByteBuffer': ({fields, object, b, config}) => {
-    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
-    if(ser) {
+    const ser = (object.name || '') === '' ? fields.data : structLookup(object.name, object.account)
+    if (ser) {
       b.readVarint32() // length prefix (usefull if object.name is unknown)
       object.data = ser.fromByteBuffer(b, config)
     } else {
@@ -510,16 +510,16 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
   },
 
   'action.data.appendByteBuffer': ({fields, object, b}) => {
-    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
-    if(ser) {
+    const ser = (object.name || '') === '' ? fields.data : structLookup(object.name, object.account)
+    if (ser) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
       ser.appendByteBuffer(b2, object.data)
       b.writeVarint32(b2.offset)
       b.append(b2.copy(0, b2.offset), 'binary')
     } else {
       // console.log(`Unknown Action.name ${object.name}`)
-      const data = typeof object.data === 'string' ? new Buffer(object.data, 'hex') : object.data
-      if(!Buffer.isBuffer(data)) {
+      const data = typeof object.data === 'string' ? Buffer.from(object.data, 'hex') : object.data
+      if (!Buffer.isBuffer(data)) {
         throw new TypeError(`Unknown struct '${object.name}' for contract '${object.account}', locate this struct or provide serialized action.data`)
       }
       b.writeVarint32(data.length)
@@ -529,12 +529,12 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
 
   'action.data.fromObject': ({fields, object, result}) => {
     const {data, name} = object
-    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
-    if(ser) {
-      if(typeof data === 'object') {
+    const ser = (name || '') === '' ? fields.data : structLookup(name, object.account)
+    if (ser) {
+      if (typeof data === 'object') {
         result.data = ser.fromObject(data) // resolve shorthand
-      } else if(typeof data === 'string') {
-        const buf = new Buffer(data, 'hex')
+      } else if (typeof data === 'string') {
+        const buf = Buffer.from(data, 'hex')
         result.data = Fcbuffer.fromBuffer(ser, buf)
       } else {
         throw new TypeError('Expecting hex string or object in action.data')
@@ -547,16 +547,16 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
 
   'action.data.toObject': ({fields, object, result, config}) => {
     const {data, name} = object || {}
-    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
-    if(!ser) {
+    const ser = (name || '') === '' ? fields.data : structLookup(name, object.account)
+    if (!ser) {
       // Types without an ABI will accept hex
       result.data = Buffer.isBuffer(data) ? data.toString('hex') : data
       return
     }
 
-    if(forceActionDataHex) {
+    if (forceActionDataHex) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-      if(data) {
+      if (data) {
         ser.appendByteBuffer(b2, data)
       }
       result.data = b2.copy(0, b2.offset).toString('hex')

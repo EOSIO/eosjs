@@ -26,10 +26,9 @@ describe('offline', () => {
     transaction_extensions: []
   }
 
-
-  it('multi-signature', async function() {
+  it('multi-signature', async function () {
     const transactionHeaders = (expireInSeconds, callback) => {
-      callback(null/*error*/, headers)
+      callback(null/* error */, headers)
     }
     const eos = Eos({
       keyProvider: [
@@ -42,10 +41,10 @@ describe('offline', () => {
 
     const trx = await eos.nonce(1, {authorization: 'inita'})
 
-    assert.equal(trx.transaction.signatures.length, 2, 'signature count')
+    assert.strictEqual(trx.transaction.signatures.length, 2, 'signature count')
   })
 
-  it('transaction', async function() {
+  it('transaction', async function () {
     const eos = Eos({
       keyProvider: wif,
       httpEndpoint: null
@@ -58,18 +57,18 @@ describe('offline', () => {
       actions: [{
         account: 'eosio.null',
         name: 'nonce',
-        authorization:[{
+        authorization: [{
           actor: 'inita',
           permission: 'active'
         }],
-        data: '0131' //hex
+        data: '0131' // hex
       }]
     })
 
-    assert.equal(trx.transaction.signatures.length, 1, 'signature count')
+    assert.strictEqual(trx.transaction.signatures.length, 1, 'signature count')
   })
 
-  it('transactionHeaders object', async function() {
+  it('transactionHeaders object', async function () {
     const eos = Eos({
       keyProvider: wif,
       httpEndpoint: null,
@@ -79,7 +78,7 @@ describe('offline', () => {
     const memo = ''
     const trx = await eos.transfer('few', 'many', '100.0000 SYS', memo)
 
-    assert.deepEqual({
+    assert.deepStrictEqual({
       expiration: trx.transaction.transaction.expiration,
       ref_block_num: trx.transaction.transaction.ref_block_num,
       ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
@@ -90,22 +89,21 @@ describe('offline', () => {
       transaction_extensions: []
     }, headers)
 
-    assert.equal(trx.transaction.signatures.length, 1, 'signature count')
+    assert.strictEqual(trx.transaction.signatures.length, 1, 'signature count')
   })
 
-  it('abi', async function() {
+  it('abi', async function () {
     const eos = Eos({httpEndpoint: null})
 
     const abiBuffer = fs.readFileSync(`docker/contracts/eosio.bios/eosio.bios.abi`)
     const abiObject = JSON.parse(abiBuffer)
 
-    assert.deepEqual(abiObject, eos.fc.abiCache.abi('eosio.bios', abiBuffer).abi)
-    assert.deepEqual(abiObject, eos.fc.abiCache.abi('eosio.bios', abiObject).abi)
+    assert.deepStrictEqual(abiObject, eos.fc.abiCache.abi('eosio.bios', abiBuffer).abi)
+    assert.deepStrictEqual(abiObject, eos.fc.abiCache.abi('eosio.bios', abiObject).abi)
 
     const bios = await eos.contract('eosio.bios')
     assert(typeof bios.newaccount === 'function', 'unrecognized contract')
   })
-
 })
 
 // describe('networks', () => {
@@ -121,7 +119,7 @@ describe('offline', () => {
 // })
 
 describe('Contracts', () => {
-  it('Messages do not sort', async function() {
+  it('Messages do not sort', async function () {
     const local = Eos()
     const opts = {sign: false, broadcast: false}
     const tx = await local.transaction(['currency', 'eosio.token'], ({currency, eosio_token}) => {
@@ -130,24 +128,22 @@ describe('Contracts', () => {
 
       // {account: 'currency', ..} remains second (reverse sort)
       currency.transfer('inita', 'initd', '1.2000 CUR', '')
-
     }, opts)
-    assert.equal(tx.transaction.transaction.actions[0].account, 'eosio.token')
-    assert.equal(tx.transaction.transaction.actions[1].account, 'currency')
+    assert.strictEqual(tx.transaction.transaction.actions[0].account, 'eosio.token')
+    assert.strictEqual(tx.transaction.transaction.actions[1].account, 'currency')
   })
 })
 
 describe('Contract', () => {
-  function deploy(contract, account = 'inita') {
-    it(`deploy ${contract}@${account}`, async function() {
+  function deploy (contract, account = 'inita') {
+    it(`deploy ${contract}@${account}`, async function () {
       this.timeout(4000)
       // console.log('todo, skipping deploy ' + `${contract}@${account}`)
-      const config = {binaryen: require("binaryen"), keyProvider: wif}
+      const config = {binaryen: require('binaryen'), keyProvider: wif}
       const eos = Eos(config)
 
       const wasm = fs.readFileSync(`docker/contracts/${contract}/${contract}.wasm`)
       const abi = fs.readFileSync(`docker/contracts/${contract}/${contract}.abi`)
-
 
       await eos.setcode(account, 0, 0, wasm)
       await eos.setabi(account, JSON.parse(abi))
@@ -156,11 +152,11 @@ describe('Contract', () => {
 
       const diskAbi = JSON.parse(abi)
       delete diskAbi.____comment
-      if(!diskAbi.error_messages) {
+      if (!diskAbi.error_messages) {
         diskAbi.error_messages = []
       }
 
-      assert.deepEqual(diskAbi, code.abi)
+      assert.deepStrictEqual(diskAbi, code.abi)
     })
   }
 
@@ -175,8 +171,8 @@ describe('Contract', () => {
 })
 
 describe('Contracts Load', () => {
-  function load(name) {
-    it(name, async function() {
+  function load (name) {
+    it(name, async function () {
       const eos = Eos()
       const contract = await eos.contract(name)
       assert(contract, 'contract')
@@ -197,7 +193,6 @@ describe('transactions', () => {
 
   // A keyProvider can return private keys directly..
   it('keyProvider private key', () => {
-
     // keyProvider should return an array of keys
     const keyProvider = () => {
       return [wif]
@@ -206,13 +201,12 @@ describe('transactions', () => {
     const eos = Eos({keyProvider})
 
     return eos.transfer('inita', 'initb', '1.0000 SYS', '', false).then(tr => {
-      assert.equal(tr.transaction.signatures.length, 1)
-      assert.equal(typeof tr.transaction.signatures[0], 'string')
+      assert.strictEqual(tr.transaction.signatures.length, 1)
+      assert.strictEqual(typeof tr.transaction.signatures[0], 'string')
     })
   })
 
   it('keyProvider multiple private keys (get_required_keys)', () => {
-
     // keyProvider should return an array of keys
     const keyProvider = () => {
       return [
@@ -224,8 +218,8 @@ describe('transactions', () => {
     const eos = Eos({keyProvider})
 
     return eos.transfer('inita', 'initb', '1.2740 SYS', '', false).then(tr => {
-      assert.equal(tr.transaction.signatures.length, 1)
-      assert.equal(typeof tr.transaction.signatures[0], 'string')
+      assert.strictEqual(tr.transaction.signatures.length, 1)
+      assert.strictEqual(typeof tr.transaction.signatures[0], 'string')
     })
   })
 
@@ -236,13 +230,13 @@ describe('transactions', () => {
 
     // keyProvider should return a string or array of keys.
     const keyProvider = ({transaction, pubkeys}) => {
-      if(!pubkeys) {
-        assert.equal(transaction.actions[0].name, 'transfer')
+      if (!pubkeys) {
+        assert.strictEqual(transaction.actions[0].name, 'transfer')
         return [pubkey]
       }
 
-      if(pubkeys) {
-        assert.deepEqual(pubkeys, [pubkey])
+      if (pubkeys) {
+        assert.deepStrictEqual(pubkeys, [pubkey])
         return [wif]
       }
       assert(false, 'unexpected keyProvider callback')
@@ -251,8 +245,8 @@ describe('transactions', () => {
     const eos = Eos({keyProvider})
 
     return eos.transfer('inita', 'initb', '9.0000 SYS', '', false).then(tr => {
-      assert.equal(tr.transaction.signatures.length, 1)
-      assert.equal(typeof tr.transaction.signatures[0], 'string')
+      assert.strictEqual(tr.transaction.signatures.length, 1)
+      assert.strictEqual(typeof tr.transaction.signatures[0], 'string')
     })
   })
 
@@ -264,19 +258,18 @@ describe('transactions', () => {
   })
 
   it('keyProvider return Promise', () => {
-    const eos = Eos({keyProvider: new Promise(resolve => {resolve(wif)})})
+    const eos = Eos({keyProvider: new Promise(resolve => { resolve(wif) })})
     return eos.transfer('inita', 'initb', '1.6180 SYS', '', true)
   })
 
   it('signProvider', () => {
     const customSignProvider = ({buf, sign, transaction}) => {
-
       // All potential keys (EOS6MRy.. is the pubkey for 'wif')
       const pubkeys = ['EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV']
 
       return eos.getRequiredKeys(transaction, pubkeys).then(res => {
         // Just the required_keys need to sign
-        assert.deepEqual(res.required_keys, pubkeys)
+        assert.deepStrictEqual(res.required_keys, pubkeys)
         return sign(buf, wif) // return hex string signature or array of signatures
       })
     }
@@ -284,9 +277,9 @@ describe('transactions', () => {
     return eos.transfer('inita', 'initb', '2.0000 SYS', '', false)
   })
 
-  it('create asset', async function() {
+  it('create asset', async function () {
     const eos = Eos({signProvider})
-    const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+
     const auth = {authorization: 'eosio.token'}
     await eos.create('eosio.token', '10000 ' + randomAsset(), auth)
     await eos.create('eosio.token', '10000.00 ' + randomAsset(), auth)
@@ -359,7 +352,7 @@ describe('transactions', () => {
         {actor: 'inita', permission: 'owner'},
         {actor: 'initb', permission: 'owner'}
       ]
-      assert.deepEqual(transaction.transaction.actions[0].authorization, ans)
+      assert.deepStrictEqual(transaction.transaction.actions[0].authorization, ans)
     })
   })
 
@@ -372,7 +365,7 @@ describe('transactions', () => {
     const eos = Eos({signProvider})
     const opts = {broadcast: false, sign: false}
     return eos.transfer('inita', 'initb', '1.0000 SYS', '', opts).then(tr =>
-      assert.deepEqual(tr.transaction.signatures, [])
+      assert.deepStrictEqual(tr.transaction.signatures, [])
     )
   })
 
@@ -383,10 +376,10 @@ describe('transactions', () => {
 
   it('action to unknown contract', done => {
     Eos({signProvider}).contract('unknown432')
-    .then(() => {throw 'expecting error'})
-    .catch(error => {
-      done()
-    })
+      .then(() => { throw 'expecting error' })
+      .catch(err => { 
+        done()
+      })
   })
 
   it('action to contract', () => {
@@ -394,15 +387,15 @@ describe('transactions', () => {
       return token.transfer('inita', 'initb', '1.0000 SYS', '')
         // transaction sent on each command
         .then(tr => {
-          assert.equal(1, tr.transaction.transaction.actions.length)
+          assert.strictEqual(1, tr.transaction.transaction.actions.length)
 
           return token.transfer('initb', 'inita', '1.0000 SYS', '')
-            .then(tr => {assert.equal(1, tr.transaction.transaction.actions.length)})
+            .then(tr => { assert.strictEqual(1, tr.transaction.transaction.actions.length) })
         })
-    }).then(r => {assert(r == undefined)})
+    }).then(r => { assert(r === undefined) })
   })
 
-  it('action to contract atomic', async function() {
+  it('action to contract atomic', async function () {
     let amt = 1 // for unique transactions
     const eos = Eos({signProvider})
 
@@ -411,8 +404,8 @@ describe('transactions', () => {
       assert(eosio_token.transfer('initb', 'inita', (amt++) + '.0000 SYS', '') == null)
     }
 
-    const assertTr = tr =>{
-      assert.equal(2, tr.transaction.transaction.actions.length)
+    const assertTr = tr => {
+      assert.strictEqual(2, tr.transaction.transaction.actions.length)
     }
 
     //  contracts can be a string or array
@@ -439,7 +432,7 @@ describe('transactions', () => {
       assert(tr.transfer('inita', 'initb', '1.0000 SYS', '') == null)
       assert(tr.transfer({from: 'inita', to: 'initc', quantity: '1.0000 SYS', memo: ''}) == null)
     }).then(tr => {
-      assert.equal(2, tr.transaction.transaction.actions.length)
+      assert.strictEqual(2, tr.transaction.transaction.actions.length)
     })
   })
 
@@ -448,28 +441,28 @@ describe('transactions', () => {
     return eos.transaction(tr => {
       tr.transfer('inita', 'inita', '1.0000 SYS', '', cb => {})
     })
-    .then(() => {throw 'expecting rollback'})
-    .catch(error => {
-      assert(/Callback during a transaction/.test(error), error)
-    })
+      .then(() => { throw new Error('expecting rollback') })
+      .catch(error => {
+        assert(/Callback during a transaction/.test(error), error)
+      })
   })
 
   it('multi-action transaction error rollback', () => {
     const eos = Eos({signProvider})
-    return eos.transaction(tr => {throw 'rollback'})
-    .then(() => {throw 'expecting rollback'})
-    .catch(error => {
-      assert(/rollback/.test(error), error)
-    })
+    return eos.transaction(tr => { throw 'rollback' })
+      .then(() => { throw 'expecting rollback' })
+      .catch(error => {
+        assert(/rollback/.test(error), error)
+      })
   })
 
   it('multi-action transaction Promise.reject rollback', () => {
     const eos = Eos({signProvider})
-    return eos.transaction(tr => Promise.reject('rollback'))
-    .then(() => {throw 'expecting rollback'})
-    .catch(error => {
-      assert(/rollback/.test(error), error)
-    })
+    return eos.transaction(tr => Promise.reject(new Error('rollback')))
+      .then(() => { throw 'expecting rollback' })
+      .catch(error => {
+        assert(/rollback/.test(error), error)
+      })
   })
 
   it('custom transfer', () => {
@@ -497,7 +490,7 @@ describe('transactions', () => {
     )
   })
 
-  it('custom contract transfer', async function() {
+  it('custom contract transfer', async function () {
     const eos = Eos({signProvider})
     await eos.contract('currency').then(currency =>
       currency.transfer('currency', 'inita', '1.0000 CUR', '')
@@ -505,15 +498,15 @@ describe('transactions', () => {
   })
 })
 
-it('Transaction ABI cache', async function() {
+it('Transaction ABI cache', async function () {
   const eos = Eos()
   assert.throws(() => eos.fc.abiCache.abi('eosio'), /not cached/)
   const abi = await eos.fc.abiCache.abiAsync('eosio')
-  assert.deepEqual(abi, await eos.fc.abiCache.abiAsync('eosio', false/*force*/))
-  assert.deepEqual(abi, eos.fc.abiCache.abi('eosio'))
+  assert.deepStrictEqual(abi, await eos.fc.abiCache.abiAsync('eosio', false/* force */))
+  assert.deepStrictEqual(abi, eos.fc.abiCache.abi('eosio'))
 })
 
-it('Transaction ABI lookup', async function() {
+it('Transaction ABI lookup', async function () {
   const eos = Eos()
   const tx = await eos.transaction(
     {
@@ -536,7 +529,7 @@ it('Transaction ABI lookup', async function() {
     },
     {sign: false, broadcast: false}
   )
-  assert.equal(tx.transaction.transaction.actions[0].account, 'currency')
+  assert.strictEqual(tx.transaction.transaction.actions[0].account, 'currency')
 })
 
 const randomName = () => {

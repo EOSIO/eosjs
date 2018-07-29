@@ -15,28 +15,28 @@ describe('format', () => {
     }
 
     it('isName', () => {
-      for(let name of nameFixture.isname) {
+      for (let name of nameFixture.isname) {
         assert(isName(name, err => console.log(err)), name)
       }
-      for(let name of nameFixture.noname) {
+      for (let name of nameFixture.noname) {
         assert(!isName(name), name)
       }
     })
 
     it('encode / decode', () => {
-      assert.equal('12373', encodeName('eos'), 'encode')
-      assert.equal('3055', encodeNameHex('eos'), 'encode hex')
-      assert.equal(decodeName(encodeName('eos')), 'eos', 'decode')
+      assert.strictEqual('12373', encodeName('eos'), 'encode')
+      assert.strictEqual('3055', encodeNameHex('eos'), 'encode hex')
+      assert.strictEqual(decodeName(encodeName('eos')), 'eos', 'decode')
 
-      assert.equal('572d3ccdcd', encodeNameHex('transfer'), 'encode')
-      assert.equal(decodeNameHex('572d3ccdcd'), 'transfer', 'decode')
+      assert.strictEqual('572d3ccdcd', encodeNameHex('transfer'), 'encode')
+      assert.strictEqual(decodeNameHex('572d3ccdcd'), 'transfer', 'decode')
 
-      for(let name of nameFixture.isname) {
-        assert.equal(decodeName(encodeName(name)), name)
-        assert.equal(decodeNameHex(encodeNameHex(name)), name)
+      for (let name of nameFixture.isname) {
+        assert.strictEqual(decodeName(encodeName(name)), name)
+        assert.strictEqual(decodeNameHex(encodeNameHex(name)), name)
       }
-      for(let name of nameFixture.isname) {
-        assert.equal(decodeName(encodeName(name, false), false), name)
+      for (let name of nameFixture.isname) {
+        assert.strictEqual(decodeName(encodeName(name, false), false), name)
       }
       assert(decodeName(1))
       throws(() => decodeName(Number.MAX_SAFE_INTEGER + 1), /overflow/)
@@ -76,12 +76,12 @@ describe('format', () => {
       {value: '1.10', precision: 2, answer: '1.10'},
       {value: '1.01', precision: 2, answer: '1.01'},
 
-      {value: '1', precision: 3, answer: '1.000'},
+      {value: '1', precision: 3, answer: '1.000'}
 
     ]
-    for(const test of decFixtures) {
+    for (const test of decFixtures) {
       const {answer, value, precision} = test
-      assert.equal(DecimalPad(value, precision), answer, JSON.stringify(test))
+      assert.strictEqual(DecimalPad(value, precision), answer.toString())
     }
   })
 
@@ -103,11 +103,11 @@ describe('format', () => {
       {value: '110', precision: 2, answer: '1.10'},
       {value: '101', precision: 2, answer: '1.01'},
       {value: '0101', precision: 2, answer: '1.01'},
-      {value: '1', precision: 5, answer: '0.00001'},
+      {value: '1', precision: 5, answer: '0.00001'}
     ]
-    for(const test of decFixtures) {
+    for (const test of decFixtures) {
       const {answer, value, precision} = test
-      assert.equal(DecimalUnimply(value, precision), answer, JSON.stringify(test))
+      assert.strictEqual(DecimalUnimply(value, precision), answer, JSON.stringify(test))
     }
   })
 
@@ -123,10 +123,10 @@ describe('format', () => {
       ['1.0000 SYM@contract', '1.0000', 4, 'SYM', 'contract'],
       ['1.0000 SYM@tract.token', '1.0000', 4, 'SYM', 'tract.token'],
       ['1.0000 SYM@tr.act.token', '1.0000', 4, 'SYM', 'tr.act.token'],
-      ['1.0000 SYM', '1.0000', 4, 'SYM', null],
+      ['1.0000 SYM', '1.0000', 4, 'SYM', null]
     ]
-    for(const [str, amount, precision, symbol, contract] of parseExtendedAssets) {
-      assert.deepEqual(
+    for (const [str, amount, precision, symbol, contract] of parseExtendedAssets) {
+      assert.deepStrictEqual(
         parseAsset(str),
         {amount, precision, symbol, contract},
         JSON.stringify([str, amount, precision, symbol, contract])
