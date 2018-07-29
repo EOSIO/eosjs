@@ -191,7 +191,7 @@ function DecimalString (value) {
 function DecimalPad (num, precision) {
   const value = DecimalString(num)
   if (precision == null) {
-    return num
+    return num.toString()
   }
 
   assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)
