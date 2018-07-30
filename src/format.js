@@ -297,7 +297,7 @@ function parseAsset(str) {
   const symbolMatch = str.match(/(^| |,)([A-Z]+)(@|$)/)
   const symbol = symbolMatch ? symbolMatch[2] : null
 
-  const [, contractRaw] = str.split('@')
+  const [, contractRaw = ''] = str.split('@')
   const contract = /^[a-z0-5]+(\.[a-z0-5]+)*$/.test(contractRaw) ? contractRaw : null
 
   const check = printAsset({amount, precision, symbol, contract})
