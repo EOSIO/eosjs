@@ -384,7 +384,7 @@ describe('transactions', () => {
   it('action to unknown contract', done => {
     Eos({signProvider}).contract('unknown432')
     .then(() => {throw 'expecting error'})
-    .catch(error => {
+    .catch(error => { // eslint-disable-line handle-callback-err
       done()
     })
   })
