@@ -35,6 +35,7 @@ export class Api {
   chainId: string;
   transactionTypes: Map<string, ser.Type>;
   contracts = new Map<string, ser.Contract>();
+  abis = new Map<string, Abi>();
 
   constructor(args: { rpc: JsonRpc, authorityProvider?: AuthorityProvider, signatureProvider: SignatureProvider, chainId: string }) {
     this.rpc = args.rpc;
@@ -44,18 +45,34 @@ export class Api {
     this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
   }
 
-  async getContract(accountName: string, reload = false): Promise<ser.Contract> {
-    if (!reload && this.contracts.get(accountName))
-      return this.contracts.get(accountName);
+  async getAbi(accountName: string, reload = false): Promise<Abi> {
+    if (!reload && this.abis.get(accountName))
+      return this.abis.get(accountName);
     let abi: Abi;
     try {
       abi = (await this.rpc.get_abi(accountName)).abi;
     } catch (e) {
-      e.message = 'fetching abi for ' + accountName + ': ' + e.message;
+      e.message = `fetching abi for ${accountName}: ${e.message}`;
       throw e;
     }
     if (!abi)
-      throw new Error("Missing abi for " + accountName);
+      throw new Error(`Missing abi for ${accountName}`);
+    this.abis.set(accountName, abi);
+    return abi;
+  }
+
+  async getTransactionAbis(transaction: any, reload = false): Promise<Abi[]> {
+    const accounts: string[] = transaction.actions.map((action: ser.Action): string => action.account);
+    const uniqueAccounts: Set<string> = new Set(accounts);
+    const actionPromises: Promise<Abi>[] = [...uniqueAccounts]
+      .map(async (account: string): Promise<Abi> => await this.getAbi(account, reload));
+    return Promise.all(actionPromises);
+  }
+
+  async getContract(accountName: string, reload = false): Promise<ser.Contract> {
+    if (!reload && this.contracts.get(accountName))
+      return this.contracts.get(accountName);
+    const abi = await this.getAbi(accountName, reload);
     let types = ser.getTypesFromAbi(ser.createInitialTypes(), abi);
     let actions = new Map<string, ser.Type>();
     for (let { name, type } of abi.actions)
