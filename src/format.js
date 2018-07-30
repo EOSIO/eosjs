@@ -193,14 +193,15 @@ function DecimalString(value) {
 
   @example DecimalPad(10.2, 3) === '10.200'
 
-  @arg {number|string|object.toString} value
-  @arg {number} [precision = null] - number of decimal places (null skips padding)
+  @arg {number|string|object.toString} num
+  @arg {number} [precision = null] - number of decimal places.  Null skips
+    padding suffix but still applies number format normalization.
   @return {string} decimal part is added and zero padded to match precision
 */
 function DecimalPad(num, precision) {
   const value = DecimalString(num)
   if(precision == null) {
-    return num
+    return value
   }
 
   assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)
