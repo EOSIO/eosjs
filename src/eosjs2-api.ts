@@ -21,6 +21,7 @@ export interface SignatureProviderArgs {
   chainId: string;
   requiredKeys: string[];
   serializedTransaction: Uint8Array;
+  abis: Abi[];
 }
 
 export interface SignatureProvider {
@@ -155,14 +156,15 @@ export class Api {
     }
 
     if (!this.hasRequiredTaposFields(transaction)) {
-      throw new Error("Required configuration or TAPOS fields are not present")
+      throw new Error("Required configuration or TAPOS fields are not present");
     }
 
+    let abis: Abi[] = await this.getTransactionAbis(transaction);
     transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
     let serializedTransaction = this.serializeTransaction(transaction);
     let availableKeys = await this.signatureProvider.getAvailableKeys();
     let requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
-    let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction });
+    let signatures = await this.signatureProvider.sign({ chainId: this.chainId, requiredKeys, serializedTransaction, abis });
     let pushTransactionArgs = { signatures, serializedTransaction };
     if (broadcast) {
       return this.pushSignedTransaction(pushTransactionArgs);
