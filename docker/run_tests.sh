@@ -18,7 +18,6 @@ docker cp docker_nodeosd_1:/contracts .
 
 cd ..
 npm install
-npm run lint
 npm run test
 
 npm run build_browser
