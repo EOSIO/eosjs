@@ -94,7 +94,7 @@
   },
   "lint-staged": {
     "src/**/*.{js,json}": [
-      "npm run lint",
+      "eslint --fix",
       "git add"
     ]
   }
