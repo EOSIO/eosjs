@@ -2,7 +2,7 @@
 
 'use strict';
 
-import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs, TransactionConfig } from './eosjs2-jsonrpc';
+import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs, TransactionConfig, GetAbiResult } from './eosjs2-jsonrpc';
 import * as ser from './eosjs2-serialize';
 const transactionAbi = require('../src/transaction.abi.json');
 
@@ -21,7 +21,7 @@ export interface SignatureProviderArgs {
   chainId: string;
   requiredKeys: string[];
   serializedTransaction: Uint8Array;
-  abis: Abi[];
+  abis: GetAbiResult[];
 }
 
 export interface SignatureProvider {
@@ -62,11 +62,11 @@ export class Api {
     return abi;
   }
 
-  async getTransactionAbis(transaction: any, reload = false): Promise<Abi[]> {
+  async getTransactionAbis(transaction: any, reload = false): Promise<GetAbiResult[]> {
     const accounts: string[] = transaction.actions.map((action: ser.Action): string => action.account);
     const uniqueAccounts: Set<string> = new Set(accounts);
-    const actionPromises: Promise<Abi>[] = [...uniqueAccounts]
-      .map(async (account: string): Promise<Abi> => await this.getAbi(account, reload));
+    const actionPromises: Promise<GetAbiResult>[] = [...uniqueAccounts]
+      .map(async (account: string): Promise<GetAbiResult> => ({ account_name: account, abi: await this.getAbi(account, reload) }));
     return Promise.all(actionPromises);
   }
 
@@ -159,7 +159,7 @@ export class Api {
       throw new Error("Required configuration or TAPOS fields are not present");
     }
 
-    let abis: Abi[] = await this.getTransactionAbis(transaction);
+    let abis: GetAbiResult[] = await this.getTransactionAbis(transaction);
     transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
     let serializedTransaction = this.serializeTransaction(transaction);
     let availableKeys = await this.signatureProvider.getAvailableKeys();
