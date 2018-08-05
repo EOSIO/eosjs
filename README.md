@@ -34,8 +34,8 @@ sha512-ZhiO8AyYgrZOyDo3y40LVg1YkjqjUr9hYO+te8IYHU1gfAmyZxfut9CQj73+mEgC9u7GV2Gtt
 
   <script>
   eos = Eos({
-    httpEndpoint: 'http://ayeaye.cypherglass.com:8888',
-    chainId: '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca',
+    httpEndpoint: 'https://nodes.get-scatter.com',
+    chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
     verbose: true
   })
   </script>
