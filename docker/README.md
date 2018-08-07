@@ -12,11 +12,11 @@ docker-compose down
 
 # Load commands like `cleos`
 
-In case you installed Docker according to the [EOSIO developer docs](https://developers.eos.io/eosio-nodeos/docs/docker-quickstart), make sure to `unalias cleos`
-
 ```bash
 . ./dockrc.sh
 ```
+
+The [EOSIO developer docs](https://developers.eos.io/eosio-nodeos/docs/docker-quickstart) uses a `cleos` alias too.  If you see “No such container: eosio”, run ‘unalias cleos’ and try again.
 
 # Unit Test
 
