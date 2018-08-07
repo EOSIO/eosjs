@@ -12,6 +12,8 @@ docker-compose down
 
 # Load commands like `cleos`
 
+In case you installed Docker according to the [EOSIO developer docs](https://developers.eos.io/eosio-nodeos/docs/docker-quickstart), make sure to `unalias cleos`
+
 ```bash
 . ./dockrc.sh
 ```
