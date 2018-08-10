@@ -19,7 +19,7 @@ describe('offline', () => {
     expiration: new Date().toISOString().split('.')[0], // Don't use `new Date` in production
     ref_block_num: 1,
     ref_block_prefix: 452435776,
-    net_usage_words: 0,
+    max_net_usage_words: 0,
     max_cpu_usage_ms: 0,
     delay_sec: 0,
     context_free_actions: [],
@@ -83,7 +83,7 @@ describe('offline', () => {
       expiration: trx.transaction.transaction.expiration,
       ref_block_num: trx.transaction.transaction.ref_block_num,
       ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
-      net_usage_words: 0,
+      max_net_usage_words: 0,
       max_cpu_usage_ms: 0,
       delay_sec: 0,
       context_free_actions: [],

@@ -387,7 +387,7 @@ function WriteApi(Network, network, config, Transaction) {
         expiration,
         ref_block_num,
         ref_block_prefix,
-        net_usage_words = 0,
+        max_net_usage_words = 0,
         max_cpu_usage_ms = 0,
         delay_sec = 0
       } = arg
@@ -395,7 +395,7 @@ function WriteApi(Network, network, config, Transaction) {
         expiration,
         ref_block_num,
         ref_block_prefix,
-        net_usage_words,
+        max_net_usage_words,
         max_cpu_usage_ms,
         delay_sec
       }
@@ -423,7 +423,7 @@ function WriteApi(Network, network, config, Transaction) {
       assert.equal(typeof rawTx.ref_block_prefix, 'number', 'expecting ref_block_prefix number')
 
       const defaultHeaders = {
-        net_usage_words: 0,
+        max_net_usage_words: 0,
         max_cpu_usage_ms: 0,
         delay_sec: 0
       }

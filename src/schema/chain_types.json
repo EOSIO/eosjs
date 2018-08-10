@@ -49,7 +49,7 @@
       "expiration": "time",
       "ref_block_num": "uint16",
       "ref_block_prefix": "uint32",
-      "net_usage_words": "unsigned_int",
+      "max_net_usage_words": "unsigned_int",
       "max_cpu_usage_ms": "uint8",
       "delay_sec": "unsigned_int"
     }
