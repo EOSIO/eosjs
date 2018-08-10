@@ -1,0 +1,6 @@
+node_modules/
+lib/
+bin/
+dist/
+docker/
+docs/
