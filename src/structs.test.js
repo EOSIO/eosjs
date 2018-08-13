@@ -60,6 +60,13 @@ describe('shorthand', () => {
     assertSerializer(Symbol, '4,SYS', '4,SYS', 'SYS')
   })
 
+  it('symbol_code', () => {
+    const eos = Eos({defaults: true})
+    const {types} = eos.fc
+    const SymbolCode = types.symbol_code()
+    assertSerializer(SymbolCode, SymbolCode.toObject())
+  })
+
   it('extended_symbol', () => {
     const eos = Eos({defaults: true})
     const esType = eos.fc.types.extended_symbol()

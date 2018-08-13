@@ -55,6 +55,7 @@ module.exports = (config = {}, extendedSchema) => {
     public_key: () => [variant(PublicKeyEcc)],
 
     symbol: () => [Symbol],
+    symbol_code: () => [SymbolCode],
     extended_symbol: () => [ExtendedSymbol],
 
     asset: () => [Asset], // After Symbol: amount, precision, symbol, contract
@@ -228,6 +229,46 @@ const Symbol = validation => {
         return 'SYS'
       }
       // symbol only (without precision prefix)
+      return parseAsset(value).symbol
+    }
+  }
+}
+
+/** Symbol type without the precision */
+const SymbolCode = validation => {
+  return {
+    fromByteBuffer (b) {
+      const bcopy = b.copy(b.offset, b.offset + 8)
+      b.skip(8)
+
+      const bin = bcopy.toBinary()
+
+      let symbol = ''
+      for(const code of bin)  {
+        if(code == '\0') {
+          break
+        }
+        symbol += code
+      }
+      return `${symbol}`
+    },
+
+    appendByteBuffer (b, value) {
+      const {symbol} = parseAsset(value)
+      const pad = '\0'.repeat(8 - symbol.length)
+      b.append(symbol + pad)
+    },
+
+    fromObject (value) {
+      assert(value != null, `Symbol is required: ` + value)
+      const {symbol} = parseAsset(value)
+      return symbol
+    },
+
+    toObject (value) {
+      if (validation.defaults && value == null) {
+        return 'SYS'
+      }
       return parseAsset(value).symbol
     }
   }
