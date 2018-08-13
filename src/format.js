@@ -70,6 +70,7 @@ const charidx = ch => {
   @see types.hpp string_to_name
 
   @arg {string} name - A string to encode, up to 12 characters long.
+  @arg {string} [littleEndian = true] - Little or Bigendian encoding
 
   @return {string<uint64>} - compressed string (from name arg).  A string is
     always used because a number could exceed JavaScript's 52 bit limit.
@@ -112,6 +113,8 @@ function encodeName(name, littleEndian = true) {
 
 /**
   @arg {Long|String|number} value uint64
+  @arg {string} [littleEndian = true] - Little or Bigendian encoding
+
   @return {string}
 */
 function decodeName(value, littleEndian = true) {
