@@ -132,7 +132,7 @@ Chain and history API functions are available after creating the `eos` object.
 ```js
 Eos = require('eosjs')
 
-// Default configuration (additional options below)
+// Default configuration
 config = {
   chainId: null, // 32 byte (64 char) hex string
   keyProvider: ['PrivateKeys...'], // WIF string or array of keys..
@@ -207,6 +207,8 @@ eos = Eos(config)
 
 Options may be provided after parameters.
 
+NOTE: `authorization` is for individual actions, it does not belong in `Eos(config)`.
+
 ```js
 options = {
   authorization: 'alice@active',
@@ -277,7 +279,7 @@ eos.transaction(
       }
     ]
   }
-  // options -- example: {broadcast: false}
+  // config -- example: {broadcast: false, sign: true}
 )
 ```
 
