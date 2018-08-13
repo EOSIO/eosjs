@@ -20,7 +20,7 @@ cd ..
 npm install
 npm run test
 
-npm run build_browser
+npm run build
 npm run minimize
 
 echo "Subresource Integrity"

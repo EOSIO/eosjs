@@ -13,13 +13,14 @@
     "test_lib": "mocha --exit --use_strict lib/*.test.js",
     "coverage": "nyc --reporter=html npm test",
     "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "build": "babel --copy-files src --out-dir lib",
-    "build_browser": "npm run build && browserify -o lib/eos.js -s Eos lib/index.js",
-    "build_browser_test": "npm run build && browserify -o dist/test.js lib/*.test.js",
+    "build": "npm run build_lib && npm run build_browser",
+    "build_lib": "babel --copy-files src --out-dir lib",
+    "build_browser": "browserify -o lib/eos.js -s Eos lib/index.js",
+    "build_browser_test": "browserify -o dist/test.js lib/*.test.js",
     "minimize": "uglifyjs lib/eos.js -o lib/eos.min.js --source-map --compress --mangle",
     "docs": "jsdoc2md src/format.js > docs/format.md",
     "srisum": "npx srisum lib/eos.*",
-    "prepublishOnly": "npm run build_browser && npm run test_lib && npm run minimize && npm run docs && npm run srisum"
+    "prepublishOnly": "npm run build && npm run test_lib && npm run minimize && npm run docs && npm run srisum"
   },
   "repository": {
     "type": "git",
