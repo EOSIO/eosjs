@@ -386,18 +386,12 @@ function WriteApi(Network, network, config, Transaction) {
       const {
         expiration,
         ref_block_num,
-        ref_block_prefix,
-        max_net_usage_words = 0,
-        max_cpu_usage_ms = 0,
-        delay_sec = 0
+        ref_block_prefix
       } = arg
       argHeaders = {
         expiration,
         ref_block_num,
-        ref_block_prefix,
-        max_net_usage_words,
-        max_cpu_usage_ms,
-        delay_sec
+        ref_block_prefix
       }
     }
 
@@ -415,6 +409,7 @@ function WriteApi(Network, network, config, Transaction) {
       assert(network, 'Network is required, provide httpEndpoint or own transaction headers')
       headers = network.createTransaction
     }
+
     headers(options.expireInSeconds, checkError(callback, config.logger, async function(rawTx) {
       // console.log('rawTx', rawTx)
       assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
