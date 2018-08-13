@@ -424,8 +424,9 @@ function WriteApi(Network, network, config, Transaction) {
       }
 
       rawTx = Object.assign({}, defaultHeaders, rawTx)
-
+      rawTx.context_free_actions = arg.context_free_actions
       rawTx.actions = arg.actions
+      rawTx.transaction_extensions = arg.transaction_extensions
 
       // Resolve shorthand
       const txObject = Transaction.fromObject(rawTx)
