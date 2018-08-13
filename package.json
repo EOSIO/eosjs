@@ -17,7 +17,7 @@
     "build_browser": "npm run build && browserify -o lib/eos.js -s Eos lib/index.js",
     "build_browser_test": "npm run build && browserify -o dist/test.js lib/*.test.js",
     "minimize": "uglifyjs lib/eos.js -o lib/eos.min.js --source-map --compress --mangle",
-    "docs": "jsdoc2md src/format.js > docs/index.md",
+    "docs": "jsdoc2md src/format.js > docs/format.md",
     "srisum": "npx srisum lib/eos.*",
     "prepublishOnly": "npm run build_browser && npm run test_lib && npm run minimize && npm run docs && npm run srisum"
   },
