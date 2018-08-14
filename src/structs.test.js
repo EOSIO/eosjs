@@ -111,6 +111,28 @@ describe('Eosio Abi', () => {
     })
   })
 
+  it('abi', async () => {
+    const eos = Eos({defaults: true, broadcast: false, sign: false})
+
+    const {abi_def} = eos.fc.structs
+
+    async function setabi(abi) {
+      // console.log(abi);
+      await eos.setabi('inita', abi) // See README
+      const buf = eos.fc.toBuffer('abi_def', abi)
+      await eos.setabi('inita', buf) // v1/chain/abi_json_to_bin
+      await eos.setabi('inita', buf.toString('hex')) // v1/chain/abi_json_to_bin
+    }
+
+    const obj = abi_def.toObject()
+    const json = JSON.stringify(obj)
+
+    await setabi(obj)
+    await setabi(abi_def.fromObject(obj))
+    await setabi(abi_def.fromObject(json))
+    await setabi(abi_def.fromObject(Buffer.from(json).toString('hex')))
+    await setabi(abi_def.fromObject(Buffer.from(json)))
+  })
 })
 
 describe('Action.data', () => {

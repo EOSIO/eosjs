@@ -493,18 +493,30 @@ const authorityOverride = ({
 })
 
 const abiOverride = structLookup => ({
-  'abi.fromObject': (value) => {
+  'abi_def.fromObject': (value) => {
     if(typeof value === 'string') {
-      return JSON.parse(value)
+      let json = Buffer.from(value, 'hex').toString()
+      if(json.length === 0) {
+        json = Buffer.from(value).toString()
+      }
+      return JSON.parse(json)
     }
     if(Buffer.isBuffer(value)) {
       return JSON.parse(value.toString())
     }
+    return null // let the default type take care of it
   },
+
   'setabi.abi.appendByteBuffer': ({fields, object, b}) => {
     const ser = structLookup('abi_def', 'eosio')
     const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
-    ser.appendByteBuffer(b2, object.abi)
+
+    if(Buffer.isBuffer(object.abi)) {
+      b2.append(object.abi)
+    } else if(typeof object.abi == 'object'){
+      ser.appendByteBuffer(b2, object.abi);
+    }
+
     b.writeVarint32(b2.offset) // length prefix
     b.append(b2.copy(0, b2.offset), 'binary')
   }
