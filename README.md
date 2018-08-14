@@ -9,7 +9,7 @@ General purpose library for EOSIO blockchains.
 
 | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
 | --- | --- | --- | --- |
-| tag: 16.0.1 | `npm install eosjs` | tag: v1.1.4 | eosio/eos:v1.1.4 |
+| tag: 16.0.2 | `npm install eosjs` | tag: v1.1.4 | eosio/eos:v1.1.4 |
 
 Prior [version](./docs/prior_versions.md) matrix.
 
