@@ -28,7 +28,7 @@ sha512-JZ6rFW/z2srIZxN+h/lSM/m1k+BEXWLS5Wt1c1RRr9CHxRXWT3ff5l0+zhedOk2kL2ZZNMFqm
 <head>
   <meta charset="utf-8">
 
-  <script src="https://cdn.jsdelivr.net/npm/eosjs@16.0.0/lib/eos.min.js"
+  <script src="https://cdn.jsdelivr.net/npm/eosjs@16.0.2/lib/eos.min.js"
     integrity="sha512-22gPq/bBKtvD6mdthugNUuGmYEdKkVnnhvSnl4k62eNPmKoFEmNbmxLIU4Hz/5EsmCX2jsYIwkaiz507wT+fBw=="
     crossorigin="anonymous"></script>
 
