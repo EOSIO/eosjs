@@ -201,7 +201,7 @@ eos = Eos(config)
   }
   ```
 
-  Turn off just API logging: `config.logger = {log: null}`
+  For example, redirect error logs: `config.logger = {error: (...args) => ..}`
 
 ### Options
 
