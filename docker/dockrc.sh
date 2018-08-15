@@ -6,7 +6,7 @@ export owner_pubkey=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 export active_pubkey=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
 function cleos() {
-  docker-compose exec keosd cleos -u http://nodeosd:8888 --wallet-url http://localhost:8900 "$@"
+  docker exec docker_keosd_1 cleos -u http://nodeosd:8888 --wallet-url http://localhost:8900 "$@"
 }
 
 function keosd() {
