@@ -350,6 +350,25 @@ describe('transactions', () => {
     return eos.transfer('inita', 'initb', '1.0000 SYS', '', {authorization: 'inita@owner'})
   })
 
+  it('transfer custom authorization (permission only)', async () => {
+    const eos = Eos({signProvider, broadcast: false, authorization: '@posting'})
+    const tr = await eos.transfer('inita', 'initb', '1.0000 SYS', '')
+    assert.deepEqual(
+      tr.transaction.transaction.actions[0].authorization,
+      [{actor: 'inita', permission: 'posting'}]
+    )
+  })
+
+  it('transfer custom global authorization', async () => {
+    const authorization = [{actor: 'inita', permission: 'posting'}]
+    const eos = Eos({signProvider, authorization, broadcast: false})
+    const tr = await eos.transfer('inita', 'initb', '1.0000 SYS', '')
+    assert.deepEqual(
+      tr.transaction.transaction.actions[0].authorization,
+      authorization
+    )
+  })
+
   it('transfer custom authorization sorting (no broadcast)', () => {
     const eos = Eos({signProvider})
     return eos.transfer('inita', 'initb', '1.0000 SYS', '',
