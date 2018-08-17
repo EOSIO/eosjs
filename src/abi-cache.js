@@ -1,6 +1,10 @@
 const assert = require('assert')
 const Structs = require('./structs')
 
+const token = require('./schema/eosio.token.abi.json')
+const system = require('./schema/eosio.system.abi.json')
+const eosio_null = require('./schema/eosio.null.abi.json')
+
 module.exports = AbiCache
 
 function AbiCache(network, config) {
@@ -53,7 +57,7 @@ function AbiCache(network, config) {
       if(Buffer.isBuffer(abi)) {
         abi = JSON.parse(abi)
       }
-      const schema = abiToFcSchema(abi)
+      const schema = abiToFcSchema(abi, account)
       const structs = Structs(abiCacheConfig, schema) // structs = {structs, types}
       return cache[account] = Object.assign({abi, schema}, structs)
     }
@@ -64,10 +68,14 @@ function AbiCache(network, config) {
     return c
   }
 
+  abi('eosio', system)
+  abi('eosio.token', token)
+  abi('eosio.null', eosio_null)
+
   return config.abiCache
 }
 
-function abiToFcSchema(abi) {
+function abiToFcSchema(abi, account) {
   // customTypes
   // For FcBuffer
   const abiSchema = {}
@@ -75,11 +83,13 @@ function abiToFcSchema(abi) {
   // convert abi types to Fcbuffer schema
   if(abi.types) { // aliases
     abi.types.forEach(e => {
+      // "account_name" = "name"
       abiSchema[e.new_type_name] = e.type
     })
   }
 
   if(abi.structs) {
+    // transaction_header = fields[actor, permission] extends base "transaction"
     abi.structs.forEach(e => {
       const fields = {}
       for(const field of e.fields) {
@@ -88,6 +98,17 @@ function abiToFcSchema(abi) {
       abiSchema[e.name] = {base: e.base, fields}
       if(e.base === '') {
         delete abiSchema[e.name].base
+      }
+    })
+  }
+
+  if(abi.actions) {
+    // setprods = set_producers
+    abi.actions.forEach(action => {
+      // action = {name: 'setprods', type: 'set_producers'}
+      abiSchema[action.type].action = {
+        name: action.name,
+        account
       }
     })
   }

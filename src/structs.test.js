@@ -170,7 +170,7 @@ describe('Action.data', () => {
     assertSerializer(structs.action, value, value)
   })
 
-  it('unknown type', () => {
+  it('unknown action', () => {
     const eos = Eos({forceActionDataHex: false})
     const {structs, types} = eos.fc
     const value = {
@@ -179,7 +179,10 @@ describe('Action.data', () => {
       data: '030a0b0c',
       authorization: []
     }
-    assertSerializer(structs.action, value)
+    assert.throws(
+      () => assertSerializer(structs.action, value),
+      /Missing ABI action/
+    )
   })
 })
 

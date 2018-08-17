@@ -507,10 +507,10 @@ describe('transactions', () => {
 
 it('Transaction ABI cache', async function() {
   const eos = Eos()
-  assert.throws(() => eos.fc.abiCache.abi('eosio'), /not cached/)
-  const abi = await eos.fc.abiCache.abiAsync('eosio')
-  assert.deepEqual(abi, await eos.fc.abiCache.abiAsync('eosio', false/*force*/))
-  assert.deepEqual(abi, eos.fc.abiCache.abi('eosio'))
+  assert.throws(() => eos.fc.abiCache.abi('eosio.msig'), /not cached/)
+  const abi = await eos.fc.abiCache.abiAsync('eosio.msig')
+  assert.deepEqual(abi, await eos.fc.abiCache.abiAsync('eosio.msig', false/*force*/))
+  assert.deepEqual(abi, eos.fc.abiCache.abi('eosio.msig'))
 })
 
 it('Transaction ABI lookup', async function() {

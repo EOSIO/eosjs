@@ -37,6 +37,8 @@ cleos create account eosio eosio.stake $owner_pubkey $active_pubkey
 cleos create account eosio eosio.token $owner_pubkey $active_pubkey
 cleos create account eosio eosio.vpay $owner_pubkey $active_pubkey
 
+cleos set contract eosio.msig contracts/eosio.msig -p eosio.msig@active
+
 # Deploy, create and issue SYS token to eosio.token
 # cleos create account eosio eosio.token $owner_pubkey $active_pubkey
 cleos set contract eosio.token contracts/eosio.token -p eosio.token@active

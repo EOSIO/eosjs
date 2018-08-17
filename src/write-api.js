@@ -88,11 +88,12 @@ function WriteApi(Network, network, config, Transaction) {
     } else if(typeof args[0] === 'object' && Array.isArray(args[0].actions)) {
       // full transaction, lookup ABIs used by each action
       const accounts = new Set() // make a unique list
-      for(const action of args[0].actions) {
+      for(const action of args[0].actions) { // TODO: Add args[0].context_free_actions to accounts too?
         accounts.add(action.account)
       }
 
       const abiPromises = []
+
       // Eos contract operations are cached (efficient and offline transactions)
       const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.null'])
       accounts.forEach(account => {

@@ -14,15 +14,12 @@ const {
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
-    const cachedCode = new Set(['eosio', 'eosio.token', 'eosio.null'])
-    if(cachedCode.has(account)) {
-      return structs[lookupName]
-    }
     const abi = config.abiCache.abi(account)
     const struct = abi.structs[lookupName]
     if(struct != null) {
       return struct
     }
+
     // TODO: move up (before `const struct = abi.structs[lookupName]`)
     for(const action of abi.abi.actions) {
       const {name, type} = action
@@ -33,7 +30,8 @@ module.exports = (config = {}, extendedSchema) => {
         }
       }
     }
-    throw new Error(`Missing ABI struct or action: ${lookupName}`)
+
+    throw new Error(`Missing ABI action: ${lookupName}`)
   }
 
   // If nodeos does not have an ABI setup for a certain action.type, it will throw
