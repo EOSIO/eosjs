@@ -27,30 +27,38 @@ sha512-MZTqzlynbFpY5Nl/6/MOEAHgX5PtSvHWketq0sgm5OqHxZCein2sYwZOfCv4wrX0Mx2mAzC6n
 <html>
 <head>
   <meta charset="utf-8">
-
   <script src="https://cdn.jsdelivr.net/npm/eosjs@16.0.3/lib/eos.min.js"
     integrity="sha512-Lb1HeEaUSTxg0Y1KqlKOKeZCRi8XrEat+my3sWdg1lNE81sUZNWogpfC9GSIwPvON1Bqj5nQk2PyTE56lBR8ag=="
     crossorigin="anonymous"></script>
 
   <script>
+  /** Transactions are only valid on the selected chain. */
   chain = {
-    mainnet: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
-    testnet: '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca',
-    sysnet: 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f'
+    main: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // main network
+    jungle: '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca', // jungle testnet
+    sys: 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f' // local developer
   }
+
   /**
     Other httpEndpoint's: https://www.eosdocs.io/resources/apiendpoints
   */
   eos = Eos({
+    keyProvider: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3',// private key
     httpEndpoint: 'http://127.0.0.1:8888',
-    chainId: chain.sysnet,
-    verbose: true
-  })
+    chainId: chain.sys,
+  });
+
+  /**
+    Sign and broadcast a transaction.
+
+    @example updateMyProducerVote('myaccount', 'proxyaccount', ['respectedbp'])
+  */
+  async function updateProducerVote(voter, proxy = '', producers = []) {
+    return eos.voteproducer({voter, proxy, producers})
+  }
+
   </script>
 </head>
-<body>
-  See console object: Eos
-</body>
 </html>
 ```
 
