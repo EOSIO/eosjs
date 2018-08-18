@@ -51,10 +51,10 @@ sha512-MZTqzlynbFpY5Nl/6/MOEAHgX5PtSvHWketq0sgm5OqHxZCein2sYwZOfCv4wrX0Mx2mAzC6n
   /**
     Sign and broadcast a transaction.
 
-    @example updateMyProducerVote('myaccount', 'proxyaccount', ['respectedbp'])
+    @example updateProducerVote('myaccount', 'proxyaccount', ['respectedbp'])
   */
   async function updateProducerVote(voter, proxy = '', producers = []) {
-    return eos.voteproducer({voter, proxy, producers})
+    return eos.voteproducer(voter, proxy, producers)
   }
 
   </script>
