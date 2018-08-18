@@ -233,63 +233,62 @@ describe('transactions', () => {
       const token = await eos.contract('eosio.token')
       await token.transfer('inita', 'initb', '1.0004 SYS', '', {keyProvider})
     })
-  })
 
-  it('keyProvider multiple private keys (get_required_keys)', () => {
-
-    // keyProvider should return an array of keys
-    const keyProvider = () => {
-      return [
-        '5K84n2nzRpHMBdJf95mKnPrsqhZq7bhUvrzHyvoGwceBHq8FEPZ',
-        wif
-      ]
-    }
-
-    const eos = Eos({keyProvider})
-
-    return eos.transfer('inita', 'initb', '1.2740 SYS', '', false).then(tr => {
-      assert.equal(tr.transaction.signatures.length, 1)
-      assert.equal(typeof tr.transaction.signatures[0], 'string')
-    })
-  })
-
-  // If a keystore is used, the keyProvider should return available
-  // public keys first then respond with private keys next.
-  it('keyProvider public keys then private key', () => {
-    const pubkey = ecc.privateToPublic(wif)
-
-    // keyProvider should return a string or array of keys.
-    const keyProvider = ({transaction, pubkeys}) => {
-      if(!pubkeys) {
-        assert.equal(transaction.actions[0].name, 'transfer')
-        return [pubkey]
+    it('multiple private keys (get_required_keys)', () => {
+      // keyProvider should return an array of keys
+      const keyProvider = () => {
+        return [
+          '5K84n2nzRpHMBdJf95mKnPrsqhZq7bhUvrzHyvoGwceBHq8FEPZ',
+          wif
+        ]
       }
 
-      if(pubkeys) {
-        assert.deepEqual(pubkeys, [pubkey])
-        return [wif]
-      }
-      assert(false, 'unexpected keyProvider callback')
-    }
+      const eos = Eos({keyProvider})
 
-    const eos = Eos({keyProvider})
-
-    return eos.transfer('inita', 'initb', '9.0000 SYS', '', false).then(tr => {
-      assert.equal(tr.transaction.signatures.length, 1)
-      assert.equal(typeof tr.transaction.signatures[0], 'string')
+      return eos.transfer('inita', 'initb', '1.2740 SYS', '', false).then(tr => {
+        assert.equal(tr.transaction.signatures.length, 1)
+        assert.equal(typeof tr.transaction.signatures[0], 'string')
+      })
     })
-  })
 
-  it('keyProvider from eosjs-keygen', () => {
-    const keystore = Keystore('uid')
-    keystore.deriveKeys({parent: wif})
-    const eos = Eos({keyProvider: keystore.keyProvider})
-    return eos.transfer('inita', 'initb', '12.0000 SYS', '', true)
-  })
+    // If a keystore is used, the keyProvider should return available
+    // public keys first then respond with private keys next.
+    it('public keys then private key', () => {
+      const pubkey = ecc.privateToPublic(wif)
 
-  it('keyProvider return Promise', () => {
-    const eos = Eos({keyProvider: new Promise(resolve => {resolve(wif)})})
-    return eos.transfer('inita', 'initb', '1.6180 SYS', '', true)
+      // keyProvider should return a string or array of keys.
+      const keyProvider = ({transaction, pubkeys}) => {
+        if(!pubkeys) {
+          assert.equal(transaction.actions[0].name, 'transfer')
+          return [pubkey]
+        }
+
+        if(pubkeys) {
+          assert.deepEqual(pubkeys, [pubkey])
+          return [wif]
+        }
+        assert(false, 'unexpected keyProvider callback')
+      }
+
+      const eos = Eos({keyProvider})
+
+      return eos.transfer('inita', 'initb', '9.0000 SYS', '', false).then(tr => {
+        assert.equal(tr.transaction.signatures.length, 1)
+        assert.equal(typeof tr.transaction.signatures[0], 'string')
+      })
+    })
+
+    it('from eosjs-keygen', () => {
+      const keystore = Keystore('uid')
+      keystore.deriveKeys({parent: wif})
+      const eos = Eos({keyProvider: keystore.keyProvider})
+      return eos.transfer('inita', 'initb', '12.0000 SYS', '', true)
+    })
+
+    it('return Promise', () => {
+      const eos = Eos({keyProvider: new Promise(resolve => {resolve(wif)})})
+      return eos.transfer('inita', 'initb', '1.6180 SYS', '', true)
+    })
   })
 
   it('signProvider', () => {
