@@ -155,9 +155,12 @@ eos = Eos(config)
   security reasons.
 
 * **keyProvider** `[array<string>|string|function]` - Provides private keys
-  used to sign transaction.  If multiple private keys are found, the API
+  used to sign transactions.  If multiple private keys are found, the API
   `get_required_keys` is called to discover which signing keys to use.  If a
   function is provided, this function is called for each transaction.
+
+  If a keyProvider is not provided here, one may be provided on a per-action
+  or per-transaction basis in [Options](#options).
 
 * **httpEndpoint** `string` - http or https location of a nodeosd server
   providing a chain API.  When using eosjs from a browser remember to configure
@@ -238,6 +241,18 @@ eos.transfer('alice', 'bob', '1.0000 SYS', '', options)
 
 * **sign** `[boolean=true]` - sign the transaction with a private key.  Leaving
   a transaction unsigned avoids the need to provide a private key.
+
+* **keyProvider** `[array<string>|string|function]` - just like the global
+  keyProvider except this provides a temporary key for a single action or
+  transaction.
+
+  ```js
+  await eos.anyAction('args', {keyProvider})
+  ```
+
+  ```js
+  await eos.transaction(tr => { tr.anyAction() }, {keyProvider})
+  ```
 
 ### Transaction
 

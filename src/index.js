@@ -189,11 +189,14 @@ function throwOnDuplicate(o1, o2, msg) {
   If only one key is available, the blockchain API calls are skipped and that
   key is used to sign the transaction.
 */
-const defaultSignProvider = (eos, config) => async function({sign, buf, transaction}) {
-  const {keyProvider} = config
+const defaultSignProvider = (eos, config) => async function({
+  sign, buf, transaction, optionsKeyProvider
+}) {
+  // optionsKeyProvider is a per-action key: await eos.someAction('user2' .., {keyProvider: privateKey2})
+  const keyProvider = optionsKeyProvider ? optionsKeyProvider : config.keyProvider
 
   if(!keyProvider) {
-    throw new TypeError('This transaction requires a config.keyProvider for signing')
+    throw new TypeError('This transaction requires a keyProvider for signing')
   }
 
   let keys = keyProvider

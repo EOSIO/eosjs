@@ -211,19 +211,27 @@ describe('transactions', () => {
     eos.setprods()
   })
 
-  // A keyProvider can return private keys directly..
-  it('keyProvider private key', () => {
-
-    // keyProvider should return an array of keys
+  describe('keyProvider', () => {
     const keyProvider = () => {
       return [wif]
     }
 
-    const eos = Eos({keyProvider})
+    it('global', async function() {
+      const eos = Eos({keyProvider})
+      await eos.transfer('inita', 'initb', '1.0001 SYS', '')
+    })
 
-    return eos.transfer('inita', 'initb', '1.0000 SYS', '', false).then(tr => {
-      assert.equal(tr.transaction.signatures.length, 1)
-      assert.equal(typeof tr.transaction.signatures[0], 'string')
+    it('per-action', async function() {
+      const eos = Eos()
+
+      await eos.transfer('inita', 'initb', '1.0002 SYS', '', {keyProvider})
+
+      await eos.transaction(tr => {
+        tr.transfer('inita', 'initb', '1.0003 SYS', '')
+      }, {keyProvider})
+
+      const token = await eos.contract('eosio.token')
+      await token.transfer('inita', 'initb', '1.0004 SYS', '', {keyProvider})
     })
   })
 
