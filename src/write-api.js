@@ -206,23 +206,47 @@ function WriteApi(Network, network, config, Transaction) {
         throw new Error('Callback during a transaction are not supported')
       }
 
-      const addDefaultAuths = options.authorization == null
-
       const authorization = []
-      if(options.authorization) {
-        if(typeof options.authorization === 'string') {
-          options.authorization = [options.authorization]
+      const providedAuth = options.authorization ? options.authorization : config.authorization
+      const addDefaultAuths = providedAuth == null
+
+      // Often if the first field in an action is an account name it is
+      // also the required authorization.
+      function firstAccount() {
+        const fieldKeys = Object.keys(definition)
+        const f1 = fieldKeys[0]
+
+        if(definition[f1] === 'account_name') {
+          return params[f1]
         }
-        options.authorization.forEach(auth => {
-          if(typeof auth === 'string') {
-            const [actor, permission = 'active'] = auth.split('@')
-            authorization.push({actor, permission})
-          } else if(typeof auth === 'object') {
-            authorization.push(auth)
-          }
-        })
-        assert.equal(authorization.length, options.authorization.length,
-          'invalid authorization in: ' + JSON.stringify(options.authorization))
+      }
+
+      if(providedAuth) {
+        let authArray
+        if(typeof providedAuth === 'string') {
+          authArray = [providedAuth]
+        } else if(Array.isArray(providedAuth)) {
+          authArray = providedAuth
+        }
+
+        if(authArray) {
+          authArray.forEach(auth => {
+            if(typeof auth === 'string') {
+              let [actor, permission = 'active'] = auth.split('@')
+              if(actor === '') {
+                actor = firstAccount()
+              }
+              if(actor) {
+                authorization.push({actor, permission})
+              }
+            } else if(typeof auth === 'object') {
+              authorization.push(auth)
+            }
+          })
+        }
+
+        assert.equal(authorization.length, authArray.length,
+          'invalid authorization in: ' + JSON.stringify(providedAuth))
       }
 
       const tr = {
@@ -235,13 +259,11 @@ function WriteApi(Network, network, config, Transaction) {
       }
 
       if(addDefaultAuths) {
-        const fieldKeys = Object.keys(definition)
-        const f1 = fieldKeys[0]
-
-        if(definition[f1] === 'account_name') {
+        const actor = firstAccount()
+        if(actor) {
           // Default authorization (since user did not provide one)
           tr.actions[0].authorization.push({
-            actor: params[f1],
+            actor,
             permission: 'active'
           })
         }

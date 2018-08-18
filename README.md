@@ -206,6 +206,16 @@ eos = Eos(config)
 
   For example, redirect error logs: `config.logger = {error: (...args) => ..}`
 
+* **authorization** - replace the default eosjs authorization on actions.  An
+  authorization provided here may still be over-written by specifying an
+  authorization for each individual action.
+
+  For example, if most actions in an dapp are based on the posting key, this
+  would replace the default active authorization with a posting authorization:
+  ```js
+  {authorization: '@posting'}
+  ```
+
 ### Options
 
 Options may be provided after parameters.
