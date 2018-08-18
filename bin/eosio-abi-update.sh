@@ -3,9 +3,8 @@ set -o xtrace
 
 function process() {
   docker cp docker_nodeosd_1:/contracts/${1}/${1}.abi .
-  node ./eosio-abi-update.js $1 $2
-  mv ./$2 ../src/schema
+  mv ${1}.abi ../src/schema/${1}.abi.json
 }
 
-process eosio.token eosio_token.json
-process eosio.system eosio_system.json
+process eosio.token
+process eosio.system

@@ -3,7 +3,7 @@ const Fcbuffer = require('fcbuffer')
 const ByteBuffer = require('bytebuffer')
 const assert = require('assert')
 
-const json = {schema: require('./schema')}
+const schema = require('./schema')
 
 const {
   isName, encodeName, decodeName,
@@ -14,21 +14,22 @@ const {
 /** Configures Fcbuffer for EOS specific structs and types. */
 module.exports = (config = {}, extendedSchema) => {
   const structLookup = (lookupName, account) => {
-    const abi = config.abiCache.abi(account)
-    const struct = abi.structs[lookupName]
-    if(struct != null) {
-      return struct
-    }
+    const cache = config.abiCache.abi(account)
 
-    // TODO: move up (before `const struct = abi.structs[lookupName]`)
-    for(const action of abi.abi.actions) {
-      const {name, type} = action
-      if(name === lookupName) {
-        const struct = abi.structs[type]
+    // Lookup by ABI action "name"
+    for(const action of cache.abi.actions) {
+      if(action.name === lookupName) {
+        const struct = cache.structs[action.type]
         if(struct != null) {
           return struct
         }
       }
+    }
+
+    // Lookup struct by "type"
+    const struct = cache.structs[lookupName]
+    if(struct != null) {
+      return struct
     }
 
     throw new Error(`Missing ABI action: ${lookupName}`)
@@ -72,9 +73,9 @@ module.exports = (config = {}, extendedSchema) => {
   config.sort['authority.accounts'] = true
   config.sort['authority.keys'] = true
 
-  const schema = Object.assign({}, json.schema, extendedSchema)
+  const fullSchema = Object.assign({}, schema, extendedSchema)
+  const {structs, types, errors, fromBuffer, toBuffer} = Fcbuffer(fullSchema, config)
 
-  const {structs, types, errors, fromBuffer, toBuffer} = Fcbuffer(schema, config)
   if(errors.length !== 0) {
     throw new Error(JSON.stringify(errors, null, 4))
   }

@@ -9,6 +9,10 @@ const writeApiGen = require('./write-api')
 const format = require('./format')
 const schema = require('./schema')
 
+const token = require('./schema/eosio.token.abi.json')
+const system = require('./schema/eosio.system.abi.json')
+const eosio_null = require('./schema/eosio.null.abi.json')
+
 const Eos = (config = {}) => {
   const configDefaults = {
     httpEndpoint: 'http://127.0.0.1:8888',
@@ -32,7 +36,6 @@ const Eos = (config = {}) => {
 
   applyDefaults(config, configDefaults)
   applyDefaults(config.logger, configDefaults.logger)
-
   return createEos(config)
 }
 
@@ -71,7 +74,11 @@ function createEos(config) {
   const network = config.httpEndpoint != null ? EosApi(config) : null
   config.network = network
 
+  const abis = []
   const abiCache = AbiCache(network, config)
+  abis.push(abiCache.abi('eosio.null', eosio_null))
+  abis.push(abiCache.abi('eosio.token', token))
+  abis.push(abiCache.abi('eosio', system))
 
   if(!config.chainId) {
     config.chainId = 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f'
@@ -88,9 +95,8 @@ function createEos(config) {
     }
     assert.equal(typeof config.mockTransactions, 'function', 'config.mockTransactions')
   }
-
   const {structs, types, fromBuffer, toBuffer} = Structs(config)
-  const eos = mergeWriteFunctions(config, EosApi, structs)
+  const eos = mergeWriteFunctions(config, EosApi, structs, abis)
 
   Object.assign(eos, {
     config: safeConfig(config),
@@ -155,12 +161,12 @@ function safeConfig(config) {
   @return {object} - read and write method calls (create and sign transactions)
   @throw {TypeError} if a funciton name conflicts
 */
-function mergeWriteFunctions(config, EosApi, structs) {
+function mergeWriteFunctions(config, EosApi, structs, abis) {
   const {network} = config
 
   const merge = Object.assign({}, network)
 
-  const writeApi = writeApiGen(EosApi, network, structs, config, schema)
+  const writeApi = writeApiGen(EosApi, network, structs, config, abis)
   throwOnDuplicate(merge, writeApi, 'Conflicting methods in EosApi and Transaction Api')
   Object.assign(merge, writeApi)
 

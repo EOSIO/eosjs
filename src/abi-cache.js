@@ -1,10 +1,6 @@
 const assert = require('assert')
 const Structs = require('./structs')
 
-const token = require('./schema/eosio.token.abi.json')
-const system = require('./schema/eosio.system.abi.json')
-const eosio_null = require('./schema/eosio.null.abi.json')
-
 module.exports = AbiCache
 
 function AbiCache(network, config) {
@@ -57,9 +53,9 @@ function AbiCache(network, config) {
       if(Buffer.isBuffer(abi)) {
         abi = JSON.parse(abi)
       }
-      const schema = abiToFcSchema(abi, account)
-      const structs = Structs(abiCacheConfig, schema) // structs = {structs, types}
-      return cache[account] = Object.assign({abi, schema}, structs)
+      const fcSchema = abiToFcSchema(abi, account)
+      const structs = Structs(abiCacheConfig, fcSchema) // returns {structs, types}
+      return cache[account] = Object.assign({abi, schema: fcSchema}, structs)
     }
     const c = cache[account]
     if(c == null) {
@@ -67,10 +63,6 @@ function AbiCache(network, config) {
     }
     return c
   }
-
-  abi('eosio', system)
-  abi('eosio.token', token)
-  abi('eosio.null', eosio_null)
 
   return config.abiCache
 }
@@ -105,12 +97,18 @@ function abiToFcSchema(abi, account) {
   if(abi.actions) {
     // setprods = set_producers
     abi.actions.forEach(action => {
-      // action = {name: 'setprods', type: 'set_producers'}
-      abiSchema[action.type].action = {
-        name: action.name,
-        account
+      // @example action = {name: 'setprods', type: 'set_producers'}
+      const type = abiSchema[action.type]
+      if(!type) {
+        console.error('Missing abiSchema type', action.type, account)//, abi, abiSchema)
+      } else {
+        type.action = {
+          name: action.name,
+          account
+        }
       }
     })
+    // console.log('abiSchema', abiSchema);
   }
 
   return abiSchema

@@ -9,35 +9,43 @@ module.exports = writeApiGen
 
 const {sign} = ecc
 
-function writeApiGen(Network, network, structs, config, schemaDef) {
+function writeApiGen(Network, network, structs, config, abis) {
   if(typeof config.chainId !== 'string') {
     throw new TypeError('config.chainId is required')
   }
-
   const writeApi = WriteApi(Network, network, config, structs.transaction)
   const reserveFunctions = new Set(['transaction', 'contract'])
-  const merge = {}
 
-  // sends transactions, also a action collecting wrapper functions
+  const merge = {}
+  // sends transactions, can act as an action collecting wrapper
   merge.transaction = writeApi.genTransaction(structs, merge)
 
   // Immediate send operations automatically calls merge.transaction
-  for(let type in schemaDef) {
-    const schema = schemaDef[type]
-    if(schema.action == null) {
-      continue
-    }
-    const actionName = schema.action.name
-    if(reserveFunctions.has(actionName)) {
-      throw new TypeError('Conflicting Api function: ' + type)
-    }
+  for(const abi of abis) {
+    for(const type in abi.schema) {
+      const typeStruct = abi.schema[type]
+      if(typeof typeStruct === 'string') {
+        // skip types like; name, account_name, etc..
+        continue
+      }
 
-    const struct = structs[type]
-    if(struct == null) {
-      continue
+      assert.equal(typeof typeStruct, 'object', `abi.schema[type = ${type}]`)
+
+      const {action} = typeStruct
+      if(action === undefined) {
+        // ABI private struct
+        continue
+      }
+
+      if(reserveFunctions.has(action.name)) {
+        throw new TypeError('Conflicting Api function: ' + type)
+      }
+
+      const definition = schemaFields(abi.schema, type)
+      merge[action.name] = writeApi.genMethod(
+        type, definition, merge.transaction, action.account, action.name
+      )
     }
-    const definition = schemaFields(schemaDef, type)
-    merge[actionName] = writeApi.genMethod(type, definition, merge.transaction, schema.action.account)
   }
 
   /**
@@ -88,7 +96,9 @@ function WriteApi(Network, network, config, Transaction) {
     } else if(typeof args[0] === 'object' && Array.isArray(args[0].actions)) {
       // full transaction, lookup ABIs used by each action
       const accounts = new Set() // make a unique list
-      for(const action of args[0].actions) { // TODO: Add args[0].context_free_actions to accounts too?
+
+      // TODO: Add args[0].context_free_actions to accounts too?
+      for(const action of args[0].actions) {
         accounts.add(action.account)
       }
 
@@ -167,7 +177,7 @@ function WriteApi(Network, network, config, Transaction) {
   function genMethod(type, definition, transactionArg, account = 'eosio.token', name = type) {
     return function (...args) {
       if (args.length === 0) {
-        console.log(usage(type, definition, Network, account, config))
+        console.log(usage({name, type}, definition, Network, account, config))
         return
       }
 
@@ -551,7 +561,7 @@ const optionsFormatter = option => {
   }
 }
 
-function usage (type, definition, Network, account, config) {
+function usage(action, definition, Network, account, config) {
   let usage = ''
   const out = (str = '') => {
     usage += str + '\n'
@@ -560,40 +570,21 @@ function usage (type, definition, Network, account, config) {
   out(account)
   out()
 
-  out('FUNCTION')
-  out(type)
+  out('ACTION')
+  out(action.name)
   out()
 
-  let struct
-  if(account === 'eosio' || account === 'eosio.token') {
-    const {structs} = Structs(
-      Object.assign(
-        {defaults: true, network: Network},
-        config
-      )
-    )
-    struct = structs[type]
+  const cache = config.abiCache.abi(account)
 
-    out('PARAMETERS')
-    out(JSON.stringify(definition, null, 4))
-    out()
+  out('PARAMETERS')
+  out(JSON.stringify(schemaFields(cache.schema, action.type), null, 4))
+  out()
 
-    out('EXAMPLE')
-    out(JSON.stringify(struct.toObject(), null, 4))
+  const struct = cache.structs[action.type]
 
-  } else {
-    const cache = config.abiCache.abi(account)
-    out('PARAMETERS')
-    out(JSON.stringify(schemaFields(cache.schema, type), null, 4))
-    out()
+  out('EXAMPLE')
+  out(`${account}.${action.name}(${JSON.stringify(struct.toObject(), null, 4)})`)
 
-    struct = cache.structs[type]
-    out('EXAMPLE')
-    out(JSON.stringify(struct.toObject(), null, 4))
-  }
-  if(struct == null) {
-    throw TypeError('Unknown type: ' + type)
-  }
   return usage
 }
 
@@ -610,6 +601,7 @@ const checkError = (parentErr, logger, parrentRes) => (error, result) => {
   }
 }
 
+/** Collapse inheritance (via "base") putting all the fields in one object. */
 function schemaFields(schema, type) {
   const {base, fields} = schema[type]
   const def = {}

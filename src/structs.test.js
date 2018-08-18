@@ -7,9 +7,10 @@ const Eos = require('.')
 
 describe('shorthand', () => {
 
-  it('authority', () => {
+  it('authority', async () => {
     const eos = Eos()
-    const {authority} = eos.fc.structs
+    const eosio = await eos.contract('eosio')
+    const {authority} = eosio.fc.structs
 
     const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
     const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}]}
@@ -21,9 +22,10 @@ describe('shorthand', () => {
     )
   })
 
-  it('PublicKey sorting', () => {
+  it('PublicKey sorting', async () => {
     const eos = Eos()
-    const {authority} = eos.fc.structs
+    const eosio = await eos.contract('eosio')
+    const {authority} = eosio.fc.structs
 
     const pubkeys = [
       'EOS7wBGPvBgRVa4wQN2zm5CjgBF6S7tP7R3JavtSa2unHUoVQGhey',
@@ -100,16 +102,20 @@ describe('shorthand', () => {
 
 describe('Eosio Abi', () => {
 
-  it('Eosio token contract parses', (done) => {
-    const eos = Eos()
+  function checkContract(name) {
+    it(`${name} contract parses`, (done) => {
+      const eos = Eos()
 
-    eos.contract('eosio.token', (error, eosio_token) => {
-      assert(!error, error)
-      assert(eosio_token.transfer, 'eosio.token contract')
-      assert(eosio_token.issue, 'eosio.token contract')
-      done()
+      eos.contract('eosio.token', (error, eosio_token) => {
+        assert(!error, error)
+        assert(eosio_token.transfer, 'eosio.token contract')
+        assert(eosio_token.issue, 'eosio.token contract')
+        done()
+      })
     })
-  })
+  }
+  checkContract('eosio')
+  checkContract('eosio.token')
 
   it('abi', async () => {
     const eos = Eos({defaults: true, broadcast: false, sign: false})
@@ -117,7 +123,6 @@ describe('Eosio Abi', () => {
     const {abi_def} = eos.fc.structs
 
     async function setabi(abi) {
-      // console.log(abi);
       await eos.setabi('inita', abi) // See README
       const buf = eos.fc.toBuffer('abi_def', abi)
       await eos.setabi('inita', buf) // v1/chain/abi_json_to_bin

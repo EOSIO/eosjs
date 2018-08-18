@@ -93,7 +93,7 @@ describe('offline', () => {
     assert.equal(trx.transaction.signatures.length, 1, 'signature count')
   })
 
-  it('abi', async function() {
+  it('load abi', async function() {
     const eos = Eos({httpEndpoint: null})
 
     const abiBuffer = fs.readFileSync(`docker/contracts/eosio.bios/eosio.bios.abi`)
@@ -192,7 +192,7 @@ describe('transactions', () => {
 
   it('usage', () => {
     const eos = Eos({signProvider})
-    eos.transfer()
+    eos.setprods()
   })
 
   // A keyProvider can return private keys directly..
@@ -472,13 +472,13 @@ describe('transactions', () => {
     })
   })
 
-  it('custom transfer', () => {
+  it('custom transaction', () => {
     const eos = Eos({signProvider})
     return eos.transaction(
       {
         actions: [
           {
-            account: 'eosio',
+            account: 'eosio.token',
             name: 'transfer',
             data: {
               from: 'inita',

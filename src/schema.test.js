@@ -2,6 +2,7 @@
 
 const assert = require('assert')
 const Fcbuffer = require('fcbuffer')
+
 const schema = require('./schema')
 
 describe('schema', () => {
@@ -12,4 +13,3 @@ describe('schema', () => {
   })
 
 })
-
