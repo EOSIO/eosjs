@@ -262,6 +262,7 @@ Create and send (broadcast) a transaction:
 eos.transaction(
   {
     // ...headers,
+    // context_free_actions: [],
     actions: [
       {
         account: 'eosio.token',
@@ -478,13 +479,13 @@ await eos.transaction('myaccount', myaccount => {
 
   // Create the initial token with its max supply
   // const options = {authorization: 'myaccount'} // default
-  myaccount.create('myaccount', '10000000.000 TOK')//, options)
+  myaccount.create('myaccount', '10000000.000 PHI')//, options)
 
   // Issue some of the max supply for circulation into an arbitrary account
-  myaccount.issue('myaccount', '10000.000 TOK', 'issue')
+  myaccount.issue('myaccount', '10000.000 PHI', 'issue')
 })
 
-const balance = await eos.getCurrencyBalance('myaccount', 'myaccount', 'TOK')
+const balance = await eos.getCurrencyBalance('myaccount', 'myaccount', 'PHI')
 console.log('Currency Balance', balance)
 ```
 
@@ -506,24 +507,24 @@ await eos.transaction(eos =>
 
 // transaction on a single contract
 await eos.transaction('myaccount', myaccount => {
-  myaccount.transfer('myaccount', 'inita', '10.000 TOK@myaccount', '')
+  myaccount.transfer('myaccount', 'inita', '10.000 PHI', '')
 })
 
 // mix contracts in the same transaction
 await eos.transaction(['myaccount', 'eosio.token'], ({myaccount, eosio_token}) => {
-  myaccount.transfer('inita', 'initb', '1.000 TOK@myaccount', '')
+  myaccount.transfer('inita', 'initb', '1.000 PHI', '')
   eosio_token.transfer('inita', 'initb', '1.0000 SYS', '')
 })
 
 // The contract method does not take an array so must be called once for
 // each contract that is needed.
 const myaccount = await eos.contract('myaccount')
-await myaccount.transfer('myaccount', 'inita', '1.000 TOK', '')
+await myaccount.transfer('myaccount', 'inita', '1.000 PHI', '')
 
 // a transaction to a contract instance can specify multiple actions
 await myaccount.transaction(myaccountTr => {
-  myaccountTr.transfer('inita', 'initb', '1.000 TOK', '')
-  myaccountTr.transfer('initb', 'inita', '1.000 TOK', '')
+  myaccountTr.transfer('inita', 'initb', '1.000 PHI', '')
+  myaccountTr.transfer('initb', 'inita', '1.000 PHI', '')
 })
 ```
 
