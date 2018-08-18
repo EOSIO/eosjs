@@ -16,7 +16,7 @@ docker-compose logs -f | egrep -v 'Produced block 0' &
 sleep 2
 
 
-cleos wallet create
+cleos wallet create --to-console
 cleos wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
 
 # Create accounts must happen before eosio.system is installed
