@@ -45,28 +45,44 @@ describe('offline', () => {
     assert.equal(trx.transaction.signatures.length, 2, 'signature count')
   })
 
-  it('transaction', async function() {
+  describe('custom transactions', function () {
+    const nonce = {
+      account: 'eosio.null',
+      name: 'nonce',
+      data: '010f'
+    }
+
+    const authorization = [{
+      actor: 'inita',
+      permission: 'active'
+    }]
+
     const eos = Eos({
-      keyProvider: wif,
-      httpEndpoint: null
+      keyProvider: wif
     })
 
-    const trx = await eos.transaction({
-      expiration: new Date().toISOString().split('.')[0], // Don't use `new Date` in production
-      ref_block_num: 1,
-      ref_block_prefix: 452435776,
-      actions: [{
-        account: 'eosio.null',
-        name: 'nonce',
-        authorization:[{
-          actor: 'inita',
-          permission: 'active'
-        }],
-        data: '0131' //hex
-      }]
+    it('context_free_actions', async function() {
+      await eos.transaction({
+        context_free_actions: [nonce],// can't have authorization
+        actions: [{
+          account: 'eosio.token',
+          name: 'transfer',
+          data: {
+            from: 'inita',
+            to: 'initb',
+            quantity: '1.0000 SYS',
+            memo: ''
+          },
+          authorization
+        }]
+      })
     })
 
-    assert.equal(trx.transaction.signatures.length, 1, 'signature count')
+    it('nonce', async function() {
+      const trx = await eos.transaction({
+        actions: [ Object.assign({}, nonce, {authorization}) ],
+      })
+    })
   })
 
   it('transactionHeaders object', async function() {
