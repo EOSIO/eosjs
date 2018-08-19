@@ -19,7 +19,7 @@
     "build_browser_test": "browserify -o dist/test.js lib/*.test.js",
     "minimize": "uglifyjs lib/eos.js -o lib/eos.min.js --source-map --compress --mangle",
     "docs": "jsdoc2md src/format.js > docs/format.md",
-    "srisum": "npx srisum lib/eos.*",
+    "srisum": "srisum lib/eos.*",
     "prepublishOnly": "npm run build && npm run test_lib && npm run minimize && npm run docs && npm run srisum"
   },
   "repository": {
@@ -50,6 +50,7 @@
     "jsdoc-to-markdown": "^3.0.4",
     "mocha": "^5.2.0",
     "nyc": "^13.0.1",
+    "srisum": "^2.0.0",
     "uglify-js": "3.4.1"
   },
   "dependencies": {
