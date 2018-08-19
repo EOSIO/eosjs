@@ -9,7 +9,7 @@ General purpose library for EOSIO blockchains.
 
 | [EOSIO/eosjs](/EOSIO/eosjs) | [Npm](https://www.npmjs.com/package/eosjs) | [EOSIO/eos](https://github.com/EOSIO/eos) | [Docker Hub](https://hub.docker.com/r/eosio/eos/) |
 | --- | --- | --- | --- |
-| tags: 16.0.0 - 16.0.3 | `npm install eosjs` | tags: v1.1.n - v1.2.1 | eosio/eos:v1.2.1 |
+| tags: 16.0.0 - 16.0.4 | `npm install eosjs` | tags: v1.1.n - v1.2.1 | eosio/eos:v1.2.1 |
 
 Prior [version](./docs/prior_versions.md) matrix.
 
@@ -20,15 +20,15 @@ Prior [version](./docs/prior_versions.md) matrix.
 
 ```html
 <!--
-sha512-IROKp40AWkXmwbin81GOCaYvLeQ/x9PUlf+knUmUNGCCeJtElb/sRQ2W1H12AwohAUV3iFzubCuFxsq9fJVuIg== lib/eos.js
-sha512-Lb1HeEaUSTxg0Y1KqlKOKeZCRi8XrEat+my3sWdg1lNE81sUZNWogpfC9GSIwPvON1Bqj5nQk2PyTE56lBR8ag== lib/eos.min.js
-sha512-MZTqzlynbFpY5Nl/6/MOEAHgX5PtSvHWketq0sgm5OqHxZCein2sYwZOfCv4wrX0Mx2mAzC6nIOsVixcxW4Dnw== lib/eos.min.js.map
+sha512-xslf8D0zCBxeneFGpc6bnd6HwYfzXrHB8YGU1CTobwdsiS0CmKckyZakN+lUmj0sG8cRTCo2QTM96iOcKCwLdg== lib/eos.js
+sha512-QlAXZdFmjggnrHXtSlf2fnbIky248RTIHC5Oa3yZKnRBuLXDYxiGjZYJQc4+0dzHxQ1LJoP3cb7xiG/xCXNe0A== lib/eos.min.js
+sha512-WxYb9ZNPsCsu9DYPUpRssJFcmMLj2xCTe1rnG7gEHWkXxq7rrlcWDcGhqbeVY/Hc1AVV0MbbPX9JpD3XK8bQEA== lib/eos.min.js.map
 -->
 <html>
 <head>
   <meta charset="utf-8">
   <script src="https://cdn.jsdelivr.net/npm/eosjs@16.0.3/lib/eos.min.js"
-    integrity="sha512-Lb1HeEaUSTxg0Y1KqlKOKeZCRi8XrEat+my3sWdg1lNE81sUZNWogpfC9GSIwPvON1Bqj5nQk2PyTE56lBR8ag=="
+    integrity="sha512-QlAXZdFmjggnrHXtSlf2fnbIky248RTIHC5Oa3yZKnRBuLXDYxiGjZYJQc4+0dzHxQ1LJoP3cb7xiG/xCXNe0A=="
     crossorigin="anonymous"></script>
 
   <script>
