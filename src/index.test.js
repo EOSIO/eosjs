@@ -64,17 +64,10 @@ describe('offline', () => {
     it('context_free_actions', async function() {
       await eos.transaction({
         context_free_actions: [nonce],// can't have authorization
-        actions: [{
-          account: 'eosio.token',
-          name: 'transfer',
-          data: {
-            from: 'inita',
-            to: 'initb',
-            quantity: '1.0000 SYS',
-            memo: ''
-          },
-          authorization
-        }]
+        actions: [
+          // only action, needs an authorization
+          Object.assign({}, nonce, {authorization})
+        ]
       })
     })
 
