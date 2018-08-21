@@ -82,6 +82,9 @@ eos = Eos({httpEndpoint, chainId, keyProvider})
 // Cold-storage
 eos = Eos({httpEndpoint: null, chainId, keyProvider})
 
+// Add support for non-EOS public key prefixes, such as TLOS, etc
+eos = Eos({keyPrefix:'TLOS'})
+
 // Read-only instance when 'eosjs' is already a dependency
 eos = Eos.modules.api({/*config*/})
 
