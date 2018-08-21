@@ -5,6 +5,7 @@
 const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
 
 const base58_chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 function create_base58_map() {
   let base58_map = Array(256).fill(-1) as number[];
@@ -14,6 +15,16 @@ function create_base58_map() {
 }
 
 const base58_map = create_base58_map();
+
+function create_base64_map() {
+  let base64_map = Array(256).fill(-1) as number[];
+  for (let i = 0; i < base64_chars.length; ++i)
+    base64_map[base64_chars.charCodeAt(i)] = i;
+  base64_map['='.charCodeAt(0)] = 0;
+  return base64_map;
+}
+
+const base64_map = create_base64_map();
 
 export function isNegative(bin: Uint8Array) {
   return (bin[bin.length - 1] & 0x80) !== 0;
@@ -122,6 +133,36 @@ export function binaryToBase58(bin: Uint8Array, minDigits = 1) {
       result.push('1'.charCodeAt(0));
   result.reverse();
   return String.fromCharCode(...result);
+}
+
+export function base64ToBinary(s: string) {
+  let len = s.length;
+  if ((len & 3) === 1 && s[len - 1] === '=')
+    len -= 1; // fc appends an extra '='
+  if ((len & 3) !== 0)
+    throw new Error("base-64 value is not padded correctly");
+  let groups = len >> 2;
+  let bytes = groups * 3;
+  if (len > 0 && s[len - 1] === '=') {
+    if (s[len - 2] === '=')
+      bytes -= 2;
+    else
+      bytes -= 1;
+  }
+  let result = new Uint8Array(bytes);
+
+  for (let group = 0; group < groups; ++group) {
+    let digit0 = base64_map[s.charCodeAt(group * 4 + 0)];
+    let digit1 = base64_map[s.charCodeAt(group * 4 + 1)];
+    let digit2 = base64_map[s.charCodeAt(group * 4 + 2)];
+    let digit3 = base64_map[s.charCodeAt(group * 4 + 3)];
+    result[group * 3 + 0] = (digit0 << 2) | (digit1 >> 4);
+    if (group * 3 + 1 < bytes)
+      result[group * 3 + 1] = ((digit1 & 15) << 4) | (digit2 >> 2);
+    if (group * 3 + 2 < bytes)
+      result[group * 3 + 2] = ((digit2 & 3) << 6) | digit3;
+  }
+  return result;
 }
 
 export const enum KeyType {

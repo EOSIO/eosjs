@@ -4,6 +4,8 @@
 
 import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs, TransactionConfig, GetAbiResult } from './eosjs2-jsonrpc';
 import * as ser from './eosjs2-serialize';
+import { base64ToBinary } from './eosjs2-numeric';
+const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
 
 export const serialize = ser;
@@ -29,6 +31,11 @@ export interface SignatureProvider {
   sign: (args: SignatureProviderArgs) => Promise<string[]>;
 }
 
+export interface CachedAbi {
+  rawAbi: Uint8Array;
+  abi: Abi;
+}
+
 export class Api {
   rpc: JsonRpc;
   authorityProvider: AuthorityProvider;
@@ -37,12 +44,13 @@ export class Api {
   textEncoder: TextEncoder;
   textDecoder: TextDecoder;
 
+  abiTypes: Map<string, ser.Type>;
   transactionTypes: Map<string, ser.Type>;
   contracts = new Map<string, ser.Contract>();
-  abis = new Map<string, Abi>();
+  cachedAbis = new Map<string, CachedAbi>();
 
   constructor(args: {
-    rpc: JsonRpc, authorityProvider?: AuthorityProvider, 
+    rpc: JsonRpc, authorityProvider?: AuthorityProvider,
     signatureProvider: SignatureProvider,
     chainId: string,
     textEncoder?: TextEncoder,
@@ -55,23 +63,32 @@ export class Api {
     this.textEncoder = args.textEncoder
     this.textDecoder = args.textDecoder
 
+    this.abiTypes = ser.getTypesFromAbi(ser.createInitialTypes(), abiAbi);
     this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
   }
 
-  async getAbi(accountName: string, reload = false): Promise<Abi> {
-    if (!reload && this.abis.get(accountName))
-      return this.abis.get(accountName);
-    let abi: Abi;
+  async getCachedAbi(accountName: string, reload = false): Promise<CachedAbi> {
+    if (!reload && this.cachedAbis.get(accountName))
+      return this.cachedAbis.get(accountName);
+    let cachedAbi: CachedAbi;
     try {
-      abi = (await this.rpc.get_abi(accountName)).abi;
+      // todo: use get_raw_abi when it becomes available
+      let rawAbi = base64ToBinary((await this.rpc.get_raw_code_and_abi(accountName)).abi);
+      const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder, array: rawAbi });
+      let abi = this.abiTypes.get('abi_def').deserialize(buffer);
+      cachedAbi = { rawAbi, abi };
     } catch (e) {
       e.message = `fetching abi for ${accountName}: ${e.message}`;
       throw e;
     }
-    if (!abi)
+    if (!cachedAbi)
       throw new Error(`Missing abi for ${accountName}`);
-    this.abis.set(accountName, abi);
-    return abi;
+    this.cachedAbis.set(accountName, cachedAbi);
+    return cachedAbi;
+  }
+
+  async getAbi(accountName: string, reload = false): Promise<Abi> {
+    return (await this.getCachedAbi(accountName, reload)).abi;
   }
 
   async getTransactionAbis(transaction: any, reload = false): Promise<GetAbiResult[]> {

@@ -70,6 +70,12 @@ export interface GetInfoResult {
   block_net_limit: number;
 }
 
+export interface GetRawCodeAndAbiResult {
+  account_name: string;
+  wasm: string;
+  abi: string;
+}
+
 export interface TransactionConfig {
   broadcast?: boolean;
   blocksBehind?: number;
@@ -130,6 +136,7 @@ export class JsonRpc implements AuthorityProvider {
   async get_info(): Promise<GetInfoResult> { return await this.fetch('/v1/chain/get_info', {}); }
   async get_producer_schedule(): Promise<any> { return await this.fetch('/v1/chain/get_producer_schedule', {}); }
   async get_producers(json = true, lower_bound = '', limit = 50): Promise<any> { return await this.fetch('/v1/chain/get_producers', { json, lower_bound, limit }); }
+  async get_raw_code_and_abi(account_name: string): Promise<GetRawCodeAndAbiResult> { return await this.fetch('/v1/chain/get_raw_code_and_abi', { account_name }); }
 
   async get_table_rows({
     json = true,
