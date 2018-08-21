@@ -34,15 +34,27 @@ export class Api {
   authorityProvider: AuthorityProvider;
   signatureProvider: SignatureProvider;
   chainId: string;
+  textEncoder: TextEncoder;
+  textDecoder: TextDecoder;
+
   transactionTypes: Map<string, ser.Type>;
   contracts = new Map<string, ser.Contract>();
   abis = new Map<string, Abi>();
 
-  constructor(args: { rpc: JsonRpc, authorityProvider?: AuthorityProvider, signatureProvider: SignatureProvider, chainId: string }) {
+  constructor(args: {
+    rpc: JsonRpc, authorityProvider?: AuthorityProvider, 
+    signatureProvider: SignatureProvider,
+    chainId: string,
+    textEncoder?: TextEncoder,
+    textDecoder?: TextDecoder,
+  }) {
     this.rpc = args.rpc;
     this.authorityProvider = args.authorityProvider || args.rpc;
     this.signatureProvider = args.signatureProvider;
     this.chainId = args.chainId;
+    this.textEncoder = args.textEncoder
+    this.textDecoder = args.textDecoder
+
     this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
   }
 
@@ -92,7 +104,7 @@ export class Api {
   }
 
   serializeTransaction(transaction: any): Uint8Array {
-    let buffer = new ser.SerialBuffer;
+    let buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
     this.serialize(buffer, 'transaction', {
       max_net_usage_words: 0,
       max_cpu_usage_ms: 0,
@@ -106,7 +118,7 @@ export class Api {
   }
 
   deserializeTransaction(transaction: Uint8Array): any {
-    const buffer = new ser.SerialBuffer();
+    const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
     buffer.pushArray(transaction)
     return this.deserialize(buffer, 'transaction');
   }
@@ -114,14 +126,14 @@ export class Api {
   async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
     return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
       const contract = await this.getContract(account)
-      return ser.serializeAction(contract, account, name, authorization, data);
+      return ser.serializeAction(contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
     }));
   }
 
   async deserializeActions(actions: ser.Action[]): Promise<ser.Action[]> {
     return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
       const contract = await this.getContract(account)
-      return ser.deserializeAction(contract, account, name, authorization, data);
+      return ser.deserializeAction(contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
     }));
   }
 

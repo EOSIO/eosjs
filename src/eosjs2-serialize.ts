@@ -745,26 +745,26 @@ export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: numbe
   };
 };
 
-export function serializeActionData(contract: Contract, account: string, name: string, data: any): string {
+export function serializeActionData(contract: Contract, account: string, name: string, data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): string {
   let action = contract.actions.get(name);
   if (!action) {
     throw new Error(`Unknown action ${name} in contract ${account}`);
   }
-  let buffer = new SerialBuffer;
+  let buffer = new SerialBuffer({ textEncoder, textDecoder });
   action.serialize(buffer, data);
   return arrayToHex(buffer.asUint8Array());
 }
 
-export function serializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any): SerializedAction {
+export function serializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): SerializedAction {
   return {
     account,
     name,
     authorization,
-    data: serializeActionData(contract, account, name, data),
+    data: serializeActionData(contract, account, name, data, textEncoder, textDecoder),
   };
 }
 
-export function deserializeActionData(contract: Contract, account: string, name: string, data: any): any {
+export function deserializeActionData(contract: Contract, account: string, name: string, data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): any {
   const action = contract.actions.get(name);
   if (typeof data === "string") {
     data = hexToUint8Array(data)
@@ -772,16 +772,16 @@ export function deserializeActionData(contract: Contract, account: string, name:
   if (!action) {
     throw new Error(`Unknown action ${name} in contract ${account}`);
   }
-  let buffer = new SerialBuffer;
+  let buffer = new SerialBuffer({ textDecoder, textEncoder });
   buffer.pushArray(data)
   return action.deserialize(buffer);
 }
 
-export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any): Action {
+export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): Action {
   return {
     account,
     name,
     authorization,
-    data: deserializeActionData(contract, account, name, data),
+    data: deserializeActionData(contract, account, name, data, textEncoder, textDecoder),
   };
 }
