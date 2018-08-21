@@ -157,7 +157,7 @@ const PublicKeyEcc = (validation) => {
       const bcopy = b.copy(b.offset, b.offset + 33)
       b.skip(33)
       const pubbuf = Buffer.from(bcopy.toBinary(), 'binary')
-      // fix to prevent returning wrong authority string if this is a non-EOS prefix
+      // fix to prevent failure for non-EOS prefixes
       const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
       return PublicKey.fromBuffer(pubbuf).toString(keyPrefix)
     },
@@ -166,7 +166,7 @@ const PublicKeyEcc = (validation) => {
       // if(validation.debug) {
       //   console.error(`${value}`, 'PublicKeyType.appendByteBuffer')
       // }
-      // fix to prevent returning wrong authority string if this is a non-EOS prefix
+      // fix to prevent failure for non-EOS prefixes
       const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
       const buf = PublicKey.fromStringOrThrow(value,keyPrefix).toBuffer()
       b.append(buf.toString('binary'), 'binary')
