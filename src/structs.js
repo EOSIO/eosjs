@@ -470,12 +470,12 @@ const SignatureType = (validation, baseTypes) => {
   }
 }
 
-const authorityOverride = validation => ({
+const authorityOverride = config => ({
   /** shorthand `EOS6MRyAj..` */
   'authority.fromObject': (value) => {
     // fix to prevent returning wrong authority string if this is a non-EOS prefix
-    const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS';
-    if(PublicKey.fromString(value, validation.keyPrefix)) {
+    const keyPrefix = config.keyPrefix ? config.keyPrefix : 'EOS';
+    if(PublicKey.fromString(value, keyPrefix)) {
       return {
         threshold: 1,
         keys: [{key: value, weight: 1}]
