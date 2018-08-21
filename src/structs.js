@@ -42,7 +42,7 @@ module.exports = (config = {}, extendedSchema) => {
     config.forceActionDataHex : true
 
   const override = Object.assign({},
-    authorityOverride,
+    authorityOverride(config),
     abiOverride(structLookup),
     wasmCodeOverride(config),
     actionDataOverride(structLookup, forceActionDataHex),
@@ -157,14 +157,18 @@ const PublicKeyEcc = (validation) => {
       const bcopy = b.copy(b.offset, b.offset + 33)
       b.skip(33)
       const pubbuf = Buffer.from(bcopy.toBinary(), 'binary')
-      return PublicKey.fromBuffer(pubbuf).toString()
+      // fix to prevent returning wrong authority string if this is a non-EOS prefix
+      const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
+      return PublicKey.fromBuffer(pubbuf).toString(keyPrefix)
     },
 
     appendByteBuffer (b, value) {
       // if(validation.debug) {
       //   console.error(`${value}`, 'PublicKeyType.appendByteBuffer')
       // }
-      const buf = PublicKey.fromStringOrThrow(value).toBuffer()
+      // fix to prevent returning wrong authority string if this is a non-EOS prefix
+      const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
+      const buf = PublicKey.fromStringOrThrow(value,keyPrefix).toBuffer()
       b.append(buf.toString('binary'), 'binary')
     },
 
@@ -466,10 +470,12 @@ const SignatureType = (validation, baseTypes) => {
   }
 }
 
-const authorityOverride = ({
+const authorityOverride = validation => ({
   /** shorthand `EOS6MRyAj..` */
   'authority.fromObject': (value) => {
-    if(PublicKey.fromString(value)) {
+    // fix to prevent returning wrong authority string if this is a non-EOS prefix
+    const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS';
+    if(PublicKey.fromString(value, validation.keyPrefix)) {
       return {
         threshold: 1,
         keys: [{key: value, weight: 1}]
