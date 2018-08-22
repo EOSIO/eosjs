@@ -53,13 +53,15 @@ export interface SerializedAction {
 }
 
 export class SerialBuffer {
-  length = 0;
-  array = new Uint8Array(1024);
+  length: number;
+  array: Uint8Array;
   readPos = 0;
   textEncoder: TextEncoder;
   textDecoder: TextDecoder;
 
-  constructor({ textEncoder, textDecoder } = {} as { textEncoder: TextEncoder, textDecoder: TextDecoder }) {
+  constructor({ textEncoder, textDecoder, array } = {} as { textEncoder?: TextEncoder, textDecoder?: TextDecoder, array?: Uint8Array }) {
+    this.array = array || new Uint8Array(1024);
+    this.length = array ? array.length : 0;
     this.textEncoder = textEncoder || new TextEncoder;
     this.textDecoder = textDecoder || new TextDecoder('utf-8', { fatal: true });
   }
@@ -716,18 +718,20 @@ export function getType(types: Map<string, Type>, name: string): Type {
 
 export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
   let types = new Map(initialTypes);
-  for (let { new_type_name, type } of abi.types)
-    types.set(new_type_name,
-      createType({ name: new_type_name, aliasOfName: type, }));
-  for (let { name, base, fields } of abi.structs) {
-    types.set(name, createType({
-      name,
-      baseName: base,
-      fields: fields.map(({ name, type }) => ({ name, typeName: type, type: null })),
-      serialize: serializeStruct,
-      deserialize: deserializeStruct,
-    }));
-  }
+  if (abi.types)
+    for (let { new_type_name, type } of abi.types)
+      types.set(new_type_name,
+        createType({ name: new_type_name, aliasOfName: type, }));
+  if (abi.structs)
+    for (let { name, base, fields } of abi.structs) {
+      types.set(name, createType({
+        name,
+        baseName: base,
+        fields: fields.map(({ name, type }) => ({ name, typeName: type, type: null })),
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+      }));
+    }
   for (let [name, type] of types) {
     if (type.baseName)
       type.base = getType(types, type.baseName);
