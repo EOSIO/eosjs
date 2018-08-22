@@ -8,11 +8,11 @@ const Eos = require('.')
 describe('shorthand', () => {
 
   it('authority', async () => {
-    const eos = Eos()
+    const eos = Eos({keyPrefix: 'PUB'})
     const eosio = await eos.contract('eosio')
     const {authority} = eosio.fc.structs
 
-    const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+    const pubkey = 'PUB6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
     const auth = {threshold: 1, keys: [{key: pubkey, weight: 1}]}
 
     assert.deepEqual(authority.fromObject(pubkey), auth)
@@ -47,10 +47,10 @@ describe('shorthand', () => {
   })
 
   it('public_key', () => {
-    const eos = Eos()
+    const eos = Eos({keyPrefix: 'PUB'})
     const {structs, types} = eos.fc
     const PublicKeyType = types.public_key()
-    const pubkey = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
+    const pubkey = 'PUB6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
     // 02c0ded2bc1f1305fb0faac5e6c03ee3a1924234985427b6167ca569d13df435cf
     assertSerializer(PublicKeyType, pubkey)
   })

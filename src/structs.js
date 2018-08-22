@@ -42,7 +42,7 @@ module.exports = (config = {}, extendedSchema) => {
     config.forceActionDataHex : true
 
   const override = Object.assign({},
-    authorityOverride,
+    authorityOverride(config),
     abiOverride(structLookup),
     wasmCodeOverride(config),
     actionDataOverride(structLookup, forceActionDataHex),
@@ -157,14 +157,14 @@ const PublicKeyEcc = (validation) => {
       const bcopy = b.copy(b.offset, b.offset + 33)
       b.skip(33)
       const pubbuf = Buffer.from(bcopy.toBinary(), 'binary')
-      return PublicKey.fromBuffer(pubbuf).toString()
+      return PublicKey.fromBuffer(pubbuf).toString(validation.keyPrefix)
     },
 
     appendByteBuffer (b, value) {
       // if(validation.debug) {
       //   console.error(`${value}`, 'PublicKeyType.appendByteBuffer')
       // }
-      const buf = PublicKey.fromStringOrThrow(value).toBuffer()
+      const buf = PublicKey.fromStringOrThrow(value, validation.keyPrefix).toBuffer()
       b.append(buf.toString('binary'), 'binary')
     },
 
@@ -174,7 +174,8 @@ const PublicKeyEcc = (validation) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return 'EOS6MRy..'
+        const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
+        return keyPrefix + '6MRy..'
       }
       return value
     }
@@ -466,10 +467,10 @@ const SignatureType = (validation, baseTypes) => {
   }
 }
 
-const authorityOverride = ({
+const authorityOverride = config => ({
   /** shorthand `EOS6MRyAj..` */
   'authority.fromObject': (value) => {
-    if(PublicKey.fromString(value)) {
+    if(PublicKey.fromString(value, config.keyPrefix)) {
       return {
         threshold: 1,
         keys: [{key: value, weight: 1}]

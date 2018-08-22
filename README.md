@@ -82,6 +82,9 @@ eos = Eos({httpEndpoint, chainId, keyProvider})
 // Cold-storage
 eos = Eos({httpEndpoint: null, chainId, keyProvider})
 
+// Add support for non-EOS public key prefixes, such as PUB, etc
+eos = Eos({keyPrefix: 'PUB'})
+
 // Read-only instance when 'eosjs' is already a dependency
 eos = Eos.modules.api({/*config*/})
 
@@ -169,6 +172,8 @@ eos = Eos(config)
 
   If a keyProvider is not provided here, one may be provided on a per-action
   or per-transaction basis in [Options](#options).
+
+* **keyPrefix** `[string='EOS']` - Change the public key prefix.
 
 * **httpEndpoint** `string` - http or https location of a nodeosd server
   providing a chain API.  When using eosjs from a browser remember to configure
