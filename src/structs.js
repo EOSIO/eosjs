@@ -157,18 +157,14 @@ const PublicKeyEcc = (validation) => {
       const bcopy = b.copy(b.offset, b.offset + 33)
       b.skip(33)
       const pubbuf = Buffer.from(bcopy.toBinary(), 'binary')
-      // fix to prevent failure for non-EOS prefixes
-      const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
-      return PublicKey.fromBuffer(pubbuf).toString(keyPrefix)
+      return PublicKey.fromBuffer(pubbuf).toString(validation.keyPrefix)
     },
 
     appendByteBuffer (b, value) {
       // if(validation.debug) {
       //   console.error(`${value}`, 'PublicKeyType.appendByteBuffer')
       // }
-      // fix to prevent failure for non-EOS prefixes
-      const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
-      const buf = PublicKey.fromStringOrThrow(value,keyPrefix).toBuffer()
+      const buf = PublicKey.fromStringOrThrow(value, validation.keyPrefix).toBuffer()
       b.append(buf.toString('binary'), 'binary')
     },
 
@@ -178,7 +174,8 @@ const PublicKeyEcc = (validation) => {
 
     toObject (value) {
       if (validation.defaults && value == null) {
-        return 'EOS6MRy..'
+        const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
+        return keyPrefix + '6MRy..'
       }
       return value
     }
@@ -473,9 +470,7 @@ const SignatureType = (validation, baseTypes) => {
 const authorityOverride = config => ({
   /** shorthand `EOS6MRyAj..` */
   'authority.fromObject': (value) => {
-    // fix to prevent returning wrong authority string if this is a non-EOS prefix
-    const keyPrefix = config.keyPrefix ? config.keyPrefix : 'EOS';
-    if(PublicKey.fromString(value, keyPrefix)) {
+    if(PublicKey.fromString(value, config.keyPrefix)) {
       return {
         threshold: 1,
         keys: [{key: value, weight: 1}]
