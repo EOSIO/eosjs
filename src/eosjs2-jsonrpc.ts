@@ -20,6 +20,7 @@ export interface Abi {
   types: { new_type_name: string, type: string }[];
   structs: { name: string, base: string, fields: { name: string, type: string }[] }[];
   actions: { name: string, type: string, ricardian_contract: string }[];
+  tables: { name: string, type: string, index_type: string, key_names: string[], key_types: string[] }[];
 }
 
 export interface GetAbiResult {
