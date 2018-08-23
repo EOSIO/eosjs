@@ -287,7 +287,7 @@ network connection (httpEndpoint == null). In that case provide you own headers:
 ```js
 // only needed in cold-storage or for offline transactions
 const headers = {
-  expiration: '2018-06-14T18:16:10'
+  expiration: '2018-06-14T18:16:10',
   ref_block_num: 1,
   ref_block_prefix: 452435776
 }
