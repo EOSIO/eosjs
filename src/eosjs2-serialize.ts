@@ -437,7 +437,7 @@ export class SerialBuffer {
   }
 
   /**
-   * Append a `symbol_code`
+   * Append a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision.
    */
   pushSymbolCode(name: string) {
     let a = [];
@@ -448,7 +448,7 @@ export class SerialBuffer {
   }
 
   /**
-   * Get a `symbol_code`
+   * Get a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision.
    */
   getSymbolCode() {
     let a = this.getUint8Array(8);
@@ -585,33 +585,54 @@ export class SerialBuffer {
   }
 } // SerialBuffer
 
+/**
+ * Convert date in ISO format to `time_point` (miliseconds since epoch)
+ */
 export function dateToTimePoint(date: string) {
   return Math.round(Date.parse(date + 'Z') * 1000);
 }
 
+/**
+ * Convert `time_point` (miliseconds since epoch) to date in ISO format
+ */
 export function timePointToDate(us: number) {
   let s = (new Date(us / 1000)).toISOString();
   return s.substr(0, s.length - 1);
 }
 
+/**
+ * Convert date in ISO format to `time_point_sec` (seconds since epoch)
+ */
 export function dateToTimePointSec(date: string) {
   return Math.round(Date.parse(date + 'Z') / 1000);
 }
 
+/**
+ * Convert `time_point_sec` (seconds since epoch) to to date in ISO format
+ */
 export function timePointSecToDate(sec: number) {
   let s = (new Date(sec * 1000)).toISOString();
   return s.substr(0, s.length - 1);
 }
 
+/**
+ * Convert date in ISO format to `block_timestamp_type` (half-seconds since a different epoch)
+ */
 export function dateToBlockTimestamp(date: string) {
   return Math.round((Date.parse(date + 'Z') - 946684800000) / 500);
 }
 
+/**
+ * Convert `block_timestamp_type` (half-seconds since a different epoch) to to date in ISO format
+ */
 export function blockTimestampToDate(slot: number) {
   let s = (new Date(slot * 500 + 946684800000)).toISOString();
   return s.substr(0, s.length - 1);
 }
 
+/**
+ * Convert `string` to `Symbol`. format: `precision,NAME`.
+ */
 export function stringToSymbol(s: string): Symbol {
   let m = s.match(/^([0-9]+),([A-Z]+)$/);
   if (!m)
@@ -619,10 +640,16 @@ export function stringToSymbol(s: string): Symbol {
   return { name: m[2], precision: +m[1] };
 }
 
+/**
+ * Convert `Symbol` to `string`. format: `precision,NAME`.
+ */
 export function symbolToString({ name, precision }: Symbol) {
   return precision + ',' + name;
 }
 
+/**
+ * Convert binary data to hex
+ */
 export function arrayToHex(data: Uint8Array) {
   let result = '';
   for (let x of data)
@@ -630,6 +657,9 @@ export function arrayToHex(data: Uint8Array) {
   return result.toUpperCase();
 }
 
+/**
+ * Convert hex to binary data
+ */
 export function hexToUint8Array(hex: string) {
   let l = hex.length / 2;
   let result = new Uint8Array(l);
@@ -724,6 +754,9 @@ function createType(attrs: CreateTypeArgs): Type {
   };
 }
 
+/**
+ * Create the set of types built-in to the abi format
+ */
 export function createInitialTypes(): Map<string, Type> {
   let result = new Map(Object.entries({
     bool: createType({
@@ -898,6 +931,9 @@ export function createInitialTypes(): Map<string, Type> {
   return result;
 } // createInitialTypes()
 
+/**
+ * Get type from `types`
+ */
 export function getType(types: Map<string, Type>, name: string): Type {
   let type = types.get(name);
   if (type && type.aliasOfName)
@@ -923,6 +959,10 @@ export function getType(types: Map<string, Type>, name: string): Type {
   throw new Error('Unknown type: ' + name);
 }
 
+/**
+ * Get types from abi
+ * @param initialTypes Set of types to build on. In most cases, it's best to fill this from a fresh call to `getTypesFromAbi()`.
+ */
 export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
   let types = new Map(initialTypes);
   if (abi.types)
@@ -948,6 +988,9 @@ export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
   return types;
 } // getTypesFromAbi
 
+/**
+ * TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `refBlock.timestamp`
+ */
 export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: number) {
   return {
     expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
@@ -956,6 +999,9 @@ export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: numbe
   };
 };
 
+/**
+ * Convert action data to serialized form (hex)
+ */
 export function serializeActionData(contract: Contract, account: string, name: string, data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): string {
   let action = contract.actions.get(name);
   if (!action) {
@@ -966,6 +1012,9 @@ export function serializeActionData(contract: Contract, account: string, name: s
   return arrayToHex(buffer.asUint8Array());
 }
 
+/**
+ * Return action in serialized form
+ */
 export function serializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): SerializedAction {
   return {
     account,
@@ -975,7 +1024,10 @@ export function serializeAction(contract: Contract, account: string, name: strin
   };
 }
 
-export function deserializeActionData(contract: Contract, account: string, name: string, data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): any {
+/**
+ * Deserialize action data. If `data` is a `string`, then it's assumed to be in hex.
+ */
+export function deserializeActionData(contract: Contract, account: string, name: string, data: string | Uint8Array | number[], textEncoder: TextEncoder, textDecoder: TextDecoder): any {
   const action = contract.actions.get(name);
   if (typeof data === "string") {
     data = hexToUint8Array(data)
@@ -988,7 +1040,10 @@ export function deserializeActionData(contract: Contract, account: string, name:
   return action.deserialize(buffer);
 }
 
-export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): Action {
+/**
+ * Deserialize action. If `data` is a `string`, then it's assumed to be in hex.
+ */
+export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: string | Uint8Array | number[], textEncoder: TextEncoder, textDecoder: TextDecoder): Action {
   return {
     account,
     name,
