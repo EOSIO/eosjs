@@ -25,7 +25,7 @@ Open `test.html` in your browser of choice
 <script>
   let pre = document.getElementsByTagName('pre')[0];
   const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
-  const rpc = new eosjs2_jsonrpc.JsonRpc('http://localhost:8000');
+  const rpc = new eosjs2_jsonrpc.JsonRpc('http://127.0.0.1:8000');
   const signatureProvider = new eosjs2_jssig.default([defaultPrivateKey]);
   const api = new eosjs2.Api({ rpc, signatureProvider });
 
@@ -62,43 +62,46 @@ Open `test.html` in your browser of choice
 
 ## Node / ES2015 Usage Example
 
+Note: tested with Node v10.3.0. Older versions need older syntax.
+
 `npm install eosjs2` or `yarn add eosjs2`
 
 ```javascript
-import eosjs2 from 'eosjs2';
+const eosjs2 = require('eosjs2');
+const fetch = require('node-fetch');                            // node only; not needed in browsers
+const { TextDecoder, TextEncoder } = require('text-encoding');  // node only; not needed in browsers
 
-// or use named imports
-// import { Api, Rpc, SignatureProvider } from 'eosjs2';
-
-const defaultPrivateKey = "5JmqocoeJ1ury2SdjVNVgNL1n4qR2sse5cxN4upvspU2R5PEnxP"; // thegazelle
-const rpc = new eosjs2_jsonrpc.JsonRpc('http://dev.cryptolions.io:18888');
-const signatureProvider = new eosjs2_jssig.default([defaultPrivateKey]);
-const api = new eosjs2.Api({ rpc, signatureProvider });
+const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
+const rpc = new eosjs2.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
+const signatureProvider = new eosjs2.SignatureProvider([defaultPrivateKey]);
+const api = new eosjs2.Api({ rpc, signatureProvider, textDecoder: new TextDecoder, textEncoder: new TextEncoder });
 
 (async () => {
   try {
     const resultWithConfig = await api.transact({
       actions: [{
-          account: 'eosio.token',
-          name: 'transfer',
-          authorization: [{
-              actor: 'useraaaaaaaa',
-              permission: 'active',
-          }],
-          data: {
-              from: 'useraaaaaaaa',
-              to: 'useraaaaaaab',
-              quantity: '0.0001 SYS',
-              memo: '',
-          },
+        account: 'eosio.token',
+        name: 'transfer',
+        authorization: [{
+          actor: 'useraaaaaaaa',
+          permission: 'active',
+        }],
+        data: {
+          from: 'useraaaaaaaa',
+          to: 'useraaaaaaab',
+          quantity: '0.0001 SYS',
+          memo: '',
+        },
       }]
     }, {
       blocksBehind: 3,
       expireSeconds: 30,
     });
-    console.log(resultWithConfig);
+    console.log(JSON.stringify(resultWithConfig, null, 2));
   } catch (e) {
-    // handle error
+    console.log('Caught exception: ' + e);
+    if (e instanceof eosjs2.Rpc.RpcError)
+      console.log(JSON.stringify(e.json, null, 2));
   }
 })();
 ```
