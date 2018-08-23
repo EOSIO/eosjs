@@ -68,8 +68,8 @@ Note: tested with Node v10.3.0. Older versions need older syntax.
 
 ```javascript
 const eosjs2 = require('eosjs2');
-const fetch = require('node-fetch');
-const { TextDecoder, TextEncoder } = require('text-encoding');
+const fetch = require('node-fetch');                            // node only; not needed in browsers
+const { TextDecoder, TextEncoder } = require('text-encoding');  // node only; not needed in browsers
 
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
 const rpc = new eosjs2.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
@@ -94,9 +94,9 @@ const api = new eosjs2.Api({ rpc, signatureProvider, textDecoder: new TextDecode
         },
       }]
     }, {
-        blocksBehind: 3,
-        expireSeconds: 30,
-      });
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
     console.log(JSON.stringify(resultWithConfig, null, 2));
   } catch (e) {
     console.log('Caught exception: ' + e);
