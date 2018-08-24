@@ -2,12 +2,15 @@
 
 'use strict';
 
-import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs, TransactionConfig, GetAbiResult } from './eosjs2-jsonrpc';
+import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs, GetAbiResult } from './eosjs2-jsonrpc';
 import * as ser from './eosjs2-serialize';
 import { base64ToBinary } from './eosjs2-numeric';
 const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
 
+/**
+ * Reexport `eosjs2-serialize`
+ */
 export const serialize = ser;
 
 /**
@@ -115,12 +118,12 @@ export class Api {
   textDecoder: TextDecoder;
 
   /**
-   * Converts abi files between binary and structured form (abi.abi.json)
+   * Converts abi files between binary and structured form (`abi.abi.json`)
    */
   abiTypes: Map<string, ser.Type>;
 
   /**
-   * Converts transactions between binary and structured form (transaction.abi.json)
+   * Converts transactions between binary and structured form (`transaction.abi.json`)
    */
   transactionTypes: Map<string, ser.Type>;
 
@@ -144,7 +147,8 @@ export class Api {
    *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
    */
   constructor(args: {
-    rpc: JsonRpc, authorityProvider?: AuthorityProvider,
+    rpc: JsonRpc,
+    authorityProvider?: AuthorityProvider,
     signatureProvider: SignatureProvider,
     chainId: string,
     textEncoder?: TextEncoder,
@@ -303,7 +307,7 @@ export class Api {
    *    * If both `blocksBehind` and `expireSeconds` are present, then fetch the block which is `blocksBehind` behind head block, use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
    * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
    */
-  async transact(transaction: any, { broadcast = true, blocksBehind, expireSeconds }: TransactionConfig = {}): Promise<any> {
+  async transact(transaction: any, { broadcast = true, blocksBehind, expireSeconds }: { broadcast?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
     let info: GetInfoResult;
 
     if (!this.chainId) {
