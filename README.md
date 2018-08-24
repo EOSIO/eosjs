@@ -506,6 +506,11 @@ transferTransaction = transfer.transaction
 eos = Eos(/* {httpEndpoint: 'https://..'} */)
 
 processedTransaction = await eos.pushTransaction(transferTransaction)
+
+// cleos version:
+const cleosTransaction = transferTransaction.transaction
+cleosTransaction.signatures = transferTransaction.signatures
+// `cloes push transaction ${JSON.stringify(cleosTransaction)}`
 ```
 
 #### Custom Token
