@@ -2,13 +2,9 @@
 
 import { AuthorityProvider, AuthorityProviderArgs } from './eosjs2-api';
 
-/**
- * Holds detailed error information
- */
+/** Holds detailed error information */
 export class RpcError extends Error {
-  /**
-   * Detailed error information
-   */
+  /** Detailed error information */
   json: any;
 
   constructor(json: any) {
@@ -22,9 +18,7 @@ export class RpcError extends Error {
   }
 }
 
-/**
- * Structured format for abis
- */
+/** Structured format for abis */
 export interface Abi {
   version: string;
   types: { new_type_name: string, type: string }[];
@@ -33,26 +27,20 @@ export interface Abi {
   tables: { name: string, type: string, index_type: string, key_names: string[], key_types: string[] }[];
 }
 
-/**
- * Return value of `/v1/chain/get_abi`
- */
+/** Return value of `/v1/chain/get_abi` */
 export interface GetAbiResult {
   account_name: string;
   abi: Abi;
 }
 
-/**
- * Subset of `GetBlockResult` needed to calculate TAPoS fields in transactions
- */
+/** Subset of `GetBlockResult` needed to calculate TAPoS fields in transactions */
 export interface BlockTaposInfo {
   timestamp: string;
   block_num: number;
   ref_block_prefix: number;
 }
 
-/**
- * Return value of `/v1/chain/get_block`
- */
+/** Return value of `/v1/chain/get_block` */
 export interface GetBlockResult {
   timestamp: string;
   producer: string;
@@ -67,9 +55,7 @@ export interface GetBlockResult {
   ref_block_prefix: number;
 }
 
-/**
- * Return value of `/v1/chain/get_code`
- */
+/** Return value of `/v1/chain/get_code` */
 export interface GetCodeResult {
   account_name: string;
   code_hash: string;
@@ -78,9 +64,7 @@ export interface GetCodeResult {
   abi: Abi;
 }
 
-/**
- * Return value of `/v1/chain/get_info`
- */
+/** Return value of `/v1/chain/get_info` */
 export interface GetInfoResult {
   server_version: string;
   chain_id: string;
@@ -96,18 +80,14 @@ export interface GetInfoResult {
   block_net_limit: number;
 }
 
-/**
- * Return value of `/v1/chain/get_raw_code_and_abi`
- */
+/** Return value of `/v1/chain/get_raw_code_and_abi` */
 export interface GetRawCodeAndAbiResult {
   account_name: string;
   wasm: string;
   abi: string;
 }
 
-/**
- * Arguments for `push_transaction`
- */
+/** Arguments for `push_transaction` */
 export interface PushTransactionArgs {
   signatures: string[];
   serializedTransaction: Uint8Array;
@@ -120,9 +100,7 @@ function arrayToHex(data: Uint8Array) {
   return result;
 }
 
-/**
- * Make RPC calls
- */
+/** Make RPC calls */
 export class JsonRpc implements AuthorityProvider {
   endpoint: string;
   fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
@@ -141,9 +119,7 @@ export class JsonRpc implements AuthorityProvider {
       this.fetchBuiltin = (<any>global).fetch;
   }
 
-  /**
-   * Post `body` to `endpoint + path`. Throws detailed error information in `RpcError` when available.
-   */
+  /** Post `body` to `endpoint + path`. Throws detailed error information in `RpcError` when available. */
   async fetch(path: string, body: any) {
     let response, json;
     try {
@@ -164,64 +140,40 @@ export class JsonRpc implements AuthorityProvider {
     return json;
   }
 
-  /**
-   * Raw call to `/v1/chain/get_abi`
-   */
+  /** Raw call to `/v1/chain/get_abi` */
   async get_abi(account_name: string): Promise<GetAbiResult> { return await this.fetch('/v1/chain/get_abi', { account_name }); }
 
-  /**
-   * Raw call to `/v1/chain/get_account`
-   */
+  /** Raw call to `/v1/chain/get_account` */
   async get_account(account_name: string): Promise<any> { return await this.fetch('/v1/chain/get_account', { account_name }); }
 
-  /**
-   * Raw call to `/v1/chain/get_block_header_state`
-   */
+  /** Raw call to `/v1/chain/get_block_header_state` */
   async get_block_header_state(block_num_or_id: number | string): Promise<any> { return await this.fetch('/v1/chain/get_block_header_state', { block_num_or_id }); }
 
-  /**
-   * Raw call to `/v1/chain/get_block`
-   */
+  /** Raw call to `/v1/chain/get_block` */
   async get_block(block_num_or_id: number | string): Promise<GetBlockResult> { return await this.fetch('/v1/chain/get_block', { block_num_or_id }); }
 
-  /**
-   * Raw call to `/v1/chain/get_code`
-   */
+  /** Raw call to `/v1/chain/get_code` */
   async get_code(account_name: string): Promise<GetCodeResult> { return await this.fetch('/v1/chain/get_code', { account_name }); }
 
-  /**
-   * Raw call to `/v1/chain/get_currency_balance`
-   */
+  /** Raw call to `/v1/chain/get_currency_balance` */
   async get_currency_balance(code: string, account: string, symbol: string = null): Promise<any> { return await this.fetch('/v1/chain/get_currency_balance', { code, account, symbol }); }
 
-  /**
-   * Raw call to `/v1/chain/get_currency_stats`
-   */
+  /** Raw call to `/v1/chain/get_currency_stats` */
   async get_currency_stats(code: string, symbol: string): Promise<any> { return await this.fetch('/v1/chain/get_currency_stats', { code, symbol }); }
 
-  /**
-   * Raw call to `/v1/chain/get_info`
-   */
+  /** Raw call to `/v1/chain/get_info` */
   async get_info(): Promise<GetInfoResult> { return await this.fetch('/v1/chain/get_info', {}); }
 
-  /**
-   * Raw call to `/v1/chain/get_producer_schedule`
-   */
+  /** Raw call to `/v1/chain/get_producer_schedule` */
   async get_producer_schedule(): Promise<any> { return await this.fetch('/v1/chain/get_producer_schedule', {}); }
 
-  /**
-   * Raw call to `/v1/chain/get_producers`
-   */
+  /** Raw call to `/v1/chain/get_producers` */
   async get_producers(json = true, lower_bound = '', limit = 50): Promise<any> { return await this.fetch('/v1/chain/get_producers', { json, lower_bound, limit }); }
 
-  /**
-   * Raw call to `/v1/chain/get_raw_code_and_abi`
-   */
+  /** Raw call to `/v1/chain/get_raw_code_and_abi` */
   async get_raw_code_and_abi(account_name: string): Promise<GetRawCodeAndAbiResult> { return await this.fetch('/v1/chain/get_raw_code_and_abi', { account_name }); }
 
-  /**
-   * Raw call to `/v1/chain/get_table_rows`
-   */
+  /** Raw call to `/v1/chain/get_table_rows` */
   async get_table_rows({
     json = true,
     code,
@@ -245,9 +197,7 @@ export class JsonRpc implements AuthorityProvider {
       });
   }
 
-  /**
-   * Get subset of `availableKeys` needed to meet authorities in `transaction`. Implements `AuthorityProvider`
-   */
+  /** Get subset of `availableKeys` needed to meet authorities in `transaction`. Implements `AuthorityProvider` */
   async getRequiredKeys(args: AuthorityProviderArgs): Promise<string[]> {
     return (await this.fetch('/v1/chain/get_required_keys', {
       transaction: args.transaction,
@@ -255,9 +205,7 @@ export class JsonRpc implements AuthorityProvider {
     })).required_keys;
   }
 
-  /**
-   * Push a serialized transaction
-   */
+  /** Push a serialized transaction */
   async push_transaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
     return await this.fetch('/v1/chain/push_transaction', {
       signatures,
@@ -267,28 +215,18 @@ export class JsonRpc implements AuthorityProvider {
     });
   }
 
-  /**
-   * Raw call to `/v1/db_size/get`
-   */
+  /** Raw call to `/v1/db_size/get` */
   async db_size_get() { return await this.fetch('/v1/db_size/get', {}); }
 
-  /**
-   * Raw call to `/v1/history/get_actions`
-   */
+  /** Raw call to `/v1/history/get_actions` */
   async history_get_actions(account_name: string, pos: number = null, offset: number = null) { return await this.fetch('/v1/history/get_actions', { account_name, pos, offset }); }
 
-  /**
-   * Raw call to `/v1/history/get_transaction`
-   */
+  /** Raw call to `/v1/history/get_transaction` */
   async history_get_transaction(id: string, block_num_hint: number = null) { return await this.fetch('/v1/history/get_transaction', { id, block_num_hint }); }
 
-  /**
-   * Raw call to `/v1/history/get_key_accounts`
-   */
+  /** Raw call to `/v1/history/get_key_accounts` */
   async history_get_key_accounts(public_key: string) { return await this.fetch('/v1/history/get_key_accounts', { public_key }); }
 
-  /**
-   * Raw call to `/v1/history/get_controlled_accounts`
-   */
+  /** Raw call to `/v1/history/get_controlled_accounts` */
   async history_get_controlled_accounts(controlling_account: string) { return await this.fetch('/v1/history/get_controlled_accounts', { controlling_account }); }
 } // JsonRpc

@@ -5,88 +5,54 @@
 import { Abi, BlockTaposInfo } from './eosjs2-jsonrpc';
 import * as numeric from './eosjs2-numeric';
 
-/**
- * A field in an abi
- */
+/** A field in an abi */
 export interface Field {
-  /**
-   * Field name
-   */
+  /** Field name */
   name: string;
 
-  /**
-   * Type name in string form
-   */
+  /** Type name in string form */
   typeName: string;
 
-  /**
-   * Type of the field
-   */
+  /** Type of the field */
   type: Type;
 }
 
-/**
- * A type in an abi
- */
+/** A type in an abi */
 export interface Type {
-  /**
-   * Type name
-   */
+  /** Type name */
   name: string;
 
-  /**
-   * Type name this is an alias of, if any
-   */
+  /** Type name this is an alias of, if any */
   aliasOfName: string;
 
-  /**
-   * Type this is an array of, if any
-   */
+  /** Type this is an array of, if any */
   arrayOf: Type;
 
-  /**
-   * Type this is an optional of, if any
-   */
+  /** Type this is an optional of, if any */
   optionalOf: Type;
 
-  /**
-   * Base name of this type, if this is a struct
-   */
+  /** Base name of this type, if this is a struct */
   baseName: string;
 
-  /**
-   * Base of this type, if this is a struct
-   */
+  /** Base of this type, if this is a struct */
   base: Type;
 
-  /**
-   * Contained fields, if this is a struct
-   */
+  /** Contained fields, if this is a struct */
   fields: Field[];
 
-  /**
-   * Convert `data` to binary form and store in `buffer`
-   */
+  /** Convert `data` to binary form and store in `buffer` */
   serialize: (buffer: SerialBuffer, data: any) => void;
 
-  /**
-   * Convert data in `buffer` from binary form
-   */
+  /** Convert data in `buffer` from binary form */
   deserialize: (buffer: SerialBuffer) => any;
 }
 
-/**
- * Structural representation of a symbol
- */
+/** Structural representation of a symbol */
 export interface Symbol {
-  /**
-   * Name of the symbol, not including precision
-   */
+  /** Name of the symbol, not including precision */
   name: string;
 
-  /**
-   * Number of digits after the decimal point
-   */
+  /** Number of digits after the decimal point */
   precision: number;
 }
 
@@ -100,9 +66,7 @@ export interface Authorization {
   permission: string;
 }
 
-/**
- * Action with data in structured form
- */
+/** Action with data in structured form */
 export interface Action {
   account: string;
   name: string;
@@ -110,9 +74,7 @@ export interface Action {
   data: any;
 }
 
-/**
- * Action with data in serialized hex form
- */
+/** Action with data in serialized hex form */
 export interface SerializedAction {
   account: string;
   name: string;
@@ -120,23 +82,15 @@ export interface SerializedAction {
   data: string;
 }
 
-/**
- * Serialize and deserialize data
- */
+/** Serialize and deserialize data */
 export class SerialBuffer {
-  /**
-   * Amount of valid data in `array`
-   */
+  /** Amount of valid data in `array` */
   length: number;
 
-  /**
-   * Data in serialized (binary) form
-   */
+  /** Data in serialized (binary) form */
   array: Uint8Array;
 
-  /**
-   * Current position while reading (deserializing)
-   */
+  /** Current position while reading (deserializing) */
   readPos = 0;
 
   textEncoder: TextEncoder;
@@ -155,9 +109,7 @@ export class SerialBuffer {
     this.textDecoder = textDecoder || new TextDecoder('utf-8', { fatal: true });
   }
 
-  /**
-   * Resize `array` if needed to have at least `size` bytes free
-   */
+  /** Resize `array` if needed to have at least `size` bytes free */
   reserve(size: number) {
     if (this.length + size <= this.array.length)
       return;
@@ -169,50 +121,38 @@ export class SerialBuffer {
     this.array = newArray;
   }
 
-  /**
-   * Return data with excess storage trimmed away
-   */
+  /** Return data with excess storage trimmed away */
   asUint8Array() {
     return new Uint8Array(this.array.buffer, 0, this.length);
   }
 
-  /**
-   * Append bytes
-   */
+  /** Append bytes */
   pushArray(v: number[] | Uint8Array) {
     this.reserve(v.length);
     this.array.set(v, this.length);
     this.length += v.length;
   }
 
-  /**
-   * Append bytes
-   */
+  /** Append bytes */
   push(...v: number[]) {
     this.pushArray(v);
   }
 
-  /**
-   * Get a single byte
-   */
+  /** Get a single byte */
   get() {
     if (this.readPos < this.length)
       return this.array[this.readPos++];
     throw new Error('Read past end of buffer');
   }
 
-  /**
-   * Append bytes in `v`. Throws if `len` doesn't match `v.length`
-   */
+  /** Append bytes in `v`. Throws if `len` doesn't match `v.length` */
   pushUint8ArrayChecked(v: Uint8Array, len: number) {
     if (v.length !== len)
       throw new Error('Binary data has incorrect size');
     this.pushArray(v);
   }
 
-  /**
-   * Get `len` bytes
-   */
+  /** Get `len` bytes */
   getUint8Array(len: number) {
     if (this.readPos + len > this.length)
       throw new Error('Read past end of buffer');
@@ -221,16 +161,12 @@ export class SerialBuffer {
     return result;
   }
 
-  /**
-   * Append a `uint16`
-   */
+  /** Append a `uint16` */
   pushUint16(v: number) {
     this.push((v >> 0) & 0xff, (v >> 8) & 0xff);
   }
 
-  /**
-   * Get a `uint16`
-   */
+  /** Get a `uint16` */
   getUint16() {
     let v = 0;
     v |= this.get() << 0;
@@ -238,16 +174,12 @@ export class SerialBuffer {
     return v;
   }
 
-  /**
-   * Append a `uint32`
-   */
+  /** Append a `uint32` */
   pushUint32(v: number) {
     this.push((v >> 0) & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff);
   }
 
-  /**
-   * Get a `uint32`
-   */
+  /** Get a `uint32` */
   getUint32() {
     let v = 0;
     v |= this.get() << 0;
@@ -257,9 +189,7 @@ export class SerialBuffer {
     return v >>> 0;
   }
 
-  /**
-   * Append a `uint64`. *Caution*: `number` only has 53 bits of precision
-   */
+  /** Append a `uint64`. *Caution*: `number` only has 53 bits of precision */
   pushNumberAsUint64(v: number) {
     this.pushUint32(v >>> 0);
     this.pushUint32(Math.floor(v / 0x10000_0000) >>> 0);
@@ -275,9 +205,7 @@ export class SerialBuffer {
     return (high >>> 0) * 0x10000_0000 + (low >>> 0);
   }
 
-  /**
-   * Append a `varuint32`
-   */
+  /** Append a `varuint32` */
   pushVaruint32(v: number) {
     while (true) {
       if (v >>> 7) {
@@ -290,9 +218,7 @@ export class SerialBuffer {
     }
   }
 
-  /**
-   * Get a `varuint32`
-   */
+  /** Get a `varuint32` */
   getVaruint32() {
     let v = 0;
     let bit = 0;
@@ -306,16 +232,12 @@ export class SerialBuffer {
     return v >>> 0;
   }
 
-  /**
-   * Append a `varint32`
-   */
+  /** Append a `varint32` */
   pushVarint32(v: number) {
     this.pushVaruint32((v << 1) ^ (v >> 31));
   }
 
-  /**
-   * Get a `varint32`
-   */
+  /** Get a `varint32` */
   getVarint32() {
     let v = this.getVaruint32();
     if (v & 1)
@@ -324,37 +246,27 @@ export class SerialBuffer {
       return v >>> 1;
   }
 
-  /**
-   * Append a `float32`
-   */
+  /** Append a `float32` */
   pushFloat32(v: number) {
     this.pushArray(new Uint8Array((new Float32Array([v])).buffer));
   }
 
-  /**
-   * Get a `float32`
-   */
+  /** Get a `float32` */
   getFloat32() {
     return new Float32Array(this.getUint8Array(4).slice().buffer)[0];
   }
 
-  /**
-   * Append a `float64`
-   */
+  /** Append a `float64` */
   pushFloat64(v: number) {
     this.pushArray(new Uint8Array((new Float64Array([v])).buffer));
   }
 
-  /**
-   * Get a `float64`
-   */
+  /** Get a `float64` */
   getFloat64() {
     return new Float64Array(this.getUint8Array(8).slice().buffer)[0];
   }
 
-  /**
-   * Append a `name`
-   */
+  /** Append a `name` */
   pushName(s: string) {
     function charToSymbol(c: number) {
       if (c >= 'a'.charCodeAt(0) && c <= 'z'.charCodeAt(0))
@@ -379,9 +291,7 @@ export class SerialBuffer {
     this.pushArray(a);
   }
 
-  /**
-   * Get a `name`
-   */
+  /** Get a `name` */
   getName() {
     let a = this.getUint8Array(8);
     let result = '';
@@ -407,38 +317,28 @@ export class SerialBuffer {
     return result;
   }
 
-  /**
-   * Append length-prefixed binary data
-   */
+  /** Append length-prefixed binary data */
   pushBytes(v: number[] | Uint8Array) {
     this.pushVaruint32(v.length);
     this.pushArray(v);
   }
 
-  /**
-   * Get length-prefixed binary data
-   */
+  /** Get length-prefixed binary data */
   getBytes() {
     return this.getUint8Array(this.getVaruint32());
   }
 
-  /**
-   * Append a string
-   */
+  /** Append a string */
   pushString(v: string) {
     this.pushBytes(this.textEncoder.encode(v));
   }
 
-  /**
-   * Get a string
-   */
+  /** Get a string */
   getString() {
     return this.textDecoder.decode(this.getBytes());
   }
 
-  /**
-   * Append a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision.
-   */
+  /** Append a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision. */
   pushSymbolCode(name: string) {
     let a = [];
     a.push(...this.textEncoder.encode(name));
@@ -447,9 +347,7 @@ export class SerialBuffer {
     this.pushArray(a.slice(0, 8));
   }
 
-  /**
-   * Get a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision.
-   */
+  /** Get a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision. */
   getSymbolCode() {
     let a = this.getUint8Array(8);
     let len;
@@ -460,9 +358,7 @@ export class SerialBuffer {
     return name;
   }
 
-  /**
-   * Append a `symbol`
-   */
+  /** Append a `symbol` */
   pushSymbol({ name, precision }: Symbol) {
     let a = [precision & 0xff];
     a.push(...this.textEncoder.encode(name));
@@ -471,9 +367,7 @@ export class SerialBuffer {
     this.pushArray(a.slice(0, 8));
   }
 
-  /**
-   * Get a `symbol`
-   */
+  /** Get a `symbol` */
   getSymbol(): Symbol {
     let precision = this.get();
     let a = this.getUint8Array(7);
@@ -485,9 +379,7 @@ export class SerialBuffer {
     return { name, precision };
   }
 
-  /**
-   * Append an asset
-   */
+  /** Append an asset */
   pushAsset(s: string) {
     s = s.trim();
     let pos = 0;
@@ -518,9 +410,7 @@ export class SerialBuffer {
     this.pushSymbol({ name, precision });
   }
 
-  /**
-   * Get an asset
-   */
+  /** Get an asset */
   getAsset() {
     let amount = this.getUint8Array(8);
     let { name, precision } = this.getSymbol();
@@ -530,54 +420,42 @@ export class SerialBuffer {
     return s + ' ' + name;
   }
 
-  /**
-   * Append a public key
-   */
+  /** Append a public key */
   pushPublicKey(s: string) {
     let key = numeric.stringToPublicKey(s);
     this.push(key.type);
     this.pushArray(key.data);
   }
 
-  /**
-   * Get a public key
-   */
+  /** Get a public key */
   getPublicKey() {
     let type = this.get();
     let data = this.getUint8Array(numeric.publicKeyDataSize);
     return numeric.publicKeyToString({ type, data });
   }
 
-  /**
-   * Append a private key
-   */
+  /** Append a private key */
   pushPrivateKey(s: string) {
     let key = numeric.stringToPrivateKey(s);
     this.push(key.type);
     this.pushArray(key.data);
   }
 
-  /**
-   * Get a private key
-   */
+  /** Get a private key */
   getPrivateKey() {
     let type = this.get();
     let data = this.getUint8Array(numeric.privateKeyDataSize);
     return numeric.privateKeyToString({ type, data });
   }
 
-  /**
-   * Append a signature
-   */
+  /** Append a signature */
   pushSignature(s: string) {
     let key = numeric.stringToSignature(s);
     this.push(key.type);
     this.pushArray(key.data);
   }
 
-  /**
-   * Get a signature
-   */
+  /** Get a signature */
   getSignature() {
     let type = this.get();
     let data = this.getUint8Array(numeric.signatureDataSize);
@@ -585,54 +463,40 @@ export class SerialBuffer {
   }
 } // SerialBuffer
 
-/**
- * Convert date in ISO format to `time_point` (miliseconds since epoch)
- */
+/** Convert date in ISO format to `time_point` (miliseconds since epoch) */
 export function dateToTimePoint(date: string) {
   return Math.round(Date.parse(date + 'Z') * 1000);
 }
 
-/**
- * Convert `time_point` (miliseconds since epoch) to date in ISO format
- */
+/** Convert `time_point` (miliseconds since epoch) to date in ISO format */
 export function timePointToDate(us: number) {
   let s = (new Date(us / 1000)).toISOString();
   return s.substr(0, s.length - 1);
 }
 
-/**
- * Convert date in ISO format to `time_point_sec` (seconds since epoch)
- */
+/** Convert date in ISO format to `time_point_sec` (seconds since epoch) */
 export function dateToTimePointSec(date: string) {
   return Math.round(Date.parse(date + 'Z') / 1000);
 }
 
-/**
- * Convert `time_point_sec` (seconds since epoch) to to date in ISO format
- */
+/** Convert `time_point_sec` (seconds since epoch) to to date in ISO format */
 export function timePointSecToDate(sec: number) {
   let s = (new Date(sec * 1000)).toISOString();
   return s.substr(0, s.length - 1);
 }
 
-/**
- * Convert date in ISO format to `block_timestamp_type` (half-seconds since a different epoch)
- */
+/** Convert date in ISO format to `block_timestamp_type` (half-seconds since a different epoch) */
 export function dateToBlockTimestamp(date: string) {
   return Math.round((Date.parse(date + 'Z') - 946684800000) / 500);
 }
 
-/**
- * Convert `block_timestamp_type` (half-seconds since a different epoch) to to date in ISO format
- */
+/** Convert `block_timestamp_type` (half-seconds since a different epoch) to to date in ISO format */
 export function blockTimestampToDate(slot: number) {
   let s = (new Date(slot * 500 + 946684800000)).toISOString();
   return s.substr(0, s.length - 1);
 }
 
-/**
- * Convert `string` to `Symbol`. format: `precision,NAME`.
- */
+/** Convert `string` to `Symbol`. format: `precision,NAME`. */
 export function stringToSymbol(s: string): Symbol {
   let m = s.match(/^([0-9]+),([A-Z]+)$/);
   if (!m)
@@ -640,16 +504,12 @@ export function stringToSymbol(s: string): Symbol {
   return { name: m[2], precision: +m[1] };
 }
 
-/**
- * Convert `Symbol` to `string`. format: `precision,NAME`.
- */
+/** Convert `Symbol` to `string`. format: `precision,NAME`. */
 export function symbolToString({ name, precision }: Symbol) {
   return precision + ',' + name;
 }
 
-/**
- * Convert binary data to hex
- */
+/** Convert binary data to hex */
 export function arrayToHex(data: Uint8Array) {
   let result = '';
   for (let x of data)
@@ -657,9 +517,7 @@ export function arrayToHex(data: Uint8Array) {
   return result.toUpperCase();
 }
 
-/**
- * Convert hex to binary data
- */
+/** Convert hex to binary data */
 export function hexToUint8Array(hex: string) {
   let l = hex.length / 2;
   let result = new Uint8Array(l);
@@ -754,9 +612,7 @@ function createType(attrs: CreateTypeArgs): Type {
   };
 }
 
-/**
- * Create the set of types built-in to the abi format
- */
+/** Create the set of types built-in to the abi format */
 export function createInitialTypes(): Map<string, Type> {
   let result = new Map(Object.entries({
     bool: createType({
@@ -931,9 +787,7 @@ export function createInitialTypes(): Map<string, Type> {
   return result;
 } // createInitialTypes()
 
-/**
- * Get type from `types`
- */
+/** Get type from `types` */
 export function getType(types: Map<string, Type>, name: string): Type {
   let type = types.get(name);
   if (type && type.aliasOfName)
@@ -988,9 +842,7 @@ export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
   return types;
 } // getTypesFromAbi
 
-/**
- * TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `refBlock.timestamp`
- */
+/** TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `refBlock.timestamp` */
 export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: number) {
   return {
     expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
@@ -999,9 +851,7 @@ export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: numbe
   };
 };
 
-/**
- * Convert action data to serialized form (hex)
- */
+/** Convert action data to serialized form (hex) */
 export function serializeActionData(contract: Contract, account: string, name: string, data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): string {
   let action = contract.actions.get(name);
   if (!action) {
@@ -1012,9 +862,7 @@ export function serializeActionData(contract: Contract, account: string, name: s
   return arrayToHex(buffer.asUint8Array());
 }
 
-/**
- * Return action in serialized form
- */
+/** Return action in serialized form */
 export function serializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: any, textEncoder: TextEncoder, textDecoder: TextDecoder): SerializedAction {
   return {
     account,
@@ -1024,9 +872,7 @@ export function serializeAction(contract: Contract, account: string, name: strin
   };
 }
 
-/**
- * Deserialize action data. If `data` is a `string`, then it's assumed to be in hex.
- */
+/** Deserialize action data. If `data` is a `string`, then it's assumed to be in hex. */
 export function deserializeActionData(contract: Contract, account: string, name: string, data: string | Uint8Array | number[], textEncoder: TextEncoder, textDecoder: TextDecoder): any {
   const action = contract.actions.get(name);
   if (typeof data === "string") {
@@ -1040,9 +886,7 @@ export function deserializeActionData(contract: Contract, account: string, name:
   return action.deserialize(buffer);
 }
 
-/**
- * Deserialize action. If `data` is a `string`, then it's assumed to be in hex.
- */
+/** Deserialize action. If `data` is a `string`, then it's assumed to be in hex. */
 export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[], data: string | Uint8Array | number[], textEncoder: TextEncoder, textDecoder: TextDecoder): Action {
   return {
     account,

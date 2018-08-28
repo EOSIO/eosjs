@@ -26,16 +26,12 @@ function create_base64_map() {
 
 const base64_map = create_base64_map();
 
-/**
- * Is `bignum` a negative number?
- */
+/** Is `bignum` a negative number? */
 export function isNegative(bignum: Uint8Array) {
   return (bignum[bignum.length - 1] & 0x80) !== 0;
 }
 
-/**
- * Negate `bignum`
- */
+/** Negate `bignum` */
 export function negate(bignum: Uint8Array) {
   let carry = 1;
   for (let i = 0; i < bignum.length; ++i) {
@@ -165,9 +161,7 @@ export function binaryToBase58(bignum: Uint8Array, minDigits = 1) {
   return String.fromCharCode(...result);
 }
 
-/**
- * Convert an unsigned base-64 number in `s` to a bignum
- */
+/** Convert an unsigned base-64 number in `s` to a bignum */
 export function base64ToBinary(s: string) {
   let len = s.length;
   if ((len & 3) === 1 && s[len - 1] === '=')
@@ -198,32 +192,22 @@ export function base64ToBinary(s: string) {
   return result;
 }
 
-/**
- * Key types this library supports
- */
+/** Key types this library supports */
 export const enum KeyType {
   k1 = 0,
   r1 = 1,
 };
 
-/**
- * Public key data size, excluding type field
- */
+/** Public key data size, excluding type field */
 export const publicKeyDataSize = 33;
 
-/**
- * Private key data size, excluding type field
- */
+/** Private key data size, excluding type field */
 export const privateKeyDataSize = 32;
 
-/**
- * Signature data size, excluding type field
- */
+/** Signature data size, excluding type field */
 export const signatureDataSize = 65;
 
-/**
- * Public key, private key, or signature in binary form
- */
+/** Public key, private key, or signature in binary form */
 export interface Key {
   type: KeyType;
   data: Uint8Array;
@@ -257,9 +241,7 @@ function keyToString(key: Key, suffix: string, prefix: string) {
   return prefix + binaryToBase58(whole);
 }
 
-/**
- * Convert key in `s` to binary form
- */
+/** Convert key in `s` to binary form */
 export function stringToPublicKey(s: string): Key {
   if (s.substr(0, 3) == "EOS") {
     let whole = base58ToBinary(publicKeyDataSize + 4, s.substr(3));
@@ -277,9 +259,7 @@ export function stringToPublicKey(s: string): Key {
   }
 }
 
-/**
- * Convert `key` to string (base-58) form
- */
+/** Convert `key` to string (base-58) form */
 export function publicKeyToString(key: Key) {
   if (key.type == KeyType.k1 && key.data.length == publicKeyDataSize) {
     let digest = new Uint8Array(ripemd160(key.data));
@@ -296,9 +276,7 @@ export function publicKeyToString(key: Key) {
   }
 }
 
-/**
- * Convert key in `s` to binary form
- */
+/** Convert key in `s` to binary form */
 export function stringToPrivateKey(s: string): Key {
   if (s.substr(0, 7) == "PVT_R1_")
     return stringToKey(s.substr(7), KeyType.r1, privateKeyDataSize, "R1");
@@ -306,9 +284,7 @@ export function stringToPrivateKey(s: string): Key {
     throw new Error("unrecognized private key format");
 }
 
-/**
- * Convert `key` to string (base-58) form
- */
+/** Convert `key` to string (base-58) form */
 export function privateKeyToString(key: Key) {
   if (key.type == KeyType.r1)
     return keyToString(key, "R1", "PVT_R1_");
@@ -316,9 +292,7 @@ export function privateKeyToString(key: Key) {
     throw new Error("unrecognized private key format");
 }
 
-/**
- * Convert key in `s` to binary form
- */
+/** Convert key in `s` to binary form */
 export function stringToSignature(s: string): Key {
   if (s.substr(0, 7) == "SIG_K1_")
     return stringToKey(s.substr(7), KeyType.k1, signatureDataSize, "K1");
@@ -328,9 +302,7 @@ export function stringToSignature(s: string): Key {
     throw new Error("unrecognized signature format");
 }
 
-/**
- * Convert `signature` to string (base-58) form
- */
+/** Convert `signature` to string (base-58) form */
 export function signatureToString(signature: Key) {
   if (signature.type == KeyType.k1)
     return keyToString(signature, "K1", "SIG_K1_");
