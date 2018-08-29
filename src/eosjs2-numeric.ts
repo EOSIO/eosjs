@@ -252,6 +252,8 @@ export function stringToPublicKey(s: string): Key {
     if (digest[0] !== whole[publicKeyDataSize] || digest[1] !== whole[34] || digest[2] !== whole[35] || digest[3] !== whole[36])
       throw new Error("checksum doesn't match");
     return key;
+  } else if (s.substr(0, 7) == "PUB_K1_") {
+    return stringToKey(s.substr(7), KeyType.k1, publicKeyDataSize, "K1");
   } else if (s.substr(0, 7) == "PUB_R1_") {
     return stringToKey(s.substr(7), KeyType.r1, publicKeyDataSize, "R1");
   } else {
@@ -262,18 +264,24 @@ export function stringToPublicKey(s: string): Key {
 /** Convert `key` to string (base-58) form */
 export function publicKeyToString(key: Key) {
   if (key.type == KeyType.k1 && key.data.length == publicKeyDataSize) {
-    let digest = new Uint8Array(ripemd160(key.data));
-    let whole = new Uint8Array(publicKeyDataSize + 4);
-    for (let i = 0; i < publicKeyDataSize; ++i)
-      whole[i] = key.data[i];
-    for (let i = 0; i < 4; ++i)
-      whole[i + publicKeyDataSize] = digest[i];
-    return "EOS" + binaryToBase58(whole);
+    return keyToString(key, "K1", "PUB_K1_");
   } else if (key.type == KeyType.r1 && key.data.length == publicKeyDataSize) {
     return keyToString(key, "R1", "PUB_R1_");
   } else {
     throw new Error("unrecognized public key format");
   }
+}
+
+/** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`). Leaves other formats untouched */
+export function convertLegacyPublicKey(s: string) {
+  if (s.substr(0, 3) == "EOS")
+    return publicKeyToString(stringToPublicKey(s));
+  return s;
+}
+
+/** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`). Leaves other formats untouched */
+export function convertLegacyPublicKeys(keys: string[]) {
+  return keys.map(convertLegacyPublicKey);
 }
 
 /** Convert key in `s` to binary form */
