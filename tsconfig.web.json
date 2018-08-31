@@ -3,6 +3,7 @@
         "module": "es2015",
         "target": "es2017",
         "outDir": "dist",
+        "lib": ["es2017"],
         "sourceMap": true,
         "noImplicitAny": true
     },
