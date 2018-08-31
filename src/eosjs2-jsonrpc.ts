@@ -8,7 +8,6 @@ export class RpcError extends Error {
   json: any;
 
   constructor(json: any) {
-    console.log("Start constructor")
     if (json.error && json.error.details && json.error.details.length && json.error.details[0].message)
       super(json.error.details[0].message)
     else if (json.processed && json.processed.except && json.processed.except.message)
@@ -16,7 +15,6 @@ export class RpcError extends Error {
     else
       super(json.message);
     this.json = json;
-    console.log("End constructor")
   }
 }
 
