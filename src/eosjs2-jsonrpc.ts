@@ -9,6 +9,7 @@ export class RpcError extends Error {
   json: any;
 
   constructor(json: any) {
+    console.log("Start constructor")
     if (json.error && json.error.details && json.error.details.length && json.error.details[0].message)
       super(json.error.details[0].message)
     else if (json.processed && json.processed.except && json.processed.except.message)
@@ -16,6 +17,7 @@ export class RpcError extends Error {
     else
       super(json.message);
     this.json = json;
+    console.log("End constructor")
   }
 }
 
@@ -136,7 +138,7 @@ export class JsonRpc implements AuthorityProvider {
       e.isFetchError = true;
       throw e;
     }
-    if (!response.ok)
+    if (!response.ok) 
       throw new RpcError(json);
     return json;
   }
@@ -184,7 +186,6 @@ export class JsonRpc implements AuthorityProvider {
     lower_bound = '',
     upper_bound = '',
     limit = 10 }: any): Promise<any> {
-
     return await this.fetch(
       '/v1/chain/get_table_rows', {
         json,
