@@ -1,6 +1,7 @@
 // copyright defined in eosjs2/LICENSE.txt
 
 import { AuthorityProvider, AuthorityProviderArgs } from './eosjs2-api';
+import { convertLegacyPublicKeys } from './eosjs2-numeric';
 
 /** Holds detailed error information */
 export class RpcError extends Error {
@@ -199,10 +200,10 @@ export class JsonRpc implements AuthorityProvider {
 
   /** Get subset of `availableKeys` needed to meet authorities in `transaction`. Implements `AuthorityProvider` */
   async getRequiredKeys(args: AuthorityProviderArgs): Promise<string[]> {
-    return (await this.fetch('/v1/chain/get_required_keys', {
+    return convertLegacyPublicKeys((await this.fetch('/v1/chain/get_required_keys', {
       transaction: args.transaction,
       available_keys: args.availableKeys
-    })).required_keys;
+    })).required_keys);
   }
 
   /** Push a serialized transaction */
