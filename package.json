@@ -26,7 +26,6 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-1": "^6.24.1",
     "jest": "^23.5.0",
-    "jest-fetch-mock": "^1.6.5",
     "json-loader": "^0.5.7",
     "ts-jest": "^23.1.4",
     "ts-loader": "^4.3.1",
@@ -36,9 +35,6 @@
   },
   "jest": {
     "automock": false,
-    "setupFiles": [
-      "./setupJest.js"
-    ],
     "moduleFileExtensions": [
       "ts",
       "tsx",
