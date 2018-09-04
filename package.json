@@ -45,7 +45,7 @@
     },
     "globals": {
       "ts-jest": {
-        "tsConfigFile": "tsconfig.json"
+        "tsConfigFile": "tsconfig.test.json"
       }
     },
     "testRegex": "(/src/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
