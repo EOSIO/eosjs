@@ -31,7 +31,7 @@ Open `test.html` in your browser of choice
 
   (async () => {
     try {
-      const resultWithConfig = await api.transact({
+      const result = await api.transact({
         actions: [{
             account: 'eosio.token',
             name: 'transfer',
@@ -50,7 +50,7 @@ Open `test.html` in your browser of choice
         blocksBehind: 3,
         expireSeconds: 30,
       });
-      pre.textContent += '\n\nTransaction with configured TAPOS pushed!\n\n' + JSON.stringify(resultWithConfig, null, 2);
+      pre.textContent += '\n\nTransaction pushed!\n\n' + JSON.stringify(result, null, 2);
     } catch (e) {
       pre.textContent = '\nCaught exception: ' + e;
       if (e instanceof eosjs2_jsonrpc.RpcError)
@@ -78,7 +78,7 @@ const api = new eosjs2.Api({ rpc, signatureProvider, textDecoder: new TextDecode
 
 (async () => {
   try {
-    const resultWithConfig = await api.transact({
+    const result = await api.transact({
       actions: [{
         account: 'eosio.token',
         name: 'transfer',
@@ -97,11 +97,152 @@ const api = new eosjs2.Api({ rpc, signatureProvider, textDecoder: new TextDecode
       blocksBehind: 3,
       expireSeconds: 30,
     });
-    console.log(JSON.stringify(resultWithConfig, null, 2));
+    console.log(JSON.stringify(result, null, 2));
   } catch (e) {
     console.log('Caught exception: ' + e);
     if (e instanceof eosjs2.Rpc.RpcError)
       console.log(JSON.stringify(e.json, null, 2));
   }
 })();
+```
+
+## Example: Buy ram
+
+```javascript
+const result = await api.transact({
+  actions: [{
+    account: 'eosio',
+    name: 'buyrambytes',
+    authorization: [{
+      actor: 'useraaaaaaaa',
+      permission: 'active',
+    }],
+    data: {
+      payer: 'useraaaaaaaa',
+      receiver: 'useraaaaaaaa',
+      bytes: 8192,
+    },
+  }]
+}, {
+  blocksBehind: 3,
+  expireSeconds: 30,
+});
+```
+
+## Example: Stake
+
+```javascript
+const result = await api.transact({
+  actions: [{
+    account: 'eosio',
+    name: 'delegatebw',
+    authorization: [{
+      actor: 'useraaaaaaaa',
+      permission: 'active',
+    }],
+    data: {
+      from: 'useraaaaaaaa',
+      receiver: 'useraaaaaaaa',
+      stake_net_quantity: '1.0000 SYS',
+      stake_cpu_quantity: '1.0000 SYS',
+      transfer: false,
+    }
+  }]
+}, {
+  blocksBehind: 3,
+  expireSeconds: 30,
+});
+```
+
+## Example: Unstake
+
+```javascript
+const result = await api.transact({
+  actions: [{
+    account: 'eosio',
+    name: 'undelegatebw',
+    authorization: [{
+      actor: 'useraaaaaaaa',
+      permission: 'active',
+    }],
+    data: {
+      from: 'useraaaaaaaa',
+      receiver: 'useraaaaaaaa',
+      unstake_net_quantity: '1.0000 SYS',
+      unstake_cpu_quantity: '1.0000 SYS',
+      transfer: false,
+    }
+  }]
+}, {
+  blocksBehind: 3,
+  expireSeconds: 30,
+});
+```
+
+## Example: Create New Account (multiple actions)
+
+```javascript
+const result = await api.transact({
+  actions: [{
+    account: 'eosio',
+    name: 'newaccount',
+    authorization: [{
+      actor: 'useraaaaaaaa',
+      permission: 'active',
+    }],
+    data: {
+      creator: 'useraaaaaaaa',
+      name: 'mynewaccount',
+      owner: {
+        threshold: 1,
+        keys: [{
+          key: 'PUB_R1_6FPFZqw5ahYrR9jD96yDbbDNTdKtNqRbze6oTDLntrsANgQKZu',
+          weight: 1
+        }],
+        accounts: [],
+        waits: []
+      },
+      active: {
+        threshold: 1,
+        keys: [{
+          key: 'PUB_R1_6FPFZqw5ahYrR9jD96yDbbDNTdKtNqRbze6oTDLntrsANgQKZu',
+          weight: 1
+        }],
+        accounts: [],
+        waits: []
+      },
+    },
+  },
+  {
+    account: 'eosio',
+    name: 'buyrambytes',
+    authorization: [{
+      actor: 'useraaaaaaaa',
+      permission: 'active',
+    }],
+    data: {
+      payer: 'useraaaaaaaa',
+      receiver: 'mynewaccount',
+      bytes: 8192,
+    },
+  },
+  {
+    account: 'eosio',
+    name: 'delegatebw',
+    authorization: [{
+      actor: 'useraaaaaaaa',
+      permission: 'active',
+    }],
+    data: {
+      from: 'useraaaaaaaa',
+      receiver: 'mynewaccount',
+      stake_net_quantity: '1.0000 SYS',
+      stake_cpu_quantity: '1.0000 SYS',
+      transfer: false,
+    }
+  }]
+}, {
+  blocksBehind: 3,
+  expireSeconds: 30,
+});
 ```
