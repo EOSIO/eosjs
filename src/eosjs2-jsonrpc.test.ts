@@ -2,7 +2,7 @@ import { JsonRpc, RpcError } from "./eosjs2-jsonrpc"
 
 describe("JSON RPC", () => {
   const endpoint = "http://localhost"
-  let jsonRpc
+  let jsonRpc: JsonRpc
 
   beforeEach(() => {
     fetch.resetMocks()
@@ -125,7 +125,7 @@ describe("JSON RPC", () => {
     const block_num_or_id = 1234
     const expReturn = { data: "12345" }
     const expParams = {
-      body: JSON.stringify({
+        body: JSON.stringify({
         block_num_or_id
       }),
       method: "POST"
@@ -204,7 +204,7 @@ describe("JSON RPC", () => {
     const expPath = "/v1/chain/get_currency_balance"
     const code = "morse"
     const account = "myaccountaaa"
-    const symbol = null
+    const symbol: string = null
     const expReturn = { data: "12345" }
     const expParams = {
       body: JSON.stringify({
@@ -444,9 +444,10 @@ describe("JSON RPC", () => {
       "John Hancock",
       "Abraham Lincoln"
     ]
-    const serializedTransaction = [
+    const serializedTransaction = new Uint8Array([
       0, 16, 32, 128, 255
-    ]
+    ])
+
     const limit = 50
     const expReturn = { data: "12345" }
     const callParams = {
@@ -513,8 +514,8 @@ describe("JSON RPC", () => {
   it("calls history_get_actions with default params", async () => {
     const expPath = "/v1/history/get_actions"
     const account_name = "myaccountaaa"
-    const pos = null
-    const offset = null
+    const pos: number = null
+    const offset: number = null
     const expReturn = { data: "12345" }
     const expParams = {
       body: JSON.stringify({
@@ -557,7 +558,7 @@ describe("JSON RPC", () => {
   it("calls history_get_transaction with default params", async () => {
     const expPath = "/v1/history/get_transaction"
     const id = "myaccountaaa"
-    const block_num_hint = null
+    const block_num_hint: number = null
     const expReturn = { data: "12345" }
     const expParams = {
       body: JSON.stringify({
