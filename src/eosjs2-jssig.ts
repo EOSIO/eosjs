@@ -2,7 +2,7 @@
 
 "use strict";
 
-import ecc from "eosjs-ecc";
+import * as ecc from "eosjs-ecc";
 import { SignatureProvider, SignatureProviderArgs } from "./eosjs2-api";
 import { convertLegacyPublicKey } from "./eosjs2-numeric";
 
