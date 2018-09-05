@@ -1,0 +1,20 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended",
+    "tslint-eslint-rules"
+  ],
+  "jsRules": {},
+  "rules": {
+    "object-literal-sort-keys": false,
+    "no-bitwise": false,
+    "interface-name": [true, "never-prefix"],
+    "no-console": [true, "log"],
+    "semicolon": [true, "always"],
+    "ter-indent": [true, 2]
+  },
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": ["src/**/*.js"]
+  }
+}
