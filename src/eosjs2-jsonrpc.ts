@@ -184,7 +184,6 @@ export class JsonRpc implements AuthorityProvider {
     lower_bound = '',
     upper_bound = '',
     limit = 10 }: any): Promise<any> {
-
     return await this.fetch(
       '/v1/chain/get_table_rows', {
         json,
