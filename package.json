@@ -6,7 +6,8 @@
   "scripts": {
     "prepublish": "npm run build",
     "test": "jest",
-    "lint": "tslint -p tsconfig.node.json -c tslint.json",
+    "lint": "tslint -c tslint.json src/**/*.ts",
+    "lint-fix": "tslint -c tslint.json src/**/*.ts --fix",
     "build": "tsc -p ./tsconfig.node.json && cp src/ripemd.js dist && babel dist --out-dir dist",
     "build-web": "webpack"
   },
