@@ -136,7 +136,7 @@ export class JsonRpc implements AuthorityProvider {
       e.isFetchError = true;
       throw e;
     }
-    if (!response.ok) 
+    if (!response.ok)
       throw new RpcError(json);
     return json;
   }
