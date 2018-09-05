@@ -38,7 +38,7 @@
 
 "use strict";
 
-export class RIPEMD160
+class RIPEMD160
 {
 	constructor()
 	{
@@ -469,4 +469,8 @@ Method #2
 		h.forEach((h_i, i) => data_view.setUint32(i * 4, h_i, true));
 		return result;
 	}
+}
+
+module.exports = {
+	RIPEMD160
 }

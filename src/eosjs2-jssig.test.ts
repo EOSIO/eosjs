@@ -37,8 +37,6 @@ describe("JsSignatureProvider", () => {
 
     const signatures = await provider.sign({chainId, requiredKeys, serializedTransaction, abis})
 
-    console.info("Signatures: ", JSON.stringify(signatures))
-
     expect(eccSignatureSign).toHaveBeenCalledTimes(2)
     expect(signatures).toEqual([privateKeys[0], privateKeys[2]])
   })
