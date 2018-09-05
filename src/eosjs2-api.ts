@@ -2,11 +2,17 @@
 
 "use strict";
 
+<<<<<<< HEAD
 import { Abi, GetAbiResult, GetInfoResult, JsonRpc, PushTransactionArgs } from "./eosjs2-jsonrpc";
 import { base64ToBinary } from "./eosjs2-numeric";
 import * as ser from "./eosjs2-serialize";
 
 // tslint:disable-next-line
+=======
+import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from './eosjs2-jsonrpc';
+import * as ser from './eosjs2-serialize';
+import { base64ToBinary } from './eosjs2-numeric';
+>>>>>>> Create new interface for binary abis
 const abiAbi = require('../src/abi.abi.json');
 // tslint:disable-next-line
 const transactionAbi = require('../src/transaction.abi.json');
@@ -29,6 +35,11 @@ export interface AuthorityProvider {
   getRequiredKeys: (args: AuthorityProviderArgs) => Promise<string[]>;
 }
 
+export interface BinaryAbi {
+  account_name: string;
+  abi: Uint8Array;
+}
+
 /** Arguments to `sign` */
 export interface SignatureProviderArgs {
   /** Chain transaction is for */
@@ -41,7 +52,7 @@ export interface SignatureProviderArgs {
   serializedTransaction: Uint8Array;
 
   /** ABIs for all contracts with actions included in `serializedTransaction` */
-  abis: GetAbiResult[];
+  abis: BinaryAbi[];
 }
 
 /** Signs transactions */
@@ -155,10 +166,9 @@ export class Api {
     const accounts: string[] = transaction.actions.map((action: ser.Action): string => action.account);
     const uniqueAccounts: Set<string> = new Set(accounts);
     const actionPromises: Array<Promise<GetAbiResult>> = [...uniqueAccounts].map(
-      async (account: string): Promise<GetAbiResult> => (
-        { account_name: account, abi: await this.getAbi(account, reload) }
-      ),
-    );
+      async (account: string): Promise<GetAbiResult> => ({
+        account_name: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
+      }));
     return Promise.all(actionPromises);
   }
 
@@ -267,7 +277,11 @@ export class Api {
       throw new Error("Required configuration or TAPOS fields are not present");
     }
 
+<<<<<<< HEAD
     const abis: GetAbiResult[] = await this.getTransactionAbis(transaction);
+=======
+    let abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
+>>>>>>> Create new interface for binary abis
     transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
     const serializedTransaction = this.serializeTransaction(transaction);
     const availableKeys = await this.signatureProvider.getAvailableKeys();
