@@ -33,7 +33,7 @@ describe("JsSignatureProvider", () => {
     const serializedTransaction = new Uint8Array([
       0, 16, 32, 128, 255
     ])
-    const abis = []
+    const abis: any[] = []
 
     const signatures = await provider.sign({chainId, requiredKeys, serializedTransaction, abis})
 
