@@ -3,8 +3,8 @@
 "use strict";
 
 import ecc from "eosjs-ecc";
-import { SignatureProvider, SignatureProviderArgs } from './eosjs2-api';
-import { convertLegacyPublicKey } from './eosjs2-numeric';
+import { SignatureProvider, SignatureProviderArgs } from "./eosjs2-api";
+import { convertLegacyPublicKey } from "./eosjs2-numeric";
 
 /** Signs transactions using in-process private keys */
 export default class JsSignatureProvider implements SignatureProvider {
@@ -16,8 +16,8 @@ export default class JsSignatureProvider implements SignatureProvider {
 
   /** @param privateKeys private keys to sign with */
   constructor(privateKeys: string[]) {
-    for (let k of privateKeys) {
-      let pub = convertLegacyPublicKey(ecc.PrivateKey.fromString(k).toPublic().toString());
+    for (const k of privateKeys) {
+      const pub = convertLegacyPublicKey(ecc.PrivateKey.fromString(k).toPublic().toString());
       this.keys.set(pub, k);
       this.availableKeys.push(pub);
     }
@@ -30,9 +30,11 @@ export default class JsSignatureProvider implements SignatureProvider {
 
   /** Sign a transaction */
   public async sign({ chainId, requiredKeys, serializedTransaction }: SignatureProviderArgs) {
-    let signBuf = Buffer.concat([
-      new Buffer(chainId, 'hex'), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32))
+    const signBuf = Buffer.concat([
+      new Buffer(chainId, "hex"), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32)),
     ]);
-    return requiredKeys.map(pub => ecc.Signature.sign(signBuf, this.keys.get(convertLegacyPublicKey(pub))).toString());
+    return requiredKeys.map(
+      (pub) => ecc.Signature.sign(signBuf, this.keys.get(convertLegacyPublicKey(pub))).toString(),
+    );
   }
 }

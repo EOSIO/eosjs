@@ -297,14 +297,19 @@ export function publicKeyToString(key: Key) {
   }
 }
 
-/** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`). Leaves other formats untouched */
+/** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
+ * Leaves other formats untouched
+ */
 export function convertLegacyPublicKey(s: string) {
-  if (s.substr(0, 3) == "EOS")
+  if (s.substr(0, 3) === "EOS") {
     return publicKeyToString(stringToPublicKey(s));
+  }
   return s;
 }
 
-/** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`). Leaves other formats untouched */
+/** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
+ * Leaves other formats untouched
+ */
 export function convertLegacyPublicKeys(keys: string[]) {
   return keys.map(convertLegacyPublicKey);
 }
