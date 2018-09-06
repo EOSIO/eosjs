@@ -159,7 +159,7 @@ describe("eosjs2-api", () => {
 
   it("getTransactionAbis returns abis by transactions", async () => {
     const response = await api.getTransactionAbis(transaction);
-    expect(response[0].abi.actions).toHaveLength(3);
+    expect(response[0].abi.length).toBeGreaterThan(0);
   });
 
   it("getContract returns a contract", async () => {
