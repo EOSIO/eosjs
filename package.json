@@ -20,7 +20,8 @@
   "dependencies": {
     "@types/jest": "^23.3.1",
     "babel-polyfill": "^6.26.0",
-    "eosjs-ecc": "^4.0.1"
+    "eosjs-ecc": "^4.0.1",
+    "text-encoding": "^0.6.4"
   },
   "devDependencies": {
     "@types/node": "^10.3.1",
@@ -49,6 +50,7 @@
       "js"
     ],
     "transform": {
+      "^.+\\.jsx?$": "<rootDir>/node_modules/babel-jest",
       "^.+\\.(tsx?)$": "ts-jest"
     },
     "globals": {
@@ -60,3 +62,4 @@
     "testEnvironment": "node"
   }
 }
+
