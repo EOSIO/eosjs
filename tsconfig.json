@@ -1,12 +1,17 @@
 {
     "compilerOptions": {
-        "module": "es2015",
-        "target": "es2017",
+        "target": "es5",
+        "module": "commonjs",
         "outDir": "dist",
         "sourceMap": true,
         "noImplicitAny": true,
         "moduleResolution": "node",
-        "declaration": true
+        "declaration": true,
+        "downlevelIteration": true,
+        "lib": [
+            "es2017",
+            "dom"
+        ]
     },
     "include": [
         "src/*.ts",

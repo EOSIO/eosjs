@@ -8,8 +8,9 @@
     "test": "jest",
     "lint": "tslint -c tslint.json src/**/*.ts",
     "lint-fix": "tslint -c tslint.json src/**/*.ts --fix",
-    "build": "tsc -p ./tsconfig.node.json && cp src/ripemd.js dist && babel dist --out-dir dist",
-    "build-web": "webpack"
+    "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
+    "build-web": "webpack",
+    "clean": "rm -rf dist"
   },
   "author": "block.one",
   "license": "MIT",
@@ -25,9 +26,6 @@
   },
   "devDependencies": {
     "@types/node": "^10.3.1",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-1": "^6.24.1",
     "jest": "^23.5.0",
     "jest-fetch-mock": "^1.6.5",
     "json-loader": "^0.5.7",
@@ -50,16 +48,14 @@
       "js"
     ],
     "transform": {
-      "^.+\\.jsx?$": "<rootDir>/node_modules/babel-jest",
       "^.+\\.(tsx?)$": "ts-jest"
     },
     "globals": {
       "ts-jest": {
-        "tsConfigFile": "tsconfig.test.json"
+        "tsConfigFile": "tsconfig.json"
       }
     },
     "testRegex": "(/src/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "testEnvironment": "node"
   }
 }
-
