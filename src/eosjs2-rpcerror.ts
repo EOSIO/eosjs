@@ -11,6 +11,7 @@ export class RpcError extends Error {
     } else {
       super(json.message);
     }
+    Object.setPrototypeOf(this, RpcError.prototype);
     this.json = json;
   }
 }

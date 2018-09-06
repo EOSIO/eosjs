@@ -61,7 +61,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        accountName,
+        account_name: accountName,
       }),
       method: "POST",
     };
@@ -88,7 +88,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        accountName,
+        account_name: accountName,
       }),
       method: "POST",
     };
@@ -107,7 +107,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        accountName,
+        account_name: accountName,
       }),
       method: "POST",
     };
@@ -126,7 +126,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        blockNumOrId,
+        block_num_or_id: blockNumOrId,
       }),
       method: "POST",
     };
@@ -145,7 +145,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        blockNumOrId,
+        block_num_or_id: blockNumOrId,
       }),
       method: "POST",
     };
@@ -164,7 +164,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        accountName,
+        account_name: accountName,
       }),
       method: "POST",
     };
@@ -285,7 +285,7 @@ describe("JSON RPC", () => {
     const expParams = {
       body: JSON.stringify({
         json,
-        lowerBound,
+        lower_bound: lowerBound,
         limit,
       }),
       method: "POST",
@@ -308,7 +308,7 @@ describe("JSON RPC", () => {
     const expParams = {
       body: JSON.stringify({
         json,
-        lowerBound,
+        lower_bound: lowerBound,
         limit,
       }),
       method: "POST",
@@ -328,7 +328,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        accountName,
+        account_name: accountName,
       }),
       method: "POST",
     };
@@ -496,7 +496,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        accountName,
+        account_name: accountName,
         pos,
         offset,
       }),
@@ -519,7 +519,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        accountName,
+        account_name: accountName,
         pos,
         offset,
       }),
@@ -542,7 +542,7 @@ describe("JSON RPC", () => {
     const expParams = {
       body: JSON.stringify({
         id,
-        blockNumHint,
+        block_num_hint: blockNumHint,
       }),
       method: "POST",
     };
@@ -563,7 +563,7 @@ describe("JSON RPC", () => {
     const expParams = {
       body: JSON.stringify({
         id,
-        blockNumHint,
+        block_num_hint: blockNumHint,
       }),
       method: "POST",
     };
@@ -582,7 +582,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        publicKey,
+        public_key: publicKey,
       }),
       method: "POST",
     };
@@ -601,7 +601,7 @@ describe("JSON RPC", () => {
     const expReturn = { data: "12345" };
     const expParams = {
       body: JSON.stringify({
-        controllingAccount,
+        controlling_account: controllingAccount,
       }),
       method: "POST",
     };
