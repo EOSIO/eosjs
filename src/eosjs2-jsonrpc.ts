@@ -134,28 +134,33 @@ export class JsonRpc implements AuthorityProvider {
   }
 
   /** Raw call to `/v1/chain/get_abi` */
-  public async get_abi(accountName: string): Promise<GetAbiResult> {
-    return await this.fetch("/v1/chain/get_abi", { account_name: accountName });
+  // tslint:disable-next-line:variable-name
+  public async get_abi(account_name: string): Promise<GetAbiResult> {
+    return await this.fetch("/v1/chain/get_abi", { account_name });
   }
 
   /** Raw call to `/v1/chain/get_account` */
-  public async get_account(accountName: string): Promise<any> {
-    return await this.fetch("/v1/chain/get_account", { account_name: accountName });
+  // tslint:disable-next-line:variable-name
+  public async get_account(account_name: string): Promise<any> {
+    return await this.fetch("/v1/chain/get_account", { account_name });
   }
 
   /** Raw call to `/v1/chain/get_block_header_state` */
-  public async get_block_header_state(blockNumOrId: number | string): Promise<any> {
-    return await this.fetch("/v1/chain/get_block_header_state", { block_num_or_id: blockNumOrId });
+  // tslint:disable-next-line:variable-name
+  public async get_block_header_state(block_num_or_id: number | string): Promise<any> {
+    return await this.fetch("/v1/chain/get_block_header_state", { block_num_or_id });
   }
 
   /** Raw call to `/v1/chain/get_block` */
-  public async get_block(blockNumOrId: number | string): Promise<GetBlockResult> {
-    return await this.fetch("/v1/chain/get_block", { block_num_or_id: blockNumOrId });
+  // tslint:disable-next-line:variable-name
+  public async get_block(block_num_or_id: number | string): Promise<GetBlockResult> {
+    return await this.fetch("/v1/chain/get_block", { block_num_or_id });
   }
 
   /** Raw call to `/v1/chain/get_code` */
-  public async get_code(accountName: string): Promise<GetCodeResult> {
-    return await this.fetch("/v1/chain/get_code", { account_name: accountName });
+  // tslint:disable-next-line:variable-name
+  public async get_code(account_name: string): Promise<GetCodeResult> {
+    return await this.fetch("/v1/chain/get_code", { account_name });
   }
 
   /** Raw call to `/v1/chain/get_currency_balance` */
@@ -179,13 +184,15 @@ export class JsonRpc implements AuthorityProvider {
   }
 
   /** Raw call to `/v1/chain/get_producers` */
-  public async get_producers(json = true, lowerBound = "", limit = 50): Promise<any> {
-    return await this.fetch("/v1/chain/get_producers", { json, lower_bound: lowerBound, limit });
+  // tslint:disable-next-line:variable-name
+  public async get_producers(json = true, lower_bound = "", limit = 50): Promise<any> {
+    return await this.fetch("/v1/chain/get_producers", { json, lower_bound, limit });
   }
 
   /** Raw call to `/v1/chain/get_raw_code_and_abi` */
-  public async get_raw_code_and_abi(accountName: string): Promise<GetRawCodeAndAbiResult> {
-    return await this.fetch("/v1/chain/get_raw_code_and_abi", { account_name: accountName });
+  // tslint:disable-next-line:variable-name
+  public async get_raw_code_and_abi(account_name: string): Promise<GetRawCodeAndAbiResult> {
+    return await this.fetch("/v1/chain/get_raw_code_and_abi", { account_name });
   }
 
   /** Raw call to `/v1/chain/get_table_rows` */
@@ -233,22 +240,26 @@ export class JsonRpc implements AuthorityProvider {
   public async db_size_get() { return await this.fetch("/v1/db_size/get", {}); }
 
   /** Raw call to `/v1/history/get_actions` */
-  public async history_get_actions(accountName: string, pos: number = null, offset: number = null) {
-    return await this.fetch("/v1/history/get_actions", { account_name: accountName, pos, offset });
+  // tslint:disable-next-line:variable-name
+  public async history_get_actions(account_name: string, pos: number = null, offset: number = null) {
+    return await this.fetch("/v1/history/get_actions", { account_name, pos, offset });
   }
 
   /** Raw call to `/v1/history/get_transaction` */
-  public async history_get_transaction(id: string, blockNumHint: number = null) {
-    return await this.fetch("/v1/history/get_transaction", { id, block_num_hint: blockNumHint });
+  // tslint:disable-next-line:variable-name
+  public async history_get_transaction(id: string, block_num_hint: number = null) {
+    return await this.fetch("/v1/history/get_transaction", { id, block_num_hint });
   }
 
   /** Raw call to `/v1/history/get_key_accounts` */
-  public async history_get_key_accounts(publicKey: string) {
-    return await this.fetch("/v1/history/get_key_accounts", { public_key: publicKey });
+  // tslint:disable-next-line:variable-name
+  public async history_get_key_accounts(public_key: string) {
+    return await this.fetch("/v1/history/get_key_accounts", { public_key });
   }
 
   /** Raw call to `/v1/history/get_controlled_accounts` */
-  public async history_get_controlled_accounts(controllingAccount: string) {
-    return await this.fetch("/v1/history/get_controlled_accounts", { controlling_account: controllingAccount });
+  // tslint:disable-next-line:variable-name
+  public async history_get_controlled_accounts(controlling_account: string) {
+    return await this.fetch("/v1/history/get_controlled_accounts", { controlling_account });
   }
 } // JsonRpc
