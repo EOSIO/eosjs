@@ -11,10 +11,11 @@ Open `test.html` in your browser of choice
 
 *These tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
 
-
 ## Browser Usage Example
 
 `npm run build-web` or `yarn build-web`
+
+Reuse the `api` object for all transactions; it caches ABIs to reduce network usage. Only call `new eosjs2.Api(...)` once.
 
 ```html
 <pre style="width: 100%; height: 100%; margin:0px; "></pre>
@@ -63,6 +64,8 @@ Open `test.html` in your browser of choice
 ## Node / ES2015 Usage Example
 
 Note: tested with Node v10.3.0. Older versions need older syntax.
+
+Reuse the `api` object for all transactions; it caches ABIs to reduce network usage. Only call `new eosjs2.Api(...)` once.
 
 `npm install eosjs2` or `yarn add eosjs2`
 
