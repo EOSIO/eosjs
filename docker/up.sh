@@ -47,7 +47,6 @@ cleos push action eosio.token create\
 cleos push action eosio.token issue\
   '{"to":"eosio.token", "quantity": "10000.0000 SYS", "memo": "issue"}' -p eosio.token@active
 
-
 # Either the eosio.bios or eosio.system contract may be deployed to the eosio
 # account.  System contain everything bios has but adds additional constraints
 # such as ram and cpu limits.
