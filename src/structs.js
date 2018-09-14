@@ -571,7 +571,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
       b.append(b2.copy(0, b2.offset), 'binary')
     } else {
       // console.log(`Unknown Action.name ${object.name}`)
-      const data = typeof object.data === 'string' ? new Buffer(object.data, 'hex') : object.data
+      const data = typeof object.data === 'string' ? Buffer.from(object.data, 'hex') : object.data
       if(!Buffer.isBuffer(data)) {
         throw new TypeError(`Unknown struct '${object.name}' for contract '${object.account}', locate this struct or provide serialized action.data`)
       }
@@ -587,7 +587,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
       if(typeof data === 'object') {
         result.data = ser.fromObject(data) // resolve shorthand
       } else if(typeof data === 'string') {
-        const buf = new Buffer(data, 'hex')
+        const buf = Buffer.from(data, 'hex')
         result.data = Fcbuffer.fromBuffer(ser, buf)
       } else {
         throw new TypeError('Expecting hex string or object in action.data')
