@@ -71,7 +71,7 @@ Object.assign(
 )
 
 function createEos(config) {
-  const network = config.httpEndpoint != null ? EosApi(config) : null
+  const network = config.httpEndpoint !== null ? EosApi(config) : null
   config.network = network
 
   const abis = []
@@ -88,7 +88,7 @@ function createEos(config) {
     checkChainId(network, config.chainId, config.logger)
   }
 
-  if(config.mockTransactions != null) {
+  if(config.mockTransactions !== null) {
     if(typeof config.mockTransactions === 'string') {
       const mock = config.mockTransactions
       config.mockTransactions = () => mock
@@ -233,7 +233,7 @@ const defaultSignProvider = (eos, config) => async function({
   }
 
   // offline signing assumes all keys provided need to sign
-  if(config.httpEndpoint == null) {
+  if(config.httpEndpoint === null) {
     const sigs = []
     for(const key of keys) {
       sigs.push(sign(buf, key.private))
@@ -245,8 +245,8 @@ const defaultSignProvider = (eos, config) => async function({
 
   // keys are either public or private keys
   for(const key of keys) {
-    const isPrivate = key.private != null
-    const isPublic = key.public != null
+    const isPrivate = key.private !== null
+    const isPublic = key.public !== null
 
     if(isPrivate) {
       keyMap.set(ecc.privateToPublic(key.private), key.private)

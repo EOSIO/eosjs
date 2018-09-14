@@ -158,7 +158,7 @@ function decodeName(value, littleEndian = true) {
   @return {string} value
 */
 function DecimalString(value) {
-  assert(value != null, 'value is required')
+  assert(value !== null, 'value is required')
   value = value === 'object' && value.toString ? value.toString() : String(value)
 
   const neg = /^-/.test(value)
@@ -203,7 +203,7 @@ function DecimalString(value) {
 */
 function DecimalPad(num, precision) {
   const value = DecimalString(num)
-  if(precision == null) {
+  if(precision === null) {
     return value
   }
 
@@ -238,14 +238,14 @@ function DecimalImply(value, precision) {
   @return {number} 1.0000
 */
 function DecimalUnimply(value, precision) {
-  assert(value != null, 'value is required')
+  assert(value !== null, 'value is required')
   value = value === 'object' && value.toString ? value.toString() : String(value)
   const neg = /^-/.test(value)
   if(neg) {
     value = value.substring(1)
   }
   assert(/^\d+$/.test(value), `invalid whole number ${value}`)
-  assert(precision != null, 'precision required')
+  assert(precision !== null, 'precision required')
   assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)
 
   // Ensure minimum length
@@ -264,13 +264,13 @@ function DecimalUnimply(value, precision) {
 function printAsset({amount, precision, symbol, contract}) {
   assert.equal(typeof symbol, 'string', 'symbol is a required string')
 
-  if(amount != null && precision != null) {
+  if(amount !== null && precision !== null) {
     amount = DecimalPad(amount, precision)
   }
 
-  const join = (e1, e2) => e1 == null ? '' : e2 == null ? '' : e1 + e2
+  const join = (e1, e2) => e1 === null ? '' : e2 === null ? '' : e1 + e2
 
-  if(amount != null) {
+  if(amount !== null) {
     // the amount contains the precision
     return join(amount, ' ') + symbol + join('@', contract)
   }
@@ -295,7 +295,7 @@ function parseAsset(str) {
   const precisionMatch = str.match(/(^| )([0-9]+),([A-Z]+)(@|$)/)
   const precisionSymbol = precisionMatch ? Number(precisionMatch[2]) : null
   const precisionAmount = amount ? (amount.split('.')[1] || '').length : null
-  const precision = precisionSymbol != null ? precisionSymbol : precisionAmount
+  const precision = precisionSymbol !== null ? precisionSymbol : precisionAmount
 
   const symbolMatch = str.match(/(^| |,)([A-Z]+)(@|$)/)
   const symbol = symbolMatch ? symbolMatch[2] : null
@@ -307,13 +307,13 @@ function parseAsset(str) {
 
   assert.equal(str, check,  `Invalid asset string: ${str} !== ${check}`)
 
-  if(precision != null) {
+  if(precision !== null) {
     assert(precision >= 0 && precision <= 18, `Precision should be 18 characters or less`)
   }
-  if(symbol != null) {
+  if(symbol !== null) {
     assert(symbol.length <= 7, `Asset symbol is 7 characters or less`)
   }
-  if(contract != null) {
+  if(contract !== null) {
     assert(contract.length <= 12, `Contract is 12 characters or less`)
   }
 
