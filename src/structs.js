@@ -20,7 +20,7 @@ module.exports = (config = {}, extendedSchema) => {
     for(const action of cache.abi.actions) {
       if(action.name === lookupName) {
         const struct = cache.structs[action.type]
-        if(struct != null) {
+        if(struct !== null) {
           return struct
         }
       }
@@ -28,7 +28,7 @@ module.exports = (config = {}, extendedSchema) => {
 
     // Lookup struct by "type"
     const struct = cache.structs[lookupName]
-    if(struct != null) {
+    if(struct !== null) {
       return struct
     }
 
@@ -38,7 +38,7 @@ module.exports = (config = {}, extendedSchema) => {
   // If nodeos does not have an ABI setup for a certain action.type, it will throw
   // an error: `Invalid cast from object_type to string` .. forceActionDataHex
   // may be used to until native ABI is added or fixed.
-  const forceActionDataHex = config.forceActionDataHex != null ?
+  const forceActionDataHex = config.forceActionDataHex !== null ?
     config.forceActionDataHex : true
 
   const override = Object.assign({},
@@ -108,7 +108,7 @@ const Name = (validation) => {
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         return ''
       }
       return value
@@ -173,7 +173,7 @@ const PublicKeyEcc = (validation) => {
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         const keyPrefix = validation.keyPrefix ? validation.keyPrefix : 'EOS'
         return keyPrefix + '6MRy..'
       }
@@ -198,7 +198,7 @@ const Symbol = validation => {
 
       let symbol = ''
       for(const code of bin)  {
-        if(code == '\0') {
+        if(code === '\0') {
           break
         }
         symbol += code
@@ -208,15 +208,15 @@ const Symbol = validation => {
 
     appendByteBuffer (b, value) {
       const {symbol, precision} = parseAsset(value)
-      assert(precision != null, `Precision unknown for symbol: ${value}`)
+      assert(precision !== null, `Precision unknown for symbol: ${value}`)
       const pad = '\0'.repeat(7 - symbol.length)
       b.append(String.fromCharCode(precision) + symbol + pad)
     },
 
     fromObject (value) {
-      assert(value != null, `Symbol is required: ` + value)
+      assert(value !== null, `Symbol is required: ` + value)
       const {symbol, precision} = parseAsset(value)
-      if(precision == null) {
+      if(precision === null) {
         return symbol
       } else {
         // Internal object, this can have the precision prefix
@@ -225,7 +225,7 @@ const Symbol = validation => {
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         return 'SYS'
       }
       // symbol only (without precision prefix)
@@ -245,7 +245,7 @@ const SymbolCode = validation => {
 
       let symbol = ''
       for(const code of bin)  {
-        if(code == '\0') {
+        if(code === '\0') {
           break
         }
         symbol += code
@@ -260,13 +260,13 @@ const SymbolCode = validation => {
     },
 
     fromObject (value) {
-      assert(value != null, `Symbol is required: ` + value)
+      assert(value !== null, `Symbol is required: ` + value)
       const {symbol} = parseAsset(value)
       return symbol
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         return 'SYS'
       }
       return parseAsset(value).symbol
@@ -294,7 +294,7 @@ const ExtendedSymbol = (validation, baseTypes, customTypes) => {
       assert.equal(typeof value, 'string', 'Invalid extended symbol: ' + value)
 
       const [symbol, contract] = value.split('@')
-      assert(contract != null, 'Missing @contract suffix in extended symbol: ' + value)
+      assert(contract !== null, 'Missing @contract suffix in extended symbol: ' + value)
 
       symbolType.appendByteBuffer(b, symbol)
       contractName.appendByteBuffer(b, contract)
@@ -305,7 +305,7 @@ const ExtendedSymbol = (validation, baseTypes, customTypes) => {
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         return 'SYS@contract'
       }
       return value
@@ -324,21 +324,21 @@ const Asset = (validation, baseTypes, customTypes) => {
   return {
     fromByteBuffer (b) {
       const amount = amountType.fromByteBuffer(b)
-      assert(amount != null, 'amount')
+      assert(amount !== null, 'amount')
 
       const sym = symbolType.fromByteBuffer(b)
       const {precision, symbol} = parseAsset(`${sym}`)
-      assert(precision != null, 'precision')
-      assert(symbol != null, 'symbol')
+      assert(precision !== null, 'precision')
+      assert(symbol !== null, 'symbol')
 
       return `${DecimalUnimply(amount, precision)} ${symbol}`
     },
 
     appendByteBuffer (b, value) {
       const {amount, precision, symbol} = parseAsset(value)
-      assert(amount != null, 'amount')
-      assert(precision != null, 'precision')
-      assert(symbol != null, 'symbol')
+      assert(amount !== null, 'amount')
+      assert(precision !== null, 'precision')
+      assert(symbol !== null, 'symbol')
 
       amountType.appendByteBuffer(b, DecimalImply(amount, precision))
       symbolType.appendByteBuffer(b, `${precision},${symbol}`)
@@ -346,22 +346,22 @@ const Asset = (validation, baseTypes, customTypes) => {
 
     fromObject (value) {
       const {amount, precision, symbol} = parseAsset(value)
-      assert(amount != null, 'amount')
-      assert(precision != null, 'precision')
-      assert(symbol != null, 'symbol')
+      assert(amount !== null, 'amount')
+      assert(precision !== null, 'precision')
+      assert(symbol !== null, 'symbol')
 
       return `${DecimalPad(amount, precision)} ${symbol}`
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         return '0.0001 SYS'
       }
 
       const {amount, precision, symbol} = parseAsset(value)
-      assert(amount != null, 'amount')
-      assert(precision != null, 'precision')
-      assert(symbol != null, 'symbol')
+      assert(amount !== null, 'amount')
+      assert(precision !== null, 'precision')
+      assert(symbol !== null, 'symbol')
 
       return `${DecimalPad(amount, precision)} ${symbol}`
     }
@@ -407,16 +407,16 @@ const ExtendedAsset = (validation, baseTypes, customTypes) => {
       }
 
       const {amount, precision, symbol, contract} = asset
-      assert(amount != null, 'missing amount')
-      assert(precision != null, 'missing precision')
-      assert(symbol != null, 'missing symbol')
-      assert(contract != null, 'missing contract')
+      assert(amount !== null, 'missing amount')
+      assert(precision !== null, 'missing precision')
+      assert(symbol !== null, 'missing symbol')
+      assert(contract !== null, 'missing contract')
 
       return {amount, precision, symbol, contract}
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         return {
           amount: '1.0000',
           precision: 4,
@@ -458,7 +458,7 @@ const SignatureType = (validation, baseTypes) => {
     },
 
     toObject (value) {
-      if (validation.defaults && value == null) {
+      if (validation.defaults && value === null) {
         return 'SIG_K1_bas58signature..'
       }
       const signature = Signature.from(value)
@@ -513,7 +513,7 @@ const abiOverride = structLookup => ({
 
     if(Buffer.isBuffer(object.abi)) {
       b2.append(object.abi)
-    } else if(typeof object.abi == 'object'){
+    } else if(typeof object.abi === 'object'){
       ser.appendByteBuffer(b2, object.abi);
     }
 
@@ -528,7 +528,7 @@ const wasmCodeOverride = config => ({
       const code = object.code.toString()
       if(/^\s*\(module/.test(code)) {
         const {binaryen} = config
-        assert(binaryen != null, 'required: config.binaryen = require("binaryen")')
+        assert(binaryen !== null, 'required: config.binaryen = require("binaryen")')
         if(config.debug) {
           console.log('Assembling WASM..')
         }
@@ -549,7 +549,7 @@ const wasmCodeOverride = config => ({
 */
 const actionDataOverride = (structLookup, forceActionDataHex) => ({
   'action.data.fromByteBuffer': ({fields, object, b, config}) => {
-    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
+    const ser = (object.name || '') === '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
       b.readVarint32() // length prefix (usefull if object.name is unknown)
       object.data = ser.fromByteBuffer(b, config)
@@ -563,7 +563,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
   },
 
   'action.data.appendByteBuffer': ({fields, object, b}) => {
-    const ser = (object.name || '') == '' ? fields.data : structLookup(object.name, object.account)
+    const ser = (object.name || '') === '' ? fields.data : structLookup(object.name, object.account)
     if(ser) {
       const b2 = new ByteBuffer(ByteBuffer.DEFAULT_CAPACITY, ByteBuffer.LITTLE_ENDIAN)
       ser.appendByteBuffer(b2, object.data)
@@ -582,7 +582,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
 
   'action.data.fromObject': ({fields, object, result}) => {
     const {data, name} = object
-    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
+    const ser = (name || '') === '' ? fields.data : structLookup(name, object.account)
     if(ser) {
       if(typeof data === 'object') {
         result.data = ser.fromObject(data) // resolve shorthand
@@ -600,7 +600,7 @@ const actionDataOverride = (structLookup, forceActionDataHex) => ({
 
   'action.data.toObject': ({fields, object, result, config}) => {
     const {data, name} = object || {}
-    const ser = (name || '') == '' ? fields.data : structLookup(name, object.account)
+    const ser = (name || '') === '' ? fields.data : structLookup(name, object.account)
     if(!ser) {
       // Types without an ABI will accept hex
       result.data = Buffer.isBuffer(data) ? data.toString('hex') : data

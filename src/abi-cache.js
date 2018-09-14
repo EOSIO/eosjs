@@ -23,11 +23,11 @@ function AbiCache(network, config) {
   function abiAsync(account, force = true) {
     assert.equal(typeof account, 'string', 'account string required')
 
-    if(force == false && cache[account] != null) {
+    if(force === false && cache[account] !== null) {
       return Promise.resolve(cache[account])
     }
 
-    if(network == null) {
+    if(network === null) {
       const abi = cache[account]
       assert(abi, `Missing ABI for account: ${account}, provide httpEndpoint or add to abiCache`)
       return Promise.resolve(abi)
@@ -58,7 +58,7 @@ function AbiCache(network, config) {
       return cache[account] = Object.assign({abi, schema: fcSchema}, structs)
     }
     const c = cache[account]
-    if(c == null) {
+    if(c === null) {
       throw new Error(`Abi '${account}' is not cached`)
     }
     return c

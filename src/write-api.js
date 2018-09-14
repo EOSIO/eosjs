@@ -81,7 +81,7 @@ function WriteApi(Network, network, config, Transaction) {
   const genTransaction = (structs, merge) => async function(...args) {
     let contracts, options, callback
 
-    if(args[args.length - 1] == null) {
+    if(args[args.length - 1] === null) {
       // callback may be undefined
       args = args.slice(0, args.length - 1)
     }
@@ -208,7 +208,7 @@ function WriteApi(Network, network, config, Transaction) {
 
       const authorization = []
       const providedAuth = options.authorization ? options.authorization : config.authorization
-      const addDefaultAuths = providedAuth == null
+      const addDefaultAuths = providedAuth === null
 
       // Often if the first field in an action is an account name it is
       // also the required authorization.
@@ -308,7 +308,7 @@ function WriteApi(Network, network, config, Transaction) {
           noCallback: true
         }
       })
-      if(ret == null) {
+      if(ret === null) {
         // double-check (code can change)
         throw new Error('Callbacks can not be used when creating a multi-action transaction')
       }
@@ -326,7 +326,7 @@ function WriteApi(Network, network, config, Transaction) {
 
       } else if(typeof value === 'object') {
         // other contract(s) (currency contract for example)
-        if(messageCollector[variableName] == null) {
+        if(messageCollector[variableName] === null) {
           messageCollector[variableName] = {}
         }
         for(const key2 in value) {
@@ -412,9 +412,9 @@ function WriteApi(Network, network, config, Transaction) {
 
     let argHeaders = null
     if( // minimum required headers
-      arg.expiration != null &&
-      arg.ref_block_num != null &&
-      arg.ref_block_prefix != null
+      arg.expiration !== null &&
+      arg.ref_block_num !== null &&
+      arg.ref_block_prefix !== null
     ) {
       const {
         expiration,
@@ -502,7 +502,7 @@ function WriteApi(Network, network, config, Transaction) {
         }
 
         const mock = config.mockTransactions ? config.mockTransactions() : null
-        if(mock != null) {
+        if(mock !== null) {
           assert(/pass|fail/.test(mock), 'mockTransactions should return a string: pass or fail')
           if(mock === 'pass') {
             callback(null, {

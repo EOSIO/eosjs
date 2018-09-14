@@ -437,7 +437,7 @@ describe('transactions', () => {
           return token.transfer('initb', 'inita', '1.0000 SYS', '')
             .then(tr => {assert.equal(1, tr.transaction.transaction.actions.length)})
         })
-    }).then(r => {assert(r == undefined)})
+    }).then(r => {assert(r === undefined)})
   })
 
   it('action to contract atomic', async function() {
@@ -445,8 +445,8 @@ describe('transactions', () => {
     const eos = Eos({signProvider})
 
     const trTest = eosio_token => {
-      assert(eosio_token.transfer('inita', 'initb', amt + '.0000 SYS', '') == null)
-      assert(eosio_token.transfer('initb', 'inita', (amt++) + '.0000 SYS', '') == null)
+      assert(eosio_token.transfer('inita', 'initb', amt + '.0000 SYS', '') === null)
+      assert(eosio_token.transfer('initb', 'inita', (amt++) + '.0000 SYS', '') === null)
     }
 
     const assertTr = tr =>{
@@ -474,8 +474,8 @@ describe('transactions', () => {
   it('multi-action transaction (broadcast)', () => {
     const eos = Eos({signProvider})
     return eos.transaction(tr => {
-      assert(tr.transfer('inita', 'initb', '1.0000 SYS', '') == null)
-      assert(tr.transfer({from: 'inita', to: 'initc', quantity: '1.0000 SYS', memo: ''}) == null)
+      assert(tr.transfer('inita', 'initb', '1.0000 SYS', '') === null)
+      assert(tr.transfer({from: 'inita', to: 'initc', quantity: '1.0000 SYS', memo: ''}) === null)
     }).then(tr => {
       assert.equal(2, tr.transaction.transaction.actions.length)
     })
