@@ -514,7 +514,7 @@ const abiOverride = structLookup => ({
     if(Buffer.isBuffer(object.abi)) {
       b2.append(object.abi)
     } else if(typeof object.abi == 'object'){
-      ser.appendByteBuffer(b2, object.abi);
+      ser.appendByteBuffer(b2, object.abi)
     }
 
     b.writeVarint32(b2.offset) // length prefix
