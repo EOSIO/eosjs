@@ -41,7 +41,6 @@ describe('offline', () => {
     })
 
     const trx = await eos.nonce(1, {authorization: 'inita'})
-
     assert.equal(trx.transaction.signatures.length, 2, 'signature count')
   })
 
@@ -78,28 +77,78 @@ describe('offline', () => {
     })
   })
 
-  it('transactionHeaders object', async function() {
+  describe('transaction headers', async function() {
+    const headerOverrides = {
+      max_net_usage_words: 333,
+      max_cpu_usage_ms: 222,
+      delay_sec: 369
+    }
+
+    const transactionHeaders = Object.assign({}, headers, headerOverrides)
+    const xfer = ['few', 'many', '100.0000 SYS', ''/*memo*/]
+
+    it('global', async function() {
+      const eos = Eos({
+        keyProvider: wif,
+        httpEndpoint: null,
+        transactionHeaders
+      })
+
+      const trx = await eos.transfer(...xfer)
+
+      assert.deepEqual({
+        expiration: trx.transaction.transaction.expiration,
+        ref_block_num: trx.transaction.transaction.ref_block_num,
+        ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
+        max_net_usage_words: trx.transaction.transaction.max_net_usage_words,
+        max_cpu_usage_ms: trx.transaction.transaction.max_cpu_usage_ms,
+        delay_sec: trx.transaction.transaction.delay_sec,
+        context_free_actions: [],
+        transaction_extensions: []
+      }, transactionHeaders)
+
+      assert.equal(trx.transaction.signatures.length, 1, 'signature count')
+    })
+
     const eos = Eos({
+      sign: false,
+      broadcast: false,
       keyProvider: wif,
       httpEndpoint: null,
       transactionHeaders: headers
     })
 
-    const memo = ''
-    const trx = await eos.transfer('few', 'many', '100.0000 SYS', memo)
+    it('object', async function() {
+      const trx = await eos.transaction({
+        delay_sec: 369,
+        actions: [{
+          account: 'eosio.null',
+          name: 'nonce',
+          data: '010f',
+          authorization: [{actor: 'inita', permission: 'owner'}]
+        }]
+      })
+      assert.equal(trx.transaction.transaction.delay_sec, 369, 'delay_sec')
+    })
 
-    assert.deepEqual({
-      expiration: trx.transaction.transaction.expiration,
-      ref_block_num: trx.transaction.transaction.ref_block_num,
-      ref_block_prefix: trx.transaction.transaction.ref_block_prefix,
-      max_net_usage_words: 0,
-      max_cpu_usage_ms: 0,
-      delay_sec: 0,
-      context_free_actions: [],
-      transaction_extensions: []
-    }, headers)
+    it('action', async function() {
+      const trx = await eos.transfer(...xfer, {delay_sec: 369})
+      assert.equal(trx.transaction.transaction.delay_sec, 369, 'delay_sec')
+    })
 
-    assert.equal(trx.transaction.signatures.length, 1, 'signature count')
+    it('callback', async function() {
+      const trx = await eos.transaction(tr => {tr.transfer(...xfer)}, {delay_sec: 369})
+      assert.equal(trx.transaction.transaction.delay_sec, 369, 'delay_sec')
+    })
+
+    it('contract', async function() {
+      const trx = await eos.transaction('eosio.token',
+        eosio_token => { eosio_token.transfer(...xfer) },
+        {delay_sec: 369}
+      )
+      assert.equal(trx.transaction.transaction.delay_sec, 369, 'delay_sec')
+    })
+
   })
 
   it('load abi', async function() {

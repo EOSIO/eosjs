@@ -360,7 +360,7 @@ function WriteApi(Network, network, config, Transaction) {
     )
   }
 
-  function transaction(arg, options, callback) {
+  async function transaction(arg, options, callback) {
     const defaultExpiration = config.expireInSeconds ? config.expireInSeconds : 60
     const optionDefault = {expireInSeconds: defaultExpiration, broadcast: true, sign: true}
     options = Object.assign({}/*clone*/, optionDefault, options)
@@ -410,157 +410,182 @@ function WriteApi(Network, network, config, Transaction) {
       throw new TypeError('Expecting config.signProvider function (disable using {sign: false})')
     }
 
-    let argHeaders = null
-    if( // minimum required headers
-      arg.expiration != null &&
-      arg.ref_block_num != null &&
-      arg.ref_block_prefix != null
-    ) {
-      const {
-        expiration,
-        ref_block_num,
-        ref_block_prefix
-      } = arg
-      argHeaders = {
-        expiration,
-        ref_block_num,
-        ref_block_prefix
-      }
+    const rawTx = {
+      max_net_usage_words: 0,
+      max_cpu_usage_ms: 0,
+      delay_sec: 0,
+      context_free_actions: [],
+      actions: [],
+      signatures: [],
+      transaction_extensions: []
     }
 
-    let headers
-    if(argHeaders) {
-      headers = (expireInSeconds, callback) => callback(null, argHeaders)
-    } else if(config.transactionHeaders) {
+    // global transaction headers
+    if(config.transactionHeaders) {
       if(typeof config.transactionHeaders === 'object') {
-        headers = (exp, callback) => callback(null, config.transactionHeaders)
+        Object.assign(rawTx, config.transactionHeaders)
+      } else if(typeof config.transactionHeaders === 'function') {
+        await config.transactionHeaders(
+          options.expireInSeconds,
+          checkError(callback, config.logger, async function(headers) {
+            assert.equal(typeof headers, 'object', 'expecting transaction header object')
+            Object.assign(rawTx, headers)
+          })
+        )
       } else {
-        assert.equal(typeof config.transactionHeaders, 'function', 'config.transactionHeaders')
-        headers = config.transactionHeaders
+        assert(false, 'config.transactionHeaders should be an object or function')
       }
-    } else {
-      assert(network, 'Network is required, provide httpEndpoint or own transaction headers')
-      headers = network.createTransaction
     }
 
-    headers(options.expireInSeconds, checkError(callback, config.logger, async function(rawTx) {
-      // console.log('rawTx', rawTx)
-      assert.equal(typeof rawTx, 'object', 'expecting transaction header object')
-      assert.equal(typeof rawTx.expiration, 'string', 'expecting expiration: iso date time string')
-      assert.equal(typeof rawTx.ref_block_num, 'number', 'expecting ref_block_num number')
-      assert.equal(typeof rawTx.ref_block_prefix, 'number', 'expecting ref_block_prefix number')
 
-      const defaultHeaders = {
-        max_net_usage_words: 0,
-        max_cpu_usage_ms: 0,
-        delay_sec: 0
+    // per transaction headers
+    for(const txField of [
+      'expiration', 'ref_block_num', 'ref_block_prefix',
+      'delay_sec', 'max_net_usage_words', 'max_cpu_usage_ms'
+    ]) {
+      if(arg[txField] !== undefined) {
+        // eos.transaction('eosio', eosio => { eosio.myaction(..) }, {delay_sec: 369})
+        // eos.transaction({delay_sec: 369, actions: [...]})
+        rawTx[txField] = arg[txField]
+      } else if(options[txField] !== undefined) {
+        // eos.transaction(tr => {tr.transfer(...)}, {delay_sec: 369})
+        rawTx[txField] = options[txField]
       }
+    }
 
-      rawTx = Object.assign({}, defaultHeaders, rawTx)
-      rawTx.context_free_actions = arg.context_free_actions
-      rawTx.actions = arg.actions
-      rawTx.transaction_extensions = arg.transaction_extensions
-
-      // Resolve shorthand
-      const txObject = Transaction.fromObject(rawTx)
-
-      const buf = Fcbuffer.toBuffer(Transaction, txObject)
-      const tr = Transaction.toObject(txObject)
-
-      const transactionId  = createHash('sha256').update(buf).digest().toString('hex')
-
-      let sigs = []
-      if(options.sign){
-        const chainIdBuf = Buffer.from(config.chainId, 'hex')
-        const packedContextFreeData = Buffer.from(new Uint8Array(32)) // TODO
-        const signBuf = Buffer.concat([chainIdBuf, buf, packedContextFreeData])
-
-        sigs = config.signProvider({transaction: tr, buf: signBuf, sign,
-          optionsKeyProvider: options.keyProvider})
-
-        if(!Array.isArray(sigs)) {
-          sigs = [sigs]
-        }
-      }
-
-      // sigs can be strings or Promises
-      Promise.all(sigs).then(sigs => {
-        sigs = [].concat.apply([], sigs) // flatten arrays in array
-
-        for(let i = 0; i < sigs.length; i++) {
-          const sig = sigs[i]
-          // normalize (hex to base58 format for example)
-          if(typeof sig === 'string' && sig.length === 130) {
-            sigs[i] = ecc.Signature.from(sig).toString()
-          }
-        }
-
-        const packedTr = {
-          compression: 'none',
-          transaction: tr,
-          signatures: sigs
-        }
-
-        const mock = config.mockTransactions ? config.mockTransactions() : null
-        if(mock != null) {
-          assert(/pass|fail/.test(mock), 'mockTransactions should return a string: pass or fail')
-          if(mock === 'pass') {
-            callback(null, {
-              transaction_id: transactionId,
-              mockTransaction: true,
-              broadcast: false,
-              transaction: packedTr
-            })
-          }
-          if(mock === 'fail') {
-            const error = `[push_transaction mock error] 'fake error', digest '${buf.toString('hex')}'`
-
-            if(config.logger.error) {
-              config.logger.error(error)
+    // eosjs calcualted headers
+    if( // minimum required headers
+      rawTx.expiration === undefined ||
+      rawTx.ref_block_num === undefined ||
+      rawTx.ref_block_prefix === undefined
+    ) {
+      assert(network, 'Network is required, provide httpEndpoint or own transaction headers')
+      await new Promise(resolve => {
+        network.createTransaction(
+          options.expireInSeconds,
+          checkError(callback, config.logger, async function(headers) {
+            for(const txField of [ 'expiration', 'ref_block_num', 'ref_block_prefix']) {
+              // console.log(txField, headers[txField]);
+              if(rawTx[txField] === undefined) {
+                rawTx[txField] = headers[txField]
+              }
             }
+            resolve()
+          })
+        )
+      })
+    }
 
-            callback(error)
-          }
-          return
+    // console.log('rawTx', rawTx)
+
+    assert.equal(typeof rawTx.expiration, 'string', 'expecting expiration: iso date time string')
+    assert.equal(typeof rawTx.ref_block_num, 'number', 'expecting ref_block_num number')
+    assert.equal(typeof rawTx.ref_block_prefix, 'number', 'expecting ref_block_prefix number')
+
+    rawTx.context_free_actions = arg.context_free_actions
+    rawTx.actions = arg.actions
+    rawTx.transaction_extensions = arg.transaction_extensions
+
+    // Resolve shorthand
+    const txObject = Transaction.fromObject(rawTx)
+    // console.log('txObject', txObject)
+
+    const buf = Fcbuffer.toBuffer(Transaction, txObject)
+    const tr = Transaction.toObject(txObject)
+
+    const transactionId  = createHash('sha256').update(buf).digest().toString('hex')
+
+    let sigs = []
+    if(options.sign){
+      const chainIdBuf = Buffer.from(config.chainId, 'hex')
+      const packedContextFreeData = Buffer.from(new Uint8Array(32)) // TODO
+      const signBuf = Buffer.concat([chainIdBuf, buf, packedContextFreeData])
+
+      sigs = config.signProvider({transaction: tr, buf: signBuf, sign,
+        optionsKeyProvider: options.keyProvider})
+
+      if(!Array.isArray(sigs)) {
+        sigs = [sigs]
+      }
+    }
+
+    // sigs can be strings or Promises
+    Promise.all(sigs).then(sigs => {
+      sigs = [].concat.apply([], sigs) // flatten arrays in array
+
+      for(let i = 0; i < sigs.length; i++) {
+        const sig = sigs[i]
+        // normalize (hex to base58 format for example)
+        if(typeof sig === 'string' && sig.length === 130) {
+          sigs[i] = ecc.Signature.from(sig).toString()
         }
+      }
 
-        if(!options.broadcast || !network) {
+      const packedTr = {
+        compression: 'none',
+        transaction: tr,
+        signatures: sigs
+      }
+
+      const mock = config.mockTransactions ? config.mockTransactions() : null
+      if(mock != null) {
+        assert(/pass|fail/.test(mock), 'mockTransactions should return a string: pass or fail')
+        if(mock === 'pass') {
           callback(null, {
             transaction_id: transactionId,
+            mockTransaction: true,
             broadcast: false,
             transaction: packedTr
           })
-        } else {
-          network.pushTransaction(packedTr, (error, processedTransaction) => {
-            if(!error) {
-              callback(
-                null,
-                Object.assign(
-                  {
-                    broadcast: true,
-                    transaction: packedTr,
-                    transaction_id: transactionId
-                  },
-                  processedTransaction
-                )
+        }
+        if(mock === 'fail') {
+          const error = `[push_transaction mock error] 'fake error', digest '${buf.toString('hex')}'`
+
+          if(config.logger.error) {
+            config.logger.error(error)
+          }
+
+          callback(error)
+        }
+        return
+      }
+
+      if(!options.broadcast || !network) {
+        callback(null, {
+          transaction_id: transactionId,
+          broadcast: false,
+          transaction: packedTr
+        })
+      } else {
+        network.pushTransaction(packedTr, (error, processedTransaction) => {
+          if(!error) {
+            callback(
+              null,
+              Object.assign(
+                {
+                  broadcast: true,
+                  transaction: packedTr,
+                  transaction_id: transactionId
+                },
+                processedTransaction
               )
-            } else {
-              if(config.logger.error) {
-                config.logger.error(
-                  `[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`
-                )
-              }
-              callback(error.message)
+            )
+          } else {
+            if(config.logger.error) {
+              config.logger.error(
+                `[push_transaction error] '${error.message}', transaction '${buf.toString('hex')}'`
+              )
             }
-          })
-        }
-      }).catch(error => {
-        if(config.logger.error) {
-          config.logger.error(error)
-        }
-        callback(error)
-      })
-    }))
+            callback(error.message)
+          }
+        })
+      }
+    }).catch(error => {
+      if(config.logger.error) {
+        config.logger.error(error)
+      }
+      callback(error)
+    })
     return returnPromise
   }
 
