@@ -123,11 +123,7 @@ export class Api {
     this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
   }
 
-  /**
-   * Decodes an abi as Uint8Array into json.
-   * @param rawAbi Hex string version of an abi.
-   * @returns A deserialized json version of the abi.
-   */
+  /** Decodes an abi as Uint8Array into json. */
   public rawAbiToJson(rawAbi: Uint8Array): Abi {
     const buffer = new ser.SerialBuffer({
       textEncoder: this.textEncoder,
