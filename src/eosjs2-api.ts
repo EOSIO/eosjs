@@ -123,6 +123,17 @@ export class Api {
     this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
   }
 
+  /** Decodes an abi as Uint8Array into json. */
+  public rawAbiToJson(rawAbi: Uint8Array): Abi {
+    const buffer = new ser.SerialBuffer({
+      textEncoder: this.textEncoder,
+      textDecoder: this.textDecoder,
+      array: rawAbi,
+    });
+
+    return this.abiTypes.get("abi_def").deserialize(buffer);
+  }
+
   /** Get abi in both binary and structured forms. Fetch when needed. */
   public async getCachedAbi(accountName: string, reload = false): Promise<CachedAbi> {
     if (!reload && this.cachedAbis.get(accountName)) {
@@ -132,12 +143,7 @@ export class Api {
     try {
       // todo: use get_raw_abi when it becomes available
       const rawAbi = base64ToBinary((await this.rpc.get_raw_code_and_abi(accountName)).abi);
-      const buffer = new ser.SerialBuffer({
-        textEncoder: this.textEncoder,
-        textDecoder: this.textDecoder,
-        array: rawAbi,
-      });
-      const abi = this.abiTypes.get("abi_def").deserialize(buffer);
+      const abi = this.rawAbiToJson(rawAbi);
       cachedAbi = { rawAbi, abi };
     } catch (e) {
       e.message = `fetching abi for ${accountName}: ${e.message}`;
