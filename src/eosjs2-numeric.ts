@@ -210,8 +210,8 @@ export function base64ToBinary(s: string) {
 
 /** Key types this library supports */
 export const enum KeyType {
-  k1 = 0,
-  r1 = 1,
+    k1 = 0,
+    r1 = 1,
 }
 
 /** Public key data size, excluding type field */
@@ -245,7 +245,7 @@ function stringToKey(s: string, type: KeyType, size: number, suffix: string): Ke
     const result = { type, data: new Uint8Array(whole.buffer, 0, size) };
     const digest = new Uint8Array(digestSuffixRipemd160(result.data, suffix));
     if (digest[0] !== whole[size + 0] || digest[1] !== whole[size + 1]
-      || digest[2] !== whole[size + 2] || digest[3] !== whole[size + 3]) {
+        || digest[2] !== whole[size + 2] || digest[3] !== whole[size + 3]) {
         throw new Error("checksum doesn't match");
     }
     return result;
@@ -273,7 +273,7 @@ export function stringToPublicKey(s: string): Key {
         }
         const digest = new Uint8Array(ripemd160(key.data));
         if (digest[0] !== whole[publicKeyDataSize] || digest[1] !== whole[34]
-       || digest[2] !== whole[35] || digest[3] !== whole[36]) {
+            || digest[2] !== whole[35] || digest[3] !== whole[36]) {
             throw new Error("checksum doesn't match");
         }
         return key;

@@ -4,7 +4,7 @@ import JsSignatureProvider from "./eosjs2-jssig";
 
 describe("JsSignatureProvider", () => {
     const privateKeys = ["key1", "key2", "key3"];
-    const publicKeys =  [
+    const publicKeys = [
         "PUB_K1_8iD9ABKFH5b9JyFgb5PE51BdCV74qGN9UMfg9V3TwaExCQWxJm",
         "PUB_K1_8f2o2LLQ3phteqyazxirQZnQzQFpnjLnXiUFEJcsSYhnjWNvSX",
         "PUB_K1_5imfbmmHC83VRxLRTcvovviAc6LPpyszcDuKtkwka9e9Jg37Hp",
@@ -35,7 +35,7 @@ describe("JsSignatureProvider", () => {
         ]);
         const abis: any[] = [];
 
-        const signatures = await provider.sign({chainId, requiredKeys, serializedTransaction, abis});
+        const signatures = await provider.sign({ chainId, requiredKeys, serializedTransaction, abis });
 
         expect(eccSignatureSign).toHaveBeenCalledTimes(2);
         expect(signatures).toEqual([privateKeys[0], privateKeys[2]]);
