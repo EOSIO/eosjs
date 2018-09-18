@@ -15,6 +15,9 @@ Open `test.html` in your browser of choice
 
 `npm run build-web` or `yarn build-web`
 
+#### IE11 and Edge Support
+If you need to support IE11 or Edge you will also need to install a text-encoding polyfill as eosjs2 Signing is dependent on the TextEncoder which IE11 and Edge do not provide.  Pass the TextEncoder and TextDecoder to the API constructor as demonstrated in the [ES 2015 example](#node-es-2015).  Refer to the documentation here https://github.com/inexorabletash/text-encoding to determine the best way to include it in your project.
+
 Reuse the `api` object for all transactions; it caches ABIs to reduce network usage. Only call `new eosjs2.Api(...)` once.
 
 ```html
@@ -61,7 +64,7 @@ Reuse the `api` object for all transactions; it caches ABIs to reduce network us
 </script>
 ```
 
-## Node / ES2015 Usage Example
+## <a name="node-es-2015">Node / ES2015 Usage Example</a>
 
 Note: tested with Node v10.3.0. Older versions need older syntax.
 
@@ -72,7 +75,7 @@ Reuse the `api` object for all transactions; it caches ABIs to reduce network us
 ```javascript
 const eosjs2 = require('eosjs2');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
-const { TextDecoder, TextEncoder } = require('text-encoding');  // node only; not needed in browsers
+const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 and IE Edge Browsers
 
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
 const rpc = new eosjs2.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
