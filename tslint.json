@@ -11,7 +11,7 @@
     "interface-name": [true, "never-prefix"],
     "no-console": [true, "log"],
     "semicolon": [true, "always"],
-    "ter-indent": [true, 2]
+    "ter-indent": [true, 4]
   },
   "rulesDirectory": [],
   "linterOptions": {
