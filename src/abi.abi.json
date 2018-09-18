@@ -134,6 +134,20 @@
             ]
         },
         {
+            "name": "variant_def",
+            "base": "",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "types",
+                    "type": "string[]"
+                }
+            ]
+        },
+        {
             "name": "abi_def",
             "base": "",
             "fields": [
@@ -168,6 +182,10 @@
                 {
                     "name": "abi_extensions",
                     "type": "extensions_entry[]"
+                },
+                {
+                    "name": "variants",
+                    "type": "variant_def[]$"
                 }
             ]
         }
