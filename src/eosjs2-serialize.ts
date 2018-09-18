@@ -899,7 +899,7 @@ export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: numbe
 
 /** Convert action data to serialized form (hex) */
 export function serializeActionData(contract: Contract, account: string, name: string, data: any,
-    textEncoder: TextEncoder, textDecoder: TextDecoder): string {
+                                    textEncoder: TextEncoder, textDecoder: TextDecoder): string {
     const action = contract.actions.get(name);
     if (!action) {
         throw new Error(`Unknown action ${name} in contract ${account}`);
@@ -911,8 +911,8 @@ export function serializeActionData(contract: Contract, account: string, name: s
 
 /** Return action in serialized form */
 export function serializeAction(contract: Contract, account: string, name: string,
-    authorization: Authorization[], data: any, textEncoder: TextEncoder,
-    textDecoder: TextDecoder): SerializedAction {
+                                authorization: Authorization[], data: any, textEncoder: TextEncoder,
+                                textDecoder: TextDecoder): SerializedAction {
     return {
         account,
         name,
@@ -923,8 +923,8 @@ export function serializeAction(contract: Contract, account: string, name: strin
 
 /** Deserialize action data. If `data` is a `string`, then it's assumed to be in hex. */
 export function deserializeActionData(contract: Contract, account: string, name: string,
-    data: string | Uint8Array | number[], textEncoder: TextEncoder,
-    textDecoder: TextDecoder): any {
+                                      data: string | Uint8Array | number[], textEncoder: TextEncoder,
+                                      textDecoder: TextDecoder): any {
     const action = contract.actions.get(name);
     if (typeof data === "string") {
         data = hexToUint8Array(data);
@@ -939,8 +939,8 @@ export function deserializeActionData(contract: Contract, account: string, name:
 
 /** Deserialize action. If `data` is a `string`, then it's assumed to be in hex. */
 export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[],
-    data: string | Uint8Array | number[], textEncoder: TextEncoder,
-    textDecoder: TextDecoder): Action {
+                                  data: string | Uint8Array | number[], textEncoder: TextEncoder,
+                                  textDecoder: TextDecoder): Action {
     return {
         account,
         name,
