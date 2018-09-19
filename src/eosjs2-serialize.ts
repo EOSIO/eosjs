@@ -376,6 +376,9 @@ export class SerialBuffer {
 
     /** Append a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision. */
     public pushSymbolCode(name: string) {
+        if (typeof name !== "string") {
+            throw new Error("Expected string containing symbol_code");
+        }
         const a = [];
         a.push(...this.textEncoder.encode(name));
         while (a.length < 8) {
@@ -423,6 +426,9 @@ export class SerialBuffer {
 
     /** Append an asset */
     public pushAsset(s: string) {
+        if (typeof s !== "string") {
+            throw new Error("Expected string containing asset");
+        }
         s = s.trim();
         let pos = 0;
         let amount = "";
@@ -555,6 +561,9 @@ export function blockTimestampToDate(slot: number) {
 
 /** Convert `string` to `Symbol`. format: `precision,NAME`. */
 export function stringToSymbol(s: string): { name: string, precision: number } {
+    if (typeof s !== "string") {
+        throw new Error("Expected string containing symbol");
+    }
     const m = s.match(/^([0-9]+),([A-Z]+)$/);
     if (!m) {
         throw new Error("Invalid symbol");
@@ -738,37 +747,52 @@ function createType(attrs: CreateTypeArgs): Type {
     };
 }
 
+function checkRange(orig: number, converted: number) {
+    if (Number.isNaN(+orig) || Number.isNaN(+converted) || (typeof orig !== "number" && typeof orig !== "string")) {
+        throw new Error("Expected number");
+    }
+    if (+orig !== +converted) {
+        throw new Error("Number is out of range");
+    }
+    return +orig;
+}
+
 /** Create the set of types built-in to the abi format */
 export function createInitialTypes(): Map<string, Type> {
     const result: Map<string, Type> = new Map(Object.entries({
         bool: createType({
             name: "bool",
-            serialize(buffer: SerialBuffer, data: boolean) { buffer.push(data ? 1 : 0); },
+            serialize(buffer: SerialBuffer, data: boolean) {
+                if (typeof data !== "boolean") {
+                    throw new Error("Expected true or false");
+                }
+                buffer.push(data ? 1 : 0);
+            },
             deserialize(buffer: SerialBuffer) { return !!buffer.get(); },
         }),
         uint8: createType({
             name: "uint8",
-            serialize(buffer: SerialBuffer, data: number) { buffer.push(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.push(checkRange(data, data & 0xff)); },
             deserialize(buffer: SerialBuffer) { return buffer.get(); },
         }),
         int8: createType({
             name: "int8",
-            serialize(buffer: SerialBuffer, data: number) { buffer.push(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.push(checkRange(data, data << 24 >> 24)); },
             deserialize(buffer: SerialBuffer) { return buffer.get() << 24 >> 24; },
         }),
         uint16: createType({
             name: "uint16",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(checkRange(data, data & 0xffff)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint16(); },
         }),
         int16: createType({
             name: "int16",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(checkRange(data, data << 16 >> 16)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint16() << 16 >> 16; },
         }),
         uint32: createType({
             name: "uint32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(checkRange(data, data >>> 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint32(); },
         }),
         uint64: createType({
@@ -787,17 +811,17 @@ export function createInitialTypes(): Map<string, Type> {
         }),
         int32: createType({
             name: "int32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(checkRange(data, data | 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint32() | 0; },
         }),
         varuint32: createType({
             name: "varuint32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushVaruint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushVaruint32(checkRange(data, data >>> 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getVaruint32(); },
         }),
         varint32: createType({
             name: "varint32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushVarint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushVarint32(checkRange(data, data | 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getVarint32(); },
         }),
         uint128: createType({

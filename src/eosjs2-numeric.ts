@@ -270,6 +270,9 @@ function keyToString(key: Key, suffix: string, prefix: string) {
 
 /** Convert key in `s` to binary form */
 export function stringToPublicKey(s: string): Key {
+    if (typeof s !== "string") {
+        throw new Error("expected string containing public key");
+    }
     if (s.substr(0, 3) === "EOS") {
         const whole = base58ToBinary(publicKeyDataSize + 4, s.substr(3));
         const key = { type: KeyType.k1, data: new Uint8Array(publicKeyDataSize) };
@@ -321,6 +324,9 @@ export function convertLegacyPublicKeys(keys: string[]) {
 
 /** Convert key in `s` to binary form */
 export function stringToPrivateKey(s: string): Key {
+    if (typeof s !== "string") {
+        throw new Error("expected string containing private key");
+    }
     if (s.substr(0, 7) === "PVT_R1_") {
         return stringToKey(s.substr(7), KeyType.r1, privateKeyDataSize, "R1");
     } else {
@@ -339,6 +345,9 @@ export function privateKeyToString(key: Key) {
 
 /** Convert key in `s` to binary form */
 export function stringToSignature(s: string): Key {
+    if (typeof s !== "string") {
+        throw new Error("expected string containing signature");
+    }
     if (s.substr(0, 7) === "SIG_K1_") {
         return stringToKey(s.substr(7), KeyType.k1, signatureDataSize, "K1");
     } else if (s.substr(0, 7) === "SIG_R1_") {
