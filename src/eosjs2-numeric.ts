@@ -80,6 +80,11 @@ export function signedDecimalToBinary(size: number, s: string) {
     const result = decimalToBinary(size, s);
     if (negative) {
         negate(result);
+        if (!isNegative(result)) {
+            throw new Error("number is out of range");
+        }
+    } else if (isNegative(result)) {
+        throw new Error("number is out of range");
     }
     return result;
 }

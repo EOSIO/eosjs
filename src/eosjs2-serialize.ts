@@ -138,6 +138,11 @@ export class SerialBuffer {
         return this.readPos < this.length;
     }
 
+    /** Restart reading from the beginning */
+    public restartRead() {
+        this.readPos = 0;
+    }
+
     /** Return data with excess storage trimmed away */
     public asUint8Array() {
         return new Uint8Array(this.array.buffer, 0, this.length);
@@ -290,6 +295,9 @@ export class SerialBuffer {
 
     /** Append a `name` */
     public pushName(s: string) {
+        if (typeof s !== "string") {
+            throw new Error("Expected string containing name");
+        }
         function charToSymbol(c: number) {
             if (c >= "a".charCodeAt(0) && c <= "z".charCodeAt(0)) {
                 return (c - "a".charCodeAt(0)) + 6;
@@ -499,9 +507,22 @@ export class SerialBuffer {
     }
 } // SerialBuffer
 
+/** Is this a supported ABI version? */
+export function supportedAbiVersion(version: string) {
+    return version.startsWith("eosio::abi/1.");
+}
+
+function checkDateParse(date: string) {
+    const result = Date.parse(date);
+    if (Number.isNaN(result)) {
+        throw new Error("Invalid time format");
+    }
+    return result;
+}
+
 /** Convert date in ISO format to `time_point` (miliseconds since epoch) */
 export function dateToTimePoint(date: string) {
-    return Math.round(Date.parse(date + "Z") * 1000);
+    return Math.round(checkDateParse(date + "Z") * 1000);
 }
 
 /** Convert `time_point` (miliseconds since epoch) to date in ISO format */
@@ -512,7 +533,7 @@ export function timePointToDate(us: number) {
 
 /** Convert date in ISO format to `time_point_sec` (seconds since epoch) */
 export function dateToTimePointSec(date: string) {
-    return Math.round(Date.parse(date + "Z") / 1000);
+    return Math.round(checkDateParse(date + "Z") / 1000);
 }
 
 /** Convert `time_point_sec` (seconds since epoch) to to date in ISO format */
@@ -523,7 +544,7 @@ export function timePointSecToDate(sec: number) {
 
 /** Convert date in ISO format to `block_timestamp_type` (half-seconds since a different epoch) */
 export function dateToBlockTimestamp(date: string) {
-    return Math.round((Date.parse(date + "Z") - 946684800000) / 500);
+    return Math.round((checkDateParse(date + "Z") - 946684800000) / 500);
 }
 
 /** Convert `block_timestamp_type` (half-seconds since a different epoch) to to date in ISO format */
@@ -557,10 +578,20 @@ export function arrayToHex(data: Uint8Array) {
 
 /** Convert hex to binary data */
 export function hexToUint8Array(hex: string) {
+    if (typeof hex !== "string") {
+        throw new Error("Expected string containing hex digits");
+    }
+    if (hex.length % 2) {
+        throw new Error("Odd number of hex digits");
+    }
     const l = hex.length / 2;
     const result = new Uint8Array(l);
     for (let i = 0; i < l; ++i) {
-        result[i] = parseInt(hex.substr(i * 2, 2), 16);
+        const x = parseInt(hex.substr(i * 2, 2), 16);
+        if (Number.isNaN(x)) {
+            throw new Error("Expected hex string");
+        }
+        result[i] = x;
     }
     return result;
 }
@@ -771,13 +802,13 @@ export function createInitialTypes(): Map<string, Type> {
         }),
         uint128: createType({
             name: "uint128",
-            serialize(buffer: SerialBuffer, data: string) { buffer.pushArray(numeric.decimalToBinary(16, data)); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushArray(numeric.decimalToBinary(16, "" + data)); },
             deserialize(buffer: SerialBuffer) { return numeric.binaryToDecimal(buffer.getUint8Array(16)); },
         }),
         int128: createType({
             name: "int128",
             serialize(buffer: SerialBuffer, data: string) {
-                buffer.pushArray(numeric.signedDecimalToBinary(16, data));
+                buffer.pushArray(numeric.signedDecimalToBinary(16, "" + data));
             },
             deserialize(buffer: SerialBuffer) { return numeric.signedBinaryToDecimal(buffer.getUint8Array(16)); },
         }),
