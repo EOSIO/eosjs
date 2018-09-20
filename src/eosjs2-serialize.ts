@@ -17,6 +17,12 @@ export interface Field {
     type: Type;
 }
 
+/** State for serialize() and deserialize() */
+export class SerializerState {
+    /** Have any binary extensions been skipped? */
+    public skippedBinaryExtension = false;
+}
+
 /** A type in an abi */
 export interface Type {
     /** Type name */
@@ -31,6 +37,9 @@ export interface Type {
     /** Type this is an optional of, if any */
     optionalOf: Type;
 
+    /** Marks binary extension fields */
+    extensionOf?: Type;
+
     /** Base name of this type, if this is a struct */
     baseName: string;
 
@@ -41,10 +50,10 @@ export interface Type {
     fields: Field[];
 
     /** Convert `data` to binary form and store in `buffer` */
-    serialize: (buffer: SerialBuffer, data: any) => void;
+    serialize: (buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean) => void;
 
     /** Convert data in `buffer` from binary form */
-    deserialize: (buffer: SerialBuffer) => any;
+    deserialize: (buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) => any;
 }
 
 /** Structural representation of a symbol */
@@ -122,6 +131,16 @@ export class SerialBuffer {
         const newArray = new Uint8Array(l);
         newArray.set(this.array);
         this.array = newArray;
+    }
+
+    /** Is there data available to read? */
+    public haveReadData() {
+        return this.readPos < this.length;
+    }
+
+    /** Restart reading from the beginning */
+    public restartRead() {
+        this.readPos = 0;
     }
 
     /** Return data with excess storage trimmed away */
@@ -276,6 +295,9 @@ export class SerialBuffer {
 
     /** Append a `name` */
     public pushName(s: string) {
+        if (typeof s !== "string") {
+            throw new Error("Expected string containing name");
+        }
         function charToSymbol(c: number) {
             if (c >= "a".charCodeAt(0) && c <= "z".charCodeAt(0)) {
                 return (c - "a".charCodeAt(0)) + 6;
@@ -354,6 +376,9 @@ export class SerialBuffer {
 
     /** Append a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision. */
     public pushSymbolCode(name: string) {
+        if (typeof name !== "string") {
+            throw new Error("Expected string containing symbol_code");
+        }
         const a = [];
         a.push(...this.textEncoder.encode(name));
         while (a.length < 8) {
@@ -401,6 +426,9 @@ export class SerialBuffer {
 
     /** Append an asset */
     public pushAsset(s: string) {
+        if (typeof s !== "string") {
+            throw new Error("Expected string containing asset");
+        }
         s = s.trim();
         let pos = 0;
         let amount = "";
@@ -485,9 +513,22 @@ export class SerialBuffer {
     }
 } // SerialBuffer
 
+/** Is this a supported ABI version? */
+export function supportedAbiVersion(version: string) {
+    return version.startsWith("eosio::abi/1.");
+}
+
+function checkDateParse(date: string) {
+    const result = Date.parse(date);
+    if (Number.isNaN(result)) {
+        throw new Error("Invalid time format");
+    }
+    return result;
+}
+
 /** Convert date in ISO format to `time_point` (miliseconds since epoch) */
 export function dateToTimePoint(date: string) {
-    return Math.round(Date.parse(date + "Z") * 1000);
+    return Math.round(checkDateParse(date + "Z") * 1000);
 }
 
 /** Convert `time_point` (miliseconds since epoch) to date in ISO format */
@@ -498,7 +539,7 @@ export function timePointToDate(us: number) {
 
 /** Convert date in ISO format to `time_point_sec` (seconds since epoch) */
 export function dateToTimePointSec(date: string) {
-    return Math.round(Date.parse(date + "Z") / 1000);
+    return Math.round(checkDateParse(date + "Z") / 1000);
 }
 
 /** Convert `time_point_sec` (seconds since epoch) to to date in ISO format */
@@ -509,7 +550,7 @@ export function timePointSecToDate(sec: number) {
 
 /** Convert date in ISO format to `block_timestamp_type` (half-seconds since a different epoch) */
 export function dateToBlockTimestamp(date: string) {
-    return Math.round((Date.parse(date + "Z") - 946684800000) / 500);
+    return Math.round((checkDateParse(date + "Z") - 946684800000) / 500);
 }
 
 /** Convert `block_timestamp_type` (half-seconds since a different epoch) to to date in ISO format */
@@ -520,6 +561,9 @@ export function blockTimestampToDate(slot: number) {
 
 /** Convert `string` to `Symbol`. format: `precision,NAME`. */
 export function stringToSymbol(s: string): { name: string, precision: number } {
+    if (typeof s !== "string") {
+        throw new Error("Expected string containing symbol");
+    }
     const m = s.match(/^([0-9]+),([A-Z]+)$/);
     if (!m) {
         throw new Error("Invalid symbol");
@@ -543,10 +587,20 @@ export function arrayToHex(data: Uint8Array) {
 
 /** Convert hex to binary data */
 export function hexToUint8Array(hex: string) {
+    if (typeof hex !== "string") {
+        throw new Error("Expected string containing hex digits");
+    }
+    if (hex.length % 2) {
+        throw new Error("Odd number of hex digits");
+    }
     const l = hex.length / 2;
     const result = new Uint8Array(l);
     for (let i = 0; i < l; ++i) {
-        result[i] = parseInt(hex.substr(i * 2, 2), 16);
+        const x = parseInt(hex.substr(i * 2, 2), 16);
+        if (Number.isNaN(x)) {
+            throw new Error("Expected hex string");
+        }
+        result[i] = x;
     }
     return result;
 }
@@ -559,62 +613,109 @@ function deserializeUnknown(buffer: SerialBuffer): SerialBuffer {
     throw new Error("Don't know how to deserialize " + this.name);
 }
 
-function serializeStruct(buffer: SerialBuffer, data: any) {
+function serializeStruct(this: Type, buffer: SerialBuffer, data: any,
+                         state = new SerializerState(), allowExtensions = true) {
     if (this.base) {
-        this.base.serialize(buffer, data);
+        this.base.serialize(buffer, data, state, allowExtensions);
     }
     for (const field of this.fields) {
-        if (!(field.name in data)) {
-            throw new Error("missing " + this.name + "." + field.name + " (type=" + field.type.name + ")");
+        if (field.name in data) {
+            if (state.skippedBinaryExtension) {
+                throw new Error("unexpected " + this.name + "." + field.name);
+            }
+            field.type.serialize(
+                buffer, data[field.name], state, allowExtensions && field === this.fields[this.fields.length - 1]);
+        } else {
+            if (allowExtensions && field.type.extensionOf) {
+                state.skippedBinaryExtension = true;
+            } else {
+                throw new Error("missing " + this.name + "." + field.name + " (type=" + field.type.name + ")");
+            }
         }
-        field.type.serialize(buffer, data[field.name]);
     }
 }
 
-function deserializeStruct(buffer: SerialBuffer) {
+function deserializeStruct(this: Type, buffer: SerialBuffer, state = new SerializerState(), allowExtensions = true) {
     let result;
     if (this.base) {
-        result = this.base.deserialize(buffer);
+        result = this.base.deserialize(buffer, state, allowExtensions);
     } else {
         result = {};
     }
     for (const field of this.fields) {
-        result[field.name] = field.type.deserialize(buffer);
+        if (allowExtensions && field.type.extensionOf && !buffer.haveReadData()) {
+            state.skippedBinaryExtension = true;
+        } else {
+            result[field.name] = field.type.deserialize(buffer, state, allowExtensions);
+        }
     }
     return result;
 }
 
-function serializeArray(buffer: SerialBuffer, data: any[]) {
+function serializeVariant(this: Type, buffer: SerialBuffer, data: any,
+                          state?: SerializerState, allowExtensions?: boolean) {
+    if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== "string") {
+        throw new Error('expected variant: ["type", value]');
+    }
+    const i = this.fields.findIndex((field: Field) => field.name === data[0]);
+    if (i < 0) {
+        throw new Error(`type "${data[0]}" is not valid for variant`);
+    }
+    buffer.pushVaruint32(i);
+    this.fields[i].type.serialize(buffer, data[1], state, allowExtensions);
+}
+
+function deserializeVariant(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+    const i = buffer.getVaruint32();
+    if (i >= this.fields.length) {
+        throw new Error(`type index ${i} is not valid for variant`);
+    }
+    const field = this.fields[i];
+    return [field.name, field.type.deserialize(buffer, state, allowExtensions)];
+}
+
+function serializeArray(this: Type, buffer: SerialBuffer, data: any[],
+                        state?: SerializerState, allowExtensions?: boolean) {
     buffer.pushVaruint32(data.length);
     for (const item of data) {
-        this.arrayOf.serialize(buffer, item);
+        this.arrayOf.serialize(buffer, item, state, false);
     }
 }
 
-function deserializeArray(buffer: SerialBuffer) {
+function deserializeArray(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
     const len = buffer.getVaruint32();
     const result = [];
     for (let i = 0; i < len; ++i) {
-        result.push(this.arrayOf.deserialize(buffer));
+        result.push(this.arrayOf.deserialize(buffer, state, false));
     }
     return result;
 }
 
-function serializeOptional(buffer: SerialBuffer, data: any) {
+function serializeOptional(this: Type, buffer: SerialBuffer, data: any,
+                           state?: SerializerState, allowExtensions?: boolean) {
     if (data === null || data === undefined) {
         buffer.push(0);
     } else {
         buffer.push(1);
-        this.optionalOf.serialize(buffer, data);
+        this.optionalOf.serialize(buffer, data, state, allowExtensions);
     }
 }
 
-function deserializeOptional(buffer: SerialBuffer) {
+function deserializeOptional(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
     if (buffer.get()) {
-        return this.optionalOf.deserialize(buffer);
+        return this.optionalOf.deserialize(buffer, state, allowExtensions);
     } else {
         return null;
     }
+}
+
+function serializeExtension(this: Type, buffer: SerialBuffer, data: any,
+                            state?: SerializerState, allowExtensions?: boolean) {
+    this.extensionOf.serialize(buffer, data, state, allowExtensions);
+}
+
+function deserializeExtension(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+    return this.extensionOf.deserialize(buffer, state, allowExtensions);
 }
 
 interface CreateTypeArgs {
@@ -622,11 +723,12 @@ interface CreateTypeArgs {
     aliasOfName?: string;
     arrayOf?: Type;
     optionalOf?: Type;
+    extensionOf?: Type;
     baseName?: string;
     base?: Type;
     fields?: Field[];
-    serialize?: (buffer: SerialBuffer, data: any) => void;
-    deserialize?: (buffer: SerialBuffer) => any;
+    serialize?: (buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean) => void;
+    deserialize?: (buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) => any;
 }
 
 function createType(attrs: CreateTypeArgs): Type {
@@ -635,6 +737,7 @@ function createType(attrs: CreateTypeArgs): Type {
         aliasOfName: "",
         arrayOf: null,
         optionalOf: null,
+        extensionOf: null,
         baseName: "",
         base: null,
         fields: [],
@@ -644,37 +747,52 @@ function createType(attrs: CreateTypeArgs): Type {
     };
 }
 
+function checkRange(orig: number, converted: number) {
+    if (Number.isNaN(+orig) || Number.isNaN(+converted) || (typeof orig !== "number" && typeof orig !== "string")) {
+        throw new Error("Expected number");
+    }
+    if (+orig !== +converted) {
+        throw new Error("Number is out of range");
+    }
+    return +orig;
+}
+
 /** Create the set of types built-in to the abi format */
 export function createInitialTypes(): Map<string, Type> {
     const result: Map<string, Type> = new Map(Object.entries({
         bool: createType({
             name: "bool",
-            serialize(buffer: SerialBuffer, data: boolean) { buffer.push(data ? 1 : 0); },
+            serialize(buffer: SerialBuffer, data: boolean) {
+                if (typeof data !== "boolean") {
+                    throw new Error("Expected true or false");
+                }
+                buffer.push(data ? 1 : 0);
+            },
             deserialize(buffer: SerialBuffer) { return !!buffer.get(); },
         }),
         uint8: createType({
             name: "uint8",
-            serialize(buffer: SerialBuffer, data: number) { buffer.push(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.push(checkRange(data, data & 0xff)); },
             deserialize(buffer: SerialBuffer) { return buffer.get(); },
         }),
         int8: createType({
             name: "int8",
-            serialize(buffer: SerialBuffer, data: number) { buffer.push(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.push(checkRange(data, data << 24 >> 24)); },
             deserialize(buffer: SerialBuffer) { return buffer.get() << 24 >> 24; },
         }),
         uint16: createType({
             name: "uint16",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(checkRange(data, data & 0xffff)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint16(); },
         }),
         int16: createType({
             name: "int16",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint16(checkRange(data, data << 16 >> 16)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint16() << 16 >> 16; },
         }),
         uint32: createType({
             name: "uint32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(checkRange(data, data >>> 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint32(); },
         }),
         uint64: createType({
@@ -693,28 +811,28 @@ export function createInitialTypes(): Map<string, Type> {
         }),
         int32: createType({
             name: "int32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushUint32(checkRange(data, data | 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getUint32() | 0; },
         }),
         varuint32: createType({
             name: "varuint32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushVaruint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushVaruint32(checkRange(data, data >>> 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getVaruint32(); },
         }),
         varint32: createType({
             name: "varint32",
-            serialize(buffer: SerialBuffer, data: number) { buffer.pushVarint32(data); },
+            serialize(buffer: SerialBuffer, data: number) { buffer.pushVarint32(checkRange(data, data | 0)); },
             deserialize(buffer: SerialBuffer) { return buffer.getVarint32(); },
         }),
         uint128: createType({
             name: "uint128",
-            serialize(buffer: SerialBuffer, data: string) { buffer.pushArray(numeric.decimalToBinary(16, data)); },
+            serialize(buffer: SerialBuffer, data: string) { buffer.pushArray(numeric.decimalToBinary(16, "" + data)); },
             deserialize(buffer: SerialBuffer) { return numeric.binaryToDecimal(buffer.getUint8Array(16)); },
         }),
         int128: createType({
             name: "int128",
             serialize(buffer: SerialBuffer, data: string) {
-                buffer.pushArray(numeric.signedDecimalToBinary(16, data));
+                buffer.pushArray(numeric.signedDecimalToBinary(16, "" + data));
             },
             deserialize(buffer: SerialBuffer) { return numeric.signedBinaryToDecimal(buffer.getUint8Array(16)); },
         }),
@@ -850,6 +968,14 @@ export function getType(types: Map<string, Type>, name: string): Type {
             deserialize: deserializeOptional,
         });
     }
+    if (name.endsWith("$")) {
+        return createType({
+            name,
+            extensionOf: getType(types, name.substr(0, name.length - 1)),
+            serialize: serializeExtension,
+            deserialize: deserializeExtension,
+        });
+    }
     throw new Error("Unknown type: " + name);
 }
 
@@ -874,6 +1000,16 @@ export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
                 fields: fields.map(({ name: n, type }) => ({ name: n, typeName: type, type: null })),
                 serialize: serializeStruct,
                 deserialize: deserializeStruct,
+            }));
+        }
+    }
+    if (abi.variants) {
+        for (const { name, types: t } of abi.variants) {
+            types.set(name, createType({
+                name,
+                fields: t.map((s) => ({ name: s, typeName: s, type: null })),
+                serialize: serializeVariant,
+                deserialize: deserializeVariant,
             }));
         }
     }

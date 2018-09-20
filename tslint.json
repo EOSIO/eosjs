@@ -6,6 +6,7 @@
   ],
   "jsRules": {},
   "rules": {
+    "max-classes-per-file": false,
     "object-literal-sort-keys": false,
     "no-bitwise": false,
     "interface-name": [true, "never-prefix"],
