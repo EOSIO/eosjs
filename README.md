@@ -1,3 +1,9 @@
+**A major update to the EOSJS library will be released on the 2nd of October that is not backwards compatible.** 
+
+**We will not be releasing details on the update until then, but we would like to remind you it is very important that if you’re using EOSJS for any of your projects, make sure that you have version locking in you package.json locked down to v16.0.8 like this:** 
+
+**"eosjs": “^16.0.8” to make sure that your application doesn’t break.**
+
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)
 [![NPM](https://img.shields.io/npm/v/eosjs.svg)](https://www.npmjs.org/package/eosjs)
 
