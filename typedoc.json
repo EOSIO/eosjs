@@ -1,0 +1,19 @@
+{
+  "name": "eosjs2",
+  "target": "es5",
+  "module": ["es2017","dom"],
+  "ignoreCompilerErrors": true,
+  "includeDeclarations": false,
+  "excludeProtected": true,
+  "excludePrivate": true,
+  "mode": "modules",
+  "out": "docs-build",
+  "theme": "markdown",
+  "mdEngine": "gitbook",
+  "stripExternal": false,
+  "exclude": ["**/index*","**/*.test.ts"],
+  "readme": "README.md",
+  "hideGenerator": "true",
+  "verbose": true,
+  "mdSourceRepo": "https://www.github.com/EOSIO/eosjs2"
+}

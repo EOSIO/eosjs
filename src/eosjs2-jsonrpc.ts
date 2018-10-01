@@ -1,3 +1,7 @@
+/**
+ * @module JSON-RPC
+ */
+
 // copyright defined in eosjs2/LICENSE.txt
 
 import { AuthorityProvider, AuthorityProviderArgs } from "./eosjs2-api";
