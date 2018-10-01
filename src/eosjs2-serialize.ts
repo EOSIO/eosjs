@@ -1,3 +1,7 @@
+/**
+ * @module Serialize
+ */
+
 // copyright defined in eosjs2/LICENSE.txt
 
 "use strict";
