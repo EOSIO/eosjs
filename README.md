@@ -2,7 +2,7 @@
 
 ## eosjs2
 
-Library for talking to an EOSIO RPC API. `transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of broadcast: true, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
+Library for talking to an EOSIO RPC API. `transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
 
 ## Running Tests
 
@@ -41,8 +41,7 @@ const api = new eosjs2.Api({ rpc, signatureProvider, textDecoder: new TextDecode
 
 ### Sending a transaction
 ```js
-wait api.transact({
-  (async () => {
+(async () => {
   const result = await api.transact({
     actions: [{
       account: 'eosio.token',
@@ -79,7 +78,6 @@ try {
 ```
 
 ## Browsers
-Browser distribution is located in 'dist', see a [usage example](static/3.-Internet-Explorer-and-Edge.md)
+Browser distribution is located in `dist`
 
-
-Permalink for eosjs2 documentation is [http://eosio.github.io/eosjs2](http://eosio.github.io/eosjs2)
+Permalink for eosjs2 documentation is [http://eosio.github.io/eosjs](http://eosio.github.io/eosjs)
