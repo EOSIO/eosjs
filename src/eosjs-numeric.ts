@@ -1,7 +1,7 @@
 /**
  * @module Numeric
  */
-// copyright defined in eosjs2/LICENSE.txt
+// copyright defined in eosjs/LICENSE.txt
 
 "use strict";
 
