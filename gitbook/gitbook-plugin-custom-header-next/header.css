@@ -1,0 +1,199 @@
+.book.with-header .book-summary,.book.with-header .book-body {
+    top: 62px;
+}
+
+header#small {
+    display: none;
+}
+
+header#main .inner {
+    padding: 0 40px;
+    position: relative;
+    height: 60px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(150,150,150,.3);
+}
+
+header#main .inner a {
+    color: #353535;
+    cursor: pointer;
+}
+
+header#main .inner a:hover {
+    text-decoration: none;
+}
+
+header#main .inner header#mainer_ctrls {
+    display: inline-block;
+    position: absolute;
+    right: 40px;
+    font-size: 16px;
+}
+
+header#main .inner .top_nav {
+    display: inline-block;
+    margin: 0;
+}
+
+header#main .inner .top_nav .top_nav_item {
+    display: inline-block;
+    box-sizing: border-box;
+    height: 60px;
+}
+
+header#main .inner .top_nav .top_nav_item.selected {
+    border-bottom: 4px solid #0bb1ea;
+}
+
+header#main .inner .top_nav .top_nav_item.selected:hover {
+    border-bottom: 4px solid #0bb1ea;
+}
+
+header#main .inner .top_nav .top_nav_item:hover {
+    border-bottom: 4px solid #eaeaea;
+}
+
+header#main .inner .top_nav a {
+    height: 60px;
+    line-height: 60px;
+    padding: 0 15px;
+}
+
+header#main .inner .top_notice_box {
+    display: inline-block;
+    padding: 0 30px;
+}
+
+header#main .inner .top_user_box {
+    display: inline-block;
+}
+
+header#main {
+    position: relative;
+    z-index: 10;
+}
+
+.logo {
+    /* float: left; */
+    height: 100%;
+    font-size: 24px;
+}
+
+.logo a {
+    display: inline-block;
+    overflow: hidden;
+    text-decoration: none;
+    line-height: 999em;
+}
+
+.logo a img {
+    display: block;
+}
+
+header#main .inner {
+    padding: 0 15px;
+    position: relative;
+    height: 60px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(150,150,150,.3);
+}
+
+header#main .inner a {
+    color: #353535;
+    cursor: pointer;
+}
+
+header#main .inner a:hover {
+    text-decoration: none;
+}
+
+header#main .inner header#mainer_main {
+    display: inline-block;
+}
+
+header#main .inner header#mainer_sub_title,header#main .inner header#mainer_title {
+    display: inline-block;
+    color: #353535;
+    font-size: 18px;
+    font-weight: 400;
+    height: 60px;
+    line-height: 60px
+}
+
+header#main .inner header#mainer_logo {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    vertical-align: middle;
+    margin-right: 10px;
+    background-size: cover;
+}
+
+header#main .inner header#mainer_title:after {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 14px;
+    border-right: 1px solid #353535
+}
+
+header#main .inner header#mainer_sub_title {
+    padding: 0 20px;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
+    .logo a {
+        background-size: 250px auto;
+    }
+}
+
+@media (max-width: 1024px) {
+    .book.with-header .book-summary,.book.with-header .book-body {
+        top: 45px;
+    }
+
+    header#main {
+        display:none;
+    }
+
+    header#small {
+        position: relative;
+        display: block;
+        width: 100%;
+        z-index: 10;
+        height: 45px;
+    }
+
+    header#small .swiper-container {
+        height: 40px;
+        line-height: 40px;
+        font-family: "黑体",sans-serif;
+    }
+
+    header#small .swiper-container .swiper-slide {
+        text-align: center;
+        background: #fff;
+
+        /* Center slide text vertically */
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+    }
+
+    header#small .swiper-container .swiper-slide a {
+        color: black;
+    }
+
+    header#small .swiper-container .swiper-slide.selected a {
+        color: red;
+    }
+}
