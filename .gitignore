@@ -1,5 +1,5 @@
+.DS_Store
 dist/
 dist-web/
-node_modules
-package-lock.json
-.DS_Store
+node_modules/
+docs-build/
