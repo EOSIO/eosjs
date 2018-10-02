@@ -1,14 +1,14 @@
 <pre style="width: 100%; height: 100%; margin:0px; "></pre>
 
-<script src='dist-web/eosjs2-debug.js'></script>
-<script src='dist-web/eosjs2-jsonrpc-debug.js'></script>
-<script src='dist-web/eosjs2-jssig-debug.js'></script>
+<script src='dist-web/eosjs-debug.js'></script>
+<script src='dist-web/eosjs-jsonrpc-debug.js'></script>
+<script src='dist-web/eosjs-jssig-debug.js'></script>
 <script>
   let pre = document.getElementsByTagName('pre')[0];
   const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
-  const rpc = new eosjs2_jsonrpc.JsonRpc('http://localhost:8000');
-  const signatureProvider = new eosjs2_jssig.default([defaultPrivateKey]);
-  const api = new eosjs2.Api({ rpc, signatureProvider });
+  const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8000');
+  const signatureProvider = new eosjs_jssig.default([defaultPrivateKey]);
+  const api = new eosjs.Api({ rpc, signatureProvider });
 
   function waitTwoSeconds() {
     return new Promise(resolve => setTimeout(resolve, 2000));
@@ -113,7 +113,7 @@
       });
     } catch (e) {
       pre.textContent = '\nCaught exception: ' + e;
-      if (e instanceof eosjs2_jsonrpc.RpcError)
+      if (e instanceof eosjs_jsonrpc.RpcError)
         pre.textContent += '\n\n' + JSON.stringify(e.json, null, 2);
     }
   })();

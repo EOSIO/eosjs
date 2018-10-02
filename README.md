@@ -1,8 +1,8 @@
-*Important*: eosjs2 is under active development and should be considered beta. Improvements and enhancements may break or remove existing functionality. Be sure to lock your dependencies.
+*Important*: eosjs is under active development and should be considered beta. Improvements and enhancements may break or remove existing functionality. Be sure to lock your dependencies.
 
 If you are looking for the old version of `eosjs` you can [find it here](https://github.com/EOSIO/eosjs/tree/v16.0.9).
 
-## eosjs2
+## eosjs
 
 Library for talking to an EOSIO RPC API. `transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
 
@@ -17,7 +17,7 @@ Open `test.html` in your browser of choice
 
 ### NodeJS
 ```js
-const eosjs2 = require('eosjs2');
+const eosjs = require('eosjs');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 and IE Edge Browsers
 ```
@@ -26,19 +26,19 @@ const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 an
 SignatureProvider holds private keys and is responsible for signing transactions
 ```js
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
-const signatureProvider = new eosjs2.SignatureProvider([defaultPrivateKey]);
+const signatureProvider = new eosjs.SignatureProvider([defaultPrivateKey]);
 ```
 
 ### JSON-RPC
 Open a connection to JSON-RPC, include `fetch` when on NodeJS
 ```js
-const rpc = new eosjs2.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
+const rpc = new eosjs.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
 ```
 
 ### API Constructor
 Include textDecoder and textEncoder when using in browser.
 ```js
-const api = new eosjs2.Api({ rpc, signatureProvider, textDecoder: new TextDecoder, textEncoder: new TextEncoder });
+const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder, textEncoder: new TextEncoder });
 ```
 
 ### Sending a transaction
@@ -65,7 +65,7 @@ const api = new eosjs2.Api({ rpc, signatureProvider, textDecoder: new TextDecode
 ```
 
 ### Error handling
-use `eosjs2_jsonrpc.RpcError` for handling JSON-RPC Errors
+use `eosjs_jsonrpc.RpcError` for handling JSON-RPC Errors
 ```js
 ...
 try {
@@ -73,7 +73,7 @@ try {
   ...
 } catch (e) {
   console.log('\nCaught exception: ' + e);
-  if (e instanceof eosjs2_jsonrpc.RpcError)
+  if (e instanceof eosjs_jsonrpc.RpcError)
     console.log(JSON.stringify(e.json, null, 2);
 }
 ...
@@ -82,4 +82,4 @@ try {
 ## Browsers
 Browser distribution is located in `dist`
 
-Permalink for eosjs2 documentation is [http://eosio.github.io/eosjs](http://eosio.github.io/eosjs)
+Permalink for eosjs documentation is [http://eosio.github.io/eosjs](http://eosio.github.io/eosjs)

@@ -1,7 +1,7 @@
 import { TextDecoder, TextEncoder } from "text-encoding";
-import { Api } from "./eosjs2-api";
-import { JsonRpc } from "./eosjs2-jsonrpc";
-import SignatureProvider from "./eosjs2-jssig";
+import { Api } from "./eosjs-api";
+import { JsonRpc } from "./eosjs-jsonrpc";
+import SignatureProvider from "./eosjs-jssig";
 
 const transaction = {
     expiration: "2018-09-04T18:42:49",
@@ -125,7 +125,7 @@ const deserializedActions = [
     },
 ];
 
-describe("eosjs2-api", () => {
+describe("eosjs-api", () => {
     let api;
     const fetch = async (input: any, init: any): Promise<any> => ({
         ok: true,

@@ -2,14 +2,14 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        eosjs2: './src/eosjs2-api.ts',
-        eosjs2_jsonrpc: './src/eosjs2-jsonrpc.ts',
-        eosjs2_jssig: './src/eosjs2-jssig.ts',
+        eosjs: './src/eosjs-api.ts',
+        eosjs_jsonrpc: './src/eosjs-jsonrpc.ts',
+        eosjs_jssig: './src/eosjs-jssig.ts',
     },
     devtool: 'inline-source-map',
     mode: 'development',
     output: {
-        library: 'eosjs2',
+        library: 'eosjs',
         pathinfo: true,
     },
     module: {

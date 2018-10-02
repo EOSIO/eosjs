@@ -2,13 +2,13 @@
  * @module JS-Sig
  */
 
-// copyright defined in eosjs2/LICENSE.txt
+// copyright defined in eosjs/LICENSE.txt
 
 "use strict";
 
 import * as ecc from "eosjs-ecc";
-import { SignatureProvider, SignatureProviderArgs } from "./eosjs2-api";
-import { convertLegacyPublicKey } from "./eosjs2-numeric";
+import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api";
+import { convertLegacyPublicKey } from "./eosjs-numeric";
 
 /** Signs transactions using in-process private keys */
 export default class JsSignatureProvider implements SignatureProvider {

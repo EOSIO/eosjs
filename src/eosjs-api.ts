@@ -2,20 +2,20 @@
  * @module API
  */
 
-// copyright defined in eosjs2/LICENSE.txt
+// copyright defined in eosjs/LICENSE.txt
 
 "use strict";
 
-import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from "./eosjs2-jsonrpc";
-import { base64ToBinary } from "./eosjs2-numeric";
-import * as ser from "./eosjs2-serialize";
+import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from "./eosjs-jsonrpc";
+import { base64ToBinary } from "./eosjs-numeric";
+import * as ser from "./eosjs-serialize";
 
 // tslint:disable-next-line
 const abiAbi = require('../src/abi.abi.json');
 // tslint:disable-next-line
 const transactionAbi = require('../src/transaction.abi.json');
 
-/** Reexport `eosjs2-serialize` */
+/** Reexport `eosjs-serialize` */
 export const serialize = ser;
 
 /** Arguments to `getRequiredKeys` */

@@ -2,11 +2,11 @@
  * @module JSON-RPC
  */
 
-// copyright defined in eosjs2/LICENSE.txt
+// copyright defined in eosjs/LICENSE.txt
 
-import { AuthorityProvider, AuthorityProviderArgs } from "./eosjs2-api";
-import { convertLegacyPublicKeys } from "./eosjs2-numeric";
-import { RpcError } from "./eosjs2-rpcerror";
+import { AuthorityProvider, AuthorityProviderArgs } from "./eosjs-api";
+import { convertLegacyPublicKeys } from "./eosjs-numeric";
+import { RpcError } from "./eosjs-rpcerror";
 
 /** Structured format for abis */
 export interface Abi {
