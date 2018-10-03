@@ -6,17 +6,6 @@ If you are looking for the old version of `eosjs` you can [find it here](https:/
 
 Library for talking to an EOSIO RPC API. `transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
 
-## Running Tests
-
-### Automated Test Suite
-`npm run test` or `yarn test`
-
-### Integration Tests
-1. `npm run build-web` or `yarn build-web`
-1. Open `test.html` in your browser of choice
-
-*The integration tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
-
 ## Basic Usage
 
 ### NodeJS
@@ -84,6 +73,18 @@ try {
 ```
 
 ## Browsers
-Browser distribution is located in `dist`
+After running `npm run build-web` or `yarn build-web`, the browser distribution will be located in `dist`. For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
+
+## Running Tests
+
+### Automated Test Suite
+`npm run test` or `yarn test`
+
+### Integration Tests
+1. `npm run build-web` or `yarn build-web`
+1. Open `test.html` in your browser of choice
+
+*The integration tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
+
 
 Permalink for eosjs documentation is [http://eosio.github.io/eosjs](http://eosio.github.io/eosjs)
