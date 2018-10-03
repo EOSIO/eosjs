@@ -8,10 +8,6 @@ If you are looking for the the previous version of `eosjs` you can [find it here
 
 Library for talking to an EOSIO RPC API. `transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
 
-## Installation
-
-To install
-
 ## Basic Usage
 
 ### NodeJS
