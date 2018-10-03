@@ -8,10 +8,14 @@ Library for talking to an EOSIO RPC API. `transact()` is used to sign and push t
 
 ## Running Tests
 
-`npm run build-web` or `yarn build-web`
-Open `test.html` in your browser of choice
+### Automated Test Suite
+`npm run test` or `yarn test`
 
-*These tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
+### Integration Tests
+1. `npm run build-web` or `yarn build-web`
+1. Open `test.html` in your browser of choice
+
+*The integration tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
 
 ## Basic Usage
 
