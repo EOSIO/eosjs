@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "1.0.0",
+  "version": "20.0.0-beta1",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
