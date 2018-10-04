@@ -1,5 +1,4 @@
 .DS_Store
 dist/
-dist-web/
 node_modules/
 docs-build/
