@@ -54,6 +54,9 @@ const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder
         memo: '',
       },
     }]
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
   });
   console.dir(result);
 })();
