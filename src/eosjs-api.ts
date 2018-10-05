@@ -34,7 +34,7 @@ export interface AuthorityProvider {
 
 /** Retrieves raw ABIs for a specified accountName */
 export interface AbiProvider {
-    getRawAbi: (args: string) => Promise<BinaryAbi>;
+    getRawAbi: (accountName: string) => Promise<BinaryAbi>;
 }
 
 /** Structure for the raw form of ABIs */
@@ -122,7 +122,7 @@ export class Api {
         authorityProvider?: AuthorityProvider,
         abiProvider?: AbiProvider,
         signatureProvider: SignatureProvider,
-        chainId: string,
+        chainId?: string,
         textEncoder?: TextEncoder,
         textDecoder?: TextDecoder,
     }) {
