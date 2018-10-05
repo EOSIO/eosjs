@@ -4,7 +4,8 @@
 
 // copyright defined in eosjs/LICENSE.txt
 
-import { AuthorityProvider, AuthorityProviderArgs } from "./eosjs-api";
+import { AuthorityProvider, AuthorityProviderArgs, AbiProvider, BinaryAbi } from "./eosjs-api";
+import { base64ToBinary } from "./eosjs-numeric";
 import { convertLegacyPublicKeys } from "./eosjs-numeric";
 import { RpcError } from "./eosjs-rpcerror";
 
@@ -96,7 +97,7 @@ function arrayToHex(data: Uint8Array) {
 }
 
 /** Make RPC calls */
-export class JsonRpc implements AuthorityProvider {
+export class JsonRpc implements AuthorityProvider, AbiProvider {
     public endpoint: string;
     public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
 
@@ -201,6 +202,14 @@ export class JsonRpc implements AuthorityProvider {
     // tslint:disable-next-line:variable-name
     public async get_raw_code_and_abi(account_name: string): Promise<GetRawCodeAndAbiResult> {
         return await this.fetch("/v1/chain/get_raw_code_and_abi", { account_name });
+    }
+
+    /** calls `/v1/chain/get_raw_code_and_abi` and pulls out unneeded raw wasm code */
+    // TODO: use `/v1/chain/get_raw_abi` directly when it becomes available
+    public async getRawAbi(account_name: string): Promise<BinaryAbi> {
+        const rawCodeAndAbi = await this.get_raw_code_and_abi(account_name);
+        const abi = base64ToBinary(rawCodeAndAbi.abi);
+        return { account_name: rawCodeAndAbi.account_name, abi }
     }
 
     /** Raw call to `/v1/chain/get_table_rows` */
