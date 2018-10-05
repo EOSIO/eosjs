@@ -7,7 +7,6 @@
 "use strict";
 
 import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from "./eosjs-jsonrpc";
-import { base64ToBinary } from "./eosjs-numeric";
 import * as ser from "./eosjs-serialize";
 
 // tslint:disable-next-line
@@ -33,6 +32,12 @@ export interface AuthorityProvider {
     getRequiredKeys: (args: AuthorityProviderArgs) => Promise<string[]>;
 }
 
+/** Retrieves raw ABIs for a specified accountName */
+export interface AbiProvider {
+    getRawAbi: (accountName: string) => Promise<BinaryAbi>;
+}
+
+/** Structure for the raw form of ABIs */
 export interface BinaryAbi {
     account_name: string;
     abi: Uint8Array;
@@ -78,6 +83,9 @@ export class Api {
     /** Get subset of `availableKeys` needed to meet authorities in a `transaction` */
     public authorityProvider: AuthorityProvider;
 
+    /** Supplies ABIs in raw form (binary) */
+    public abiProvider: AbiProvider;
+
     /** Signs transactions */
     public signatureProvider: SignatureProvider;
 
@@ -103,6 +111,7 @@ export class Api {
      * @param args
      *    * `rpc`: Issues RPC calls
      *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
+     *    * `abiProvider`: Supplies ABIs in raw form (binary)
      *    * `signatureProvider`: Signs transactions
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
@@ -111,13 +120,15 @@ export class Api {
     constructor(args: {
         rpc: JsonRpc,
         authorityProvider?: AuthorityProvider,
+        abiProvider?: AbiProvider,
         signatureProvider: SignatureProvider,
-        chainId: string,
+        chainId?: string,
         textEncoder?: TextEncoder,
         textDecoder?: TextDecoder,
     }) {
         this.rpc = args.rpc;
         this.authorityProvider = args.authorityProvider || args.rpc;
+        this.abiProvider = args.abiProvider || args.rpc;
         this.signatureProvider = args.signatureProvider;
         this.chainId = args.chainId;
         this.textEncoder = args.textEncoder;
@@ -148,8 +159,7 @@ export class Api {
         }
         let cachedAbi: CachedAbi;
         try {
-            // todo: use get_raw_abi when it becomes available
-            const rawAbi = base64ToBinary((await this.rpc.get_raw_code_and_abi(accountName)).abi);
+            const rawAbi = (await this.abiProvider.getRawAbi(accountName)).abi;
             const abi = this.rawAbiToJson(rawAbi);
             cachedAbi = { rawAbi, abi };
         } catch (e) {
