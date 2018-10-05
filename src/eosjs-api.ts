@@ -32,7 +32,7 @@ export interface AuthorityProvider {
     getRequiredKeys: (args: AuthorityProviderArgs) => Promise<string[]>;
 }
 
-/** Retrieves raw ABIs for a specified account_name */
+/** Retrieves raw ABIs for a specified accountName */
 export interface AbiProvider {
     getRawAbi: (args: string) => Promise<BinaryAbi>;
 }
@@ -111,7 +111,7 @@ export class Api {
      * @param args
      *    * `rpc`: Issues RPC calls
      *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
-     *    * `abiProvider`: Supply ABIs to retrieve ricardian contracts
+     *    * `abiProvider`: Supplies ABIs in raw form (binary)
      *    * `signatureProvider`: Signs transactions
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
@@ -128,7 +128,7 @@ export class Api {
     }) {
         this.rpc = args.rpc;
         this.authorityProvider = args.authorityProvider || args.rpc;
-        this.abiProvider = args.abiProvider || args.rpc
+        this.abiProvider = args.abiProvider || args.rpc;
         this.signatureProvider = args.signatureProvider;
         this.chainId = args.chainId;
         this.textEncoder = args.textEncoder;
