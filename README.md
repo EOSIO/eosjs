@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ArisenIO/arisen-media/master/arisenjs.png"/>
+  <img src="https://raw.githubusercontent.com/ArisenIO/arisen-media/master/repo-headers/arisenjs.png"/>
 </p>
 
 Javascript API for integration with ARISEN-based blockchains using [ARISEN RPC API](https://docs.arisen/arisen-aos/reference).
