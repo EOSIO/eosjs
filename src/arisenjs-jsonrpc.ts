@@ -2,12 +2,12 @@
  * @module JSON-RPC
  */
 
-// copyright defined in eosjs/LICENSE.txt
+// copyright defined in arisenjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from "./eosjs-api";
-import { base64ToBinary } from "./eosjs-numeric";
-import { convertLegacyPublicKeys } from "./eosjs-numeric";
-import { RpcError } from "./eosjs-rpcerror";
+import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from "./arisenjs-api";
+import { base64ToBinary } from "./arisenjs-numeric";
+import { convertLegacyPublicKeys } from "./arisenjs-numeric";
+import { RpcError } from "./arisenjs-rpcerror";
 
 /** Structured format for abis */
 export interface Abi {

@@ -1,25 +1,23 @@
-⚠️ ***Important! We have recently released a major breaking rewrite for eosjs. Be sure to lock your dependencies.*** ⚠️
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ArisenIO/arisen-media/master/arisenjs.png"/>
+</p>
 
-If you are looking for the the previous version of `eosjs` you can [find it here](https://github.com/EOSIO/eosjs/tree/v16.0.9).
+Javascript API for integration with ARISEN-based blockchains using [ARISEN RPC API](https://docs.arisen/arisen-aos/reference).
 
-# eosjs
-
-Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
-
-Documentation can be found [here](https://eosio.github.io/eosjs)
+Documentation can be found [here](https://arisenio.github.io/arisenjs)
 
 ## Installation
 
 ### NodeJS
 
-`npm install eosjs@beta`
+`npm install arisenjs@beta`
 
 ## Basic Usage
 
 ### NodeJS
 
 ```js
-const eosjs = require('eosjs');
+const arisenjs = require('arisenjs');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 and IE Edge Browsers
 ```
@@ -29,21 +27,21 @@ const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 an
 SignatureProvider holds private keys and is responsible for signing transactions
 ```js
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
-const signatureProvider = new eosjs.SignatureProvider([defaultPrivateKey]);
+const signatureProvider = new arisenjs.SignatureProvider([defaultPrivateKey]);
 ```
 
 ### JSON-RPC
 
 Open a connection to JSON-RPC, include `fetch` when on NodeJS
 ```js
-const rpc = new eosjs.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
+const rpc = new arisenjs.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
 ```
 
 ### API Constructor
 
 Include textDecoder and textEncoder when using in browser.
 ```js
-const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder, textEncoder: new TextEncoder });
+const api = new arisenjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder, textEncoder: new TextEncoder });
 ```
 
 ### Sending a transaction
@@ -52,7 +50,7 @@ const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder
 (async () => {
   const result = await api.transact({
     actions: [{
-      account: 'eosio.token',
+      account: 'arisen.token',
       name: 'transfer',
       authorization: [{
         actor: 'useraaaaaaaa',
@@ -75,7 +73,7 @@ const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder
 
 ### Error handling
 
-use `eosjs_jsonrpc.RpcError` for handling JSON-RPC Errors
+use `arisenjs_jsonrpc.RpcError` for handling JSON-RPC Errors
 ```js
 ...
 try {
@@ -83,7 +81,7 @@ try {
   ...
 } catch (e) {
   console.log('\nCaught exception: ' + e);
-  if (e instanceof eosjs_jsonrpc.RpcError)
+  if (e instanceof arisenjs_jsonrpc.RpcError)
     console.log(JSON.stringify(e.json, null, 2);
 }
 ...
@@ -91,7 +89,7 @@ try {
 
 ## Browsers
 
-After running `npm run build-web` or `yarn build-web`, the browser distribution will be located in `dist`. For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
+After running `npm run build-web` or `yarn build-web`, the browser distribution will be located in `dist`. For full browser usage examples, [see the documentation](https://arisenio.github.io/arisenjs/static/3.-Browsers.html).
 
 ## How it works
 
@@ -107,4 +105,4 @@ After running `npm run build-web` or `yarn build-web`, the browser distribution 
 1. `npm run build-web` or `yarn build-web`
 1. Open `test.html` in your browser of choice
 
-*The integration tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
+*The integration tests assume that you have a local node for ARISEN set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*

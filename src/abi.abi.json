@@ -1,5 +1,5 @@
 {
-    "version": "eosio::abi/1.1",
+    "version": "arisen::abi/1.1",
     "structs": [
         {
             "name": "extensions_entry",

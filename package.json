@@ -1,7 +1,7 @@
 {
-  "name": "eosjs",
-  "version": "20.0.0-beta1",
-  "description": "Talk to eos API",
+  "name": "arisenjs",
+  "version": "1.0.0",
+  "description": "Javascript library for the Arisen blockchain",
   "main": "dist/index.js",
   "scripts": {
     "prepublish": "npm run build",
@@ -16,16 +16,16 @@
     "docs-serve": "python -m SimpleHTTPServer",
     "docs-publish": "sh .docs/scripts/publish.sh"
   },
-  "author": "block.one",
+  "author": "BenchX",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/EOSIO/eosjs.git"
+    "url": "https://github.com/arisenio/arisenjs.git"
   },
   "dependencies": {
     "@types/jest": "^23.3.1",
+    "arisenjs-ecc": "1.0.0",
     "babel-polyfill": "^6.26.0",
-    "eosjs-ecc": "^4.0.1",
     "text-encoding": "^0.6.4"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 {
-  "name": "eosjs",
+  "name": "arisenjs",
   "target": "es5",
   "module": ["es2017","dom"],
   "ignoreCompilerErrors": true,
@@ -15,5 +15,5 @@
   "readme": "README.md",
   "hideGenerator": "true",
   "verbose": true,
-  "mdSourceRepo": "https://www.github.com/EOSIO/eosjs"
+  "mdSourceRepo": "https://www.github.com/arisenio/arisenjs"
 }

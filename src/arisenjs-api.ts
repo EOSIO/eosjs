@@ -2,19 +2,19 @@
  * @module API
  */
 
-// copyright defined in eosjs/LICENSE.txt
+// copyright defined in arisenjs/LICENSE.txt
 
 "use strict";
 
-import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from "./eosjs-jsonrpc";
-import * as ser from "./eosjs-serialize";
+import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from "./arisenjs-jsonrpc";
+import * as ser from "./arisenjs-serialize";
 
 // tslint:disable-next-line
 const abiAbi = require('../src/abi.abi.json');
 // tslint:disable-next-line
 const transactionAbi = require('../src/transaction.abi.json');
 
-/** Reexport `eosjs-serialize` */
+/** Reexport `arisenjs-serialize` */
 export const serialize = ser;
 
 /** Arguments to `getRequiredKeys` */

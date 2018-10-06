@@ -2,13 +2,13 @@
  * @module JS-Sig
  */
 
-// copyright defined in eosjs/LICENSE.txt
+// copyright defined in arisenjs/LICENSE.txt
 
 "use strict";
 
-import * as ecc from "eosjs-ecc";
-import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api";
-import { convertLegacyPublicKey } from "./eosjs-numeric";
+import * as ecc from "arisenjs-ecc";
+import { SignatureProvider, SignatureProviderArgs } from "./arisenjs-api";
+import { convertLegacyPublicKey } from "./arisenjs-numeric";
 
 /** Signs transactions using in-process private keys */
 export default class JsSignatureProvider implements SignatureProvider {

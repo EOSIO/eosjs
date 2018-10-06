@@ -1,6 +1,6 @@
-import * as ecc from "eosjs-ecc";
+import * as ecc from "arisenjs-ecc";
 
-import JsSignatureProvider from "./eosjs-jssig";
+import JsSignatureProvider from "./arisenjs-jssig";
 
 describe("JsSignatureProvider", () => {
     const privateKeys = ["key1", "key2", "key3"];

@@ -2,12 +2,12 @@
  * @module Serialize
  */
 
-// copyright defined in eosjs/LICENSE.txt
+// copyright defined in arisenjs/LICENSE.txt
 
 "use strict";
 
-import { Abi, BlockTaposInfo } from "./eosjs-jsonrpc";
-import * as numeric from "./eosjs-numeric";
+import { Abi, BlockTaposInfo } from "./arisenjs-jsonrpc";
+import * as numeric from "./arisenjs-numeric";
 
 /** A field in an abi */
 export interface Field {
@@ -519,7 +519,7 @@ export class SerialBuffer {
 
 /** Is this a supported ABI version? */
 export function supportedAbiVersion(version: string) {
-    return version.startsWith("eosio::abi/1.");
+    return version.startsWith("arisen::abi/1.");
 }
 
 function checkDateParse(date: string) {
