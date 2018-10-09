@@ -43,7 +43,7 @@ const rpc = new eosjs.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
 
 Include textDecoder and textEncoder when using in browser.
 ```js
-const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder, textEncoder: new TextEncoder });
+const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 ```
 
 ### Sending a transaction
