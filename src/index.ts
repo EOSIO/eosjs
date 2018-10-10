@@ -5,3 +5,4 @@ import SignatureProvider from "./eosjs-jssig";
 import * as Serialize from "./eosjs-serialize";
 
 export { Api, SignatureProvider, Rpc, Serialize };
+export default { Api, SignatureProvider, Rpc, Serialize };
