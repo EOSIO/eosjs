@@ -1,4 +1,3 @@
-import "babel-polyfill";
 import Api from "./eosjs-api";
 import * as ApiInterfaces from "./eosjs-api-interfaces";
 import JsonRpc from "./eosjs-jsonrpc";
