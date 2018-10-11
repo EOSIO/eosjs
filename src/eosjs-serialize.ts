@@ -6,8 +6,8 @@
 
 "use strict";
 
-import { Abi, BlockTaposInfo } from "./eosjs-jsonrpc";
 import * as numeric from "./eosjs-numeric";
+import { Abi, BlockTaposInfo } from "./jsonrpc-interfaces";
 
 /** A field in an abi */
 export interface Field {

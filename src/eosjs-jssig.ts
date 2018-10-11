@@ -7,8 +7,8 @@
 "use strict";
 
 import * as ecc from "eosjs-ecc";
-import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api";
 import { convertLegacyPublicKey } from "./eosjs-numeric";
+import { SignatureProvider, SignatureProviderArgs } from "./api-interfaces";
 
 /** Signs transactions using in-process private keys */
 export default class JsSignatureProvider implements SignatureProvider {
