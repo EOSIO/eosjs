@@ -8,8 +8,8 @@
 
 import { JsonRpc } from "./eosjs-jsonrpc";
 import * as ser from "./eosjs-serialize";
-import { AuthorityProvider, AbiProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./api-interfaces";
-import { Abi, GetInfoResult, PushTransactionArgs } from "./rpc-interfaces";
+import { AuthorityProvider, AbiProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./eosjs-api-interfaces";
+import { Abi, GetInfoResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
 
 // tslint:disable-next-line
 const abiAbi = require('./abi.abi.json');

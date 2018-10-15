@@ -5,8 +5,8 @@
 // copyright defined in eosjs/LICENSE.txt
 import { base64ToBinary, convertLegacyPublicKeys } from "./eosjs-numeric";
 import { RpcError } from "./eosjs-rpcerror";
-import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from "./api-interfaces";
-import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./rpc-interfaces";
+import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from "./eosjs-api-interfaces";
+import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
 
 function arrayToHex(data: Uint8Array) {
     let result = "";

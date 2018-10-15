@@ -1,4 +1,4 @@
-import { Abi } from "./rpc-interfaces";
+import { Abi } from "./eosjs-rpc-interfaces";
 
 /** Arguments to `getRequiredKeys` */
 export interface AuthorityProviderArgs {

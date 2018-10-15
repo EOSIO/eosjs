@@ -8,7 +8,7 @@
 
 import * as ecc from "eosjs-ecc";
 import { convertLegacyPublicKey } from "./eosjs-numeric";
-import { SignatureProvider, SignatureProviderArgs } from "./api-interfaces";
+import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api-interfaces";
 
 /** Signs transactions using in-process private keys */
 export class JsSignatureProvider implements SignatureProvider {
