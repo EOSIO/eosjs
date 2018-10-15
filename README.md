@@ -19,7 +19,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 ### NodeJS
 
 ```js
-const eosjs = require('eosjs');
+const { Api, JsonRpc, RpcError, JsSignatureProvider } = require('eosjs');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 and IE Edge Browsers
 ```
@@ -27,6 +27,7 @@ const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 an
 ### SignatureProvider
 
 SignatureProvider holds private keys and is responsible for signing transactions
+***Using the default JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
 ```js
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
