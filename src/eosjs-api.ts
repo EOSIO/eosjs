@@ -12,12 +12,9 @@ import { AuthorityProvider, AbiProvider, BinaryAbi, CachedAbi, SignatureProvider
 import { Abi, GetInfoResult, PushTransactionArgs } from "./rpc-interfaces";
 
 // tslint:disable-next-line
-const abiAbi = require('../src/abi.abi.json');
+const abiAbi = require('./abi.abi.json');
 // tslint:disable-next-line
-const transactionAbi = require('../src/transaction.abi.json');
-
-/** Reexport `eosjs-serialize` */
-export const serialize = ser;
+const transactionAbi = require('./transaction.abi.json');
 
 export class Api {
     /** Issues RPC calls */
