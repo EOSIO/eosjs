@@ -7,7 +7,7 @@
 "use strict";
 
 import * as numeric from "./eosjs-numeric";
-import { Abi, BlockTaposInfo } from "./jsonrpc-interfaces";
+import { Abi, BlockTaposInfo } from "./rpc-interfaces";
 
 /** A field in an abi */
 export interface Field {

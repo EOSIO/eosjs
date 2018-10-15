@@ -1,4 +1,4 @@
-import { Abi } from "./jsonrpc-interfaces";
+import { Abi } from "./rpc-interfaces";
 
 /** Arguments to `getRequiredKeys` */
 export interface AuthorityProviderArgs {
