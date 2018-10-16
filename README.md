@@ -19,7 +19,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 ### NodeJS
 
 ```js
-const eosjs = require('eosjs');
+const { Api, JsonRpc, RpcError, JsSignatureProvider } = require('eosjs');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 and IE Edge Browsers
 ```
@@ -27,23 +27,24 @@ const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 an
 ### SignatureProvider
 
 SignatureProvider holds private keys and is responsible for signing transactions
+***Using the default JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
 ```js
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
-const signatureProvider = new eosjs.SignatureProvider([defaultPrivateKey]);
+const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 ```
 
 ### JSON-RPC
 
 Open a connection to JSON-RPC, include `fetch` when on NodeJS
 ```js
-const rpc = new eosjs.Rpc.JsonRpc('http://127.0.0.1:8000', { fetch });
+const rpc = new JsonRpc('http://127.0.0.1:8000', { fetch });
 ```
 
 ### API Constructor
 
 Include textDecoder and textEncoder when using in browser.
 ```js
-const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 ```
 
 ### Sending a transaction
@@ -75,7 +76,7 @@ const api = new eosjs.Api({ rpc, signatureProvider, textDecoder: new TextDecoder
 
 ### Error handling
 
-use `eosjs_jsonrpc.RpcError` for handling JSON-RPC Errors
+use `RpcError` for handling RPC Errors
 ```js
 ...
 try {
@@ -83,7 +84,7 @@ try {
   ...
 } catch (e) {
   console.log('\nCaught exception: ' + e);
-  if (e instanceof eosjs_jsonrpc.RpcError)
+  if (e instanceof RpcError)
     console.log(JSON.stringify(e.json, null, 2);
 }
 ...
@@ -102,9 +103,3 @@ After running `npm run build-web` or `yarn build-web`, the browser distribution 
 
 ### Automated Test Suite
 `npm run test` or `yarn test`
-
-### Integration Tests
-1. `npm run build-web` or `yarn build-web`
-1. Open `test.html` in your browser of choice
-
-*The integration tests assume that you have a local node for EOS set up at localhost:8000. The test.html file should run through 5 test cases with the final showing an exception on the screen for missing required TAPOS.*
