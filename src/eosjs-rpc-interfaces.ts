@@ -1,3 +1,5 @@
+// copyright defined in eosjs/LICENSE.txt
+
 /** Structured format for abis */
 export interface Abi {
     version: string;

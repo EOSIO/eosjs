@@ -1,6 +1,7 @@
 /**
  * @module RPC-Error
  */
+// copyright defined in eosjs/LICENSE.txt
 
 /** Holds detailed error information */
 export default class RpcError extends Error {

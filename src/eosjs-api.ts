@@ -1,15 +1,12 @@
 /**
  * @module API
  */
-
 // copyright defined in eosjs/LICENSE.txt
 
-"use strict";
-
+import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./eosjs-api-interfaces";
 import JsonRpc from "./eosjs-jsonrpc";
-import * as ser from "./eosjs-serialize";
-import { AuthorityProvider, AbiProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./eosjs-api-interfaces";
 import { Abi, GetInfoResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
+import * as ser from "./eosjs-serialize";
 
 // tslint:disable-next-line
 const abiAbi = require('../src/abi.abi.json');

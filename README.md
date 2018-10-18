@@ -1,4 +1,4 @@
-⚠️ ***Important! We have recently released a major breaking rewrite for eosjs. Be sure to lock your dependencies.*** ⚠️
+⚠️ ***Important! We recently released a major breaking rewrite for eosjs. Be sure to lock your dependencies.*** ⚠️
 
 If you are looking for the the previous version of `eosjs` you can [find it here](https://github.com/EOSIO/eosjs/tree/v16.0.9).
 
@@ -16,8 +16,16 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ## Basic Usage
 
+### Browser 
+
+Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
+```js
+import { Api, JsonRpc, RpcError, JsSignatureProvider } from 'eosjs';
+```
+
 ### NodeJS
 
+Importing using commonJS syntax is supported by node out of the box.
 ```js
 const { Api, JsonRpc, RpcError, JsSignatureProvider } = require('eosjs');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
@@ -26,8 +34,10 @@ const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 an
 
 ### SignatureProvider
 
-SignatureProvider holds private keys and is responsible for signing transactions
+SignatureProvider holds private keys and is responsible for signing transactions.
+
 ***Using the default JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
+
 ```js
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
@@ -35,7 +45,7 @@ const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
 ### JSON-RPC
 
-Open a connection to JSON-RPC, include `fetch` when on NodeJS
+Open a connection to JSON-RPC, include `fetch` when on NodeJS.
 ```js
 const rpc = new JsonRpc('http://127.0.0.1:8000', { fetch });
 ```
