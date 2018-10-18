@@ -3,7 +3,7 @@
  */
 
 /** Holds detailed error information */
-export class RpcError extends Error {
+export default class RpcError extends Error {
     /** Detailed error information */
     public json: any;
 

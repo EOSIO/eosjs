@@ -2,8 +2,9 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        eosjs: './src/eosjs-api.ts',
+        eosjs_api: './src/eosjs-api.ts',
         eosjs_jsonrpc: './src/eosjs-jsonrpc.ts',
+        eosjs_rpcerror: './src/eosjs-rpcerror.ts',
         eosjs_jssig: './src/eosjs-jssig.ts',
     },
     devtool: 'inline-source-map',

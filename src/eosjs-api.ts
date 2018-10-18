@@ -6,17 +6,17 @@
 
 "use strict";
 
-import { JsonRpc } from "./eosjs-jsonrpc";
+import JsonRpc from "./eosjs-jsonrpc";
 import * as ser from "./eosjs-serialize";
 import { AuthorityProvider, AbiProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./eosjs-api-interfaces";
 import { Abi, GetInfoResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
 
 // tslint:disable-next-line
-const abiAbi = require('./abi.abi.json');
+const abiAbi = require('../src/abi.abi.json');
 // tslint:disable-next-line
-const transactionAbi = require('./transaction.abi.json');
+const transactionAbi = require('../src/transaction.abi.json');
 
-export class Api {
+export default class Api {
     /** Issues RPC calls */
     public rpc: JsonRpc;
 

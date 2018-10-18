@@ -4,7 +4,7 @@
 
 // copyright defined in eosjs/LICENSE.txt
 import { base64ToBinary, convertLegacyPublicKeys } from "./eosjs-numeric";
-import { RpcError } from "./eosjs-rpcerror";
+import RpcError from "./eosjs-rpcerror";
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from "./eosjs-api-interfaces";
 import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
 
@@ -17,7 +17,7 @@ function arrayToHex(data: Uint8Array) {
 }
 
 /** Make RPC calls */
-export class JsonRpc implements AuthorityProvider, AbiProvider {
+export default class JsonRpc implements AuthorityProvider, AbiProvider {
     public endpoint: string;
     public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
 
