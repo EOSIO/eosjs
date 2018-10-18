@@ -27,7 +27,7 @@ export interface AbiProvider {
 export interface BinaryAbi {
 
     /** account which has deployed the ABI */
-    account_name: string;
+    accountName: string;
 
     /** abi in binary form */
     abi: Uint8Array;
