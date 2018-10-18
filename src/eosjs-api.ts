@@ -121,7 +121,7 @@ export default class Api {
         const uniqueAccounts: Set<string> = new Set(accounts);
         const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
             async (account: string): Promise<BinaryAbi> => ({
-                account_name: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
+                accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
         return Promise.all(actionPromises);
     }

@@ -129,7 +129,7 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
     public async getRawAbi(accountName: string): Promise<BinaryAbi> {
         const rawCodeAndAbi = await this.get_raw_code_and_abi(accountName);
         const abi = base64ToBinary(rawCodeAndAbi.abi);
-        return { account_name: rawCodeAndAbi.account_name, abi };
+        return { accountName: rawCodeAndAbi.account_name, abi };
     }
 
     /** Raw call to `/v1/chain/get_table_rows` */
