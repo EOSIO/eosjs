@@ -1,5 +1,5 @@
-import { JsonRpc } from "./eosjs-jsonrpc";
-import { RpcError } from "./eosjs-rpcerror";
+import JsonRpc from "../eosjs-jsonrpc";
+import RpcError from "../eosjs-rpcerror";
 
 describe("JSON RPC", () => {
     const endpoint = "http://localhost";
