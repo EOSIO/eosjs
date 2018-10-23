@@ -1,5 +1,5 @@
 {
-  "name": "eosjs",
+  "name": "@blockone/eosjs-testdeploy",
   "version": "20.0.0-beta2",
   "description": "Talk to eos API",
   "main": "dist/index.js",
