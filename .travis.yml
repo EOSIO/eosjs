@@ -4,7 +4,15 @@ node_js:
   - '10.0.0'
 before_install:
   - npm install -g typescript
+before_script:
+  - source ./scripts/is_latest.sh
 script:
   - npm run lint
   - npm run test
-
+deploy:
+  provider: script
+  script: 
+    - ./scripts/publish.sh
+  on: 
+    tags: true
+    condition: $TRAVIS_IS_LATEST_TAG = true # sourced from ./scripts/is_latest.sh      

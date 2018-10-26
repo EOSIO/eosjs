@@ -1,7 +1,7 @@
 import { TextDecoder, TextEncoder } from "text-encoding";
-import { Api } from "./eosjs-api";
-import { JsonRpc } from "./eosjs-jsonrpc";
-import SignatureProvider from "./eosjs-jssig";
+import Api from "../eosjs-api";
+import JsonRpc from "../eosjs-jsonrpc";
+import JsSignatureProvider from "../eosjs-jssig";
 
 const transaction = {
     expiration: "2018-09-04T18:42:49",
@@ -143,7 +143,7 @@ describe("eosjs-api", () => {
 
     beforeEach(() => {
         const rpc = new JsonRpc("", { fetch });
-        const signatureProvider = new SignatureProvider(["5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"]);
+        const signatureProvider = new JsSignatureProvider(["5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"]);
         const chainId = "038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca";
         api = new Api({
             rpc, signatureProvider, chainId, textDecoder: new TextDecoder(), textEncoder: new TextEncoder(),

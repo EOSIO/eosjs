@@ -1,5 +1,5 @@
-import { JsonRpc } from "./eosjs-jsonrpc";
-import { RpcError } from "./eosjs-rpcerror";
+import JsonRpc from "../eosjs-jsonrpc";
+import RpcError from "../eosjs-rpcerror";
 
 describe("JSON RPC", () => {
     const endpoint = "http://localhost";
@@ -351,6 +351,8 @@ describe("JSON RPC", () => {
         const lowerBound = "zero";
         const upperBound = "five";
         const limit = 20;
+        const indexPosition = 1;
+        const keyType = "str";
         const expReturn = { data: "12345" };
         const callParams = {
             json,
@@ -360,6 +362,8 @@ describe("JSON RPC", () => {
             table_key: tableKey,
             lower_bound: lowerBound,
             upper_bound: upperBound,
+            index_position: indexPosition,
+            key_type: keyType,
             limit,
         };
         const expParams = {
@@ -385,6 +389,8 @@ describe("JSON RPC", () => {
         const lowerBound = "";
         const upperBound = "";
         const limit = 10;
+        const indexPosition = 1;
+        const keyType = "";
         const expReturn = { data: "12345" };
         const callParams = {
             code,
@@ -400,6 +406,8 @@ describe("JSON RPC", () => {
                 table_key: tableKey,
                 lower_bound: lowerBound,
                 upper_bound: upperBound,
+                index_position: indexPosition,
+                key_type: keyType,
                 limit,
             }),
             method: "POST",

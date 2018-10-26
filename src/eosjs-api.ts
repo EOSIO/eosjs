@@ -1,13 +1,11 @@
 /**
  * @module API
  */
-
 // copyright defined in eosjs/LICENSE.txt
 
-"use strict";
-
-import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from "./eosjs-jsonrpc";
-import { base64ToBinary } from "./eosjs-numeric";
+import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./eosjs-api-interfaces";
+import JsonRpc from "./eosjs-jsonrpc";
+import { Abi, GetInfoResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
 import * as ser from "./eosjs-serialize";
 
 // tslint:disable-next-line
@@ -15,68 +13,15 @@ const abiAbi = require('../src/abi.abi.json');
 // tslint:disable-next-line
 const transactionAbi = require('../src/transaction.abi.json');
 
-/** Reexport `eosjs-serialize` */
-export const serialize = ser;
-
-/** Arguments to `getRequiredKeys` */
-export interface AuthorityProviderArgs {
-    /** Transaction that needs to be signed */
-    transaction: any;
-
-    /** Public keys associated with the private keys that the `SignatureProvider` holds */
-    availableKeys: string[];
-}
-
-/** Get subset of `availableKeys` needed to meet authorities in `transaction` */
-export interface AuthorityProvider {
-    /** Get subset of `availableKeys` needed to meet authorities in `transaction` */
-    getRequiredKeys: (args: AuthorityProviderArgs) => Promise<string[]>;
-}
-
-export interface BinaryAbi {
-    account_name: string;
-    abi: Uint8Array;
-}
-
-/** Arguments to `sign` */
-export interface SignatureProviderArgs {
-    /** Chain transaction is for */
-    chainId: string;
-
-    /** Public keys associated with the private keys needed to sign the transaction */
-    requiredKeys: string[];
-
-    /** Transaction to sign */
-    serializedTransaction: Uint8Array;
-
-    /** ABIs for all contracts with actions included in `serializedTransaction` */
-    abis: BinaryAbi[];
-}
-
-/** Signs transactions */
-export interface SignatureProvider {
-    /** Public keys associated with the private keys that the `SignatureProvider` holds */
-    getAvailableKeys: () => Promise<string[]>;
-
-    /** Sign a transaction */
-    sign: (args: SignatureProviderArgs) => Promise<string[]>;
-}
-
-/** Holds a fetched abi */
-export interface CachedAbi {
-    /** abi in binary form */
-    rawAbi: Uint8Array;
-
-    /** abi in structured form */
-    abi: Abi;
-}
-
-export class Api {
+export default class Api {
     /** Issues RPC calls */
     public rpc: JsonRpc;
 
     /** Get subset of `availableKeys` needed to meet authorities in a `transaction` */
     public authorityProvider: AuthorityProvider;
+
+    /** Supplies ABIs in raw form (binary) */
+    public abiProvider: AbiProvider;
 
     /** Signs transactions */
     public signatureProvider: SignatureProvider;
@@ -103,6 +48,7 @@ export class Api {
      * @param args
      *    * `rpc`: Issues RPC calls
      *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
+     *    * `abiProvider`: Supplies ABIs in raw form (binary)
      *    * `signatureProvider`: Signs transactions
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
@@ -111,13 +57,15 @@ export class Api {
     constructor(args: {
         rpc: JsonRpc,
         authorityProvider?: AuthorityProvider,
+        abiProvider?: AbiProvider,
         signatureProvider: SignatureProvider,
-        chainId: string,
+        chainId?: string,
         textEncoder?: TextEncoder,
         textDecoder?: TextDecoder,
     }) {
         this.rpc = args.rpc;
         this.authorityProvider = args.authorityProvider || args.rpc;
+        this.abiProvider = args.abiProvider || args.rpc;
         this.signatureProvider = args.signatureProvider;
         this.chainId = args.chainId;
         this.textEncoder = args.textEncoder;
@@ -148,8 +96,7 @@ export class Api {
         }
         let cachedAbi: CachedAbi;
         try {
-            // todo: use get_raw_abi when it becomes available
-            const rawAbi = base64ToBinary((await this.rpc.get_raw_code_and_abi(accountName)).abi);
+            const rawAbi = (await this.abiProvider.getRawAbi(accountName)).abi;
             const abi = this.rawAbiToJson(rawAbi);
             cachedAbi = { rawAbi, abi };
         } catch (e) {
@@ -174,7 +121,7 @@ export class Api {
         const uniqueAccounts: Set<string> = new Set(accounts);
         const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
             async (account: string): Promise<BinaryAbi> => ({
-                account_name: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
+                accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
         return Promise.all(actionPromises);
     }
