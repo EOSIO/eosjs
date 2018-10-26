@@ -29,7 +29,8 @@ Importing using commonJS syntax is supported by node out of the box.
 ```js
 const { Api, JsonRpc, RpcError, JsSignatureProvider } = require('eosjs');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
-const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 and IE Edge Browsers
+const { TextDecoder, TextEncoder } = require('text-encoding');  // IE11 and IE Edge Browsers only
+const {TextEncoder,TextDecoder} = require('util')               // node only; native TextEncoder/Decoder 
 ```
 
 ### SignatureProvider
