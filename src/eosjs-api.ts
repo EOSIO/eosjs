@@ -238,13 +238,12 @@ export default class Api {
         const serializedTransaction = this.serializeTransaction(transaction);
         const availableKeys = await this.signatureProvider.getAvailableKeys();
         const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
-        const signatures = await this.signatureProvider.sign({
+        const pushTransactionArgs = await this.signatureProvider.sign({
             chainId: this.chainId,
             requiredKeys,
             serializedTransaction,
             abis,
         });
-        const pushTransactionArgs = { signatures, serializedTransaction };
         if (broadcast) {
             return this.pushSignedTransaction(pushTransactionArgs);
         }

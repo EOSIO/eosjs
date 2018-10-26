@@ -34,8 +34,9 @@ export default class JsSignatureProvider implements SignatureProvider {
         const signBuf = Buffer.concat([
             new Buffer(chainId, "hex"), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32)),
         ]);
-        return requiredKeys.map(
+        const signatures = requiredKeys.map(
             (pub) => ecc.Signature.sign(signBuf, this.keys.get(convertLegacyPublicKey(pub))).toString(),
         );
+        return { signatures, serializedTransaction };
     }
 }
