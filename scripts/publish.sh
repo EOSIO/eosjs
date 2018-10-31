@@ -50,8 +50,8 @@ make_version
 echo "Pushing to git"
 upload_files
 
-echo "Publish to NPM"
+echo "Build and Publish to NPM"
 
 cp .npmrc.template $HOME/.npmrc 
-npm install
+
 npm publish
