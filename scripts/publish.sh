@@ -1,5 +1,4 @@
-
-#!/bin/sh
+#!/bin/bash
 
 setup_git() {
   # Set the user name and email to match the API token holder
@@ -54,4 +53,10 @@ echo "Build and Publish to NPM"
 
 cp .npmrc.template $HOME/.npmrc 
 
-npm publish
+if [[ "$TRAVIS_TAG" == *"-beta"* ]]; then
+  echo "Publishing with beta tag to npm"
+  npm publish --tag beta
+else
+  echo "Publishing with latest tag to npm"
+  npm publish
+fi
