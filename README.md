@@ -20,14 +20,18 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
 ```js
-import { Api, JsonRpc, RpcError, JsSignatureProvider } from 'eosjs';
+import { Api, JsonRpc, RpcError } from 'eosjs';
+
+// If using default signature provider
+import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'
 ```
 
 ### NodeJS
 
 Importing using commonJS syntax is supported by node out of the box.
 ```js
-const { Api, JsonRpc, RpcError, JsSignatureProvider } = require('eosjs');
+const { Api, JsonRpc, RpcError } = require('eosjs');
+const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextDecoder, TextEncoder } = require('text-encoding');  // IE11 and IE Edge Browsers only
 const {TextEncoder,TextDecoder} = require('util')               // node only; native TextEncoder/Decoder 
