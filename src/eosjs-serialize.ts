@@ -616,6 +616,9 @@ function deserializeUnknown(buffer: SerialBuffer): SerialBuffer {
 
 function serializeStruct(this: Type, buffer: SerialBuffer, data: any,
                          state = new SerializerState(), allowExtensions = true) {
+    if (typeof data !== "object") {
+        throw new Error("expected object containing data: " + JSON.stringify(data));
+    }
     if (this.base) {
         this.base.serialize(buffer, data, state, allowExtensions);
     }
