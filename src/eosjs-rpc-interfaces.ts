@@ -75,6 +75,6 @@ export interface GetRawCodeAndAbiResult {
 
 /** Arguments for `push_transaction` */
 export interface PushTransactionArgs {
-    signatures: string[];
+    signatures?: string[];
     serializedTransaction: Uint8Array;
 }
