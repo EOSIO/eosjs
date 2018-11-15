@@ -1,14 +1,11 @@
 /**
  * @module JS-Sig
  */
-
-// copyright defined in eosjs2/LICENSE.txt
-
-"use strict";
+// copyright defined in eosjs/LICENSE.txt
 
 import * as ecc from "eosjs-ecc";
-import { SignatureProvider, SignatureProviderArgs } from "./eosjs2-api";
-import { convertLegacyPublicKey } from "./eosjs2-numeric";
+import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api-interfaces";
+import { convertLegacyPublicKey } from "./eosjs-numeric";
 
 /** Signs transactions using in-process private keys */
 export default class JsSignatureProvider implements SignatureProvider {
@@ -37,8 +34,9 @@ export default class JsSignatureProvider implements SignatureProvider {
         const signBuf = Buffer.concat([
             new Buffer(chainId, "hex"), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32)),
         ]);
-        return requiredKeys.map(
+        const signatures = requiredKeys.map(
             (pub) => ecc.Signature.sign(signBuf, this.keys.get(convertLegacyPublicKey(pub))).toString(),
         );
+        return { signatures, serializedTransaction };
     }
 }

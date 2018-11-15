@@ -1,10 +1,10 @@
 {
-  "name": "eosjs2",
-  "version": "1.0.0",
+  "name": "eosjs",
+  "version": "20.0.0-beta2",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "test": "jest",
     "lint": "tslint -c tslint.json src/**/*.ts",
     "lint-fix": "tslint -c tslint.json src/**/*.ts --fix",
@@ -20,17 +20,18 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/EOSIO/eosjs2.git"
+    "url": "https://github.com/EOSIO/eosjs.git"
   },
   "dependencies": {
     "@types/jest": "^23.3.1",
-    "babel-polyfill": "^6.26.0",
+    "babel-runtime": "^6.26.0",
     "eosjs-ecc": "^4.0.1",
     "text-encoding": "^0.6.4"
   },
   "devDependencies": {
     "@types/node": "^10.3.1",
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-1": "^6.24.1",
     "jest": "^23.5.0",
@@ -47,7 +48,7 @@
   "jest": {
     "automock": false,
     "setupFiles": [
-      "./setupJest.js"
+      "./src/tests/setupJest.js"
     ],
     "moduleFileExtensions": [
       "ts",

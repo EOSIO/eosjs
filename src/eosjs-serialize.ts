@@ -1,13 +1,10 @@
 /**
  * @module Serialize
  */
+// copyright defined in eosjs/LICENSE.txt
 
-// copyright defined in eosjs2/LICENSE.txt
-
-"use strict";
-
-import { Abi, BlockTaposInfo } from "./eosjs2-jsonrpc";
-import * as numeric from "./eosjs2-numeric";
+import * as numeric from "./eosjs-numeric";
+import { Abi, BlockTaposInfo } from "./eosjs-rpc-interfaces";
 
 /** A field in an abi */
 export interface Field {
