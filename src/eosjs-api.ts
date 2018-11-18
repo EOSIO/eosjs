@@ -236,7 +236,7 @@ export default class Api {
 
         transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
         const serializedTransaction = this.serializeTransaction(transaction);
-        const pushTransactionArgs: PushTransactionArgs = { serializedTransaction };
+        const pushTransactionArgs: PushTransactionArgs = { serializedTransaction, signatures: [] };
 
         if (sign) {
             const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
