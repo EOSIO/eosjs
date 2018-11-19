@@ -207,13 +207,14 @@ export default class Api {
      *
      * Named Parameters:
      *    * `broadcast`: broadcast this transaction?
+     *    * `sign`: sign this transaction?
      *    * If both `blocksBehind` and `expireSeconds` are present,
      *      then fetch the block which is `blocksBehind` behind head block,
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
+    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
+        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
         let info: GetInfoResult;
 
         if (!this.chainId) {
@@ -236,14 +237,18 @@ export default class Api {
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
         const serializedTransaction = this.serializeTransaction(transaction);
-        const availableKeys = await this.signatureProvider.getAvailableKeys();
-        const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
-        const pushTransactionArgs = await this.signatureProvider.sign({
-            chainId: this.chainId,
-            requiredKeys,
-            serializedTransaction,
-            abis,
-        });
+        let pushTransactionArgs: PushTransactionArgs  = { serializedTransaction, signatures: [] };
+
+        if (sign) {
+            const availableKeys = await this.signatureProvider.getAvailableKeys();
+            const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            pushTransactionArgs = await this.signatureProvider.sign({
+                chainId: this.chainId,
+                requiredKeys,
+                serializedTransaction,
+                abis,
+            });
+        }
         if (broadcast) {
             return this.pushSignedTransaction(pushTransactionArgs);
         }
