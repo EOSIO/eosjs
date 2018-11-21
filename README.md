@@ -95,7 +95,7 @@ try {
 } catch (e) {
   console.log('\nCaught exception: ' + e);
   if (e instanceof RpcError)
-    console.log(JSON.stringify(e.json, null, 2);
+    console.log(JSON.stringify(e.json, null, 2));
 }
 ...
 ```
