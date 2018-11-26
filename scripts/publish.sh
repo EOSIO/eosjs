@@ -26,18 +26,17 @@ make_version() {
   git status
   
   # Run the deploy build and increment the package versions
-  # %s is the placeholder for the created tag
-  npm version -no-git-tag-version $TRAVIS_TAG
+  npm version -no-git-tag-version prerelease
 }
 
 upload_files() {
   git commit -a -m "Updating version [skip ci]"
 
   # This make sure the current work area is pushed to the tip of the current branch
-  git push origin HEAD:master  
+  git push origin HEAD:${TRAVIS_BRANCH}  
 }
 
-echo "Running on tag ${TRAVIS_TAG}, branch ${TRAVIS_BRANCH}":
+echo "Running on branch ${TRAVIS_BRANCH}":
 
 echo "Setting up git"
 setup_git
@@ -49,14 +48,8 @@ make_version
 echo "Pushing to git"
 upload_files
 
-echo "Build and Publish to NPM"
+echo "Publish to NPM"
 
 cp .npmrc.template $HOME/.npmrc 
 
-if [[ "$TRAVIS_TAG" == *"-beta"* ]]; then
-  echo "Publishing with beta tag to npm"
-  npm publish --tag beta
-else
-  echo "Publishing with latest tag to npm"
-  npm publish
-fi
+npm publish --tag edge
