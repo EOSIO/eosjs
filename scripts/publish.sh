@@ -23,17 +23,14 @@ make_version() {
   git checkout -- .
   
   # Echo the status to the log so that we can see it is OK
-  git status
-  
+  git status 
+
   # Run the deploy build and increment the package versions
-  npm version -no-git-tag-version prerelease
-}
+  current_commit="$(git rev-parse --short HEAD)";
 
-upload_files() {
+  npm version prerelease -preid "${current_commit}" -no-git-tag-version
+
   git commit -a -m "Updating version [skip ci]"
-
-  # This make sure the current work area is pushed to the tip of the current branch
-  git push origin HEAD:${TRAVIS_BRANCH}  
 }
 
 echo "Running on branch ${TRAVIS_BRANCH}":
@@ -44,9 +41,6 @@ setup_git
 echo "Creating new version"
 
 make_version
-
-echo "Pushing to git"
-upload_files
 
 echo "Publish to NPM"
 

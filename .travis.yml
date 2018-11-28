@@ -3,8 +3,16 @@ language: node_js
 node_js:
   - '10.0.0'    
 before_install:
+  - npm i -g npm@6.4.1
   - yarn global add typescript
   - yarn global add webpack 
 script:
   - yarn run lint
   - yarn run test
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: 
+      - ./scripts/publish.sh
+    on: 
+      branch: develop
