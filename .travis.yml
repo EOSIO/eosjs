@@ -8,10 +8,3 @@ before_install:
 script:
   - yarn run lint
   - yarn run test
-deploy:
-  - provider: script
-    skip_cleanup: true
-    script: 
-      - ./scripts/publish.sh
-    on: 
-      branch: develop
