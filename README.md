@@ -10,13 +10,17 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ## Installation
 
-### NodeJS
+### NodeJS Dependency
 
-`npm install eosjs@beta`
+`npm install eosjs@beta` or `yarn add eosjs@beta`
 
-## Basic Usage
+### Browser Distribution
 
-### Browser 
+Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist` and can be directly copied into your project repository. For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
+
+## Import
+
+### ES Modules
 
 Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
 ```js
@@ -26,20 +30,22 @@ import { Api, JsonRpc, RpcError } from 'eosjs';
 import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'
 ```
 
-### NodeJS
+### CommonJS 
 
-Importing using commonJS syntax is supported by node out of the box.
+Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
 const { Api, JsonRpc, RpcError } = require('eosjs');
 const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
+const { TextEncoder, TextDecoder } = require('util')            // node only; native TextEncoder/Decoder 
 const { TextDecoder, TextEncoder } = require('text-encoding');  // IE11 and IE Edge Browsers only
-const {TextEncoder,TextDecoder} = require('util')               // node only; native TextEncoder/Decoder 
 ```
+
+## Basic Usage
 
 ### SignatureProvider
 
-SignatureProvider holds private keys and is responsible for signing transactions.
+The SignatureProvider holds private keys and is responsible for signing transactions.
 
 ***Using the default JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
 
@@ -55,7 +61,7 @@ Open a connection to JSON-RPC, include `fetch` when on NodeJS.
 const rpc = new JsonRpc('http://127.0.0.1:8000', { fetch });
 ```
 
-### API Constructor
+### API
 
 Include textDecoder and textEncoder when using in browser.
 ```js
@@ -63,6 +69,8 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
 ```
 
 ### Sending a transaction
+
+`transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
 
 ```js
 (async () => {
@@ -104,15 +112,6 @@ try {
 }
 ...
 ```
-
-## Browsers
-
-After running `npm run build-web` or `yarn build-web`, the browser distribution will be located in `dist`. For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
-
-## How it works
-
-`transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
-
 
 ## Running Tests
 
