@@ -27,7 +27,7 @@ Importing using ES6 module syntax in the browser is supported if you have a tran
 import { Api, JsonRpc, RpcError } from 'eosjs';
 
 // If using default signature provider
-import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'
+import JsSignatureProvider from 'eosjs/dist/eosjs-jssig';
 ```
 
 ### CommonJS 
@@ -37,8 +37,8 @@ Importing using commonJS syntax is supported by NodeJS out of the box.
 const { Api, JsonRpc, RpcError } = require('eosjs');
 const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
-const { TextEncoder, TextDecoder } = require('util')            // node only; native TextEncoder/Decoder 
-const { TextDecoder, TextEncoder } = require('text-encoding');  // IE11 and IE Edge Browsers only
+const { TextEncoder, TextDecoder } = require('util');           // node only; native TextEncoder/Decoder 
+const { TextEncoder, TextDecoder } = require('text-encoding');  // React Native, IE11, and Edge Browsers only
 ```
 
 ## Basic Usage
@@ -117,3 +117,6 @@ try {
 
 ### Automated Test Suite
 `npm run test` or `yarn test`
+
+### Integration Test Suite
+Run `npm run build-web` to build the browser distrubution then open `test.html` in the browser of your choice.  The file should run through 5 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final test should throw an exception as it is missing the TAPOS fields and the config parameter.
