@@ -16,7 +16,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### Browser Distribution
 
-Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist` and can be directly copied into your project repository. For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
+Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
 
 ## Import
 
@@ -58,7 +58,7 @@ const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
 Open a connection to JSON-RPC, include `fetch` when on NodeJS.
 ```js
-const rpc = new JsonRpc('http://127.0.0.1:8000', { fetch });
+const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 ```
 
 ### API
@@ -115,8 +115,8 @@ try {
 
 ## Running Tests
 
-### Automated Test Suite
+### Automated Unit Test Suite
 `npm run test` or `yarn test`
 
-### Integration Test Suite
-Run `npm run build-web` to build the browser distrubution then open `test.html` in the browser of your choice.  The file should run through 5 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final test should throw an exception as it is missing the TAPOS fields and the config parameter.
+### Web Integration Test Suite
+Run `npm run build-web` to build the browser distrubution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
