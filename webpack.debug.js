@@ -8,10 +8,6 @@ module.exports = {
     },
     devtool: 'inline-source-map',
     mode: 'development',
-    output: {
-        library: 'eosjs',
-        pathinfo: true,
-    },
     module: {
         rules: [
             {
