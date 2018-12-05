@@ -16,7 +16,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### Browser Distribution
 
-Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
+Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
 
 ## Import
 

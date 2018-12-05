@@ -14,7 +14,7 @@ module.exports = {
                 use: {
                     loader: 'ts-loader',
                     options: {
-                        configFile: 'tsconfig.json'
+                        configFile: 'tsconfig.web.json'
                     }
                 },
                 exclude: /node_modules/,
@@ -26,6 +26,7 @@ module.exports = {
     },
     output: {
         filename: x => x.chunk.name.replace('_', '-') + '.js',
+        library: '[name]',
         path: path.resolve(__dirname, 'dist-web'),
     }
 };

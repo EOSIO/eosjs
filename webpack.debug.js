@@ -15,7 +15,7 @@ module.exports = {
                 use: {
                     loader: 'ts-loader',
                     options: {
-                        configFile: 'tsconfig.json'
+                        configFile: 'tsconfig.web.json'
                     }
                 },
                 exclude: /node_modules/,
@@ -26,8 +26,8 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js']
     },
     output: {
-        filename: x => x.chunk.id.replace('_', '-') + '-debug.js',
-        library: '[id]',
-        path: path.resolve(__dirname, 'dist-web'),
+        filename: x => x.chunk.name.replace('_', '-') + '-debug.js',
+        library: '[name]',
+        path: path.resolve(__dirname, 'dist-web', 'debug'),
     }
 };
