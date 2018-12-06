@@ -5,7 +5,7 @@
 <script src='../../dist-web/eosjs-jssig-debug.js'></script>
 <script>
   let pre = document.getElementsByTagName('pre')[0];
-  const defaultPrivateKey = '5JnbYttSY8dqb4iVZDpc6oRFBtiqcUrRiNrdzse2rYUB96fkhzZ'; // cryptkeeper
+  const defaultPrivateKey = '5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr'; // useraaaaaaaa
 
   const rpc = new eosjs_jsonrpc.default('http://localhost:8888');
   const signatureProvider = new eosjs_jssig.default([defaultPrivateKey]);
@@ -22,13 +22,13 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'cryptkeeper',
+                actor: 'useraaaaaaaa',
                 permission: 'active',
             }],
             data: {
-                from: 'cryptkeeper',
-                to: 'meos',
-                quantity: '0.0001 EOS',
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
                 memo: '',
             },
         }]
@@ -44,13 +44,13 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'cryptkeeper',
+                actor: 'useraaaaaaaa',
                 permission: 'active',
             }],
             data: {
-                from: 'cryptkeeper',
-                to: 'meos',
-                quantity: '0.0001 EOS',
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
                 memo: '',
             },
         }]
@@ -80,13 +80,13 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'cryptkeeper',
+                actor: 'useraaaaaaaa',
                 permission: 'active',
             }],
             data: {
-                from: 'cryptkeeper',
-                to: 'meos',
-                quantity: '0.0001 EOS',
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
                 memo: '',
             },
         }]
@@ -106,13 +106,13 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'cryptkeeper',
+                actor: 'useraaaaaaaa',
                 permission: 'active',
             }],
             data: {
-                from: 'cryptkeeper',
-                to: 'meos',
-                quantity: '0.0001 EOS',
+                from: 'useraaaaaaaa',
+                to: 'useraaaaaaab',
+                quantity: '0.0001 SYS',
                 memo: '',
             },
         }]
