@@ -52,7 +52,7 @@ export default class Api {
      *    * `signatureProvider`: Signs transactions
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-     *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
+     *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
      */
     constructor(args: {
         rpc: JsonRpc,

@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "20.0.0-beta2",
+  "version": "20.0.0-beta3",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "lint": "tslint -c tslint.json src/**/*.ts",
     "lint-fix": "tslint -c tslint.json src/**/*.ts --fix",
     "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
-    "build-web": "webpack",
+    "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
     "clean": "rm -rf dist",
     "docs-init": "sh .docs/scripts/init.sh",
     "docs-build": "sh .docs/scripts/build.sh",
@@ -23,13 +23,14 @@
     "url": "https://github.com/EOSIO/eosjs.git"
   },
   "dependencies": {
-    "@types/jest": "^23.3.1",
     "babel-runtime": "^6.26.0",
     "eosjs-ecc": "^4.0.1",
     "text-encoding": "^0.6.4"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.1",
     "@types/node": "^10.3.1",
+    "@types/text-encoding": "^0.0.35",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
@@ -60,7 +61,7 @@
     },
     "globals": {
       "ts-jest": {
-        "tsConfigFile": "tsconfig.json"
+        "tsConfig": "tsconfig.json"
       }
     },
     "testRegex": "(/src/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
