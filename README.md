@@ -16,7 +16,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### Browser Distribution
 
-Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/static/3.-Browsers.html).
+Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
 
 ## Import
 
@@ -26,8 +26,7 @@ Importing using ES6 module syntax in the browser is supported if you have a tran
 ```js
 import { Api, JsonRpc, RpcError } from 'eosjs';
 
-// If using default signature provider
-import JsSignatureProvider from 'eosjs/dist/eosjs-jssig';
+import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
 ```
 
 ### CommonJS 
@@ -35,7 +34,7 @@ import JsSignatureProvider from 'eosjs/dist/eosjs-jssig';
 Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
 const { Api, JsonRpc, RpcError } = require('eosjs');
-const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');
+const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');  // development only
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');           // node only; native TextEncoder/Decoder 
 const { TextEncoder, TextDecoder } = require('text-encoding');  // React Native, IE11, and Edge Browsers only
@@ -43,11 +42,11 @@ const { TextEncoder, TextDecoder } = require('text-encoding');  // React Native,
 
 ## Basic Usage
 
-### SignatureProvider
+### Signature Provider
 
-The SignatureProvider holds private keys and is responsible for signing transactions.
+The Signature Provider holds private keys and is responsible for signing transactions.
 
-***Using the default JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
+***Using the JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
 
 ```js
 const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
