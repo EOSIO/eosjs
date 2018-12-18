@@ -1,10 +1,30 @@
+env:
+  global:
+    PUBLISH_NPM_LATEST_FROM="master"
 sudo: false
 language: node_js
 node_js:
-  - '10.0.0'
+  - '10.0.0'    
 before_install:
-  - npm install -g typescript
+  - npm i -g npm@6.4.1
+  - yarn global add typescript
+  - yarn global add webpack 
+before_script:
+  - source ./scripts/is_latest.sh
 script:
-  - npm run lint
-  - npm run test
-
+  - yarn run lint
+  - yarn run test
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: 
+      - ./scripts/publish-edge.sh
+    on: 
+      branch: develop
+  - provider: script
+    skip_cleanup: true
+    script: 
+      - ./scripts/publish-tag.sh $PUBLISH_NPM_LATEST_FROM
+    on: 
+      tags: true
+      condition: $TRAVIS_IS_LATEST_TAG = true # sourced from ./scripts/is_latest.sh

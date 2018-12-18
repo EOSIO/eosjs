@@ -141,7 +141,10 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
         table_key = "",
         lower_bound = "",
         upper_bound = "",
-        limit = 10 }: any): Promise<any> {
+        index_position = 1,
+        key_type = "",
+        limit = 10,
+     }: any): Promise<any> {
         return await this.fetch(
             "/v1/chain/get_table_rows", {
                 json,
@@ -151,6 +154,8 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
                 table_key,
                 lower_bound,
                 upper_bound,
+                index_position,
+                key_type,
                 limit,
             });
     }

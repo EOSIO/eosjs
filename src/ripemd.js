@@ -379,18 +379,14 @@ Method #2
 		// are denoted with X_i[j], with 0≤i≤(t − 1) and 0≤j≤15.
 		const X = (new Array(t))
 			.fill(undefined)
-			.map((_, i) => new Proxy(
+			.map((_, i) => j => (
 				new DataView(
 					padded, i * block_size, block_size
-				), {
-				get(block_view, j)
-				{
-					return block_view.getUint32(
-						j * word_size,
-						true // Little-endian
-					);
-				}
-			}));
+				).getUint32(
+					j * word_size,
+					true // Little-endian
+				)
+			));
 
 		//  The result of RIPEMD-160 is contained in five 32-bit words,
 		// which form the internal state of the algorithm. The final
@@ -416,7 +412,7 @@ Method #2
 						RIPEMD160.add_modulo32(
 							A,
 							RIPEMD160.f(j, B, C, D),
-							X[i][r[j]],
+							X[i](r[j]),
 							RIPEMD160.K(j)
 						),
 						s[j]
@@ -440,7 +436,7 @@ Method #2
 								CP,
 								DP
 							),
-							X[i][rP[j]],
+							X[i](rP[j]),
 							RIPEMD160.KP(j)
 						),
 						sP[j]
