@@ -97,7 +97,7 @@
         throw new Error('Web Integration Test Failed Unexpectedly: ' + e.message)
     }
     await waitTwoSeconds();
-    
+
     let failedAsPlanned;
     try {
       failedAsPlanned = true;
@@ -128,7 +128,7 @@
         throw new Error('The final transact call (lacking TAPoS and config) did not fail as expected');
     }
     await waitTwoSeconds();
-    
+
     try {
         failedAsPlanned = true;
         const invalidRpcCall = await rpc.get_block(-1);

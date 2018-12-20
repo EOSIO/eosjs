@@ -29,14 +29,14 @@ import { Api, JsonRpc, RpcError } from 'eosjs';
 import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
 ```
 
-### CommonJS 
+### CommonJS
 
 Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
 const { Api, JsonRpc, RpcError } = require('eosjs');
 const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');  // development only
 const fetch = require('node-fetch');                            // node only; not needed in browsers
-const { TextEncoder, TextDecoder } = require('util');           // node only; native TextEncoder/Decoder 
+const { TextEncoder, TextDecoder } = require('util');           // node only; native TextEncoder/Decoder
 const { TextEncoder, TextDecoder } = require('text-encoding');  // React Native, IE11, and Edge Browsers only
 ```
 
