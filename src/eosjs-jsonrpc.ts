@@ -144,6 +144,8 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
         index_position = 1,
         key_type = "",
         limit = 10,
+        reverse = false,
+        show_payer = false,
      }: any): Promise<any> {
         return await this.fetch(
             "/v1/chain/get_table_rows", {
@@ -157,6 +159,8 @@ export default class JsonRpc implements AuthorityProvider, AbiProvider {
                 index_position,
                 key_type,
                 limit,
+                reverse,
+                show_payer,
             });
     }
 
