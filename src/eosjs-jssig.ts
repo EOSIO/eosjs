@@ -41,4 +41,5 @@ class JsSignatureProvider implements SignatureProvider {
     }
 }
 
-module.exports = module.exports.default = JsSignatureProvider;
+module.exports = JsSignatureProvider;
+export default JsSignatureProvider;
