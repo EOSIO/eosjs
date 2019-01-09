@@ -23,7 +23,6 @@
     "url": "https://github.com/EOSIO/eosjs.git"
   },
   "dependencies": {
-    "babel-runtime": "^6.26.0",
     "eosjs-ecc": "^4.0.1",
     "text-encoding": "^0.6.4"
   },
