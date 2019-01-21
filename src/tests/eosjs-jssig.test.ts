@@ -1,6 +1,5 @@
 import * as ecc from "eosjs-ecc";
-
-import JsSignatureProvider from "./eosjs-jssig";
+import JsSignatureProvider from "../eosjs-jssig";
 
 describe("JsSignatureProvider", () => {
     const privateKeys = ["key1", "key2", "key3"];
@@ -35,9 +34,9 @@ describe("JsSignatureProvider", () => {
         ]);
         const abis: any[] = [];
 
-        const signatures = await provider.sign({ chainId, requiredKeys, serializedTransaction, abis });
+        const signOutput = await provider.sign({ chainId, requiredKeys, serializedTransaction, abis });
 
         expect(eccSignatureSign).toHaveBeenCalledTimes(2);
-        expect(signatures).toEqual([privateKeys[0], privateKeys[2]]);
+        expect(signOutput).toEqual({ signatures: [privateKeys[0], privateKeys[2]], serializedTransaction });
     });
 });

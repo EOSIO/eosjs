@@ -1,13 +1,10 @@
 /**
  * @module Serialize
  */
-
 // copyright defined in eosjs/LICENSE.txt
 
-"use strict";
-
-import { Abi, BlockTaposInfo } from "./eosjs-jsonrpc";
 import * as numeric from "./eosjs-numeric";
+import { Abi, BlockTaposInfo } from "./eosjs-rpc-interfaces";
 
 /** A field in an abi */
 export interface Field {
@@ -21,10 +18,21 @@ export interface Field {
     type: Type;
 }
 
+/** Options for serialize() and deserialize() */
+export interface SerializerOptions {
+    bytesAsUint8Array?: boolean;
+}
+
 /** State for serialize() and deserialize() */
 export class SerializerState {
+    public options: SerializerOptions;
+
     /** Have any binary extensions been skipped? */
     public skippedBinaryExtension = false;
+
+    constructor(options: SerializerOptions = {}) {
+        this.options = options;
+    }
 }
 
 /** A type in an abi */
@@ -149,7 +157,7 @@ export class SerialBuffer {
 
     /** Return data with excess storage trimmed away */
     public asUint8Array() {
-        return new Uint8Array(this.array.buffer, 0, this.length);
+        return new Uint8Array(this.array.buffer, this.array.byteOffset, this.length);
     }
 
     /** Append bytes */
@@ -185,7 +193,7 @@ export class SerialBuffer {
         if (this.readPos + len > this.length) {
             throw new Error("Read past end of buffer");
         }
-        const result = new Uint8Array(this.array.buffer, this.readPos, len);
+        const result = new Uint8Array(this.array.buffer, this.array.byteOffset + this.readPos, len);
         this.readPos += len;
         return result;
     }
@@ -619,6 +627,9 @@ function deserializeUnknown(buffer: SerialBuffer): SerialBuffer {
 
 function serializeStruct(this: Type, buffer: SerialBuffer, data: any,
                          state = new SerializerState(), allowExtensions = true) {
+    if (typeof data !== "object") {
+        throw new Error("expected object containing data: " + JSON.stringify(data));
+    }
     if (this.base) {
         this.base.serialize(buffer, data, state, allowExtensions);
     }
@@ -858,8 +869,20 @@ export function createInitialTypes(): Map<string, Type> {
 
         bytes: createType({
             name: "bytes",
-            serialize(buffer: SerialBuffer, data: string) { buffer.pushBytes(hexToUint8Array(data)); },
-            deserialize(buffer: SerialBuffer) { return arrayToHex(buffer.getBytes()); },
+            serialize(buffer: SerialBuffer, data: string | Uint8Array | number[]) {
+                if (data instanceof Uint8Array || Array.isArray(data)) {
+                    buffer.pushBytes(data);
+                } else {
+                    buffer.pushBytes(hexToUint8Array(data));
+                }
+            },
+            deserialize(buffer: SerialBuffer, state?: SerializerState) {
+                if (state.options.bytesAsUint8Array) {
+                    return buffer.getBytes();
+                } else {
+                    return arrayToHex(buffer.getBytes());
+                }
+            },
         }),
         string: createType({
             name: "string",
