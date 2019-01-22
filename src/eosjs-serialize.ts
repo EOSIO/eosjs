@@ -356,9 +356,6 @@ export class SerialBuffer {
                 result += ".";
             }
         }
-        if (result === ".............") {
-            return result;
-        }
         while (result.endsWith(".")) {
             result = result.substr(0, result.length - 1);
         }
@@ -877,7 +874,7 @@ export function createInitialTypes(): Map<string, Type> {
                 }
             },
             deserialize(buffer: SerialBuffer, state?: SerializerState) {
-                if (state.options.bytesAsUint8Array) {
+                if (state && state.options.bytesAsUint8Array) {
                     return buffer.getBytes();
                 } else {
                     return arrayToHex(buffer.getBytes());
