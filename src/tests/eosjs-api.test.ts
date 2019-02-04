@@ -1,7 +1,7 @@
 import { TextDecoder, TextEncoder } from "text-encoding";
-import Api from "../eosjs-api";
-import JsonRpc from "../eosjs-jsonrpc";
-import JsSignatureProvider from "../eosjs-jssig";
+import { Api } from "../eosjs-api";
+import { JsonRpc } from "../eosjs-jsonrpc";
+import { JsSignatureProvider } from "../eosjs-jssig";
 
 const transaction = {
     expiration: "2018-09-04T18:42:49",
