@@ -7,9 +7,9 @@
   let pre = document.getElementsByTagName('pre')[0];
   const defaultPrivateKey = '5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr'; // useraaaaaaaa
 
-  const rpc = new eosjs_jsonrpc.default('http://localhost:8888');
-  const signatureProvider = new eosjs_jssig.default([defaultPrivateKey]);
-  const api = new eosjs_api.default({ rpc, signatureProvider });
+  const rpc = new eosjs_jsonrpc('http://localhost:8888');
+  const signatureProvider = new eosjs_jssig([defaultPrivateKey]);
+  const api = new eosjs_api({ rpc, signatureProvider });
 
   function waitTwoSeconds() {
     return new Promise(resolve => setTimeout(resolve, 2000));
