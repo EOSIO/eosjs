@@ -29,23 +29,23 @@
     "text-encoding": "^0.6.4"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.1",
-    "@types/node": "^10.3.1",
+    "@types/jest": "^23.3.13",
+    "@types/node": "^10.12.21",
     "@types/text-encoding": "^0.0.35",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-1": "^6.24.1",
-    "jest": "^23.5.0",
-    "jest-fetch-mock": "^1.6.5",
+    "jest": "^23.6.0",
+    "jest-fetch-mock": "^1.7.5",
     "json-loader": "^0.5.7",
-    "ts-jest": "^23.1.4",
+    "ts-jest": "^23.10.5",
     "ts-loader": "^4.3.1",
-    "tslint": "^5.11.0",
+    "tslint": "^5.12.1",
     "tslint-eslint-rules": "^5.4.0",
     "typescript": "^2.9.1",
-    "webpack": "^4.11.0",
-    "webpack-cli": "^3.0.2"
+    "webpack": "^4.29.0",
+    "webpack-cli": "^3.2.1"
   },
   "jest": {
     "automock": false,
