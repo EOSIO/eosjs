@@ -5,10 +5,16 @@
 <script src='../../dist-web/eosjs-jssig.js'></script>
 <script>
   let pre = document.getElementsByTagName('pre')[0];
-  const defaultPrivateKey = '5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr'; // useraaaaaaaa
+  const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
+  /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
+   * 1) cleos create key --to-console (copy this privateKey & publicKey)
+   * 2) cleos wallet import 
+   * 3) cleos create account bob publicKey
+   * 4) cleos create account alice publicKey
+   */
 
   const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
-  const signatureProvider = new eosjs_jssig.JSSignatureProvider([defaultPrivateKey]);
+  const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
   const api = new eosjs_api.Api({ rpc, signatureProvider });
 
   function waitTwoSeconds() {
@@ -22,12 +28,12 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'useraaaaaaaa',
+                actor: 'bob',
                 permission: 'active',
             }],
             data: {
-                from: 'useraaaaaaaa',
-                to: 'useraaaaaaab',
+                from: 'bob',
+                to: 'alice',
                 quantity: '0.0001 SYS',
                 memo: '',
             },
@@ -44,12 +50,12 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'useraaaaaaaa',
+                actor: 'bob',
                 permission: 'active',
             }],
             data: {
-                from: 'useraaaaaaaa',
-                to: 'useraaaaaaab',
+                from: 'bob',
+                to: 'alice',
                 quantity: '0.0001 SYS',
                 memo: '',
             },
@@ -80,12 +86,12 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'useraaaaaaaa',
+                actor: 'bob',
                 permission: 'active',
             }],
             data: {
-                from: 'useraaaaaaaa',
-                to: 'useraaaaaaab',
+                from: 'bob',
+                to: 'alice',
                 quantity: '0.0001 SYS',
                 memo: '',
             },
@@ -106,12 +112,12 @@
             account: 'eosio.token',
             name: 'transfer',
             authorization: [{
-                actor: 'useraaaaaaaa',
+                actor: 'bob',
                 permission: 'active',
             }],
             data: {
-                from: 'useraaaaaaaa',
-                to: 'useraaaaaaab',
+                from: 'bob',
+                to: 'alice',
                 quantity: '0.0001 SYS',
                 memo: '',
             },
