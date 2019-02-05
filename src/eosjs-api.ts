@@ -4,7 +4,7 @@
 // copyright defined in eosjs/LICENSE.txt
 
 import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./eosjs-api-interfaces";
-import JsonRpc from "./eosjs-jsonrpc";
+import { JsonRpc } from "./eosjs-jsonrpc";
 import { Abi, GetInfoResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
 import * as ser from "./eosjs-serialize";
 
@@ -13,7 +13,7 @@ const abiAbi = require('../src/abi.abi.json');
 // tslint:disable-next-line
 const transactionAbi = require('../src/transaction.abi.json');
 
-export default class Api {
+export class Api {
     /** Issues RPC calls */
     public rpc: JsonRpc;
 

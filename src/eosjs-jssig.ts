@@ -8,7 +8,7 @@ import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api-interfaces
 import { convertLegacyPublicKey } from "./eosjs-numeric";
 
 /** Signs transactions using in-process private keys */
-export default class JsSignatureProvider implements SignatureProvider {
+export class JsSignatureProvider implements SignatureProvider {
     /** map public to private keys */
     public keys = new Map<string, string>();
 
