@@ -6,6 +6,7 @@
   "scripts": {
     "prepare": "npm run build",
     "test": "jest",
+    "test-node": "node src/tests/nodeTest.js",
     "lint": "tslint -c tslint.json src/**/*.ts",
     "lint-fix": "tslint -c tslint.json src/**/*.ts --fix",
     "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
