@@ -25,7 +25,7 @@ Clone this repository locally then run `npm run build-web` or `yarn build-web`. 
 Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
 ```js
 import { Api, JsonRpc, RpcError } from 'eosjs';
-import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
+import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // development only
 ```
 
 ### CommonJS
@@ -33,7 +33,7 @@ import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
 Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
 const { Api, JsonRpc, RpcError } = require('eosjs');
-const JsSignatureProvider = require('eosjs/dist/eosjs-jssig').default;  // development only
+const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 const { TextEncoder, TextDecoder } = require('text-encoding');          // React Native, IE11, and Edge Browsers only
@@ -48,7 +48,7 @@ The Signature Provider holds private keys and is responsible for signing transac
 ***Using the JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
 
 ```js
-const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
+const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // bob
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 ```
 
@@ -61,7 +61,7 @@ const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 
 ### API
 
-Include textDecoder and textEncoder when using in browser.
+Include textDecoder and textEncoder when using in Node, React Native, IE11 or Edge Browsers.
 ```js
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 ```
@@ -116,5 +116,12 @@ try {
 ### Automated Unit Test Suite
 `npm run test` or `yarn test`
 
-### Web Integration Test Suite
-Run `npm run build-web` to build the browser distrubution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
+### Integration Test Suite
+
+#### Web Environment
+
+Run `npm run build-web` or `yarn build-web` to build the browser distribution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
+
+#### NodeJS Environment
+
+Run `npm run build` or `yarn build` to build the NPM distribution bundle then run `npm run test-node` or `yarn test-node`.  The file should run through 6 tests, relaying the results onto your terminal with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown for an invalid transaction and invalid rpc call.
