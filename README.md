@@ -33,7 +33,7 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // devel
 Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
 const { Api, JsonRpc, RpcError } = require('eosjs');
-const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');  // development only
+const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 const { TextEncoder, TextDecoder } = require('text-encoding');          // React Native, IE11, and Edge Browsers only
@@ -116,5 +116,12 @@ try {
 ### Automated Unit Test Suite
 `npm run test` or `yarn test`
 
-### Web Integration Test Suite
-Run `npm run build-web` to build the browser distrubution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
+### Integration Test Suite
+
+#### Web Environment
+
+Run `npm run build-web` or `yarn build-web` to build the browser distribution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
+
+#### NodeJS Environment
+
+Run `npm run build` or `yarn build` to build the NPM distribution bundle then run `npm run test-node` or `yarn test-node`.  The file should run through 6 tests, relaying the results onto your terminal with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown for an invalid transaction and invalid rpc call.
