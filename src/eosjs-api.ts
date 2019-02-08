@@ -9,9 +9,9 @@ import { Abi, GetInfoResult, PushTransactionArgs } from './eosjs-rpc-interfaces'
 import * as ser from './eosjs-serialize'
 
 // tslint:disable-next-line
-const abiAbi = require('../src/abi.abi.json');
+const abiAbi = require('../src/abi.abi.json')
 // tslint:disable-next-line
-const transactionAbi = require('../src/transaction.abi.json');
+const transactionAbi = require('../src/transaction.abi.json')
 
 export class Api {
     /** Issues RPC calls */

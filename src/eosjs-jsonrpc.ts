@@ -5,7 +5,7 @@
 
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces'
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric'
-import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./eosjs-rpc-interfaces"; // tslint:disable-line
+import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./eosjs-rpc-interfaces" // tslint:disable-line
 import { RpcError } from './eosjs-rpcerror'
 
 function arrayToHex(data: Uint8Array) {
