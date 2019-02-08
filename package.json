@@ -7,8 +7,8 @@
     "prepare": "npm run build",
     "test": "jest",
     "test-node": "node src/tests/nodeTest.js",
-    "lint": "tslint -c tslint.json src/**/*.ts",
-    "lint-fix": "tslint -c tslint.json src/**/*.ts --fix",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "lint-fix": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
     "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
     "clean": "rm -rf dist",
@@ -29,6 +29,7 @@
     "text-encoding": "^0.6.4"
   },
   "devDependencies": {
+    "@blockone/tslint-config-blockone": "^2.0.0",
     "@types/jest": "^23.3.1",
     "@types/node": "^10.3.1",
     "@types/text-encoding": "^0.0.35",
