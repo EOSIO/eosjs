@@ -18,7 +18,7 @@ describe('JSON RPC', () => {
 
     fetch.once(JSON.stringify(expReturn), { status: 404 })
 
-        // async / await don't play well with expect().toThrow()
+    // async / await don't play well with expect().toThrow()
     try {
       await jsonRpc.get_abi(accountName)
     } catch (e) {
@@ -44,7 +44,6 @@ describe('JSON RPC', () => {
 
     fetch.once(JSON.stringify(expReturn))
 
-        // async / await don't play well with expect().toThrow()
     try {
       await jsonRpc.get_abi(accountName)
     } catch (e) {

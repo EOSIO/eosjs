@@ -3,7 +3,6 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-// tslint:disable-next-line:no-var-requires
 const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer
 
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'

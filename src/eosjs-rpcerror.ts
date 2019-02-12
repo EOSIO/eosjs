@@ -5,7 +5,7 @@
 
 /** Holds detailed error information */
 export class RpcError extends Error {
-    /** Detailed error information */
+  /** Detailed error information */
   public json: any
 
   constructor(json: any) {

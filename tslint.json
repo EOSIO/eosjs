@@ -4,6 +4,6 @@
       "@blockone/tslint-config-blockone/tslint-config"
   ],
   "jsRules": {},
-  "rules": { "no-bitwise": false },
+  "rules": { "no-bitwise": false, "no-var-requires": false },
   "rulesDirectory": []
 }
