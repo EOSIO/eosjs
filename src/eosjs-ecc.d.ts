@@ -1,1 +1,1 @@
-declare module "eosjs-ecc"
+declare module "eosjs-ecc";
