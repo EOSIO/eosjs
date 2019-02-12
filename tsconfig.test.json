@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.node",
-  "compilerOptions": {
-    "module": "commonjs",
-    "allowJs": true,
-    "declaration": false
-  }
-}
