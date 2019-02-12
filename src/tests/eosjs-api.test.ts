@@ -169,12 +169,6 @@ describe('eosjs-api', () => {
     expect(response.actions).toBeTruthy()
   })
 
-    // This test misuses this function
-    // it("serializeTransaction converts tx to binary", () => {
-    //     const tx = api.serializeTransaction(transaction);
-    //     expect([...tx]).toEqual(serializedTx);
-    // });
-
   it('deserializeTransaction converts tx from binary', () => {
     const tx = api.deserializeTransaction(serializedTx)
     expect(tx).toEqual(deserializedTx)
