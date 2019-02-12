@@ -3,10 +3,11 @@ import { RpcError } from '../eosjs-rpcerror'
 
 describe('JSON RPC', () => {
   const endpoint = 'http://localhost'
+  const fetchMock = fetch as any
   let jsonRpc: JsonRpc
 
   beforeEach(() => {
-    fetch.resetMocks()
+    fetchMock.resetMocks()
     jsonRpc = new JsonRpc(endpoint)
   })
 
@@ -16,7 +17,7 @@ describe('JSON RPC', () => {
     const accountName = 'myaccountaaa'
     const expReturn = { data: '12345', message: expMessage }
 
-    fetch.once(JSON.stringify(expReturn), { status: 404 })
+    fetchMock.once(JSON.stringify(expReturn), { status: 404 })
 
     // async / await don't play well with expect().toThrow()
     try {
@@ -42,7 +43,7 @@ describe('JSON RPC', () => {
       },
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     try {
       await jsonRpc.get_abi(accountName)
@@ -92,7 +93,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_abi(accountName)
 
@@ -111,7 +112,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_account(accountName)
 
@@ -130,7 +131,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_block_header_state(blockNumOrId)
 
@@ -149,7 +150,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_block(blockNumOrId)
 
@@ -168,7 +169,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_code(accountName)
 
@@ -191,7 +192,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_currency_balance(code, account, symbol)
 
@@ -214,7 +215,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_currency_balance(code, account)
 
@@ -235,7 +236,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_currency_stats(code, symbol)
 
@@ -251,7 +252,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_info()
 
@@ -267,7 +268,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_producer_schedule()
 
@@ -290,7 +291,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_producers(json, lowerBound, limit)
 
@@ -313,7 +314,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_producers()
 
@@ -332,7 +333,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_raw_code_and_abi(accountName)
 
@@ -370,7 +371,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_table_rows(callParams)
 
@@ -412,7 +413,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.get_table_rows(callParams)
 
@@ -436,7 +437,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.getRequiredKeys(callParams)
 
@@ -471,7 +472,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.push_transaction(callParams)
 
@@ -487,7 +488,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.db_size_get()
 
@@ -510,7 +511,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.history_get_actions(accountName, pos, offset)
 
@@ -533,7 +534,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.history_get_actions(accountName)
 
@@ -554,7 +555,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.history_get_transaction(id, blockNumHint)
 
@@ -575,7 +576,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.history_get_transaction(id)
 
@@ -594,7 +595,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.history_get_key_accounts(publicKey)
 
@@ -613,7 +614,7 @@ describe('JSON RPC', () => {
       method: 'POST',
     }
 
-    fetch.once(JSON.stringify(expReturn))
+    fetchMock.once(JSON.stringify(expReturn))
 
     const response = await jsonRpc.history_get_controlled_accounts(controllingAccount)
 
