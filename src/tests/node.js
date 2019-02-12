@@ -16,28 +16,28 @@ const signatureProvider = new JsSignatureProvider([privateKey]);
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
 const transactWithConfig = async () => await api.transact({
-  actions: [{
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-          actor: 'bob',
-          permission: 'active',
-      }],
-      data: {
-          from: 'bob',
-          to: 'alice',
-          quantity: '0.0001 SYS',
-          memo: '',
-      },
-  }]
+    actions: [{
+        account: 'eosio.token',
+        name: 'transfer',
+        authorization: [{
+            actor: 'bob',
+            permission: 'active',
+        }],
+        data: {
+            from: 'bob',
+            to: 'alice',
+            quantity: '0.0001 SYS',
+            memo: '',
+        },
+    }]
 }, {
-  blocksBehind: 3,
-  expireSeconds: 30,
+    blocksBehind: 3,
+    expireSeconds: 30,
 });
 
 const transactWithoutConfig = async () => {
     const transactionResponse = await transactWithConfig();
-    const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 6);
+    const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
     const currentDate = new Date();
     const timePlusTen = currentDate.getTime() + 10000;
     const timeInISOString = (new Date(timePlusTen)).toISOString();
@@ -67,42 +67,42 @@ const transactWithoutConfig = async () => {
 
 const transactWithoutBroadcast = async () => await api.transact({
   actions: [{
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-          actor: 'bob',
-          permission: 'active',
-      }],
-      data: {
-          from: 'bob',
-          to: 'alice',
-          quantity: '0.0001 SYS',
-          memo: '',
-      },
-  }]
+        account: 'eosio.token',
+        name: 'transfer',
+        authorization: [{
+            actor: 'bob',
+            permission: 'active',
+        }],
+        data: {
+            from: 'bob',
+            to: 'alice',
+            quantity: '0.0001 SYS',
+            memo: '',
+        },
+    }]
 }, {
-  broadcast: false,
-  blocksBehind: 3,
-  expireSeconds: 30,
+    broadcast: false,
+    blocksBehind: 3,
+    expireSeconds: 30,
 });
 
 const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () => await api.transact({
-  actions: [{
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-          actor: 'bob',
-          permission: 'active',
-      }],
-      data: {
-          from: 'bob',
-          to: 'alice',
-          quantity: '0.0001 SYS',
-          memo: '',
-      },
-  }]
+    actions: [{
+        account: 'eosio.token',
+        name: 'transfer',
+        authorization: [{
+            actor: 'bob',
+            permission: 'active',
+        }],
+        data: {
+            from: 'bob',
+            to: 'alice',
+            quantity: '0.0001 SYS',
+            memo: '',
+        },
+    }]
 });
   
 const rpcShouldFail = async () => await rpc.get_block(-1);
