@@ -3,9 +3,9 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import * as ecc from "eosjs-ecc";
-import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api-interfaces";
-import { convertLegacyPublicKey } from "./eosjs-numeric";
+import * as ecc from 'eosjs-ecc';
+import { SignatureProvider, SignatureProviderArgs } from './eosjs-api-interfaces';
+import { convertLegacyPublicKey } from './eosjs-numeric';
 
 /** Signs transactions using in-process private keys */
 export class JsSignatureProvider implements SignatureProvider {
@@ -32,7 +32,7 @@ export class JsSignatureProvider implements SignatureProvider {
     /** Sign a transaction */
     public async sign({ chainId, requiredKeys, serializedTransaction }: SignatureProviderArgs) {
         const signBuf = Buffer.concat([
-            new Buffer(chainId, "hex"), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32)),
+            new Buffer(chainId, 'hex'), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32)),
         ]);
         const signatures = requiredKeys.map(
             (pub) => ecc.Signature.sign(signBuf, this.keys.get(convertLegacyPublicKey(pub))).toString(),

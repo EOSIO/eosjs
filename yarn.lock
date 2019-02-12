@@ -18,6 +18,14 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
+"@blockone/tslint-config-blockone@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@blockone/tslint-config-blockone/-/tslint-config-blockone-2.0.0.tgz#1df6e235200a14b3d4d440e292db0c921ae69eda"
+  integrity sha512-IEo4/r07nwNh1Jfq4xCJDt6ZK938kWTfPZ5wFl8nNdh9p/ScZ16CV7GzIIyuIp1MtAJW+yiiM6oCtRwEHwAkvA==
+  dependencies:
+    tslint "^5.11.0"
+    tslint-eslint-rules "^5.4.0"
+
 "@types/jest@^23.3.1":
   version "23.3.13"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.13.tgz#c81484b6f4ca007bb09887ed15ecb3286d58f928"
