@@ -1,14 +1,34 @@
 <pre style='width: 100%; height: 100%; margin:0px; '>
     <h1> EOSJS Web Build Integration Test Suite </h1>
-    <div><button onClick="runAllTests()">Run All Tests</button></div>
-    <div><button onClick="transactWithConfig(event)">Transact with Configuration Parameter</button><label>Not Started</label></div>
+    <div><button onClick="runAllTests();">Run All Tests</button></div>
+    <div><button onClick="transactWithConfig(event);">Transact with Configuration Parameter</button><label>Not Started</label></div>
+    <div><button onClick="transactWithoutConfig(event);">Transact with Manually Configured TAPOS</button><label>Not Started</label></div>
+    <div><button onClick="transactWithoutBroadcast(event);">Transact without Broadcasting</button><label>Not Started</label></div>
+
 </pre>
 
 <style>
+    html, body {  
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    h1 {
+        color: darkblue;
+    }
+    div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
     button {
-        margin: 1rem;
-        padding: .5rem 1rem;
-        border-radius: .25rem;
+        margin: .5rem 1rem;
+        padding: 1rem 2rem;
+        border: 2px solid grey;
+        border-radius: .5rem;
+        font-size: .85rem;
+    }
+    label {
+        font-size: 1.4rem;
     }
 </style>
 
@@ -27,12 +47,16 @@
     const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
     const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
     const api = new eosjs_api.Api({ rpc, signatureProvider });
-    let resultsLabel;
+    let resultsLabel, transactionResponse, transactionSignatures;
+
+    const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1000))
 
     const transactWithConfig = async (e) => {
-        resultsLabel = e.target.nextSibling;
-        resultsLabel.innerText = "Executing Test";
-        const transactionResponse = await api.transact({
+        if (e) {
+            resultsLabel = e.target.nextSibling;
+            resultsLabel.innerText = "Executing Test";
+        }
+        transactionResponse = await api.transact({
             actions: [{
                 account: 'eosio.token',
                 name: 'transfer',
@@ -52,20 +76,25 @@
             expireSeconds: 30,
         });
 
-        if (transactionResponse.transaction_id) {
+        if (e && transactionResponse.transaction_id) {
             resultsLabel.innerText = "SUCCESS";
         }
+
+        return transactionResponse;
     }
 
-    const transactWithoutConfig = async () => {
-        const transactionResponse = await transactWithConfig();
+    const transactWithoutConfig = async (e) => {
+        resultsLabel = e.target.nextSibling;
+        resultsLabel.innerText = "Executing Test";
+
+        transactionResponse = await transactWithConfig();
         const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
         const currentDate = new Date();
         const timePlusTen = currentDate.getTime() + 10000;
         const timeInISOString = (new Date(timePlusTen)).toISOString();
         const expiration = timeInISOString.substr(0, timeInISOString.length - 1);
 
-        return await api.transact({
+        transactionResponse = await api.transact({
             expiration,
             ref_block_num: blockInfo.block_num & 0xffff,
             ref_block_prefix: blockInfo.ref_block_prefix,
@@ -84,29 +113,44 @@
                 },
             }]
         });
+
+        if (transactionResponse.transaction_id) {
+            resultsLabel.innerText = "SUCCESS";
+        }
+
+        return transactionResponse;
     };
         
 
-    const transactWithoutBroadcast = async () => await api.transact({
-    actions: [{
-            account: 'eosio.token',
-            name: 'transfer',
-            authorization: [{
-                actor: 'bob',
-                permission: 'active',
-            }],
-            data: {
-                from: 'bob',
-                to: 'alice',
-                quantity: '0.0001 SYS',
-                memo: '',
-            },
-        }]
-    }, {
-        broadcast: false,
-        blocksBehind: 3,
-        expireSeconds: 30,
-    });
+    const transactWithoutBroadcast = async (e) => {
+        resultsLabel = e.target.nextSibling;
+        resultsLabel.innerText = "Executing Test";
+
+        transactionSignatures = await api.transact({
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: '',
+                },
+            }]
+            }, {
+                broadcast: false,
+                blocksBehind: 3,
+                expireSeconds: 30,
+        });
+
+        if(transactionSignatures.signatures && transactionSignatures.serializedTransaction) {
+            resultsLabel.innerText = "SUCCESS";
+        }
+    };
 
     const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
@@ -129,16 +173,13 @@
     
     const rpcShouldFail = async () => await rpc.get_block(-1);
 
-    const runAllTests = () => {
+    const runAllTests = async () => {
         const buttons = document.getElementsByTagName('button');
         for (var i = 1; i < buttons.length; i++) {
             var button = buttons[i];
             button.click();
+            await waitOneSecond();
         }
         return;
     }
-
-    /*(() => {
-        runAllTests();
-    })();*/
 </script>
