@@ -1,0 +1,144 @@
+<pre style='width: 100%; height: 100%; margin:0px; '>
+    <h1> EOSJS Web Build Integration Test Suite </h1>
+    <div><button onClick="runAllTests()">Run All Tests</button></div>
+    <div><button onClick="transactWithConfig(event)">Transact with Configuration Parameter</button><label>Not Started</label></div>
+</pre>
+
+<style>
+    button {
+        margin: 1rem;
+        padding: .5rem 1rem;
+        border-radius: .25rem;
+    }
+</style>
+
+<script src='../../dist-web/eosjs-api.js'></script>
+<script src='../../dist-web/eosjs-jsonrpc.js'></script>
+<script src='../../dist-web/eosjs-jssig.js'></script>
+<script>
+    const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
+    /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
+    * 1) cleos create key --to-console (copy this privateKey & publicKey)
+    * 2) cleos wallet import 
+    * 3) cleos create account bob publicKey
+    * 4) cleos create account alice publicKey
+    */
+
+    const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
+    const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
+    const api = new eosjs_api.Api({ rpc, signatureProvider });
+    let resultsLabel;
+
+    const transactWithConfig = async (e) => {
+        resultsLabel = e.target.nextSibling;
+        resultsLabel.innerText = "Executing Test";
+        const transactionResponse = await api.transact({
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: '',
+                },
+            }]
+        }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+        });
+
+        if (transactionResponse.transaction_id) {
+            resultsLabel.innerText = "SUCCESS";
+        }
+    }
+
+    const transactWithoutConfig = async () => {
+        const transactionResponse = await transactWithConfig();
+        const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
+        const currentDate = new Date();
+        const timePlusTen = currentDate.getTime() + 10000;
+        const timeInISOString = (new Date(timePlusTen)).toISOString();
+        const expiration = timeInISOString.substr(0, timeInISOString.length - 1);
+
+        return await api.transact({
+            expiration,
+            ref_block_num: blockInfo.block_num & 0xffff,
+            ref_block_prefix: blockInfo.ref_block_prefix,
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: '',
+                },
+            }]
+        });
+    };
+        
+
+    const transactWithoutBroadcast = async () => await api.transact({
+    actions: [{
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'bob',
+                permission: 'active',
+            }],
+            data: {
+                from: 'bob',
+                to: 'alice',
+                quantity: '0.0001 SYS',
+                memo: '',
+            },
+        }]
+    }, {
+        broadcast: false,
+        blocksBehind: 3,
+        expireSeconds: 30,
+    });
+
+    const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
+
+    const transactShouldFail = async () => await api.transact({
+        actions: [{
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'bob',
+                permission: 'active',
+            }],
+            data: {
+                from: 'bob',
+                to: 'alice',
+                quantity: '0.0001 SYS',
+                memo: '',
+            },
+        }]
+    });
+    
+    const rpcShouldFail = async () => await rpc.get_block(-1);
+
+    const runAllTests = () => {
+        const buttons = document.getElementsByTagName('button');
+        for (var i = 1; i < buttons.length; i++) {
+            var button = buttons[i];
+            button.click();
+        }
+        return;
+    }
+
+    /*(() => {
+        runAllTests();
+    })();*/
+</script>
