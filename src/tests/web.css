@@ -1,0 +1,33 @@
+html, body {  
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h1 {
+  color: darkblue;
+}
+
+div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  margin: .5rem 1rem;
+  padding: 1rem 2rem;
+  border: 2px solid darkblue;
+  border-radius: .5rem;
+  font-size: .85rem;
+  cursor: pointer;
+}
+
+label {
+  font-size: 1.4rem;
+}
+
+@media (min-width: 800px) {
+  html, body {
+    font-size: 20px;
+  }
+}
