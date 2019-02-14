@@ -30,7 +30,7 @@ describe('Node JS environment', () => {
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
         try {
             failedAsPlanned = true;
-            transactionResponse = await tests.transactShouldFail();
+            await tests.transactShouldFail();
             failedAsPlanned = false;
         } catch (e) {
             if (e.message !== 'Required configuration or TAPOS fields are not present') {
