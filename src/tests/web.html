@@ -29,6 +29,7 @@
         border: 2px solid darkblue;
         border-radius: .5rem;
         font-size: .85rem;
+        cursor: pointer;
     }
     label {
         font-size: 1.4rem;
@@ -81,7 +82,13 @@
         resultsLabel = e.target.nextSibling;
         resultsLabel.innerText = EXECUTING;
 
-        transactionResponse = await transactWithConfig();
+        try {
+            transactionResponse = await transactWithConfig();
+        } catch (error) {
+            resultsLabel.innerText = FAILED;
+            console.err('Transact With Config Test Failure: ', error.message);
+            return false;
+        }
 
         if (transactionResponse.transaction_id) {
             resultsLabel.innerText = SUCCESS;
@@ -124,7 +131,13 @@
         resultsLabel = e.target.nextSibling;
         resultsLabel.innerText = EXECUTING;
 
-        transactionResponse = await transactWithoutConfig()
+        try {
+            transactionResponse = await transactWithoutConfig();
+        } catch (error) {
+            resultsLabel.innerText = FAILED;
+            console.err('Transact without Config Test Failure: ', error.message);
+            return false;
+        }
 
         if (transactionResponse.transaction_id) {
             resultsLabel.innerText = SUCCESS;
@@ -161,7 +174,13 @@
         resultsLabel = e.target.nextSibling;
         resultsLabel.innerText = EXECUTING;
 
-        transactionSignatures = await transactWithoutBroadcast();
+        try {
+            transactionSignatures = await transactWithoutBroadcast();
+        } catch (error) {
+            resultsLabel.innerText = FAILED;
+            console.err('Transact without Broadcast Test Failure: ', error.message);
+            return false;
+        }
 
         if(transactionSignatures.signatures && transactionSignatures.serializedTransaction) {
             resultsLabel.innerText = SUCCESS;
@@ -177,8 +196,14 @@
         resultsLabel = e.target.nextSibling;
         resultsLabel.innerText = EXECUTING;
 
-        transactionSignatures = await transactWithoutBroadcast();
-        transactionResponse = await broadcastResult(transactionSignatures);
+        try {
+            transactionSignatures = await transactWithoutBroadcast();
+            transactionResponse = await broadcastResult(transactionSignatures);
+        } catch (error) {
+            resultsLabel.innerText = FAILED;
+            console.err('Broadcast Transaction Test Failure: ', error.message);
+            return false;
+        }
 
         if (transactionResponse.transaction_id) {
             resultsLabel.innerText = SUCCESS;
