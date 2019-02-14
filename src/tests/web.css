@@ -1,33 +1,87 @@
-html, body {  
-  max-width: 800px;
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+.header-container {
+  margin: 0;
+  background-color: #F6F6F8;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1200px;
+  margin : 0 auto;
+  padding: 2rem;
+}
+
+div.header > img { 
+  max-width: 8rem;
+}
+
+div.header > h1 {
+  font-size: 3.5rem;
+  font-weight: lighter;
+  color: #202035;
+  margin: 1.75rem 0;
+}
+
+div.header > button {
+  padding: 1rem 6rem;
+  color: white;
+  background: #15087E;
+}
+
+div.header > button:hover {
+  background: #15089E;
+}
+
+.tests {
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 2rem;
 }
 
-h1 {
-  color: darkblue;
-}
-
-div {
+div.tests > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 button {
-  margin: .5rem 1rem;
+  font-family: 'Source Sans Pro', sans-serif;
+  margin: 1rem;
   padding: 1rem 2rem;
-  border: 2px solid darkblue;
-  border-radius: .5rem;
-  font-size: .85rem;
+  border: 2px solid #15087E;
+  border-radius: .3rem;
+  font-size: .9rem;
   cursor: pointer;
+}
+
+button:hover {
+  background: #F6F6F8;
 }
 
 label {
   font-size: 1.4rem;
 }
 
-@media (min-width: 800px) {
+@media (min-width: 1200px) {
   html, body {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 800px) {
+  html, body {
+    font-size: 14px;
   }
 }

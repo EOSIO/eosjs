@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="web.css">
+        <link rel='stylesheet' type='text/css' href='web.css'>
         <script src='../../dist-web/eosjs-api.js'></script>
         <script src='../../dist-web/eosjs-jsonrpc.js'></script>
         <script src='../../dist-web/eosjs-jssig.js'></script>
         <script>
-            const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
+            const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
             /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
             * 1) cleos create key --to-console (copy this privateKey & publicKey)
             * 2) cleos wallet import 
@@ -18,7 +18,7 @@
             const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
             const api = new eosjs_api.Api({ rpc, signatureProvider });
         
-            const EXECUTING = "Executing Test", SUCCESS = "Success", FAILED = "Failed";
+            const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
         
             const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1000))
@@ -241,13 +241,20 @@
         </script>
     </head>
     <body>
-        <h1> EOSJS Web Build Integration Test Suite </h1>
-        <div><button onClick="runAllTests();">Run All Tests</button></div>
-        <div><button onClick="testTransactWithConfig(event);">Transact with Configuration Parameter</button><label>Not Started</label></div>
-        <div><button onClick="testTransactWithoutConfig(event);">Transact with Manually Configured TAPOS</button><label>Not Started</label></div>
-        <div><button onClick="testTransactWithoutBroadcast(event);">Transact without Broadcasting</button><label>Not Started</label></div>
-        <div><button onClick="testBroadcastResult(event);">Broadcast Transaction</button><label>Not Started</label></div>
-        <div><button onClick="testTransactShouldFail(event);">Invalid Transaction Throws Error</button><label>Not Started</label></div>
-        <div><button onClick="testRpcShouldFail(event);">Invalid Rpc Call Throws Rpc Error</button><label>Not Started</label></div>
+        <div class='header-container'>
+            <div class='header'>
+                <img src='logo.svg'/>
+                <h1>Web Build Integration Tests</h1>
+                <button onClick='runAllTests();'>Run All Tests</button>
+            </div>
+        </div>
+        <div class='tests'>
+            <div><button onClick='testTransactWithConfig(event);'>Transact with Configuration Parameter</button><label>Not Started</label></div>
+            <div><button onClick='testTransactWithoutConfig(event);'>Transact with Manually Configured TAPOS</button><label>Not Started</label></div>
+            <div><button onClick='testTransactWithoutBroadcast(event);'>Transact without Broadcasting</button><label>Not Started</label></div>
+            <div><button onClick='testBroadcastResult(event);'>Broadcast Transaction</button><label>Not Started</label></div>
+            <div><button onClick='testTransactShouldFail(event);'>Invalid Transaction Throws Error</button><label>Not Started</label></div>
+            <div><button onClick='testRpcShouldFail(event);'>Invalid Rpc Call Throws Rpc Error</button><label>Not Started</label></div>
+        </div>
     </body>
 </html>
