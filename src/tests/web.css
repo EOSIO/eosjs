@@ -9,6 +9,17 @@ body {
   font-family: 'Source Sans Pro', sans-serif;
 }
 
+button {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: .9rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:active, button:focus {
+  outline: none;
+}
+
 .header-container {
   margin: 0;
   background-color: #F6F6F8;
@@ -18,60 +29,71 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
   max-width: 1200px;
   margin : 0 auto;
   padding: 2rem;
 }
 
-div.header > img { 
+.header > img { 
   max-width: 8rem;
 }
 
-div.header > h1 {
+.header > h1 {
   font-size: 3.5rem;
   font-weight: lighter;
   color: #202035;
-  margin: 1.75rem 0;
+  margin: 2rem 0;
 }
 
-div.header > button {
+.header > button {
   padding: 1rem 6rem;
+  border-radius: .4rem;
   color: white;
   background: #15087E;
+  letter-spacing: 1px;
 }
 
-div.header > button:hover {
+.header > button:hover {
   background: #15089E;
 }
 
 .tests {
   max-width: 1200px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 1rem;
 }
 
-div.tests > div {
+.tests > div {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  text-align: center;
+  width: 30%;
+  margin: 1rem auto;
 }
 
-button {
-  font-family: 'Source Sans Pro', sans-serif;
-  margin: 1rem;
-  padding: 1rem 2rem;
-  border: 2px solid #15087E;
-  border-radius: .3rem;
+.tests > div > h2 {
+  font-weight: normal;
+  margin: 1.5rem 0;
   font-size: .9rem;
-  cursor: pointer;
 }
 
-button:hover {
+.tests > div > button {
+  width: 6.5rem;
+  height: 6.5rem;
+  margin: 1rem;;
+  padding: 0;
+  border: .15rem solid #15087E;
+  border-radius: 5rem;
+}
+
+.tests > div > button:hover {
   background: #F6F6F8;
-}
-
-label {
-  font-size: 1.4rem;
 }
 
 @media (min-width: 1200px) {

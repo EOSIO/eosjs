@@ -44,14 +44,14 @@
             });
         
             const testTransactWithConfig = async (e) => {
-                resultsLabel = e.target.nextSibling;
+                resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
                     transactionResponse = await transactWithConfig();
                 } catch (error) {
                     resultsLabel.innerText = FAILED;
-                    console.err('Transact With Config Test Failure: ', error.message);
+                    console.error('Transact With Config Test Failure: ', error.message);
                     return false;
                 }
         
@@ -93,14 +93,14 @@
             };
         
             const testTransactWithoutConfig = async (e) => {
-                resultsLabel = e.target.nextSibling;
+                resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
                     transactionResponse = await transactWithoutConfig();
                 } catch (error) {
                     resultsLabel.innerText = FAILED;
-                    console.err('Transact without Config Test Failure: ', error.message);
+                    console.error('Transact without Config Test Failure: ', error.message);
                     return false;
                 }
         
@@ -136,14 +136,14 @@
                 
         
             const testTransactWithoutBroadcast = async (e) => {
-                resultsLabel = e.target.nextSibling;
+                resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
                     transactionSignatures = await transactWithoutBroadcast();
                 } catch (error) {
                     resultsLabel.innerText = FAILED;
-                    console.err('Transact without Broadcast Test Failure: ', error.message);
+                    console.error('Transact without Broadcast Test Failure: ', error.message);
                     return false;
                 }
         
@@ -158,7 +158,7 @@
             const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
         
             const testBroadcastResult = async (e) => {
-                resultsLabel = e.target.nextSibling;
+                resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
@@ -166,7 +166,7 @@
                     transactionResponse = await broadcastResult(transactionSignatures);
                 } catch (error) {
                     resultsLabel.innerText = FAILED;
-                    console.err('Broadcast Transaction Test Failure: ', error.message);
+                    console.error('Broadcast Transaction Test Failure: ', error.message);
                     return false;
                 }
         
@@ -196,7 +196,7 @@
             });
         
             const testTransactShouldFail = async (e) => {
-                resultsLabel = e.target.nextSibling;
+                resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
@@ -214,7 +214,7 @@
             const rpcShouldFail = async () => await rpc.get_block(-1);
         
             const testRpcShouldFail = async (e) => {
-                resultsLabel = e.target.nextSibling;
+                resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
@@ -249,12 +249,12 @@
             </div>
         </div>
         <div class='tests'>
-            <div><button onClick='testTransactWithConfig(event);'>Transact with Configuration Parameter</button><label>Not Started</label></div>
-            <div><button onClick='testTransactWithoutConfig(event);'>Transact with Manually Configured TAPOS</button><label>Not Started</label></div>
-            <div><button onClick='testTransactWithoutBroadcast(event);'>Transact without Broadcasting</button><label>Not Started</label></div>
-            <div><button onClick='testBroadcastResult(event);'>Broadcast Transaction</button><label>Not Started</label></div>
-            <div><button onClick='testTransactShouldFail(event);'>Invalid Transaction Throws Error</button><label>Not Started</label></div>
-            <div><button onClick='testRpcShouldFail(event);'>Invalid Rpc Call Throws Rpc Error</button><label>Not Started</label></div>
+            <div><h2>Transact with Configuration Parameter</h2><button onClick='testTransactWithConfig(event);'>Test</button></div>
+            <div><h2>Transact with Manually Configured TAPOS</h2><button onClick='testTransactWithoutConfig(event);'>Test</button></div>
+            <div><h2>Transact without Broadcasting</h2><button onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
+            <div><h2>Broadcast Transaction</h2><button onClick='testBroadcastResult(event);'>Test</button></div>
+            <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
+            <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>
     </body>
 </html>
