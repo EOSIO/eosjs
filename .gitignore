@@ -3,3 +3,8 @@ dist/
 dist-web/
 node_modules/
 docs-build/
+
+#cypress artifacts
+cypress/screenshots/
+cypress/videos/
+reports/
