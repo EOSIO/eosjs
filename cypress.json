@@ -1,0 +1,12 @@
+{
+  "video": true,
+  "fixturesFolder": false,
+  "pluginsFile": false,
+  "supportFile": false,
+  "reporter": "mochawesome",
+    "reporterOptions": {
+      "reportDir": "reports",
+      "overwrite": false
+    },
+  "userAgent": "Chrome cypress"
+}
