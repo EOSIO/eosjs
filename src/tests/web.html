@@ -50,15 +50,18 @@
                 try {
                     transactionResponse = await transactWithConfig();
                 } catch (error) {
+                    resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
                     console.error('Transact With Config Test Failure: ', error.message);
                     return false;
                 }
         
                 if (transactionResponse.transaction_id) {
+                    resultsLabel.className = "success";
                     resultsLabel.innerText = SUCCESS;
                     return true;
                 }
+                resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
             }
@@ -99,15 +102,18 @@
                 try {
                     transactionResponse = await transactWithoutConfig();
                 } catch (error) {
+                    resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
                     console.error('Transact without Config Test Failure: ', error.message);
                     return false;
                 }
         
                 if (transactionResponse.transaction_id) {
+                    resultsLabel.className = "success";
                     resultsLabel.innerText = SUCCESS;
                     return true;
                 }
+                resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
             };
@@ -142,15 +148,18 @@
                 try {
                     transactionSignatures = await transactWithoutBroadcast();
                 } catch (error) {
+                    resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
                     console.error('Transact without Broadcast Test Failure: ', error.message);
                     return false;
                 }
         
                 if(transactionSignatures.signatures && transactionSignatures.serializedTransaction) {
+                    resultsLabel.className = "success";
                     resultsLabel.innerText = SUCCESS;
                     return true;
                 }
+                resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
             };
@@ -165,15 +174,18 @@
                     transactionSignatures = await transactWithoutBroadcast();
                     transactionResponse = await broadcastResult(transactionSignatures);
                 } catch (error) {
+                    resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
                     console.error('Broadcast Transaction Test Failure: ', error.message);
                     return false;
                 }
         
                 if (transactionResponse.transaction_id) {
+                    resultsLabel.className = "success";
                     resultsLabel.innerText = SUCCESS;
                     return true;
                 }
+                resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
             } 
@@ -203,10 +215,12 @@
                     await transactShouldFail();
                 } catch (e) {
                     if (e.message === 'Required configuration or TAPOS fields are not present') {
+                        resultsLabel.className = "success";
                         resultsLabel.innerText = SUCCESS;
                         return true;
                     }
                 }
+                resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
             }
@@ -221,10 +235,12 @@
                     await rpcShouldFail();
                 } catch (e) {
                     if (e instanceof eosjs_jsonrpc.RpcError) {
+                        resultsLabel.className = "success";
                         resultsLabel.innerText = SUCCESS;
                         return true;
                     }
                 }
+                resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
             }

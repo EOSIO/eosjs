@@ -12,7 +12,7 @@ body {
 button {
   font-family: 'Source Sans Pro', sans-serif;
   font-size: .9rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -94,6 +94,16 @@ button:active, button:focus {
 
 .tests > div > button:hover {
   background: #F6F6F8;
+}
+
+.tests > div > button.success {
+  color: #7ED321;
+  border: .15rem solid #7ED321;
+}
+
+.tests > div > button.failed {
+  color: #FF6363;
+  border: .15rem solid #FF6363;
 }
 
 @media (min-width: 1200px) {
