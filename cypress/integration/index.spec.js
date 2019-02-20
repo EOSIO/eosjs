@@ -6,7 +6,7 @@ describe('eosjs web test', () => {
     cy.visit(('./src/tests/web.html'))
     cy.get('div.tests>div>button').each((test) => {
       cy.wrap(test).click();
-      cy.contains('Success', { timeout: 5000 })
+      cy.wrap(test).contains('Success', { timeout: 5000 })
     });
   });
 })
