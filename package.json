@@ -10,7 +10,7 @@
     "lint-fix": "tslint -c tslint.json -p tsconfig.json --fix",
     "test": "jest src/tests/*eosjs*",
     "test-node": "jest src/tests/*node*",
-    "test-all": "yarn test && yarn test-node",
+    "test-all": "yarn test && yarn test-node && yarn cypress",
     "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
     "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
     "build-production": "yarn test-all && yarn build && yarn build-web",
