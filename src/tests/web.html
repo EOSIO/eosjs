@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel='stylesheet' type='text/css' href='web.css'>
+        <script src='../../dist-web/eosjs-api.js'></script>
+        <script src='../../dist-web/eosjs-jsonrpc.js'></script>
+        <script src='../../dist-web/eosjs-jssig.js'></script>
+        <script>
+            const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
+            /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
+            * 1) cleos create key --to-console (copy this privateKey & publicKey)
+            * 2) cleos wallet import 
+            * 3) cleos create account bob publicKey
+            * 4) cleos create account alice publicKey
+            */
+        
+            const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
+            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
+            const api = new eosjs_api.Api({ rpc, signatureProvider });
+        
+            const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
+            let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
+        
+            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1000))
+        
+            const transactWithConfig = async () => await api.transact({
+                actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }],
+                    data: {
+                        from: 'bob',
+                        to: 'alice',
+                        quantity: '0.0001 SYS',
+                        memo: '',
+                    },
+                }]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+            });
+        
+            const testTransactWithConfig = async (e) => {
+                resultsLabel = e.target;
+                resultsLabel.innerText = EXECUTING;
+        
+                try {
+                    transactionResponse = await transactWithConfig();
+                } catch (error) {
+                    resultsLabel.className = 'failed';
+                    resultsLabel.innerText = FAILED;
+                    console.error('Transact With Config Test Failure: ', error.message);
+                    return false;
+                }
+        
+                if (transactionResponse.transaction_id) {
+                    resultsLabel.className = "success";
+                    resultsLabel.innerText = SUCCESS;
+                    return true;
+                }
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                return false;
+            }
+        
+            const transactWithoutConfig = async () => {
+                const transactionResponse = await transactWithConfig();
+                const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
+                const currentDate = new Date();
+                const timePlusTen = currentDate.getTime() + 10000;
+                const timeInISOString = (new Date(timePlusTen)).toISOString();
+                const expiration = timeInISOString.substr(0, timeInISOString.length - 1);
+        
+                return await api.transact({
+                    expiration,
+                    ref_block_num: blockInfo.block_num & 0xffff,
+                    ref_block_prefix: blockInfo.ref_block_prefix,
+                    actions: [{
+                        account: 'eosio.token',
+                        name: 'transfer',
+                        authorization: [{
+                            actor: 'bob',
+                            permission: 'active',
+                        }],
+                        data: {
+                            from: 'bob',
+                            to: 'alice',
+                            quantity: '0.0001 SYS',
+                            memo: '',
+                        },
+                    }]
+                });
+            };
+        
+            const testTransactWithoutConfig = async (e) => {
+                resultsLabel = e.target;
+                resultsLabel.innerText = EXECUTING;
+        
+                try {
+                    transactionResponse = await transactWithoutConfig();
+                } catch (error) {
+                    resultsLabel.className = 'failed';
+                    resultsLabel.innerText = FAILED;
+                    console.error('Transact without Config Test Failure: ', error.message);
+                    return false;
+                }
+        
+                if (transactionResponse.transaction_id) {
+                    resultsLabel.className = "success";
+                    resultsLabel.innerText = SUCCESS;
+                    return true;
+                }
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                return false;
+            };
+                
+        
+            const transactWithoutBroadcast = async () => await api.transact({
+            actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }],
+                    data: {
+                        from: 'bob',
+                        to: 'alice',
+                        quantity: '0.0001 SYS',
+                        memo: '',
+                    },
+                }]
+            }, {
+                broadcast: false,
+                blocksBehind: 3,
+                expireSeconds: 30,
+            });
+                
+        
+            const testTransactWithoutBroadcast = async (e) => {
+                resultsLabel = e.target;
+                resultsLabel.innerText = EXECUTING;
+        
+                try {
+                    transactionSignatures = await transactWithoutBroadcast();
+                } catch (error) {
+                    resultsLabel.className = 'failed';
+                    resultsLabel.innerText = FAILED;
+                    console.error('Transact without Broadcast Test Failure: ', error.message);
+                    return false;
+                }
+        
+                if(transactionSignatures.signatures && transactionSignatures.serializedTransaction) {
+                    resultsLabel.className = "success";
+                    resultsLabel.innerText = SUCCESS;
+                    return true;
+                }
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                return false;
+            };
+        
+            const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
+        
+            const testBroadcastResult = async (e) => {
+                resultsLabel = e.target;
+                resultsLabel.innerText = EXECUTING;
+        
+                try {
+                    transactionSignatures = await transactWithoutBroadcast();
+                    transactionResponse = await broadcastResult(transactionSignatures);
+                } catch (error) {
+                    resultsLabel.className = 'failed';
+                    resultsLabel.innerText = FAILED;
+                    console.error('Broadcast Transaction Test Failure: ', error.message);
+                    return false;
+                }
+        
+                if (transactionResponse.transaction_id) {
+                    resultsLabel.className = "success";
+                    resultsLabel.innerText = SUCCESS;
+                    return true;
+                }
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                return false;
+            } 
+        
+            const transactShouldFail = async () => await api.transact({
+                actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }],
+                    data: {
+                        from: 'bob',
+                        to: 'alice',
+                        quantity: '0.0001 SYS',
+                        memo: '',
+                    },
+                }]
+            });
+        
+            const testTransactShouldFail = async (e) => {
+                resultsLabel = e.target;
+                resultsLabel.innerText = EXECUTING;
+        
+                try {
+                    await transactShouldFail();
+                } catch (e) {
+                    if (e.message === 'Required configuration or TAPOS fields are not present') {
+                        resultsLabel.className = "success";
+                        resultsLabel.innerText = SUCCESS;
+                        return true;
+                    }
+                }
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                return false;
+            }
+            
+            const rpcShouldFail = async () => await rpc.get_block(-1);
+        
+            const testRpcShouldFail = async (e) => {
+                resultsLabel = e.target;
+                resultsLabel.innerText = EXECUTING;
+        
+                try {
+                    await rpcShouldFail();
+                } catch (e) {
+                    if (e instanceof eosjs_jsonrpc.RpcError) {
+                        resultsLabel.className = "success";
+                        resultsLabel.innerText = SUCCESS;
+                        return true;
+                    }
+                }
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                return false;
+            }
+        
+            const runAllTests = async () => {
+                const buttons = document.getElementsByTagName('button');
+                for (var i = 1; i < buttons.length; i++) {
+                    var button = buttons[i];
+                    button.click();
+                    await waitOneSecond();
+                }
+                return;
+            }
+        </script>
+    </head>
+    <body>
+        <div class='header-container'>
+            <div class='header'>
+                <img src='logo.svg'/>
+                <h1>Web Build Integration Tests</h1>
+                <button onClick='runAllTests();'>Run All Tests</button>
+            </div>
+        </div>
+        <div class='tests'>
+            <div><h2>Transact with Configuration Parameter</h2><button onClick='testTransactWithConfig(event);'>Test</button></div>
+            <div><h2>Transact with Manually Configured TAPOS</h2><button onClick='testTransactWithoutConfig(event);'>Test</button></div>
+            <div><h2>Transact without Broadcasting</h2><button onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
+            <div><h2>Broadcast Transaction</h2><button onClick='testBroadcastResult(event);'>Test</button></div>
+            <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
+            <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
+        </div>
+    </body>
+</html>
