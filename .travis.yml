@@ -13,7 +13,7 @@ before_script:
   - source ./scripts/is_latest.sh
 script:
   - yarn run lint
-  - yarn run build-production
+  - yarn run test
 deploy:
   - provider: script
     skip_cleanup: true
