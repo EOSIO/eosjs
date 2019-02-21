@@ -9,6 +9,7 @@
         "moduleResolution": "node",
         "declaration": true,
         "downlevelIteration": true,
+        "skipLibCheck": true,
         "lib": [
             "es2017",
             "dom"
