@@ -6,6 +6,7 @@
   "scripts": {
     "cypress": "./scripts/run-cypress.sh",
     "cypress-ui": "./scripts/run-cypress.sh ui",
+    "prepare": "npm run build",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "lint-fix": "tslint -c tslint.json -p tsconfig.json --fix",
     "test": "jest src/tests/*eosjs*",
@@ -13,7 +14,7 @@
     "test-all": "yarn test && yarn test-node && yarn cypress",
     "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
     "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
-    "build-production": "yarn test-all && yarn build && yarn build-web",
+    "build-production": "yarn build && yarn build-web && yarn test-all",
     "clean": "rm -rf dist",
     "docs-init": "sh .docs/scripts/init.sh",
     "docs-build": "sh .docs/scripts/build.sh",
