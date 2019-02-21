@@ -13,7 +13,7 @@ describe('Node JS environment', () => {
     it('transacts with manually configured TAPOS fields', async () => {
         transactionResponse = await tests.transactWithoutConfig();
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
-    });
+    }, 10000);
 
     it('transacts without broadcasting, returning signatures and packed transaction', async () => {
         transactionSignatures = await tests.transactWithoutBroadcast();
