@@ -1,9 +1,14 @@
 dist/**/*.test.*
 dist-web/
 docs/
+cypress.json
+cypress/
 examples/
 scripts/
-src/
+src/**/*.ts
+src/**/*.js
+src/tests/
+reports/
 .babelrc
 .eslintrc.json
 .github/
@@ -20,5 +25,6 @@ tsconfig.*.json
 tslint.json
 typedoc.json
 webpack.*.js
+*.tgz
 yarn.lock
 yarn-error.log
