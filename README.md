@@ -1,7 +1,3 @@
-⚠️ ***Important! We recently released a major breaking rewrite for eosjs. Be sure to lock your dependencies.*** ⚠️
-
-If you are looking for the the previous version of `eosjs` you can [find it here](https://github.com/EOSIO/eosjs/tree/v16.0.9).
-
 # eosjs
 
 Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
@@ -12,11 +8,11 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### NodeJS Dependency
 
-`npm install eosjs@beta` or `yarn add eosjs@beta`
+`yarn add eosjs`
 
 ### Browser Distribution
 
-Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
+Clone this repository locally then run `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
 
 ## Import
 
@@ -113,15 +109,20 @@ try {
 
 ## Running Tests
 
+All tests should be run prior to a pull request being opened to ensure the changes will not break any environment.  This can be accomplished by running `yarn build-production`, which will build all production bundles then run the `yarn test-all` command. 
+
 ### Automated Unit Test Suite
-`npm run test` or `yarn test`
+
+`yarn test` will run through the core functionality of each EOSJS module with Jest.
 
 ### Integration Test Suite
 
+Integration tests will only work with a local node running on port 8888 and with test accounts "bob" and "alice".  This can be accomplished by following the [EOSIO Developer Getting Started Guide](https://developers.eos.io/eosio-home/docs/getting-the-software#section-step-1-1-start-keosd)
+
 #### Web Environment
 
-Run `npm run build-web` or `yarn build-web` to build the browser distribution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
+Run `yarn build-web` to create the `dist-web` folder and web distrubution modules then `yarn test-web`.  This will run through the `tests/web.html` file using Cypress to inform you on the command line of any test failures.
 
 #### NodeJS Environment
 
-Run `npm run build` or `yarn build` to build the NPM distribution bundle then run `npm run test-node` or `yarn test-node`.  The file should run through 6 tests, relaying the results onto your terminal with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown for an invalid transaction and invalid rpc call.
+Run `yarn build` to build the NPM distribution bundle then run `yarn test-node`.  This will create an out of box node environment with `tests/node.js` then test that environment with Jest and relay the results to the command line.
