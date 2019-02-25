@@ -107,6 +107,13 @@ try {
 ...
 ```
 
+## Contribution
+Check out the [Contributing](https://github.com/EOSIO/eosjs/blob/develop/CONTRIBUTING.md) guide and please adhere to the [Code of Conduct](https://github.com/EOSIO/eosjs/blob/develop/CONTRIBUTING.md#conduct)
+
+## License
+[MIT licensed](https://github.com/EOSIO/eosjs/blob/develop/LICENSE)
+
+
 ## Running Tests
 
 All tests should be run prior to a pull request being opened to ensure the changes will not break any environment.  This can be accomplished by running `yarn build-production`, which will build all production bundles then run the `yarn test-all` command. 
