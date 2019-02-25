@@ -76,9 +76,27 @@ To get it out of the way:
 
 Pull requests are awesome. If you're looking to raise a PR for something which doesn't have an open issue, please think carefully about [raising an issue](#reporting-an-issue) which your PR can close, especially if you're fixing a bug. This makes it more likely that there will be enough information available for your PR to be properly tested and merged.
 
-### Testing and Quality Assurance
+### Testing
 
-EOSJS is used by many libraries across the EOSIO ecosystem, so proper testing is absolutely essential prior to opening a pull request. This can be done in EOSJS by running `yarn build-production`.  This command will build the distrubution bundles (`yarn build-all`) and test each environment accordingly (`yarn test-all`).  Currently, these tests require that you have a local node running on port 8888 with test accounts 'bob' and 'alice' in order to function properly.
+EOSJS is used by many libraries across the EOSIO ecosystem, so proper testing is absolutely essential prior to opening a pull request. This can be done in EOSJS by running `yarn build-production`.  This command will build the distrubution bundles (`yarn build-all`) and test each environment accordingly (`yarn test-all`).
+
+#### Automated Unit Test Suite
+
+`yarn test` will run through the core functionality of each EOSJS module with Jest.
+
+#### Integration Test Suite
+
+Integration tests will only work with a local node running on port 8888 and with test accounts "bob" and "alice".  This can be accomplished by following the [EOSIO Developer Getting Started Guide](https://developers.eos.io/eosio-home/docs/getting-the-software#section-step-1-1-start-keosd).
+
+##### Web Environment
+
+Run `yarn build-web` to create the `dist-web` folder and web distrubution modules then `yarn test-web`.  This will run through the `tests/web.html` file using Cypress to inform you on the command line of any test failures.
+
+##### NodeJS Environment
+
+Run `yarn build` to build the NPM distribution bundle then run `yarn test-node`.  This will create an out of box node environment with `tests/node.js` then test that environment with Jest and relay the results to the command line.
+
+### Quality Assurance
 
 Never underestimate just how useful quality assurance is. If you're looking to get involved with the code base and don't know where to start, checking out and testing a pull request is one of the most useful things you could do.
 
