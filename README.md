@@ -107,22 +107,8 @@ try {
 ...
 ```
 
-## Running Tests
+## Contribution
+Check out the [Contributing](https://github.com/EOSIO/eosjs/blob/develop/CONTRIBUTING.md) guide and please adhere to the [Code of Conduct](https://github.com/EOSIO/eosjs/blob/develop/CONTRIBUTING.md#conduct).
 
-All tests should be run prior to a pull request being opened to ensure the changes will not break any environment.  This can be accomplished by running `yarn build-production`, which will build all production bundles then run the `yarn test-all` command. 
-
-### Automated Unit Test Suite
-
-`yarn test` will run through the core functionality of each EOSJS module with Jest.
-
-### Integration Test Suite
-
-Integration tests will only work with a local node running on port 8888 and with test accounts "bob" and "alice".  This can be accomplished by following the [EOSIO Developer Getting Started Guide](https://developers.eos.io/eosio-home/docs/getting-the-software#section-step-1-1-start-keosd)
-
-#### Web Environment
-
-Run `yarn build-web` to create the `dist-web` folder and web distrubution modules then `yarn test-web`.  This will run through the `tests/web.html` file using Cypress to inform you on the command line of any test failures.
-
-#### NodeJS Environment
-
-Run `yarn build` to build the NPM distribution bundle then run `yarn test-node`.  This will create an out of box node environment with `tests/node.js` then test that environment with Jest and relay the results to the command line.
+## License
+[MIT licensed](https://github.com/EOSIO/eosjs/blob/develop/LICENSE)
