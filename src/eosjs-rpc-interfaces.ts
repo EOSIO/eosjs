@@ -26,6 +26,27 @@ export interface BlockTaposInfo {
     ref_block_prefix: number;
 }
 
+export interface Action {
+    account: string;
+    name: string;
+    data: {
+        from?: string,
+        to?: string,
+        quantity?: string,
+        memo?: string,
+    };
+}
+
+export interface Transaction {
+    expiration: string;
+    actions: Action[];
+}
+
+export interface TransactionBlockResult {
+    id: string;
+    transaction: Transaction;
+}
+
 /** Return value of `/v1/chain/get_block` */
 export interface GetBlockResult {
     timestamp: string;
@@ -39,6 +60,20 @@ export interface GetBlockResult {
     id: string;
     block_num: number;
     ref_block_prefix: number;
+    transactions: Array<{
+        status: string;
+        trx: string | TransactionBlockResult;
+    }>;
+}
+
+export interface GetTransactionResult {
+    id: string;
+    trx: {
+        trx: Transaction,
+    };
+    block_time: string;
+    block_num: number;
+    last_irreversible_block: number;
 }
 
 /** Return value of `/v1/chain/get_code` */
