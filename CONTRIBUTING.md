@@ -23,8 +23,6 @@ The GitHub issue tracker is the preferred channel for [bug reports](#bug-reports
 
 * Please **search for existing issues**. Help us keep duplicate issues to a minimum by checking to see if someone has already reported your problem or requested your idea.
 
-* Please **do not** use the issue tracker for personal support requests.
-
 * Please **be civil**. Keep the discussion on topic and respect the opinions of others. See also our [Contributor Code of Conduct](#conduct).
 
 ### Bug Reports
