@@ -69,7 +69,7 @@ Also, please follow these guidelines when submitting code:
 To get it out of the way:
 
 - **[develop](https://github.com/EOSIO/eosjs/tree/develop)** is the development branch. All work on the next release happens here so you should generally branch off `develop`. Do **NOT** use this branch for a production site.
-- **[master](https://github.com/EOSIO/eosjs)** contains the latest release of EOSJS. This branch may be used in production. Do **NOT** use this branch to work on EOSJS's source.
+- **[master](https://github.com/EOSIO/eosjs/tree/master)** contains the latest release of EOSJS. This branch may be used in production. Do **NOT** use this branch to work on EOSJS's source.
 
 ### Submitting Pull Requests
 
