@@ -5,8 +5,8 @@
 !dist/**
 *.test.*
 
-# Include any additional source files which should be bundled
-!src/**/*.abi.json
-
 # Include documentation and version information in bundle
 !CONTRIBUTING.md
+
+# Include any additional source files which should be bundled
+!src/**/*.abi.json
