@@ -5,6 +5,7 @@ module.exports = {
         eosjs_api: './src/eosjs-api.ts',
         eosjs_jsonrpc: './src/rpc-web.ts',
         eosjs_jssig: './src/eosjs-jssig.ts',
+        eosjs_numeric: './src/eosjs-numeric.ts',
     },
     devtool: 'inline-source-map',
     mode: 'development',
