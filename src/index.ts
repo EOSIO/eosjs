@@ -6,4 +6,4 @@ import * as RpcInterfaces from './eosjs-rpc-interfaces';
 import { RpcError } from './eosjs-rpcerror';
 import * as Serialize from './eosjs-serialize';
 
-export { Api, ApiInterfaces, JsonRpc, RpcInterfaces, RpcError, Serialize, Numeric };
+export { Api, ApiInterfaces, JsonRpc, Numeric, RpcInterfaces, RpcError, Serialize };
