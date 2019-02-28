@@ -9,7 +9,4 @@
 !src/**/*.abi.json
 
 # Include documentation and version information in bundle
-!README.md
 !CONTRIBUTING.md
-!LICENSE
-!package.json
