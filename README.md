@@ -1,4 +1,4 @@
-# eosjs
+# eosjs ![npm](https://img.shields.io/npm/dw/eosjs.svg)
 
 Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
 
@@ -6,9 +6,13 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ## Installation
 
+### NPM
+
+The official distribution package can be found at [npm](https://www.npmjs.com/package/eosjs).
+
 ### NodeJS Dependency
 
-`yarn add eosjs`
+`yarn add eosjs@beta3`
 
 ### Browser Distribution
 
