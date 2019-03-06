@@ -1,3 +1,6 @@
+/**
+ * @module RPC-Interfaces
+ */
 // copyright defined in eosjs/LICENSE.txt
 
 /** Structured format for abis */

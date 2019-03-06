@@ -1,3 +1,6 @@
+/**
+ * @module API-Interfaces
+ */
 // copyright defined in eosjs/LICENSE.txt
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
