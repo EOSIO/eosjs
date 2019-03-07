@@ -421,6 +421,65 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls get_table_by_scope with all params', async () => {
+        const expPath = '/v1/chain/get_table_by_scope';
+        const code = 'morse';
+        const table = 'coffee';
+        const lowerBound = 'minty';
+        const upperBound = 'minty';
+        const limit = 20;
+        const expReturn = { data: '12345' };
+        const callParams = {
+            code,
+            table,
+            lower_bound: lowerBound,
+            upper_bound: upperBound,
+            limit,
+        };
+        const expParams = {
+            body: JSON.stringify(callParams),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_table_by_scope(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
+    it('calls get_table_by_scope with default params', async () => {
+        const expPath = '/v1/chain/get_table_by_scope';
+        const code = 'morse';
+        const table = 'coffee';
+        const lowerBound = '';
+        const upperBound = '';
+        const limit = 10;
+        const expReturn = { data: '12345' };
+        const callParams = {
+            code,
+            table,
+        };
+        const expParams = {
+            body: JSON.stringify({
+                code,
+                table,
+                lower_bound: lowerBound,
+                upper_bound: upperBound,
+                limit,
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_table_by_scope(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls getRequiredKeys', async () => {
         const expPath = '/v1/chain/get_required_keys';
         const keys = ['key1', 'key2', 'key3'];

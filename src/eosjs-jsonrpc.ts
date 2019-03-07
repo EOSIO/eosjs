@@ -153,6 +153,24 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             });
     }
 
+    /** Raw call to `/v1/chain/get_table_by_scope` */
+    public async get_table_by_scope({
+        code,
+        table,
+        lower_bound = '',
+        upper_bound = '',
+        limit = 10,
+    }: any): Promise<any> {
+        return await this.fetch(
+            '/v1/chain/get_table_by_scope', {
+                code,
+                table,
+                lower_bound,
+                upper_bound,
+                limit,
+            });
+    }
+
     /** Get subset of `availableKeys` needed to meet authorities in `transaction`. Implements `AuthorityProvider` */
     public async getRequiredKeys(args: AuthorityProviderArgs): Promise<string[]> {
         return convertLegacyPublicKeys((await this.fetch('/v1/chain/get_required_keys', {
