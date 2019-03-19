@@ -12,7 +12,7 @@ The official distribution package can be found at [npm](https://www.npmjs.com/pa
 
 ### NodeJS Dependency
 
-`yarn add eosjs@beta`
+`yarn add eosjs@edge`
 
 ### Browser Distribution
 
