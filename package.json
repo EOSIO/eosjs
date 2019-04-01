@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "20.0.0-beta3",
+  "version": "20.0.0",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -33,7 +33,7 @@
     "text-encoding": "0.7.0"
   },
   "devDependencies": {
-    "@blockone/tslint-config-blockone": "2.0.0",
+    "@blockone/tslint-config-blockone": "3.0.0",
     "@types/jest": "24.0.6",
     "@types/node": "11.9.4",
     "@types/text-encoding": "0.0.35",
