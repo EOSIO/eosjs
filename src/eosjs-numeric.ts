@@ -214,7 +214,7 @@ export function base64ToBinary(s: string) {
 }
 
 /** Key types this library supports */
-export const enum KeyType {
+export enum KeyType {
     k1 = 0,
     r1 = 1,
 }
