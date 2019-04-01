@@ -1,22 +1,23 @@
-import JsonRpc from "../eosjs-jsonrpc";
-import RpcError from "../eosjs-rpcerror";
+import { JsonRpc } from '../eosjs-jsonrpc';
+import { RpcError } from '../eosjs-rpcerror';
 
-describe("JSON RPC", () => {
-    const endpoint = "http://localhost";
+describe('JSON RPC', () => {
+    const endpoint = 'http://localhost';
+    const fetchMock = fetch as any;
     let jsonRpc: JsonRpc;
 
     beforeEach(() => {
-        fetch.resetMocks();
+        fetchMock.resetMocks();
         jsonRpc = new JsonRpc(endpoint);
     });
 
-    it("throws error bad status", async () => {
-        let actMessage = "";
-        const expMessage = "Not Found";
-        const accountName = "myaccountaaa";
-        const expReturn = { data: "12345", message: expMessage };
+    it('throws error bad status', async () => {
+        let actMessage = '';
+        const expMessage = 'Not Found';
+        const accountName = 'myaccountaaa';
+        const expReturn = { data: '12345', message: expMessage };
 
-        fetch.once(JSON.stringify(expReturn), { status: 404 });
+        fetchMock.once(JSON.stringify(expReturn), { status: 404 });
 
         // async / await don't play well with expect().toThrow()
         try {
@@ -29,12 +30,12 @@ describe("JSON RPC", () => {
         expect(actMessage).toEqual(expMessage);
     });
 
-    it("throws error unprocessed", async () => {
-        let actMessage = "";
-        const expMessage = "Not Processed";
-        const accountName = "myaccountaaa";
+    it('throws error unprocessed', async () => {
+        let actMessage = '';
+        const expMessage = 'Not Processed';
+        const accountName = 'myaccountaaa';
         const expReturn = {
-            data: "12345",
+            data: '12345',
             processed: {
                 except: {
                     message: expMessage,
@@ -42,9 +43,8 @@ describe("JSON RPC", () => {
             },
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
-        // async / await don't play well with expect().toThrow()
         try {
             await jsonRpc.get_abi(accountName);
         } catch (e) {
@@ -55,15 +55,15 @@ describe("JSON RPC", () => {
         expect(actMessage).toEqual(expMessage);
     });
 
-    it("calls provided fetch instead of default", async () => {
-        const expPath = "/v1/chain/get_abi";
-        const accountName = "myaccountaaa";
-        const expReturn = { data: "12345" };
+    it('calls provided fetch instead of default', async () => {
+        const expPath = '/v1/chain/get_abi';
+        const accountName = 'myaccountaaa';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
         const mockResp = {
@@ -82,18 +82,18 @@ describe("JSON RPC", () => {
 
     });
 
-    it("calls get_abi", async () => {
-        const expPath = "/v1/chain/get_abi";
-        const accountName = "myaccountaaa";
-        const expReturn = { data: "12345" };
+    it('calls get_abi', async () => {
+        const expPath = '/v1/chain/get_abi';
+        const accountName = 'myaccountaaa';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_abi(accountName);
 
@@ -101,18 +101,18 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_account", async () => {
-        const expPath = "/v1/chain/get_account";
-        const accountName = "myaccountaaa";
-        const expReturn = { data: "12345" };
+    it('calls get_account', async () => {
+        const expPath = '/v1/chain/get_account';
+        const accountName = 'myaccountaaa';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_account(accountName);
 
@@ -120,18 +120,18 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_block_header_state", async () => {
-        const expPath = "/v1/chain/get_block_header_state";
+    it('calls get_block_header_state', async () => {
+        const expPath = '/v1/chain/get_block_header_state';
         const blockNumOrId = 1234;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 block_num_or_id: blockNumOrId,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_block_header_state(blockNumOrId);
 
@@ -139,18 +139,18 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_block", async () => {
-        const expPath = "/v1/chain/get_block";
+    it('calls get_block', async () => {
+        const expPath = '/v1/chain/get_block';
         const blockNumOrId = 1234;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 block_num_or_id: blockNumOrId,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_block(blockNumOrId);
 
@@ -158,18 +158,18 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_code", async () => {
-        const expPath = "/v1/chain/get_code";
-        const accountName = "myaccountaaa";
-        const expReturn = { data: "12345" };
+    it('calls get_code', async () => {
+        const expPath = '/v1/chain/get_code';
+        const accountName = 'myaccountaaa';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_code(accountName);
 
@@ -177,22 +177,22 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_currency_balance with all params", async () => {
-        const expPath = "/v1/chain/get_currency_balance";
-        const code = "morse";
-        const account = "myaccountaaa";
-        const symbol = "EOS";
-        const expReturn = { data: "12345" };
+    it('calls get_currency_balance with all params', async () => {
+        const expPath = '/v1/chain/get_currency_balance';
+        const code = 'morse';
+        const account = 'myaccountaaa';
+        const symbol = 'EOS';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 code,
                 account,
                 symbol,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_currency_balance(code, account, symbol);
 
@@ -200,22 +200,22 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_currency_balance with default params", async () => {
-        const expPath = "/v1/chain/get_currency_balance";
-        const code = "morse";
-        const account = "myaccountaaa";
+    it('calls get_currency_balance with default params', async () => {
+        const expPath = '/v1/chain/get_currency_balance';
+        const code = 'morse';
+        const account = 'myaccountaaa';
         const symbol: string = null;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 code,
                 account,
                 symbol,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_currency_balance(code, account);
 
@@ -223,20 +223,20 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_currency_stats with all params", async () => {
-        const expPath = "/v1/chain/get_currency_stats";
-        const code = "morse";
-        const symbol = "EOS";
-        const expReturn = { data: "12345" };
+    it('calls get_currency_stats with all params', async () => {
+        const expPath = '/v1/chain/get_currency_stats';
+        const code = 'morse';
+        const symbol = 'EOS';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 code,
                 symbol,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_currency_stats(code, symbol);
 
@@ -244,15 +244,15 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_info", async () => {
-        const expPath = "/v1/chain/get_info";
-        const expReturn = { data: "12345" };
+    it('calls get_info', async () => {
+        const expPath = '/v1/chain/get_info';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({}),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_info();
 
@@ -260,15 +260,15 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_producer_schedule", async () => {
-        const expPath = "/v1/chain/get_producer_schedule";
-        const expReturn = { data: "12345" };
+    it('calls get_producer_schedule', async () => {
+        const expPath = '/v1/chain/get_producer_schedule';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({}),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_producer_schedule();
 
@@ -276,22 +276,22 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_producers with all params", async () => {
-        const expPath = "/v1/chain/get_producers";
+    it('calls get_producers with all params', async () => {
+        const expPath = '/v1/chain/get_producers';
         const json = false;
-        const lowerBound = "zero";
+        const lowerBound = 'zero';
         const limit = 10;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 json,
                 lower_bound: lowerBound,
                 limit,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_producers(json, lowerBound, limit);
 
@@ -299,22 +299,22 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_producers with default params", async () => {
-        const expPath = "/v1/chain/get_producers";
+    it('calls get_producers with default params', async () => {
+        const expPath = '/v1/chain/get_producers';
         const json = true;
-        const lowerBound = "";
+        const lowerBound = '';
         const limit = 50;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 json,
                 lower_bound: lowerBound,
                 limit,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_producers();
 
@@ -322,18 +322,18 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_raw_code_and_abi", async () => {
-        const expPath = "/v1/chain/get_raw_code_and_abi";
-        const accountName = "myaccountaaa";
-        const expReturn = { data: "12345" };
+    it('calls get_raw_code_and_abi', async () => {
+        const expPath = '/v1/chain/get_raw_code_and_abi';
+        const accountName = 'myaccountaaa';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_raw_code_and_abi(accountName);
 
@@ -341,19 +341,19 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_table_rows with all params", async () => {
-        const expPath = "/v1/chain/get_table_rows";
+    it('calls get_table_rows with all params', async () => {
+        const expPath = '/v1/chain/get_table_rows';
         const json = false;
-        const code = "morse";
-        const scope = "minty";
-        const table = "coffee";
-        const tableKey = "front_door";
-        const lowerBound = "zero";
-        const upperBound = "five";
+        const code = 'morse';
+        const scope = 'minty';
+        const table = 'coffee';
+        const tableKey = 'front_door';
+        const lowerBound = 'zero';
+        const upperBound = 'five';
         const limit = 20;
         const indexPosition = 1;
-        const keyType = "str";
-        const expReturn = { data: "12345" };
+        const keyType = 'str';
+        const expReturn = { data: '12345' };
         const reverse = false;
         const showPayer = false;
         const callParams = {
@@ -372,10 +372,10 @@ describe("JSON RPC", () => {
         };
         const expParams = {
             body: JSON.stringify(callParams),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_table_rows(callParams);
 
@@ -383,21 +383,21 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls get_table_rows with default params", async () => {
-        const expPath = "/v1/chain/get_table_rows";
+    it('calls get_table_rows with default params', async () => {
+        const expPath = '/v1/chain/get_table_rows';
         const json = true;
-        const code = "morse";
-        const scope = "minty";
-        const table = "coffee";
-        const tableKey = "";
-        const lowerBound = "";
-        const upperBound = "";
+        const code = 'morse';
+        const scope = 'minty';
+        const table = 'coffee';
+        const tableKey = '';
+        const lowerBound = '';
+        const upperBound = '';
         const limit = 10;
         const indexPosition = 1;
-        const keyType = "";
+        const keyType = '';
         const reverse = false;
         const showPayer = false;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const callParams = {
             code,
             scope,
@@ -418,10 +418,10 @@ describe("JSON RPC", () => {
                 reverse,
                 show_payer: showPayer,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_table_rows(callParams);
 
@@ -429,12 +429,71 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls getRequiredKeys", async () => {
-        const expPath = "/v1/chain/get_required_keys";
-        const keys = ["key1", "key2", "key3"];
+    it('calls get_table_by_scope with all params', async () => {
+        const expPath = '/v1/chain/get_table_by_scope';
+        const code = 'morse';
+        const table = 'coffee';
+        const lowerBound = 'minty';
+        const upperBound = 'minty';
+        const limit = 20;
+        const expReturn = { data: '12345' };
+        const callParams = {
+            code,
+            table,
+            lower_bound: lowerBound,
+            upper_bound: upperBound,
+            limit,
+        };
+        const expParams = {
+            body: JSON.stringify(callParams),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_table_by_scope(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
+    it('calls get_table_by_scope with default params', async () => {
+        const expPath = '/v1/chain/get_table_by_scope';
+        const code = 'morse';
+        const table = 'coffee';
+        const lowerBound = '';
+        const upperBound = '';
+        const limit = 10;
+        const expReturn = { data: '12345' };
+        const callParams = {
+            code,
+            table,
+        };
+        const expParams = {
+            body: JSON.stringify({
+                code,
+                table,
+                lower_bound: lowerBound,
+                upper_bound: upperBound,
+                limit,
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_table_by_scope(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
+    it('calls getRequiredKeys', async () => {
+        const expPath = '/v1/chain/get_required_keys';
+        const keys = ['key1', 'key2', 'key3'];
         const expReturn = { required_keys: keys };
         const callParams = {
-            transaction: "mytxn",
+            transaction: 'mytxn',
             availableKeys: keys,
         };
         const expParams = {
@@ -442,10 +501,10 @@ describe("JSON RPC", () => {
                 transaction: callParams.transaction,
                 available_keys: callParams.availableKeys,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.getRequiredKeys(callParams);
 
@@ -453,19 +512,19 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls push_transaction", async () => {
-        const expPath = "/v1/chain/push_transaction";
+    it('calls push_transaction', async () => {
+        const expPath = '/v1/chain/push_transaction';
         const signatures = [
-            "George Washington",
-            "John Hancock",
-            "Abraham Lincoln",
+            'George Washington',
+            'John Hancock',
+            'Abraham Lincoln',
         ];
         const serializedTransaction = new Uint8Array([
             0, 16, 32, 128, 255,
         ]);
 
         const limit = 50;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const callParams = {
             signatures,
             serializedTransaction,
@@ -474,13 +533,13 @@ describe("JSON RPC", () => {
             body: JSON.stringify({
                 signatures,
                 compression: 0,
-                packed_context_free_data: "",
-                packed_trx: "00102080ff",
+                packed_context_free_data: '',
+                packed_trx: '00102080ff',
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.push_transaction(callParams);
 
@@ -488,15 +547,15 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls db_size_get", async () => {
-        const expPath = "/v1/db_size/get";
-        const expReturn = { data: "12345" };
+    it('calls db_size_get', async () => {
+        const expPath = '/v1/db_size/get';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({}),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.db_size_get();
 
@@ -504,22 +563,22 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls history_get_actions with all params", async () => {
-        const expPath = "/v1/history/get_actions";
-        const accountName = "myaccountaaa";
+    it('calls history_get_actions with all params', async () => {
+        const expPath = '/v1/history/get_actions';
+        const accountName = 'myaccountaaa';
         const pos = 5;
         const offset = 10;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
                 pos,
                 offset,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.history_get_actions(accountName, pos, offset);
 
@@ -527,22 +586,22 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls history_get_actions with default params", async () => {
-        const expPath = "/v1/history/get_actions";
-        const accountName = "myaccountaaa";
+    it('calls history_get_actions with default params', async () => {
+        const expPath = '/v1/history/get_actions';
+        const accountName = 'myaccountaaa';
         const pos: number = null;
         const offset: number = null;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
                 pos,
                 offset,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.history_get_actions(accountName);
 
@@ -550,20 +609,20 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls history_get_transaction with all params", async () => {
-        const expPath = "/v1/history/get_transaction";
-        const id = "myaccountaaa";
+    it('calls history_get_transaction with all params', async () => {
+        const expPath = '/v1/history/get_transaction';
+        const id = 'myaccountaaa';
         const blockNumHint = 20;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 id,
                 block_num_hint: blockNumHint,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.history_get_transaction(id, blockNumHint);
 
@@ -571,20 +630,20 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls history_get_transaction with default params", async () => {
-        const expPath = "/v1/history/get_transaction";
-        const id = "myaccountaaa";
+    it('calls history_get_transaction with default params', async () => {
+        const expPath = '/v1/history/get_transaction';
+        const id = 'myaccountaaa';
         const blockNumHint: number = null;
-        const expReturn = { data: "12345" };
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 id,
                 block_num_hint: blockNumHint,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.history_get_transaction(id);
 
@@ -592,18 +651,18 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls history_get_key_accounts", async () => {
-        const expPath = "/v1/history/get_key_accounts";
-        const publicKey = "key12345";
-        const expReturn = { data: "12345" };
+    it('calls history_get_key_accounts', async () => {
+        const expPath = '/v1/history/get_key_accounts';
+        const publicKey = 'key12345';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 public_key: publicKey,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.history_get_key_accounts(publicKey);
 
@@ -611,18 +670,18 @@ describe("JSON RPC", () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it("calls history_get_controlled_accounts", async () => {
-        const expPath = "/v1/history/get_controlled_accounts";
-        const controllingAccount = "key12345";
-        const expReturn = { data: "12345" };
+    it('calls history_get_controlled_accounts', async () => {
+        const expPath = '/v1/history/get_controlled_accounts';
+        const controllingAccount = 'key12345';
+        const expReturn = { data: '12345' };
         const expParams = {
             body: JSON.stringify({
                 controlling_account: controllingAccount,
             }),
-            method: "POST",
+            method: 'POST',
         };
 
-        fetch.once(JSON.stringify(expReturn));
+        fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.history_get_controlled_accounts(controllingAccount);
 

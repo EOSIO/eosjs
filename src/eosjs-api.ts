@@ -3,17 +3,15 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from "./eosjs-api-interfaces";
-import JsonRpc from "./eosjs-jsonrpc";
-import { Abi, GetInfoResult, PushTransactionArgs } from "./eosjs-rpc-interfaces";
-import * as ser from "./eosjs-serialize";
+import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from './eosjs-api-interfaces';
+import { JsonRpc } from './eosjs-jsonrpc';
+import { Abi, GetInfoResult, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import * as ser from './eosjs-serialize';
 
-// tslint:disable-next-line
 const abiAbi = require('../src/abi.abi.json');
-// tslint:disable-next-line
 const transactionAbi = require('../src/transaction.abi.json');
 
-export default class Api {
+export class Api {
     /** Issues RPC calls */
     public rpc: JsonRpc;
 
@@ -83,10 +81,10 @@ export default class Api {
             array: rawAbi,
         });
         if (!ser.supportedAbiVersion(buffer.getString())) {
-            throw new Error("Unsupported abi version");
+            throw new Error('Unsupported abi version');
         }
         buffer.restartRead();
-        return this.abiTypes.get("abi_def").deserialize(buffer);
+        return this.abiTypes.get('abi_def').deserialize(buffer);
     }
 
     /** Get abi in both binary and structured forms. Fetch when needed. */
@@ -155,7 +153,7 @@ export default class Api {
     /** Convert a transaction to binary */
     public serializeTransaction(transaction: any): Uint8Array {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
-        this.serialize(buffer, "transaction", {
+        this.serialize(buffer, 'transaction', {
             max_net_usage_words: 0,
             max_cpu_usage_ms: 0,
             delay_sec: 0,
@@ -171,7 +169,7 @@ export default class Api {
     public deserializeTransaction(transaction: Uint8Array): any {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         buffer.pushArray(transaction);
-        return this.deserialize(buffer, "transaction");
+        return this.deserialize(buffer, 'transaction');
     }
 
     /** Convert actions to hex */
@@ -194,7 +192,7 @@ export default class Api {
 
     /** Convert a transaction from binary. Also deserializes actions. */
     public async deserializeTransactionWithActions(transaction: Uint8Array | string): Promise<any> {
-        if (typeof transaction === "string") {
+        if (typeof transaction === 'string') {
             transaction = ser.hexToUint8Array(transaction);
         }
         const deserializedTransaction = this.deserializeTransaction(transaction);
@@ -222,7 +220,7 @@ export default class Api {
             this.chainId = info.chain_id;
         }
 
-        if (typeof blocksBehind === "number" && expireSeconds) { // use config fields to generate TAPOS if they exist
+        if (typeof blocksBehind === 'number' && expireSeconds) { // use config fields to generate TAPOS if they exist
             if (!info) {
                 info = await this.rpc.get_info();
             }
@@ -231,7 +229,7 @@ export default class Api {
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {
-            throw new Error("Required configuration or TAPOS fields are not present");
+            throw new Error('Required configuration or TAPOS fields are not present');
         }
 
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);

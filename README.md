@@ -1,8 +1,4 @@
-⚠️ ***Important! We recently released a major breaking rewrite for eosjs. Be sure to lock your dependencies.*** ⚠️
-
-If you are looking for the the previous version of `eosjs` you can [find it here](https://github.com/EOSIO/eosjs/tree/v16.0.9).
-
-# eosjs
+# eosjs ![npm](https://img.shields.io/npm/dw/eosjs.svg)
 
 Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
 
@@ -10,13 +6,17 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ## Installation
 
+### NPM
+
+The official distribution package can be found at [npm](https://www.npmjs.com/package/eosjs).
+
 ### NodeJS Dependency
 
-`npm install eosjs@beta` or `yarn add eosjs@beta`
+`yarn add eosjs`
 
 ### Browser Distribution
 
-Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
+Clone this repository locally then run `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
 
 ## Import
 
@@ -25,8 +25,7 @@ Clone this repository locally then run `npm run build-web` or `yarn build-web`. 
 Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
 ```js
 import { Api, JsonRpc, RpcError } from 'eosjs';
-
-import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
+import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // development only
 ```
 
 ### CommonJS
@@ -34,10 +33,10 @@ import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
 Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
 const { Api, JsonRpc, RpcError } = require('eosjs');
-const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');  // development only
-const fetch = require('node-fetch');                            // node only; not needed in browsers
-const { TextEncoder, TextDecoder } = require('util');           // node only; native TextEncoder/Decoder
-const { TextEncoder, TextDecoder } = require('text-encoding');  // React Native, IE11, and Edge Browsers only
+const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
+const fetch = require('node-fetch');                                    // node only; not needed in browsers
+const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
+const { TextEncoder, TextDecoder } = require('text-encoding');          // React Native, IE11, and Edge Browsers only
 ```
 
 ## Basic Usage
@@ -49,7 +48,7 @@ The Signature Provider holds private keys and is responsible for signing transac
 ***Using the JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
 
 ```js
-const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
+const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // bob
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 ```
 
@@ -62,7 +61,7 @@ const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 
 ### API
 
-Include textDecoder and textEncoder when using in browser.
+Include textDecoder and textEncoder when using in Node, React Native, IE11 or Edge Browsers.
 ```js
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 ```
@@ -112,10 +111,16 @@ try {
 ...
 ```
 
-## Running Tests
+## Contributing
 
-### Automated Unit Test Suite
-`npm run test` or `yarn test`
+[Contributing Guide](./CONTRIBUTING.md)
 
-### Web Integration Test Suite
-Run `npm run build-web` to build the browser distrubution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
+[Code of Conduct](./CONTRIBUTING.md#conduct)
+
+## License
+
+[MIT](./LICENSE)
+
+## Important
+
+See LICENSE for copyright and license terms.  Block.one makes its contribution on a voluntary basis as a member of the EOSIO community and is not responsible for ensuring the overall performance of the software or any related applications.  We make no representation, warranty, guarantee or undertaking in respect of the software or any related documentation, whether expressed or implied, including but not limited to the warranties or merchantability, fitness for a particular purpose and noninfringement. In no event shall we be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or documentation or the use or other dealings in the software or documentation.  Any test results or performance figures are indicative and will not reflect performance under all conditions.  Any reference to any third party or third-party product, service or other resource is not an endorsement or recommendation by Block.one.  We are not responsible, and disclaim any and all responsibility and liability, for your use of or reliance on any of these resources. Third-party resources may be updated, changed or terminated at any time, so the information here may be out of date or inaccurate.

@@ -9,16 +9,14 @@
         "moduleResolution": "node",
         "declaration": true,
         "downlevelIteration": true,
+        "skipLibCheck": true,
         "lib": [
             "es2017",
             "dom"
         ]
     },
     "include": [
-        "src/*.ts",
-        "src/*.js"
-    ],
-    "exclude": [
-        "src/*.test.ts"
+        "src/**/*.ts",
+        "src/**/*.js",
     ]
 }

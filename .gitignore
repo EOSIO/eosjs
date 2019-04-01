@@ -3,3 +3,9 @@ dist/
 dist-web/
 node_modules/
 docs-build/
+*.tgz
+
+#cypress artifacts
+cypress/screenshots/
+cypress/videos/
+reports/
