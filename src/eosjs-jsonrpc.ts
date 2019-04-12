@@ -125,6 +125,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         return { accountName: rawCodeAndAbi.account_name, abi };
     }
 
+    /** Raw call to `/v1/chain/get_scheduled_transactions` */
+    public async get_scheduled_transactions(json = true, lowerBound = '', limit = 50): Promise<any> {
+        return await this.fetch('/v1/chain/get_scheduled_transactions', { json, lower_bound: lowerBound, limit });
+    }
+
     /** Raw call to `/v1/chain/get_table_rows` */
     public async get_table_rows({
         json = true,
