@@ -189,11 +189,13 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Push a serialized transaction */
-    public async push_transaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+    public async push_transaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,
             compression: 0,
-            packed_context_free_data: '',
+            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
             packed_trx: arrayToHex(serializedTransaction),
         });
     }
