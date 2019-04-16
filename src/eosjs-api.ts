@@ -165,6 +165,19 @@ export class Api {
         return buffer.asUint8Array();
     }
 
+    /** Serialize context-free data */
+    public serializeContextFreeData(contextFreeData: Uint8Array[]): Uint8Array {
+        if (!contextFreeData) {
+            return null;
+        }
+        const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+        buffer.pushVaruint32(contextFreeData.length);
+        for (const data of contextFreeData) {
+            buffer.pushBytes(data);
+        }
+        return buffer.asUint8Array();
+    }
+
     /** Convert a transaction from binary. Leaves actions in hex. */
     public deserializeTransaction(transaction: Uint8Array): any {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
@@ -235,7 +248,10 @@ export class Api {
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
         const serializedTransaction = this.serializeTransaction(transaction);
-        let pushTransactionArgs: PushTransactionArgs  = { serializedTransaction, signatures: [] };
+        const serializedContextFreeData = this.serializeContextFreeData(transaction.context_free_data);
+        let pushTransactionArgs: PushTransactionArgs = {
+            serializedTransaction, serializedContextFreeData, signatures: []
+        };
 
         if (sign) {
             const availableKeys = await this.signatureProvider.getAvailableKeys();
@@ -244,6 +260,7 @@ export class Api {
                 chainId: this.chainId,
                 requiredKeys,
                 serializedTransaction,
+                serializedContextFreeData,
                 abis,
             });
         }
@@ -254,10 +271,13 @@ export class Api {
     }
 
     /** Broadcast a signed transaction */
-    public async pushSignedTransaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+    public async pushSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
+            serializedContextFreeData
         });
     }
 
