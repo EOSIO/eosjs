@@ -87,6 +87,27 @@ export class Api {
         return this.abiTypes.get('abi_def').deserialize(buffer);
     }
 
+    /** Encodes a json abi as Uint8Array. */
+    public jsonToRawAbi(jsonAbi: Abi): Uint8Array {
+        const abiDef = this.abiTypes.get('abi_def');
+
+        const abiDefReducer = (acc: any, value: any) => Object.assign(acc, {[value.name]: acc[value.name] || []});
+        const abi = abiDef.fields.reduce(abiDefReducer, jsonAbi);
+        const buffer = new ser.SerialBuffer({
+            textEncoder: this.textEncoder,
+            textDecoder: this.textDecoder,
+        });
+
+        abiDef.serialize(buffer, abi);
+
+        if (!ser.supportedAbiVersion(buffer.getString())) {
+            throw new Error('Unsupported abi version');
+        }
+        buffer.restartRead();
+
+        return buffer.asUint8Array();
+    }
+
     /** Get abi in both binary and structured forms. Fetch when needed. */
     public async getCachedAbi(accountName: string, reload = false): Promise<CachedAbi> {
         if (!reload && this.cachedAbis.get(accountName)) {
