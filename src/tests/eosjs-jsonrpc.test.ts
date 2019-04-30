@@ -341,6 +341,29 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls get_scheduled_transactions', async () => {
+        const expPath = '/v1/chain/get_scheduled_transactions';
+        const json = true;
+        const lowerBound = '';
+        const limit = 50;
+        const expReturn = { data: '12345' };
+        const expParams = {
+            body: JSON.stringify({
+                json,
+                lower_bound: lowerBound,
+                limit,
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_scheduled_transactions();
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls get_table_rows with all params', async () => {
         const expPath = '/v1/chain/get_table_rows';
         const json = false;

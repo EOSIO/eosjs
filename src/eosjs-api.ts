@@ -115,7 +115,8 @@ export class Api {
 
     /** Get abis needed by a transaction */
     public async getTransactionAbis(transaction: any, reload = false): Promise<BinaryAbi[]> {
-        const accounts: string[] = transaction.actions.map((action: ser.Action): string => action.account);
+        const actions = (transaction.context_free_actions || []).concat(transaction.actions);
+        const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
         const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
             async (account: string): Promise<BinaryAbi> => ({
@@ -165,6 +166,19 @@ export class Api {
         return buffer.asUint8Array();
     }
 
+    /** Serialize context-free data */
+    public serializeContextFreeData(contextFreeData: Uint8Array[]): Uint8Array {
+        if (!contextFreeData || !contextFreeData.length) {
+            return null;
+        }
+        const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+        buffer.pushVaruint32(contextFreeData.length);
+        for (const data of contextFreeData) {
+            buffer.pushBytes(data);
+        }
+        return buffer.asUint8Array();
+    }
+
     /** Convert a transaction from binary. Leaves actions in hex. */
     public deserializeTransaction(transaction: Uint8Array): any {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
@@ -196,8 +210,11 @@ export class Api {
             transaction = ser.hexToUint8Array(transaction);
         }
         const deserializedTransaction = this.deserializeTransaction(transaction);
+        const deserializedCFActions = await this.deserializeActions(deserializedTransaction.context_free_actions);
         const deserializedActions = await this.deserializeActions(deserializedTransaction.actions);
-        return { ...deserializedTransaction, actions: deserializedActions };
+        return {
+            ...deserializedTransaction, context_free_actions: deserializedCFActions, actions: deserializedActions
+        };
     }
 
     /**
@@ -233,9 +250,16 @@ export class Api {
         }
 
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
-        transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
+        transaction = {
+            ...transaction,
+            context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
+            actions: await this.serializeActions(transaction.actions)
+        };
         const serializedTransaction = this.serializeTransaction(transaction);
-        let pushTransactionArgs: PushTransactionArgs  = { serializedTransaction, signatures: [] };
+        const serializedContextFreeData = this.serializeContextFreeData(transaction.context_free_data);
+        let pushTransactionArgs: PushTransactionArgs = {
+            serializedTransaction, serializedContextFreeData, signatures: []
+        };
 
         if (sign) {
             const availableKeys = await this.signatureProvider.getAvailableKeys();
@@ -244,6 +268,7 @@ export class Api {
                 chainId: this.chainId,
                 requiredKeys,
                 serializedTransaction,
+                serializedContextFreeData,
                 abis,
             });
         }
@@ -254,10 +279,13 @@ export class Api {
     }
 
     /** Broadcast a signed transaction */
-    public async pushSignedTransaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+    public async pushSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
+            serializedContextFreeData
         });
     }
 
