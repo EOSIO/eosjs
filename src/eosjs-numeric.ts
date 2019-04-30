@@ -290,8 +290,6 @@ export function stringToPublicKey(s: string): Key {
         return stringToKey(s.substr(7), KeyType.k1, publicKeyDataSize, 'K1');
     } else if (s.substr(0, 7) === 'PUB_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, publicKeyDataSize, 'R1');
-    } else if (s.substr(0, 7) === 'PUB_WA_') {
-        return stringToKey(s.substr(7), KeyType.wa, publicKeyDataSize, 'WA');
     } else {
         throw new Error('unrecognized public key format');
     }
@@ -303,7 +301,7 @@ export function publicKeyToString(key: Key) {
         return keyToString(key, 'K1', 'PUB_K1_');
     } else if (key.type === KeyType.r1 && key.data.length === publicKeyDataSize) {
         return keyToString(key, 'R1', 'PUB_R1_');
-    } else if (key.type === KeyType.wa && key.data.length === publicKeyDataSize) {
+    } else if (key.type === KeyType.wa) {
         return keyToString(key, 'WA', 'PUB_WA_');
     } else {
         throw new Error('unrecognized public key format');
