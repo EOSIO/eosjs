@@ -124,11 +124,41 @@ export function signedBinaryToDecimal(bignum: Uint8Array, minDigits = 1) {
     return binaryToDecimal(bignum, minDigits);
 }
 
+function base58ToBinaryVarSize(s: string) {
+    const result = [] as number[];
+    for (let i = 0; i < s.length; ++i) {
+        let carry = base58Map[s.charCodeAt(i)];
+        if (carry < 0) {
+            throw new Error('invalid base-58 value');
+        }
+        for (let j = 0; j < result.length; ++j) {
+            const x = result[j] * 58 + carry;
+            result[j] = x & 0xff;
+            carry = x >> 8;
+        }
+        if (carry) {
+            result.push(carry);
+        }
+    }
+    for (const ch of s) {
+        if (ch === '1') {
+            result.push(0);
+        } else {
+            break;
+        }
+    }
+    result.reverse();
+    return new Uint8Array(result);
+}
+
 /**
  * Convert an unsigned base-58 number in `s` to a bignum
  * @param size bignum size (bytes)
  */
 export function base58ToBinary(size: number, s: string) {
+    if (!size) {
+        return base58ToBinaryVarSize(s);
+    }
     const result = new Uint8Array(size);
     for (let i = 0; i < s.length; ++i) {
         let carry = base58Map[s.charCodeAt(i)];
@@ -247,11 +277,11 @@ function digestSuffixRipemd160(data: Uint8Array, suffix: string) {
 }
 
 function stringToKey(s: string, type: KeyType, size: number, suffix: string): Key {
-    const whole = base58ToBinary(size + 4, s);
-    const result = { type, data: new Uint8Array(whole.buffer, 0, size) };
+    const whole = base58ToBinary(size ? size + 4 : 0, s);
+    const result = { type, data: new Uint8Array(whole.buffer, 0, whole.length - 4) };
     const digest = new Uint8Array(digestSuffixRipemd160(result.data, suffix));
-    if (digest[0] !== whole[size + 0] || digest[1] !== whole[size + 1]
-        || digest[2] !== whole[size + 2] || digest[3] !== whole[size + 3]) {
+    if (digest[0] !== whole[whole.length - 4] || digest[1] !== whole[whole.length - 3]
+        || digest[2] !== whole[whole.length - 2] || digest[3] !== whole[whole.length - 1]) {
         throw new Error('checksum doesn\'t match');
     }
     return result;
@@ -290,6 +320,8 @@ export function stringToPublicKey(s: string): Key {
         return stringToKey(s.substr(7), KeyType.k1, publicKeyDataSize, 'K1');
     } else if (s.substr(0, 7) === 'PUB_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, publicKeyDataSize, 'R1');
+    } else if (s.substr(0, 7) === 'PUB_WA_') {
+        return stringToKey(s.substr(7), KeyType.wa, 0, 'WA');
     } else {
         throw new Error('unrecognized public key format');
     }
