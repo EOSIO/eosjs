@@ -570,6 +570,41 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls send_transaction', async () => {
+        const expPath = '/v1/chain/send_transaction';
+        const signatures = [
+            'George Washington',
+            'John Hancock',
+            'Abraham Lincoln',
+        ];
+        const serializedTransaction = new Uint8Array([
+            0, 16, 32, 128, 255,
+        ]);
+
+        const limit = 50;
+        const expReturn = { data: '12345' };
+        const callParams = {
+            signatures,
+            serializedTransaction,
+        };
+        const expParams = {
+            body: JSON.stringify({
+                signatures,
+                compression: 0,
+                packed_context_free_data: '',
+                packed_trx: '00102080ff',
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.send_transaction(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls db_size_get', async () => {
         const expPath = '/v1/db_size/get';
         const expReturn = { data: '12345' };

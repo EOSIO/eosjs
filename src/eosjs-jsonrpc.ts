@@ -5,7 +5,7 @@
 
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
-import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./eosjs-rpc-interfaces" // tslint:disable-line
+import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs, SendTransactionArgs } from "./eosjs-rpc-interfaces" // tslint:disable-line
 import { RpcError } from './eosjs-rpcerror';
 
 function arrayToHex(data: Uint8Array) {
@@ -188,11 +188,23 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         })).required_keys);
     }
 
-    /** Push a serialized transaction */
+    /** Push a serialized transaction (replaced by send_transaction, but returned format has changed) */
     public async push_transaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
     ): Promise<any> {
         return await this.fetch('/v1/chain/push_transaction', {
+            signatures,
+            compression: 0,
+            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
+            packed_trx: arrayToHex(serializedTransaction),
+        });
+    }
+
+    /** Send a serialized transaction */
+    public async send_transaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: SendTransactionArgs
+    ): Promise<any> {
+        return await this.fetch('/v1/chain/send_transaction', {
             signatures,
             compression: 0,
             packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),

@@ -79,3 +79,10 @@ export interface PushTransactionArgs {
     serializedTransaction: Uint8Array;
     serializedContextFreeData?: Uint8Array;
 }
+
+/** Arguments for `send_transaction` */
+export interface SendTransactionArgs {
+    signatures: string[];
+    serializedTransaction: Uint8Array;
+    serializedContextFreeData?: Uint8Array;
+}
