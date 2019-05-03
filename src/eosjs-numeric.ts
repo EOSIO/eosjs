@@ -398,6 +398,8 @@ export function signatureToString(signature: Key) {
         return keyToString(signature, 'K1', 'SIG_K1_');
     } else if (signature.type === KeyType.r1) {
         return keyToString(signature, 'R1', 'SIG_R1_');
+    } else if (signature.type === KeyType.wa) {
+        return keyToString(signature, 'WA', 'SIG_WA_');
     } else {
         throw new Error('unrecognized signature format');
     }
