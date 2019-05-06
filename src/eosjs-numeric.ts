@@ -387,6 +387,8 @@ export function stringToSignature(s: string): Key {
         return stringToKey(s.substr(7), KeyType.k1, signatureDataSize, 'K1');
     } else if (s.substr(0, 7) === 'SIG_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, signatureDataSize, 'R1');
+    } else if (s.substr(0, 7) === 'SIG_WA_') {
+        return stringToKey(s.substr(7), KeyType.wa, 0, 'WA');
     } else {
         throw new Error('unrecognized signature format');
     }
