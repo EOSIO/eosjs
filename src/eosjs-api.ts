@@ -291,7 +291,7 @@ export class Api {
 
     // eventually break out into TransactionValidator class
     private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix, ...transaction }: any): boolean {
-        return !!(expiration && ref_block_num && ref_block_prefix);
+        return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
 } // Api
