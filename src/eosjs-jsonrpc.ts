@@ -30,7 +30,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     constructor(endpoint: string, args:
         { fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> } = {},
     ) {
-        this.endpoint = endpoint;
+        this.endpoint = endpoint.replace(/\/$/, '');
         if (args.fetch) {
             this.fetchBuiltin = args.fetch;
         } else {

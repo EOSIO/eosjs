@@ -2,13 +2,14 @@ import { JsonRpc } from '../eosjs-jsonrpc';
 import { RpcError } from '../eosjs-rpcerror';
 
 describe('JSON RPC', () => {
+    const endpointExtraSlash = 'http://localhost/';
     const endpoint = 'http://localhost';
     const fetchMock = fetch as any;
     let jsonRpc: JsonRpc;
 
     beforeEach(() => {
         fetchMock.resetMocks();
-        jsonRpc = new JsonRpc(endpoint);
+        jsonRpc = new JsonRpc(endpointExtraSlash);
     });
 
     it('throws error bad status', async () => {
