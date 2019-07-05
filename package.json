@@ -55,6 +55,11 @@
     "webpack": "4.29.5",
     "webpack-cli": "3.2.3"
   },
+  "resolutions": {
+    "braces": "2.3.1",
+    "handlebars": "4.1.2",
+    "js-yaml": "3.13.1"
+  },
   "jest": {
     "automock": false,
     "setupFiles": [
