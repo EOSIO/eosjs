@@ -66,8 +66,9 @@ export class JsSignatureProvider implements SignatureProvider {
         ]);
         const signatures = requiredKeys.map(
             (pub) => {
-                const keyPair = this.elliptic.keyFromPublic(this.keys.get(pub));
-                const signature = this.elliptic.sign(signBuf, keyPair);
+                const keyPair: ec.KeyPair = this.elliptic.keyFromPublic(this.keys.get(pub));
+                const signature: ec.Signature = this.elliptic.sign(signBuf, keyPair);
+                console.log(signature);
                 const sigData = new SerialBuffer();
                 sigData.push(signature.recoveryParam);
                 sigData.pushArray(signature.r.toArray());

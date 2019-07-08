@@ -19,7 +19,7 @@ describe('JsSignatureProvider', () => {
         expect(actualPublicKeys).toEqual(publicKeys);
     });
 
-    it('signs a transaction', async () => {
+    fit('signs a transaction', async () => {
         const eccSignatureSign = jest.spyOn(ecc.Signature, 'sign');
         eccSignatureSign.mockImplementation((buffer, signKey) => signKey);
 
