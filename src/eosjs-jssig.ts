@@ -3,9 +3,10 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import * as ecc from 'eosjs-ecc';
+import { ec } from 'elliptic';
 import { SignatureProvider, SignatureProviderArgs } from './eosjs-api-interfaces';
-import { convertLegacyPublicKey } from './eosjs-numeric';
+import { convertLegacyPublicKey, signatureToString, KeyType } from './eosjs-numeric';
+import { SerialBuffer } from './eosjs-serialize';
 
 function hexToUint8Array(hex: string) {
     if (typeof hex !== 'string') {
@@ -28,6 +29,8 @@ function hexToUint8Array(hex: string) {
 
 /** Signs transactions using in-process private keys */
 export class JsSignatureProvider implements SignatureProvider {
+    public elliptic = new ec('p256') as ec;
+
     /** map public to private keys */
     public keys = new Map<string, string>();
 
@@ -37,7 +40,7 @@ export class JsSignatureProvider implements SignatureProvider {
     /** @param privateKeys private keys to sign with */
     constructor(privateKeys: string[]) {
         for (const k of privateKeys) {
-            const pub = convertLegacyPublicKey(ecc.PrivateKey.fromString(k).toPublic().toString());
+            const pub = convertLegacyPublicKey(this.elliptic.keyFromPrivate(k).getPublic().toString());
             this.keys.set(pub, k);
             this.availableKeys.push(pub);
         }
@@ -57,13 +60,23 @@ export class JsSignatureProvider implements SignatureProvider {
             new Buffer(serializedTransaction),
             new Buffer(
                 serializedContextFreeData ?
-                    hexToUint8Array(ecc.sha256(serializedContextFreeData)) :
+                    hexToUint8Array(this.elliptic.hash(serializedContextFreeData)) :
                     new Uint8Array(32)
             ),
         ]);
         const signatures = requiredKeys.map(
-            (pub) => ecc.Signature.sign(signBuf, this.keys.get(convertLegacyPublicKey(pub))).toString(),
-        );
+            (pub) => {
+                const keyPair = this.elliptic.keyFromPublic(this.keys.get(pub));
+                const signature = this.elliptic.sign(signBuf, keyPair);
+                const sigData = new SerialBuffer();
+                sigData.push(signature.recoveryParam);
+                sigData.pushArray(signature.r.toArray());
+                sigData.pushArray(signature.s.toArray());
+                return signatureToString({
+                    type: KeyType.r1,
+                    data: sigData.asUint8Array().slice()
+                });
+            });
         return { signatures, serializedTransaction, serializedContextFreeData };
     }
 }
