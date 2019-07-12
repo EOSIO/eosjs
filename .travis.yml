@@ -28,6 +28,3 @@ deploy:
     on: 
       tags: true
       condition: $TRAVIS_IS_LATEST_TAG = true # sourced from ./scripts/is_latest.sh
-notifications:
-  webhooks:
-    secure: FrWUleN0/IoOE2lPK7/YBZEvq79D8dOIN0+T3M/yR4NaVIuwG9T5e1zswEbPw0xTu03FT3hH8almw7/UEj2vAgP2KdvjeHPR1/EQOC0h0hqS5DMEYlnaXbUxoB93iQAU9wwVpa3DuiEqXQKac0nMdW+FWs/2xGpwJF0SlhzF6H/kb+/VUF+0ZngjJZFB/yXn7MI7uGuTfpbAGRSUL9MAXiXUSIxtcd4GzPS3roS0zGILDoBUljfnyuJltZdjjghdhBuNSVtGa2mI5nUpp6ulPhVDrqB9DeBo0OIiSPTJjKzPlNjB7cYLwrd4PFVj6wR2FvJe5HExKIwdSLi/ExAo1ncJ9kvsbf63SmNs9GLMSMkWhD68JFoe4tEA9cggq3WO8AB/cWmJEC5NVMdqeNh86KH1PVn8eZgwtdKsKunloe1I7NPPia/fWlraY7FYLHqb3qOYuniLDzfiJ0JkQivgXWvHaF0xDsf7BH8czBMKFkQmNXBd2FwfAzneIOyYipFpfTWWjFnTq4KsbLuLYgrZ/nRaiLu02hHY6DZT0Ec3SkMHjuwhHvCTTyC+nFQl1OVZnm08br0fItVDGFp7hOIXeqicXUO3GtEITlO8s7qUPiw6SnSUW+B7u8e1MAtjXjVriHseHO9g+PJ4IbNY8rVwDvvSTQM1R4T29Or8OocJpzA=
