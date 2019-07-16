@@ -14,6 +14,21 @@ The official distribution package can be found at [npm](https://www.npmjs.com/pa
 
 `yarn add eosjs`
 
+### Using with Typescript
+
+In order to get access to the `TextEncoding` and `TextDecoding` types, you need to add `@types/text-encoding` as a dev dependency:
+`yarn add --dev @types/text-encoding`
+
+If you're using Node (not a browser) then you'll also need to make sure the `dom` lib is referenced in your `tsconfig.json`:
+
+```
+{
+	"compilerOptions": {
+		"lib": [..., "dom"]
+	}
+}
+```
+
 ### Browser Distribution
 
 Clone this repository locally then run `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
