@@ -30,7 +30,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     constructor(endpoint: string, args:
         { fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> } = {},
     ) {
-        this.endpoint = endpoint;
+        this.endpoint = endpoint.replace(/\/$/, '');
         if (args.fetch) {
             this.fetchBuiltin = args.fetch;
         } else {
@@ -188,11 +188,23 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         })).required_keys);
     }
 
-    /** Push a serialized transaction */
+    /** Push a serialized transaction (replaced by send_transaction, but returned format has changed) */
     public async push_transaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
     ): Promise<any> {
         return await this.fetch('/v1/chain/push_transaction', {
+            signatures,
+            compression: 0,
+            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
+            packed_trx: arrayToHex(serializedTransaction),
+        });
+    }
+
+    /** Send a serialized transaction */
+    public async send_transaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
+        return await this.fetch('/v1/chain/send_transaction', {
             signatures,
             compression: 0,
             packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
