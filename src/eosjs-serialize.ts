@@ -198,6 +198,14 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
         return result;
     }
 
+    /** Skip `len` bytes */
+    public skip(len: number) {
+        if (this.readPos + len > this.length) {
+            throw new Error('Read past end of buffer');
+        }
+        this.readPos += len;
+    }
+
     /** Append a `uint16` */
     public pushUint16(v: number) {
         this.push((v >> 0) & 0xff, (v >> 8) & 0xff);
@@ -489,7 +497,15 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
     /** Get a public key */
     public getPublicKey() {
         const type = this.get();
-        const data = this.getUint8Array(numeric.publicKeyDataSize);
+        let data: Uint8Array;
+        if (type === numeric.KeyType.wa) {
+            const begin = this.readPos;
+            this.skip(34);
+            this.skip(this.getVaruint32());
+            data = new Uint8Array(this.array.buffer, this.array.byteOffset + begin, this.readPos - begin);
+        } else {
+            data = this.getUint8Array(numeric.publicKeyDataSize);
+        }
         return numeric.publicKeyToString({ type, data });
     }
 
@@ -517,7 +533,16 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
     /** Get a signature */
     public getSignature() {
         const type = this.get();
-        const data = this.getUint8Array(numeric.signatureDataSize);
+        let data: Uint8Array;
+        if (type === numeric.KeyType.wa) {
+            const begin = this.readPos;
+            this.skip(65);
+            this.skip(this.getVaruint32());
+            this.skip(this.getVaruint32());
+            data = new Uint8Array(this.array.buffer, this.array.byteOffset + begin, this.readPos - begin);
+        } else {
+            data = this.getUint8Array(numeric.signatureDataSize);
+        }
         return numeric.signatureToString({ type, data });
     }
 } // SerialBuffer
