@@ -365,7 +365,18 @@ export function stringToPrivateKey(s: string): Key {
     if (s.substr(0, 7) === 'PVT_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, privateKeyDataSize, 'R1');
     } else {
-        throw new Error('unrecognized private key format');
+        // todo: Verify checksum: sha256(sha256(key.data)).
+        //       Not critical since a bad key will fail to produce an
+        //       invalid signature anyway.
+        const whole = base58ToBinary(privateKeyDataSize + 5, s);
+        const key = { type: KeyType.k1, data: new Uint8Array(privateKeyDataSize) };
+        if (whole[0] !== 0x80) {
+            throw new Error('unrecognized private key type');
+        }
+        for (let i = 0; i < privateKeyDataSize; ++i) {
+            key.data[i] = whole[i + 1];
+        }
+        return key;
     }
 }
 
