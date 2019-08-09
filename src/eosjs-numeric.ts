@@ -366,8 +366,8 @@ export function stringToPrivateKey(s: string): Key {
         return stringToKey(s.substr(7), KeyType.r1, privateKeyDataSize, 'R1');
     } else {
         // todo: Verify checksum: sha256(sha256(key.data)).
-        //       Not critical since a bad key will fail to produce an
-        //       invalid signature anyway.
+        //       Not critical since a bad key will fail to produce a
+        //       valid signature anyway.
         const whole = base58ToBinary(privateKeyDataSize + 5, s);
         const key = { type: KeyType.k1, data: new Uint8Array(privateKeyDataSize) };
         if (whole[0] !== 0x80) {
