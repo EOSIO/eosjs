@@ -63,11 +63,19 @@ export class JsSignatureProvider implements SignatureProvider {
         const signatures = [] as string[];
         for (const key of requiredKeys) {
             const privKey = this.keys.get(convertLegacyPublicKey(key)) as any;
-            const sig = privKey.sign(digest, { canonical: true });
-            // console.log('check:', sig.s.cmp(privKey.ec.nh) <= 0);
-            const r = sig.r.toArray();
-            const s = sig.s.toArray();
-            const sigData = new Uint8Array([sig.recoveryParam + 27 + 4].concat(r, s));
+            let tries = 0;
+            let sigData: Uint8Array;
+            const isCanonical = () =>
+                !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
+                && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
+
+            do {
+                const sig = privKey.sign(digest, { canonical: true, pers: [++tries] });
+                const r = sig.r.toArray();
+                const s = sig.s.toArray();
+                sigData = new Uint8Array([sig.recoveryParam + 27 + 4].concat(r, s));
+            } while (!isCanonical());
+
             const sigStr = signatureToString({
                 type: KeyType.k1,
                 data: sigData,
