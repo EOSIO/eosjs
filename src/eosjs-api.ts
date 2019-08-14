@@ -241,7 +241,7 @@ export class Api {
             if (!info) {
                 info = await this.rpc.get_info();
             }
-            const refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
+            const refBlock = await this.rpc.get_block_header_state(info.head_block_num - blocksBehind);
             transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
         }
 
