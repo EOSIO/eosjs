@@ -217,17 +217,6 @@ export class Api {
         };
     }
 
-    private reverseHex(h: string) {
-        return h.substr(6, 2) + h.substr(4, 2) + h.substr(2, 2) + h.substr(0, 2);
-    }
-
-    private transactionHeader(refBlock: any, expireSeconds: number) {
-        return {
-            expiration: ser.timePointSecToDate(ser.dateToTimePointSec(refBlock.header.timestamp) + expireSeconds),
-            ref_block_num: refBlock.block_num & 0xffff,
-            ref_block_prefix: parseInt(this.reverseHex(refBlock.id.substr(16, 8)), 16),
-        };
-    }
     /**
      * Create and optionally broadcast a transaction.
      *
@@ -253,7 +242,7 @@ export class Api {
                 info = await this.rpc.get_info();
             }
             const refBlock = await this.rpc.get_block_header_state(info.head_block_num - blocksBehind);
-            transaction = { ...this.transactionHeader(refBlock, expireSeconds), ...transaction };
+            transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {

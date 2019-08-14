@@ -4,7 +4,7 @@
 // copyright defined in eosjs/LICENSE.txt
 
 import * as numeric from './eosjs-numeric';
-import { Abi, BlockTaposInfo } from './eosjs-rpc-interfaces';
+import { Abi, BlockTaposInfo, BlockHeaderStateTaposInfo } from './eosjs-rpc-interfaces';
 
 /** A field in an abi */
 export interface Field {
@@ -1073,12 +1073,19 @@ export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
     return types;
 } // getTypesFromAbi
 
-/** TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `refBlock.timestamp` */
+function reverseHex(h: string) {
+    return h.substr(6, 2) + h.substr(4, 2) + h.substr(2, 2) + h.substr(0, 2);
+}
+
+/** TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `timestamp` */
 export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: number) {
+    const timestamp = refBlock.header ? refBlock.header.timestamp : refBlock.timestamp;
+    const prefix = parseInt(reverseHex(refBlock.id.substr(16, 8)), 16);
+
     return {
-        expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
+        expiration: timePointSecToDate(dateToTimePointSec(timestamp) + expireSeconds),
         ref_block_num: refBlock.block_num & 0xffff,
-        ref_block_prefix: refBlock.ref_block_prefix,
+        ref_block_prefix: prefix,
     };
 }
 
