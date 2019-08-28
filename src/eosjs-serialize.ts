@@ -55,6 +55,12 @@ export interface Type {
     /** Marks sized fields */
     sizedOf?: Type;
 
+    /** Marks fixed-size fields */
+    fixedSizedOf?: Type;
+
+    /** Size of fixed-size fields */
+    fixedSize?: number;
+
     /** Base name of this type, if this is a struct */
     baseName: string;
 
@@ -772,6 +778,24 @@ function deserializeSized(this: Type, buffer: SerialBuffer, state?: SerializerSt
     return this.sizedOf.deserialize(b, state, true);
 }
 
+function serializeFixedSized(this: Type, buffer: SerialBuffer, data: any,
+                             state?: SerializerState, allowExtensions?: boolean) {
+    const b = new SerialBuffer({ textEncoder: buffer.textEncoder, textDecoder: buffer.textDecoder });
+    this.fixedSizedOf.serialize(b, data, state, true);
+    if (b.length > this.fixedSize) {
+        throw new Error(`data exceeds fixed-size limit (#${this.fixedSize})`);
+    }
+    b.pushArray(Array(this.fixedSize - b.length).fill(0));
+    buffer.pushArray(b.asUint8Array());
+}
+
+function deserializeFixedSized(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+    const b = new SerialBuffer({
+        textEncoder: buffer.textEncoder, textDecoder: buffer.textDecoder, array: buffer.getUint8Array(this.fixedSize)
+    });
+    return this.fixedSizedOf.deserialize(b, state, true);
+}
+
 interface CreateTypeArgs {
     name?: string;
     aliasOfName?: string;
@@ -779,6 +803,8 @@ interface CreateTypeArgs {
     optionalOf?: Type;
     extensionOf?: Type;
     sizedOf?: Type;
+    fixedSizedOf?: Type;
+    fixedSize?: number;
     baseName?: string;
     base?: Type;
     fields?: Field[];
@@ -794,6 +820,8 @@ function createType(attrs: CreateTypeArgs): Type {
         optionalOf: null,
         extensionOf: null,
         sizedOf: null,
+        fixedSizedOf: null,
+        fixedSize: null,
         baseName: '',
         base: null,
         fields: [],
@@ -1011,6 +1039,31 @@ export function createInitialTypes(): Map<string, Type> {
     return result;
 } // createInitialTypes()
 
+function getFixedSizedSuffix(type: string) {
+    let value = 0;
+    let suffixLength = 0;
+    let multiplier = 1;
+    while (suffixLength < type.length) {
+        const ch = type.charCodeAt(type.length - 1 - suffixLength++);
+        if (ch === '#'.charCodeAt(0)) {
+            break;
+        }
+        if (ch < '0'.charCodeAt(0) || ch > '9'.charCodeAt(0)) {
+            return null;
+        }
+        value += (ch - '0'.charCodeAt(0)) * multiplier;
+        multiplier *= 10;
+        if (value >= 0xffff_ffff) {
+            return null;
+        }
+    }
+    if (suffixLength >= 2) {
+        return { value, suffixLength };
+    } else {
+        return null;
+    }
+}
+
 /** Get type from `types` */
 export function getType(types: Map<string, Type>, name: string): Type {
     const type = types.get(name);
@@ -1050,6 +1103,16 @@ export function getType(types: Map<string, Type>, name: string): Type {
             sizedOf: getType(types, name.substr(0, name.length - 1)),
             serialize: serializeSized,
             deserialize: deserializeSized,
+        });
+    }
+    const fixedSizedSuffix = getFixedSizedSuffix(name);
+    if (fixedSizedSuffix) {
+        return createType({
+            name,
+            fixedSizedOf: getType(types, name.substr(0, name.length - fixedSizedSuffix.suffixLength)),
+            serialize: serializeFixedSized,
+            deserialize: deserializeFixedSized,
+            fixedSize: fixedSizedSuffix.value,
         });
     }
     throw new Error('Unknown type: ' + name);
