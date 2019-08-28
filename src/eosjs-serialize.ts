@@ -52,6 +52,9 @@ export interface Type {
     /** Marks binary extension fields */
     extensionOf?: Type;
 
+    /** Marks sized fields */
+    sizedOf?: Type;
+
     /** Base name of this type, if this is a struct */
     baseName: string;
 
@@ -105,24 +108,24 @@ export interface SerializedAction {
 
 /** Serialize and deserialize data */
 export class SerialBuffer { // tslint:disable-line max-classes-per-file
-  /** Amount of valid data in `array` */
+    /** Amount of valid data in `array` */
     public length: number;
 
-  /** Data in serialized (binary) form */
+    /** Data in serialized (binary) form */
     public array: Uint8Array;
 
-  /** Current position while reading (deserializing) */
+    /** Current position while reading (deserializing) */
     public readPos = 0;
 
     public textEncoder: TextEncoder;
     public textDecoder: TextDecoder;
 
-  /**
-   * @param __namedParameters
-   *    * `array`: `null` if serializing, or binary data to deserialize
-   *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-   *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
-   */
+    /**
+     * @param __namedParameters
+     *    * `array`: `null` if serializing, or binary data to deserialize
+     *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
+     *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
+     */
     constructor({ textEncoder, textDecoder, array } = {} as
         { textEncoder?: TextEncoder, textDecoder?: TextDecoder, array?: Uint8Array }) {
         this.array = array || new Uint8Array(1024);
@@ -755,12 +758,27 @@ function deserializeExtension(this: Type, buffer: SerialBuffer, state?: Serializ
     return this.extensionOf.deserialize(buffer, state, allowExtensions);
 }
 
+function serializeSized(this: Type, buffer: SerialBuffer, data: any,
+                        state?: SerializerState, allowExtensions?: boolean) {
+    const b = new SerialBuffer({ textEncoder: buffer.textEncoder, textDecoder: buffer.textDecoder });
+    this.sizedOf.serialize(b, data, state, true);
+    buffer.pushBytes(b.asUint8Array());
+}
+
+function deserializeSized(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+    const b = new SerialBuffer({
+        textEncoder: buffer.textEncoder, textDecoder: buffer.textDecoder, array: buffer.getBytes()
+    });
+    return this.sizedOf.deserialize(b, state, true);
+}
+
 interface CreateTypeArgs {
     name?: string;
     aliasOfName?: string;
     arrayOf?: Type;
     optionalOf?: Type;
     extensionOf?: Type;
+    sizedOf?: Type;
     baseName?: string;
     base?: Type;
     fields?: Field[];
@@ -775,6 +793,7 @@ function createType(attrs: CreateTypeArgs): Type {
         arrayOf: null,
         optionalOf: null,
         extensionOf: null,
+        sizedOf: null,
         baseName: '',
         base: null,
         fields: [],
@@ -1023,6 +1042,14 @@ export function getType(types: Map<string, Type>, name: string): Type {
             extensionOf: getType(types, name.substr(0, name.length - 1)),
             serialize: serializeExtension,
             deserialize: deserializeExtension,
+        });
+    }
+    if (name.endsWith('#')) {
+        return createType({
+            name,
+            sizedOf: getType(types, name.substr(0, name.length - 1)),
+            serialize: serializeSized,
+            deserialize: deserializeSized,
         });
     }
     throw new Error('Unknown type: ' + name);
