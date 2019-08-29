@@ -5,7 +5,13 @@
 
 import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
-import { Abi, GetInfoResult, PushTransactionArgs, GetBlockHeaderStateResult, GetBlockResult } from './eosjs-rpc-interfaces';
+import {
+    Abi,
+    GetInfoResult,
+    PushTransactionArgs,
+    GetBlockHeaderStateResult,
+    GetBlockResult
+} from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
 const abiAbi = require('../src/abi.abi.json');
