@@ -5,7 +5,7 @@
 
 import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
-import { Abi, GetInfoResult, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import { Abi, GetInfoResult, PushTransactionArgs, GetBlockHeaderStateResult, GetBlockResult } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
 const abiAbi = require('../src/abi.abi.json');
@@ -241,7 +241,14 @@ export class Api {
             if (!info) {
                 info = await this.rpc.get_info();
             }
-            const refBlock = await this.rpc.get_block_header_state(info.head_block_num - blocksBehind);
+
+            const taposBlockNumber = info.head_block_num - blocksBehind;
+            let refBlock: GetBlockHeaderStateResult | GetBlockResult;
+            if (taposBlockNumber - info.last_irreversible_block_num < 2) {
+                refBlock = await this.rpc.get_block(taposBlockNumber);
+            } else {
+                refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
+            }
             transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
         }
 
