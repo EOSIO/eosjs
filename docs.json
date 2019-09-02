@@ -1,0 +1,11 @@
+{
+	"name": "eosjs",
+	"generators": [
+    {
+			"name": "collate_markdown",
+			"options": {
+				"docs_dir": "docs"
+			}
+    }
+  ]
+}
