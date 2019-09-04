@@ -3,9 +3,21 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from './eosjs-api-interfaces';
+import {
+    AbiProvider,
+    AuthorityProvider,
+    BinaryAbi,
+    CachedAbi,
+    SignatureProvider
+} from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
-import { Abi, GetInfoResult, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import {
+    Abi,
+    GetInfoResult,
+    PushTransactionArgs,
+    GetBlockHeaderStateResult,
+    GetBlockResult
+} from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
 const abiAbi = require('../src/abi.abi.json');
@@ -241,7 +253,15 @@ export class Api {
             if (!info) {
                 info = await this.rpc.get_info();
             }
-            const refBlock = await this.rpc.get_block_header_state(info.head_block_num - blocksBehind);
+
+            const taposBlockNumber = info.head_block_num - blocksBehind;
+            let refBlock: GetBlockHeaderStateResult | GetBlockResult;
+            try {
+                refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
+            } catch (error) {
+                refBlock = await this.rpc.get_block(taposBlockNumber);
+            }
+
             transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
         }
 
