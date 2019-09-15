@@ -29,7 +29,7 @@ Below is a complete example transaction to call the `buyrambytes` action with `u
 The transaction will reference the block 3 blocks behind the head block, and will automatically expire the transaction 30 seconds after the time present in this referenced block.
 ```javascript
 (async () => {
-  console.log(await api.transact({
+  await api.transact({
    actions: [{
      account: 'eosio',
      name: 'buyrambytes',
@@ -46,26 +46,6 @@ The transaction will reference the block 3 blocks behind the head block, and wil
   }, {
    blocksBehind: 3,
    expireSeconds: 30,
-  }));
+  });
 })();
-```
-Above we console log the response from the EOSIO network.  An example of an expected response is shown below.
-```javascript
-{
-  transaction_id: 'b3598da4e007173e6d1b94d7be306299dd0a6813d114cf9a08c8e88a5756f1eb',
-  processed: {
-    id: 'b3598da4e007173e6d1b94d7be306299dd0a6813d114cf9a08c8e88a5756f1eb',
-    block_num: 46632826,
-    block_time: '2019-08-28T03:45:21.500',
-    producer_block_id: null,
-    receipt: { status: 'executed', cpu_usage_us: 605, net_usage_words: 14 },
-    elapsed: 605,
-    net_usage: 112,
-    scheduled: false,
-    action_traces: [ [Object] ],
-    account_ram_delta: null,
-    except: null,
-    error_code: null
-  }
-}
 ```

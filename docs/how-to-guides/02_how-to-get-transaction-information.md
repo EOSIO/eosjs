@@ -1,7 +1,7 @@
 To get a transaction's information, call `history_get_transaction` on the rpc object passing in the transaction's id and optionally, it's block number as arguments.
 ```javascript
 (async () => {
-  console.log(await rpc.history_get_transaction('b3598da4e007173e6d1b94d7be306299dd0a6813d114cf9a08c8e88a5756f1eb', 46632826))
+  await rpc.history_get_transaction('b3598da4e007173e6d1b94d7be306299dd0a6813d114cf9a08c8e88a5756f1eb', 46632826)
 })();
 ```
 

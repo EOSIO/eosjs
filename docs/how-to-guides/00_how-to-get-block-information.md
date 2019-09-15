@@ -1,7 +1,7 @@
 To get block information call `get_block` on the rpc object passing in the block number as a required argument.
 ```javascript
 (async () => { 
-  console.log(await rpc.get_block(1)) //get the first block
+  await rpc.get_block(1) //get the first block
 })();
 ```
 

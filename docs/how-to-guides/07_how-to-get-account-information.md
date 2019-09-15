@@ -1,7 +1,7 @@
 To get a specific account's information call `get_account` on the rpc object passing in the account name as a function argument.
 ```javascript
 (async () => {
-  console.log(await rpc.get_account('alice')) //get alice's account info.  This assumes the account 'alice' has been created on the chain specified in the rpc object.
+  await rpc.get_account('alice') //get alice's account info.  This assumes the account 'alice' has been created on the chain specified in the rpc object.
 })();
 ```
 
