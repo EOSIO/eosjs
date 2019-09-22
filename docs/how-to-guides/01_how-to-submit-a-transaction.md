@@ -18,7 +18,7 @@ The first parameter specifies the actions in the transaction, and their correspo
    }]
 }
 ```
-The second parameter is an [optional configuration object parameter](https://github.com/EOSIO/eosjs/blob/master/src/eosjs-api.ts#L215).  This parameter can override the default value of `broadcast: true`, and can be used to fill [TAPOS](https://eosio.stackexchange.com/questions/2362/what-is-transaction-as-proof-of-stake-tapos-and-when-would-a-smart-contract) fields with the specified `blocksBehind` and `expireSeconds`.  Given no configuration object, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
+The second parameter is an [optional configuration object parameter](https://github.com/EOSIO/eosjs/blob/master/src/eosjs-api.ts#L215).  This optional parameter can override the default values of `broadcast: true` and `sign: true`, and can be used to fill [TAPOS](https://eosio.stackexchange.com/questions/2362/what-is-transaction-as-proof-of-stake-tapos-and-when-would-a-smart-contract) fields with the specified `blocksBehind` and `expireSeconds` if necessary.  These fields are required if the first parameter specified above does not itself contain the TAPOS fields `expiration`, `ref_block_num`, and `ref_block_prefix`.  In this case it does not, so the fields are necessary.
 ```javascript
 {
   blocksBehind: 3,
@@ -46,6 +46,30 @@ The transaction will reference the block 3 blocks behind the head block, and wil
   }, {
    blocksBehind: 3,
    expireSeconds: 30,
+  });
+})();
+```
+
+Alternatively, the transaction could be submitted without the optional configuration object by specifying the TAPOS fields `expiration`, `ref_block_num`, and `ref_block_prefix` explicity in the action.
+```javascript
+(async () => {
+  await api.transact({
+   expiration: '2019-09-19T16:39:15',
+   ref_block_num: '50477227',
+   ref_block_prefix: '1022379673',
+   actions: [{
+     account: 'eosio',
+     name: 'buyrambytes',
+     authorization: [{
+       actor: 'useraaaaaaaa',
+       permission: 'active',
+     }],
+     data: {
+       payer: 'useraaaaaaaa',
+       receiver: 'useraaaaaaaa',
+       bytes: 8192,
+     },
+   }]
   });
 })();
 ```
