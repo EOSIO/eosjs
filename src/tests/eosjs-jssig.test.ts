@@ -1,38 +1,30 @@
 import { JsSignatureProvider } from '../eosjs-jssig';
 
 describe('JsSignatureProvider', () => {
-    const privateKeys = ['key1', 'key2', 'key3'];
+    const privateKeys = [
+        '5Juww5SS6aLWxopXBAWzwqrwadiZKz7XpKAiktXTKcfBGi1DWg8', '5JnHjSFwe4r7xyqAUAaVs51G7HmzE86DWGa3VAA5VvQriGYnSUr'
+    ];
     const publicKeys = [
-        'PUB_K1_8iD9ABKFH5b9JyFgb5PE51BdCV74qGN9UMfg9V3TwaExCQWxJm',
-        'PUB_K1_8f2o2LLQ3phteqyazxirQZnQzQFpnjLnXiUFEJcsSYhnjWNvSX',
-        'PUB_K1_5imfbmmHC83VRxLRTcvovviAc6LPpyszcDuKtkwka9e9Jg37Hp',
+        'PUB_K1_7tgwU6E7pAUQJgqEJt66Yi8cWvanTUW8ZfBjeXeJBQvhYTBFvY',
+        'PUB_K1_8VaY5CiTexYqgQZyPTJkc3qvWuZUi12QrZL9ssjqW2es7e7bRJ',
+    ];
+    const signatures = [
+        'SIG_K1_Kdj1FjezkWtNyGXE9S1stbZjFnbCffsmEdLLJ72bdtHXHwDjGVBZWPPVVhAJN4U67QK855nybaj6UGn86EUWqie1gLmKVa',
+        'SIG_K1_KWYhhDoyoHa2gshpSJbmN3skAwHcyqh8kAnQJhEoRzf18281JvcmJiAp4QXbRyAS3D9or2DsmUnjoyeA8EZrYNRLRPkR4R'
     ];
 
-    // These didn't test the correctness of signing. They also depend on the now-removed eosjs-ecc.
+    // These are simplified tests simply to verify a refactor didn't mess with existing code
 
     it('builds public keys from private when constructed', async () => {
-        /*
-        const eccPkFromString = jest.spyOn(ecc.PrivateKey, 'fromString');
-        eccPkFromString.mockImplementation((k) => ecc.PrivateKey.fromHex(ecc.sha256(k)));
         const provider = new JsSignatureProvider(privateKeys);
         const actualPublicKeys = await provider.getAvailableKeys();
-
-        expect(eccPkFromString).toHaveBeenCalledTimes(privateKeys.length);
         expect(actualPublicKeys).toEqual(publicKeys);
-        */
     });
 
     it('signs a transaction', async () => {
-        /*
-        const eccSignatureSign = jest.spyOn(ecc.Signature, 'sign');
-        eccSignatureSign.mockImplementation((buffer, signKey) => signKey);
-
         const provider = new JsSignatureProvider(privateKeys);
         const chainId = '12345';
-        const requiredKeys = [
-            publicKeys[0],
-            publicKeys[2],
-        ];
+        const requiredKeys = publicKeys;
         const serializedTransaction = new Uint8Array([
             0, 16, 32, 128, 255,
         ]);
@@ -40,8 +32,10 @@ describe('JsSignatureProvider', () => {
 
         const signOutput = await provider.sign({ chainId, requiredKeys, serializedTransaction, abis });
 
-        expect(eccSignatureSign).toHaveBeenCalledTimes(2);
-        expect(signOutput).toEqual({ signatures: [privateKeys[0], privateKeys[2]], serializedTransaction });
-        */
+        expect(signOutput).toEqual({
+            signatures,
+            serializedTransaction,
+            serializedContextFreeData: undefined
+        });
     });
 });

@@ -364,6 +364,8 @@ export function stringToPrivateKey(s: string): Key {
     }
     if (s.substr(0, 7) === 'PVT_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, privateKeyDataSize, 'R1');
+    } else if (s.substr(0, 7) === 'PVT_K1_') {
+        return stringToKey(s.substr(7), KeyType.k1, privateKeyDataSize, 'K1');
     } else {
         // todo: Verify checksum: sha256(sha256(key.data)).
         //       Not critical since a bad key will fail to produce a
