@@ -166,6 +166,7 @@ describe('JSON RPC', () => {
         const expParams = {
             body: JSON.stringify({
                 account_name: accountName,
+                code_as_wasm: true,
             }),
             method: 'POST',
         };
