@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "20.0.0",
+  "version": "20.0.1",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "babel-runtime": "6.26.0",
-    "eosjs-ecc": "4.0.4",
+    "eosjs-ecc": "4.0.7",
     "text-encoding": "0.7.0"
   },
   "devDependencies": {
