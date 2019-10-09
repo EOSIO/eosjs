@@ -1,4 +1,4 @@
-import { ec, curve } from 'elliptic';
+import { ec } from 'elliptic';
 import {
     Key,
     KeyType,
@@ -8,9 +8,6 @@ import {
 
 /** Represents/stores a public key and provides easy conversion for use with `elliptic` lib */
 export class PublicKey {
-    /** expensive to construct; so we do it once and reuse it */
-    private e = new ec('secp256k1');
-
     constructor(private key: Key) {}
 
     /** Instantiate public key from an EOSIO-format public key */
@@ -22,9 +19,6 @@ export class PublicKey {
     public static fromElliptic(publicKey: ec.KeyPair, keyType: KeyType = KeyType.k1): PublicKey {
         const x = publicKey.getPublic().getX().toArray();
         const y = publicKey.getPublic().getY().toArray();
-        if (!keyType) {
-            keyType = KeyType.k1;
-        }
         return new PublicKey({
             type: keyType,
             data: new Uint8Array([(y[31] & 1) ? 3 : 2].concat(x)),
@@ -37,8 +31,16 @@ export class PublicKey {
     }
 
     /** Export public key as `elliptic`-format public key */
-    public toElliptic(): ec.KeyPair {
-        return this.e.keyPair({
+    public toElliptic(ecurve?: ec): ec.KeyPair {
+        /** expensive to construct; so we do it only as needed */
+        if (!ecurve) {
+            if (this.key.type === KeyType.r1) {
+                ecurve = new ec('secp256r1') as any;
+            } else {
+                ecurve = new ec('secp256k1') as any;
+            }
+        }
+        return ecurve.keyPair({
             pub: new Buffer(this.key.data),
         });
     }

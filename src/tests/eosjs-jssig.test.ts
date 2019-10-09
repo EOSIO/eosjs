@@ -1,7 +1,11 @@
-import { JsSignatureProvider } from '../eosjs-jssig';
 import { ec } from 'elliptic';
+
 import { Signature, PrivateKey, PublicKey } from '../eosjs-key-conversions';
-import { digestFromSerializedData } from '../eosjs-numeric';
+import {
+    JsSignatureProvider,
+    digestFromSerializedData
+} from '../eosjs-jssig';
+import { SignatureProviderArgs } from '../eosjs-api-interfaces';
 
 describe('JsSignatureProvider', () => {
     const privateKeys = [
@@ -40,9 +44,10 @@ describe('JsSignatureProvider', () => {
         const serializedTransaction = new Uint8Array([
             0, 16, 32, 128, 255,
         ]);
-        const abis: any[] = [];
 
-        const signOutput = await provider.sign({ chainId, requiredKeys, serializedTransaction, abis });
+        const signOutput = await provider.sign(
+            { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+        );
 
         expect(signOutput).toEqual({
             signatures,
@@ -58,12 +63,13 @@ describe('JsSignatureProvider', () => {
         const serializedTransaction = new Uint8Array([
             0, 16, 32, 128, 255,
         ]);
-        const abis: any[] = [];
 
-        const signOutput = await provider.sign({ chainId, requiredKeys, serializedTransaction, abis });
+        const signOutput = await provider.sign(
+            { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+        );
 
-        const sig = Signature.fromString(signOutput.signatures[0]);
-        const ellipticSig = sig.toElliptic();
+        const sig: Signature = Signature.fromString(signOutput.signatures[0]);
+        const ellipticSig: ec.Signature = sig.toElliptic();
         const eosSig = Signature.fromElliptic(ellipticSig);
         expect(sig).toEqual(eosSig);
     });
@@ -75,9 +81,10 @@ describe('JsSignatureProvider', () => {
         const serializedTransaction = new Uint8Array([
             0, 16, 32, 128, 255,
         ]);
-        const abis: any[] = [];
 
-        const signOutput = await provider.sign({ chainId, requiredKeys, serializedTransaction, abis });
+        const signOutput = await provider.sign(
+            { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+        );
 
         const EC = new ec('secp256k1');
         const ellipticSig = Signature.fromString(signOutput.signatures[0]).toElliptic();

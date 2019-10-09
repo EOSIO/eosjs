@@ -1,11 +1,12 @@
-import * as EC from 'elliptic';
+import { ec } from 'elliptic';
+import BN = require('bn.js');
+
 import {
     Key,
     KeyType,
     signatureToString,
     stringToSignature,
 } from './eosjs-numeric';
-import BN = require('bn.js');
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
@@ -18,7 +19,7 @@ export class Signature {
     }
 
     /** Instantiate Signature from an `elliptic`-format Signature */
-    public static fromElliptic(ellipticSig: any): Signature {
+    public static fromElliptic(ellipticSig: ec.Signature): Signature {
         const r = ellipticSig.r.toArray();
         const s = ellipticSig.s.toArray();
         const sigData = new Uint8Array([ellipticSig.recoveryParam + 27 + 4].concat(r, s));
@@ -28,7 +29,12 @@ export class Signature {
         });
     }
 
-    /** Export Signature as `elliptic`-format Signature */
+    /** Export Signature as `elliptic`-format Signature
+     *  NOTE: This isn't an actual elliptic-format Signature, as ec.Signature is not exported by the library.
+     *  That's also why the return type is `any`.  We're *actually* returning an object with the 3 params
+     *  not an ec.Signature.
+     *  Further NOTE: @types/elliptic shows ec.Signature as exported; it is *not*.  Hence the `any`.
+     */
     public toElliptic(): any {
         const lengthOfR = 32;
         const lengthOfS = 32;

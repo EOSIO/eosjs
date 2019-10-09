@@ -3,7 +3,6 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { ec } from 'elliptic';
 const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
 
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -264,24 +263,6 @@ export const signatureDataSize = 65;
 export interface Key {
     type: KeyType;
     data: Uint8Array;
-}
-
-/** Construct the digest from transaction details */
-export function digestFromSerializedData(
-    chainId: string,
-    serializedTransaction: Uint8Array,
-    serializedContextFreeData?: Uint8Array,
-    e = new ec('secp256k1')) {
-    const signBuf = Buffer.concat([
-        new Buffer(chainId, 'hex'),
-        new Buffer(serializedTransaction),
-        new Buffer(
-            serializedContextFreeData ?
-                new Uint8Array(e.hash(serializedContextFreeData).update(serializedContextFreeData).digest()) :
-                new Uint8Array(32)
-        ),
-    ]);
-    return e.hash().update(signBuf).digest();
 }
 
 function digestSuffixRipemd160(data: Uint8Array, suffix: string) {

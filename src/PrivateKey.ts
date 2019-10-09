@@ -8,7 +8,6 @@ import {
 
 /** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
 export class PrivateKey {
-
     constructor(private key: Key) {}
 
     /** Instantiate private key from an `elliptic`-format private key */
@@ -30,15 +29,16 @@ export class PrivateKey {
     }
 
     /** Export private key as `elliptic`-format private key */
-    public toElliptic() {
-        /** expensive to construct; so we do it when needed */
-        let e: ec;
-        if (this.key.type === KeyType.r1) {
-            e = new ec('secp256r1') as any;
-        } else {
-            e = new ec('secp256k1') as any;
+    public toElliptic(ecurve?: ec) {
+        /** expensive to construct; so we do it only as needed */
+        if (!ecurve) {
+            if (this.key.type === KeyType.r1) {
+                ecurve = new ec('secp256r1') as any;
+            } else {
+                ecurve = new ec('secp256k1') as any;
+            }
         }
-        return e.keyFromPrivate(this.key.data);
+        return ecurve.keyFromPrivate(this.key.data);
     }
 
     /** Export private key as EOSIO-format private key */

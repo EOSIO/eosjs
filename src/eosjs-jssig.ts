@@ -3,6 +3,8 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
+import { ec } from 'elliptic';
+
 import { SignatureProvider, SignatureProviderArgs } from './eosjs-api-interfaces';
 import {
     PrivateKey,
@@ -11,28 +13,42 @@ import {
 } from './eosjs-key-conversions';
 import {
     convertLegacyPublicKey,
-    digestFromSerializedData,
     KeyType,
 } from './eosjs-numeric';
 
-import { ec } from 'elliptic';
+/** expensive to construct; so we do it once and reuse it */
+const defaultEc = new ec('secp256k1') as any;
+
+/** Construct the digest from transaction details */
+function digestFromSerializedData(
+    chainId: string,
+    serializedTransaction: Uint8Array,
+    serializedContextFreeData?: Uint8Array,
+    e = defaultEc) {
+    const signBuf = Buffer.concat([
+        new Buffer(chainId, 'hex'),
+        new Buffer(serializedTransaction),
+        new Buffer(
+            serializedContextFreeData ?
+                new Uint8Array(e.hash(serializedContextFreeData).update(serializedContextFreeData).digest()) :
+                new Uint8Array(32)
+        ),
+    ]);
+    return e.hash().update(signBuf).digest();
+}
 
 /** Signs transactions using in-process private keys */
-export class JsSignatureProvider implements SignatureProvider {
+class JsSignatureProvider implements SignatureProvider {
     /** map public to private keys */
-    public keys = new Map<string, string>();
+    public keys = new Map<string, ec.KeyPair>();
 
     /** public keys */
     public availableKeys = [] as string[];
 
-    /** expensive to construct; so we do it once and reuse it */
-    private e = new ec('secp256k1') as any;
-
     /** @param privateKeys private keys to sign with */
     constructor(privateKeys: string[]) {
         for (const k of privateKeys) {
-            // What is there to do about this 'as any'?
-            const priv = PrivateKey.fromString(k).toElliptic() as any;
+            const priv = PrivateKey.fromString(k).toElliptic(defaultEc);
             const pubStr = PublicKey.fromElliptic(priv, KeyType.k1).toString();
             this.keys.set(pubStr, priv);
             this.availableKeys.push(pubStr);
@@ -48,11 +64,11 @@ export class JsSignatureProvider implements SignatureProvider {
     public async sign(
         { chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs,
     ) {
-        const digest = digestFromSerializedData( chainId, serializedTransaction, serializedContextFreeData, this.e);
+        const digest = digestFromSerializedData( chainId, serializedTransaction, serializedContextFreeData, defaultEc);
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {
-            const privKey = this.keys.get(convertLegacyPublicKey(key)) as any;
+            const privKey = this.keys.get(convertLegacyPublicKey(key));
             let tries = 0;
             let sig: Signature;
             const isCanonical = (sigData: Uint8Array) =>
@@ -70,3 +86,11 @@ export class JsSignatureProvider implements SignatureProvider {
         return { signatures, serializedTransaction, serializedContextFreeData };
     }
 }
+
+export {
+    PrivateKey,
+    PublicKey,
+    Signature,
+    digestFromSerializedData,
+    JsSignatureProvider,
+};
