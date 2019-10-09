@@ -269,7 +269,7 @@ export interface Key {
 export function digestFromSerializedData(
     chainId: string,
     serializedTransaction: Uint8Array,
-    serializedContextFreeData = new Uint8Array([]),
+    serializedContextFreeData?: Uint8Array,
     e = new ec('secp256k1')) {
     const signBuf = Buffer.concat([
         new Buffer(chainId, 'hex'),
@@ -306,8 +306,9 @@ function stringToKey(s: string, type: KeyType, size: number, suffix: string): Ke
 }
 
 function keyToString(key: Key, suffix: string, prefix: string) {
+    let whole;
     const digest = new Uint8Array(digestSuffixRipemd160(key.data, suffix));
-    const whole = new Uint8Array(key.data.length + 4);
+    whole = new Uint8Array(key.data.length + 4);
     for (let i = 0; i < key.data.length; ++i) {
         whole[i] = key.data[i];
     }
@@ -404,6 +405,8 @@ export function stringToPrivateKey(s: string): Key {
 export function privateKeyToString(key: Key) {
     if (key.type === KeyType.r1) {
         return keyToString(key, 'R1', 'PVT_R1_');
+    } else if (key.type === KeyType.k1) {
+        return keyToString(key, 'K1', 'PVT_K1_');
     } else {
         throw new Error('unrecognized private key format');
     }

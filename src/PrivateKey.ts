@@ -3,6 +3,7 @@ import {
     stringToPrivateKey,
     Key,
     KeyType,
+    privateKeyToString,
 } from './eosjs-numeric';
 
 // ellipticPrivateKeyObjectToEosioPrivateKey
@@ -13,9 +14,14 @@ export class PrivateKey {
 
     constructor(private key: Key) {}
 
-    // static fromElliptic(key: ec.KeyPair): PrivateKey {
-    //     return new PrivateKey(key.getPrivate().toString())
-    // }
+    public static fromElliptic(privKey: ec.KeyPair, keyType = KeyType.k1): PrivateKey {
+        // has interface to accept a wif
+        const privArray = privKey.getPrivate().toArray();
+        return new PrivateKey({
+            type: keyType,
+            data: privKey.getPrivate().toBuffer(),
+        });
+    }
 
     public static fromString(keyString: string): PrivateKey {
         const key: Key = stringToPrivateKey(keyString);
@@ -36,7 +42,7 @@ export class PrivateKey {
         return e.keyFromPrivate(this.key.data);
     }
 
-    // public toString(): string {
-
-    // }
+    public toString(): string {
+        return privateKeyToString(this.key);
+    }
 }
