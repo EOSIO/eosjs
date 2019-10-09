@@ -266,6 +266,7 @@ export interface Key {
     data: Uint8Array;
 }
 
+/** Construct the digest from transaction details */
 export function digestFromSerializedData(
     chainId: string,
     serializedTransaction: Uint8Array,
@@ -306,9 +307,8 @@ function stringToKey(s: string, type: KeyType, size: number, suffix: string): Ke
 }
 
 function keyToString(key: Key, suffix: string, prefix: string) {
-    let whole;
     const digest = new Uint8Array(digestSuffixRipemd160(key.data, suffix));
-    whole = new Uint8Array(key.data.length + 4);
+    const whole = new Uint8Array(key.data.length + 4);
     for (let i = 0; i < key.data.length; ++i) {
         whole[i] = key.data[i];
     }

@@ -1,21 +1,18 @@
 import { ec } from 'elliptic';
 import {
-    stringToPrivateKey,
     Key,
     KeyType,
     privateKeyToString,
+    stringToPrivateKey,
 } from './eosjs-numeric';
 
-// ellipticPrivateKeyObjectToEosioPrivateKey
-// PrivateKey.fromElliptic(key).toString()
-
-// eosioPrivateKeyToEllipticPrivateKeyObject
+/** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
 export class PrivateKey {
 
     constructor(private key: Key) {}
 
+    /** Instantiate private key from an `elliptic`-format private key */
     public static fromElliptic(privKey: ec.KeyPair, keyType = KeyType.k1): PrivateKey {
-        // has interface to accept a wif
         const privArray = privKey.getPrivate().toArray();
         return new PrivateKey({
             type: keyType,
@@ -23,6 +20,7 @@ export class PrivateKey {
         });
     }
 
+    /** Instantiate private key from an EOSIO-format private key */
     public static fromString(keyString: string): PrivateKey {
         const key: Key = stringToPrivateKey(keyString);
         if (key.type !== KeyType.k1) {
@@ -31,6 +29,7 @@ export class PrivateKey {
         return new PrivateKey(key);
     }
 
+    /** Export private key as `elliptic`-format private key */
     public toElliptic() {
         /** expensive to construct; so we do it when needed */
         let e: ec;
@@ -42,6 +41,7 @@ export class PrivateKey {
         return e.keyFromPrivate(this.key.data);
     }
 
+    /** Export private key as EOSIO-format private key */
     public toString(): string {
         return privateKeyToString(this.key);
     }

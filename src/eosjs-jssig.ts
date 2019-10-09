@@ -33,12 +33,8 @@ export class JsSignatureProvider implements SignatureProvider {
         for (const k of privateKeys) {
             // What is there to do about this 'as any'?
             const priv = PrivateKey.fromString(k).toElliptic() as any;
-            // console.info('priv:');
-            // console.info(priv);
             const pubStr = PublicKey.fromElliptic(priv, KeyType.k1).toString();
             this.keys.set(pubStr, priv);
-            // console.info('this.keys:');
-            // console.info(this.keys.get(pubStr));
             this.availableKeys.push(pubStr);
         }
     }
@@ -48,7 +44,6 @@ export class JsSignatureProvider implements SignatureProvider {
         return this.availableKeys;
     }
 
-    // Signature.fromElliptic(ellipticSig).toString()
     /** Sign a transaction */
     public async sign(
         { chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs,

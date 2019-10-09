@@ -7,17 +7,17 @@ import {
 } from './eosjs-numeric';
 import BN = require('bn.js');
 
-// ellipticSignatureToEosioSignatureString
-// const sig = Signature.toElliptic(Signature.fromString(signOutput.signatures[0]));
-// Signature.fromElliptic(ellipticSig).toString()
+/** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
 
     constructor(private signature: Key) {}
 
+    /** Instantiate Signature from an EOSIO-format Signature */
     public static fromString(sig: string): Signature {
         return new Signature(stringToSignature(sig));
     }
 
+    /** Instantiate Signature from an `elliptic`-format Signature */
     public static fromElliptic(ellipticSig: any): Signature {
         const r = ellipticSig.r.toArray();
         const s = ellipticSig.s.toArray();
@@ -28,6 +28,7 @@ export class Signature {
         });
     }
 
+    /** Export Signature as `elliptic`-format Signature */
     public toElliptic(): any {
         const lengthOfR = 32;
         const lengthOfS = 32;
@@ -35,17 +36,15 @@ export class Signature {
         const s = new BN(this.signature.data.slice(lengthOfR + 1, lengthOfR + lengthOfS + 1));
 
         const recoveryParam = this.signature.data[0] - 27 - 4;
-        return {
-            r,
-            s,
-            recoveryParam,
-        };
+        return { r, s, recoveryParam };
     }
 
+    /** Export Signature as EOSIO-format Signature */
     public toString(): string {
         return signatureToString(this.signature);
     }
 
+    /** Export Signature in binary format */
     public toBinary(): Uint8Array {
         return this.signature.data;
     }
