@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@blockone/tslint-config-blockone": "3.0.0",
-    "@types/elliptic": "^6.4.9",
+    "@types/elliptic": "^6.4.10",
     "@types/jest": "24.0.6",
     "@types/node": "11.9.4",
     "@types/text-encoding": "0.0.35",
