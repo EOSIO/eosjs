@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/EOSIO/eosjs.svg?branch=master)](https://travis-ci.org/EOSIO/eosjs)  [![npm version](https://badge.fury.io/js/eosjs.svg)](https://badge.fury.io/js/eosjs)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![NPM](https://nodei.co/npm/eosjs.png)](https://nodei.co/npm/eosjs/)
-
 # eosjs ![npm](https://img.shields.io/npm/dw/eosjs.svg)
 
 Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
