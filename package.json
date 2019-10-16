@@ -37,7 +37,6 @@
     "@types/jest": "24.0.6",
     "@types/node": "11.9.4",
     "@types/text-encoding": "0.0.35",
-    "babel-cli": "6.26.0",
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-preset-env": "1.7.0",
     "babel-preset-stage-1": "6.24.1",
