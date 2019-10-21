@@ -11,11 +11,12 @@ const actions = [
     account: 'eosio',
     name: 'updateauth',
     authorization: [
-      { 
+      {
         actor: 'useraaaaaaaa',
         permission: 'active',
       }
-    ], data: {
+    ],
+    data: {
       account: 'useraaaaaaaa',
       permission: 'active',
       parent: '',
@@ -113,7 +114,7 @@ const actions = [
     account: 'eosio',
     name: 'updateauth',
     authorization: [
-      { 
+      {
         actor: 'useraaaaaaaa',
         permission: 'active',
       }
