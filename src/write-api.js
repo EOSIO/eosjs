@@ -269,9 +269,6 @@ function WriteApi(Network, network, config, Transaction) {
         }
       }
 
-      tr.actions[0].authorization.sort((a, b) =>
-        a.actor > b.actor ? 1 : a.actor < b.actor ? -1 : 0)
-
       // multi-action transaction support
       if(!optionOverrides.messageOnly) {
         transactionArg(tr, options, callback)
