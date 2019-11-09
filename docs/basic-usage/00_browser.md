@@ -1,16 +1,14 @@
-# Browsers
-
-## Usage
-`npm run build-web` or `yarn build-web`
-
-Reuse the `api` object for all transactions; it caches ABIs to reduce network usage. Only call `new eosjs_api.Api(...)` once.
-
+To use `eosjs` in a browser run `npm run build-web` or `yarn build-web`.  This will create the `dist-web` folder and web distribution modules.
 ```html
 <pre style="width: 100%; height: 100%; margin:0px; "></pre>
 
 <script src='dist-web/eosjs-api.js'></script>
 <script src='dist-web/eosjs-jsonrpc.js'></script>
 <script src='dist-web/eosjs-jssig.js'></script>
+```
+
+To cache ABIs and reduce network usage, reuse the `api` object for all transactions.  This implies you should only call `new eosjs_api.Api(...)` once.
+```html
 <script>
   let pre = document.getElementsByTagName('pre')[0];
   const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // bob
@@ -50,8 +48,7 @@ Reuse the `api` object for all transactions; it caches ABIs to reduce network us
 ```
 
 ## Debugging
-
 If you would like readable source files for debugging, change the file reference to the `-debug.js` files inside `dist-web/debug` directory.  These files should only be used for development as they are over 10 times as large as the minified versions, and importing the debug versions will increase loading times for the end user.
 
 ## IE11 and Edge Support
-If you need to support IE11 or Edge you will also need to install a text-encoding polyfill as eosjs Signing is dependent on the TextEncoder which IE11 and Edge do not provide.  Pass the TextEncoder and TextDecoder to the API constructor as demonstrated in the [ES 2015 example](#node-es-2015).  Refer to the documentation here https://github.com/inexorabletash/text-encoding to determine the best way to include it in your project.
+If you need to support IE11 or Edge you will also need to install a text-encoding polyfill, as eosjs Signing is dependent on the TextEncoder which IE11 and Edge do not provide.  Pass the TextEncoder and TextDecoder to the API constructor as demonstrated in the [CommonJS example](01_commonjs.md).  Refer to the documentation [here](https://github.com/inexorabletash/text-encoding) to determine the best way to include it in your project.
