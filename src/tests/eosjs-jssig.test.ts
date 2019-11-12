@@ -24,9 +24,14 @@ describe('JsSignatureProvider', () => {
         'PUB_K1_7VGhqctkKprW1VUj19DZZiiZLX3YcJqUJCuEcahJmUCw9RT8v2',
     ];
     const signatures = [
-        'SIG_K1_Kdj1FjezkWtNyGXE9S1stbZjFnbCffsmEdLLJ72bdtHXHwDjGVBZWPPVVhAJN4U67QK855nybaj6UGn86EUWqie1gLmKVa',
-        'SIG_K1_KWYhhDoyoHa2gshpSJbmN3skAwHcyqh8kAnQJhEoRzf18281JvcmJiAp4QXbRyAS3D9or2DsmUnjoyeA8EZrYNRLRPkR4R',
-        'SIG_K1_KAY1MqDu5Exve184p5svQiLQPtujDn9my3BwSbkAdv3TYV4t7L3WhHbEsF5zW1MkS3VMU6oTtQiVfa3AYZKpoQz49JD7bc',
+        'SIG_K1_HKkqi3zray76i63ZQwAHWMjoLk3wTa1ajZWPcUnrhgmSWQYEHDJsxkny6VDTWEmVdfktxpGoTA81qe6QuCrDmazeQndmxh',
+        'SIG_K1_HCaY9Y9qdjnkRhE9hokAyp3pFtkMmjpxF6xTd514Vo8vLVSWKek5m5aHfCaka9TqZUbajkhhd4BfBLxSwCwZUEmy8cvt1x',
+        'SIG_K1_GrZqp9ZkuhBeNpeQ5b2L2UWUUrNU1gHbTyMzkyWRhiXNkxPP84Aq9eziU399eBf9xJw8MqHHjz7R2wMTMXhXjHLgpZYFeA',
+    ];
+    const eccSignatures = [
+        'SIG_K1_KeEyJFpkp63Qq5E1zRD9aNZtTjpStvdkdnL31Z7wVmhYtrKGtpVdMBJnXyEUXNkNEyo4d4i4Q79qmRpCUsCRdFqhV6KAeF',
+        'SIG_K1_JvgMmFSDhipS1SeBLNBMdAxayAsWS3GuVGSHS7YQth5Z5ZpijxnZgaa23dYD1efQhpEgtEggdRfHMmp31RDXjmJdZYoKLm',
+        'SIG_K1_JwMqV2nbEntHSq9AuG3Zq1JBc5YqD2SftMHCTGK4A8DYGn1VPQ8QAduwCNksT5JhYgAmGMzPyJdZ2Ws4p8TCvQ16LeNhrw',
     ];
 
     // These are simplified tests simply to verify a refactor didn't mess with existing code
@@ -116,5 +121,31 @@ describe('JsSignatureProvider', () => {
         const privEllipticKey = privEosioKey.toElliptic();
         const finalEosioKeyAsString = PrivateKey.fromElliptic(privEllipticKey).toString();
         expect(privEosioKey.toString()).toEqual(finalEosioKeyAsString);
+    });
+
+    it('Ensure elliptic sign, recover, verify flow works', () => {
+        const ellipticEc = new ec('secp256k1');
+        const KPriv = privateKeys[0];
+        const KPrivElliptic = PrivateKey.fromString(KPriv).toElliptic();
+
+        const dataAsString = 'some string';
+        const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
+        // const ellipticHashedString = Buffer.from(hashedData);
+
+        const ellipticSig = KPrivElliptic.sign(ellipticHashedString);
+        // expect(Signature.fromElliptic(ellipticSig).toString()).toEqual(signatures[0]);
+        const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
+            ellipticHashedString,
+            ellipticSig,
+            ellipticSig.recoveryParam
+        );
+        const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
+        expect(PublicKey.fromElliptic(ellipticKPub).toString()).toEqual(k1FormatPublicKeys[0]);
+        const ellipticValid = ellipticEc.verify(
+            ellipticHashedString,
+            ellipticSig,
+            ellipticEc.keyFromPublic(ellipticKPub)
+        );
+        expect(ellipticValid).toEqual(true);
     });
 });
