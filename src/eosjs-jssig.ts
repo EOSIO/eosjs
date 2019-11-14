@@ -30,7 +30,7 @@ function digestFromSerializedData(
         new Buffer(serializedTransaction),
         new Buffer(
             serializedContextFreeData ?
-                new Uint8Array(e.hash(serializedContextFreeData).update(serializedContextFreeData).digest()) :
+                new Uint8Array(e.hash().update(serializedContextFreeData).digest()) :
                 new Uint8Array(32)
         ),
     ]);
