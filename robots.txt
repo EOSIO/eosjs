@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Crawl-delay: 2
+Sitemap: https://eosio.github.io//eosjs/sitemap.xml
+Host: https://eosio.github.io

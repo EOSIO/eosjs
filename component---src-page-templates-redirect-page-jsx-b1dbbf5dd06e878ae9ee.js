@@ -1,0 +1,2 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[4],{P6SZ:function(e,t,n){"use strict";n.r(t);var o=n("q1tI"),r=n.n(o),c=n("YwZP");t.default=function(e){return r.a.createElement(c.Redirect,{to:e.pageContext.redirect,noThrow:!0})}}}]);
+//# sourceMappingURL=component---src-page-templates-redirect-page-jsx-b1dbbf5dd06e878ae9ee.js.map
