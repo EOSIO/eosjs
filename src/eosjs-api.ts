@@ -212,7 +212,7 @@ export class Api {
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
     public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
+        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; maxNetUsageWords?: number; maxCpuUsageMs?: number; } = {}): Promise<any> {
         let info: GetInfoResult;
 
         if (!this.chainId) {
@@ -226,6 +226,14 @@ export class Api {
             }
             const refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
             transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
+        }
+
+        if (maxNetUsageWords) {
+            transaction = { max_net_usage_words: maxNetUsageWords, ...transaction };
+        }
+
+        if (maxCpuUsageMs) {
+            transaction = { max_cpu_usage_ms: maxCpuUsageMs, ...transaction };
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {
