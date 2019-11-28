@@ -212,9 +212,9 @@ export class Api {
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
     public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds,
-		    maxNetUsageWords, maxCpuUsageMs }:
+            maxNetUsageWords, maxCpuUsageMs }:
         { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number;
-		    maxNetUsageWords?: number; maxCpuUsageMs?: number; } = {}): Promise<any> {
+            maxNetUsageWords?: number; maxCpuUsageMs?: number; } = {}): Promise<any> {
         let info: GetInfoResult;
 
         if (!this.chainId) {
