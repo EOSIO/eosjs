@@ -11,6 +11,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eosio.github.io//eosjs/v16.0/prior_versions</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eosio.github.io//eosjs/v16.0/reference</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
