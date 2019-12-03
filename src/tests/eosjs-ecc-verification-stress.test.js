@@ -74,7 +74,7 @@ describe('JsSignatureProvider', () => {
         }
     });
 
-    it('ensure elliptic verifies eosjs-ecc\'s Sigs', () => {
+    it.only('ensure elliptic verifies eosjs-ecc\'s Sigs', () => {
         const ellipticEc = new ec('secp256k1');
         for (let idx=0; idx<privateKeys.length; idx++) {
             const KPriv = privateKeys[idx];
@@ -87,6 +87,10 @@ describe('JsSignatureProvider', () => {
             const ellipticHashedStringAsBuffer = Buffer.from(ellipticEc.hash().update(dataAsString).digest(), 'hex');
             expect(eccHashedString).toEqual(ellipticHashedStringAsBuffer);
 
+            const isCanonical = (sigData) =>
+                !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
+                && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
+
             const eccSig = ecc.sign(dataAsString, KPriv);
 
             const ellipticSig = Signature.fromString(eccSig).toElliptic();
@@ -97,14 +101,14 @@ describe('JsSignatureProvider', () => {
                 ellipticSig.recoveryParam
             );
 
-            const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
-            expect(PublicKey.fromElliptic(ellipticKPub).toString()).toEqual(PublicKey.fromString(recoveredKPub).toString());
-            expect(PublicKey.fromElliptic(ellipticKPub).toString()).toEqual(k1FormatPublicKeys[idx]);
+            const recoveredEllipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
+            expect(PublicKey.fromElliptic(recoveredEllipticKPub).toString()).toEqual(PublicKey.fromString(recoveredKPub).toString());
+            expect(PublicKey.fromElliptic(recoveredEllipticKPub).toString()).toEqual(k1FormatPublicKeys[idx]);
 
             const ellipticValid = ellipticEc.verify(
                 ellipticHashedStringAsBuffer,
                 ellipticSig,
-                ellipticEc.keyFromPublic(ellipticKPub)
+                ellipticEc.keyFromPublic(recoveredEllipticKPub)
             );
             expect(ellipticValid).toEqual(true);
         }

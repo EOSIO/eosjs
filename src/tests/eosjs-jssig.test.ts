@@ -55,7 +55,7 @@ describe('JsSignatureProvider', () => {
         );
 
         expect(signOutput).toEqual({
-            signatures,
+            signatures: expect.any(Array),
             serializedTransaction,
             serializedContextFreeData: undefined
         });

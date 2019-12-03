@@ -22,7 +22,11 @@ export class Signature {
     public static fromElliptic(ellipticSig: ec.Signature): Signature {
         const r = ellipticSig.r.toArray();
         const s = ellipticSig.s.toArray();
-        const sigData = new Uint8Array([ellipticSig.recoveryParam + 27].concat(r, s));
+        let eosioRecoveryParam = ellipticSig.recoveryParam + 27;
+        if (ellipticSig.recoveryParam <= 3) {
+            eosioRecoveryParam += 4;
+        }
+        const sigData = new Uint8Array([eosioRecoveryParam].concat(r, s));
         return new Signature({
             type: KeyType.k1,
             data: sigData,
@@ -41,7 +45,11 @@ export class Signature {
         const r = new BN(this.signature.data.slice(1, lengthOfR + 1));
         const s = new BN(this.signature.data.slice(lengthOfR + 1, lengthOfR + lengthOfS + 1));
 
-        const recoveryParam = (this.signature.data[0] - 27) & 3;
+        let ellipticRecoveryBitField = this.signature.data[0] - 27;
+        if (ellipticRecoveryBitField > 3) {
+            ellipticRecoveryBitField -= 4;
+        }
+        const recoveryParam = ellipticRecoveryBitField & 3;
         return { r, s, recoveryParam };
     }
 
