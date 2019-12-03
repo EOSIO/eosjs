@@ -255,6 +255,9 @@ export class Api {
             }
 
             const taposBlockNumber = info.head_block_num - blocksBehind;
+            console.info('head_block_num:', info.head_block_num);
+            console.info('blocksBehind:', blocksBehind);
+            console.info('taposBlockNumber:', taposBlockNumber);
             let refBlock: GetBlockHeaderStateResult | GetBlockResult;
             try {
                 refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
