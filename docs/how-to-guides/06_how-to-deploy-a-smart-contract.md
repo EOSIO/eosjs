@@ -140,7 +140,7 @@ await api.transact(
           ],
           data: {
             account: 'useraaaaaaaa',
-            code: wasmFilePath,
+            code: wasmHexString,
           },
         },
         {
