@@ -775,8 +775,8 @@ export function createInitialTypes(): Map<string, Type> {
         bool: createType({
             name: 'bool',
             serialize(buffer: SerialBuffer, data: boolean) {
-                if (typeof data !== 'boolean') {
-                    throw new Error('Expected true or false');
+                if ( !(typeof data === 'boolean' || typeof data === 'number' && ( data === 1 || data === 0))) {
+                    throw new Error('Expected boolean or number equal to 1 or 0');
                 }
                 buffer.push(data ? 1 : 0);
             },
