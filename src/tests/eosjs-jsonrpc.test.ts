@@ -12,6 +12,19 @@ describe('JSON RPC', () => {
         jsonRpc = new JsonRpc(endpointExtraSlash);
     });
 
+    it('throws error null endpoint', () => {
+        let actMessage = '';
+        const expMessage = 'JsonRpc constructor requires an endpoint';
+        try {
+            jsonRpc = new JsonRpc(null);
+        } catch (e) {
+            expect(e).toBeInstanceOf(RpcError);
+            actMessage = e.message;
+        }
+
+        expect(actMessage).toEqual(expMessage);
+    });
+
     it('throws error bad status', async () => {
         let actMessage = '';
         const expMessage = 'Not Found';
