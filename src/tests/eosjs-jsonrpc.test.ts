@@ -12,6 +12,11 @@ describe('JSON RPC', () => {
         jsonRpc = new JsonRpc(endpointExtraSlash);
     });
 
+    it('instantiates successfully', () => {
+        jsonRpc = new JsonRpc(null);
+        expect(jsonRpc).toBeInstanceOf(JsonRpc);
+    });
+
     it('throws error bad status', async () => {
         let actMessage = '';
         const expMessage = 'Not Found';
