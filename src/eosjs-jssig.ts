@@ -60,7 +60,7 @@ class JsSignatureProvider implements SignatureProvider {
         return this.availableKeys;
     }
 
-    public async signData(data: string, signingPublicKey: string) {
+    public async signHash(dataSha256: string, signingPublicKey: string) {
         const signatures = [] as string[];
         const privKey = this.keys.get(convertLegacyPublicKey(signingPublicKey));
         let tries = 0;
@@ -70,7 +70,7 @@ class JsSignatureProvider implements SignatureProvider {
             && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
 
         do {
-            const ellipticSig = privKey.sign(data, { canonical: true, pers: [++tries] });
+            const ellipticSig = privKey.sign(dataSha256, { canonical: true, pers: [++tries] });
             sig = Signature.fromElliptic(ellipticSig);
         } while (!isCanonical(sig.toBinary()));
 
