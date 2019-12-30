@@ -90,7 +90,7 @@ describe('JsSignatureProvider', () => {
 
         const sig: Signature = Signature.fromString(signOutput.signatures[0]);
         const ellipticSig: ec.Signature = sig.toElliptic();
-        const eosSig = Signature.fromElliptic(ellipticSig);
+        const eosSig = Signature.fromElliptic(ellipticSig, KeyType.k1);
         expect(sig).toEqual(eosSig);
     });
 
@@ -121,21 +121,21 @@ describe('JsSignatureProvider', () => {
         it('ensure public key functions are actual inverses of each other', async () => {
             const eosioPubKey = PublicKey.fromString(k1FormatPublicKeys[0]);
             const ellipticPubKey = eosioPubKey.toElliptic();
-            const finalEosioKeyAsK1String = PublicKey.fromElliptic(ellipticPubKey).toString();
+            const finalEosioKeyAsK1String = PublicKey.fromElliptic(ellipticPubKey, KeyType.k1).toString();
             expect(finalEosioKeyAsK1String).toEqual(k1FormatPublicKeys[0]);
         });
 
         it('verify that PUB_K1_ and Legacy pub formats are consistent', () => {
             const eosioLegacyPubKey = legacyPublicKeys[0];
             const ellipticPubKey = PublicKey.fromString(eosioLegacyPubKey).toElliptic();
-            expect(PublicKey.fromElliptic(ellipticPubKey).toString()).toEqual(k1FormatPublicKeys[0]);
+            expect(PublicKey.fromElliptic(ellipticPubKey, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[0]);
         });
 
         it('ensure private key functions are actual inverses of each other', async () => {
             const priv = privateKeys[0];
             const privEosioKey = PrivateKey.fromString(priv);
             const privEllipticKey = privEosioKey.toElliptic();
-            const finalEosioKeyAsString = PrivateKey.fromElliptic(privEllipticKey).toString();
+            const finalEosioKeyAsString = PrivateKey.fromElliptic(privEllipticKey, KeyType.k1).toString();
             expect(privEosioKey.toString()).toEqual(finalEosioKeyAsString);
         });
 
@@ -149,14 +149,14 @@ describe('JsSignatureProvider', () => {
             // const ellipticHashedString = Buffer.from(hashedData);
 
             const ellipticSig = KPrivElliptic.sign(ellipticHashedString);
-            // expect(Signature.fromElliptic(ellipticSig).toString()).toEqual(signatures[0]);
+            // expect(Signature.fromElliptic(ellipticSig, KeyType.k1).toString()).toEqual(signatures[0]);
             const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
                 ellipticHashedString,
                 ellipticSig,
                 ellipticSig.recoveryParam
             );
             const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
-            expect(PublicKey.fromElliptic(ellipticKPub).toString()).toEqual(k1FormatPublicKeys[0]);
+            expect(PublicKey.fromElliptic(ellipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[0]);
             const ellipticValid = ellipticEc.verify(
                 ellipticHashedString,
                 ellipticSig,
@@ -192,7 +192,7 @@ describe('JsSignatureProvider', () => {
             // const ellipticHashedString = Buffer.from(hashedData);
 
             const ellipticSig = KPrivElliptic.sign(ellipticHashedString);
-            // expect(Signature.fromElliptic(ellipticSig).toString()).toEqual(signatures[0]);
+            // expect(Signature.fromElliptic(ellipticSig, KeyType.r1).toString()).toEqual(signatures[0]);
             const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
                 ellipticHashedString,
                 ellipticSig,

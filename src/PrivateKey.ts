@@ -11,7 +11,7 @@ export class PrivateKey {
     constructor(private key: Key) {}
 
     /** Instantiate private key from an `elliptic`-format private key */
-    public static fromElliptic(privKey: ec.KeyPair, keyType = KeyType.k1): PrivateKey {
+    public static fromElliptic(privKey: ec.KeyPair, keyType: KeyType): PrivateKey {
         return new PrivateKey({
             type: keyType,
             data: privKey.getPrivate().toBuffer(),

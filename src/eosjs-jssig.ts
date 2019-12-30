@@ -78,7 +78,7 @@ class JsSignatureProvider implements SignatureProvider {
 
             do {
                 const ellipticSig = privKey.sign(digest, { canonical: true, pers: [++tries] });
-                sig = Signature.fromElliptic(ellipticSig);
+                sig = Signature.fromElliptic(ellipticSig, KeyType.k1);
             } while (!isCanonical(sig.toBinary()));
 
             signatures.push(sig.toString());

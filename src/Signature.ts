@@ -19,7 +19,7 @@ export class Signature {
     }
 
     /** Instantiate Signature from an `elliptic`-format Signature */
-    public static fromElliptic(ellipticSig: ec.Signature, keyType: KeyType = KeyType.k1): Signature {
+    public static fromElliptic(ellipticSig: ec.Signature, keyType: KeyType): Signature {
         const r = ellipticSig.r.toArray();
         const s = ellipticSig.s.toArray();
         let eosioRecoveryParam;
