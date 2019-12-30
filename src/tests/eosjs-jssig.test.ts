@@ -44,80 +44,73 @@ describe('JsSignatureProvider', () => {
     ];
 
     // These are simplified tests simply to verify a refactor didn't mess with existing code
-
-    it('builds public keys from private when constructed', async () => {
-        const provider = new JsSignatureProvider(privateKeys);
-        const actualPublicKeys = await provider.getAvailableKeys();
-        expect(actualPublicKeys).toEqual(k1FormatPublicKeys);
-    });
-
-    it('builds p256 elliptic public keys from private when constructed', async () => {
-        const provider = new JsSignatureProvider(privateKeysR1);
-        const actualPublicKeys = await provider.getAvailableKeys();
-        expect(actualPublicKeys).toEqual(r1FormatPublicKeys);
-    });
-
-    it('signs a transaction', async () => {
-        const provider = new JsSignatureProvider(privateKeys);
-        const chainId = '12345';
-        const requiredKeys = k1FormatPublicKeys;
-        const serializedTransaction = new Uint8Array([
-            0, 16, 32, 128, 255,
-        ]);
-
-        const signOutput = await provider.sign(
-            { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
-        );
-
-        expect(signOutput).toEqual({
-            signatures: expect.any(Array),
-            serializedTransaction,
-            serializedContextFreeData: undefined
-        });
-    });
-
-    it('confirm elliptic conversion functions are actually reciprocal', async () => {
-        const provider = new JsSignatureProvider(privateKeys);
-        const chainId = '12345';
-        const requiredKeys = k1FormatPublicKeys;
-        const serializedTransaction = new Uint8Array([
-            0, 16, 32, 128, 255,
-        ]);
-
-        const signOutput = await provider.sign(
-            { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
-        );
-
-        const sig: Signature = Signature.fromString(signOutput.signatures[0]);
-        const ellipticSig: ec.Signature = sig.toElliptic();
-        const eosSig = Signature.fromElliptic(ellipticSig, KeyType.k1);
-        expect(sig).toEqual(eosSig);
-    });
-
-    it('verify a transaction', async () => {
-        const provider = new JsSignatureProvider([privateKeys[0]]);
-        const chainId = '12345';
-        const requiredKeys = [k1FormatPublicKeys[0]];
-        const serializedTransaction = new Uint8Array([
-            0, 16, 32, 128, 255,
-        ]);
-
-        const signOutput = await provider.sign(
-            { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
-        );
-
-        const EC = new ec('secp256k1');
-        const ellipticSig = Signature.fromString(signOutput.signatures[0]).toElliptic();
-        expect(
-            EC.verify(
-                digestFromSerializedData(chainId, serializedTransaction),
-                ellipticSig,
-                PrivateKey.fromString(privateKeys[0]).toElliptic()
-            )
-        ).toEqual(true);
-    });
-
     describe('secp256k1 elliptic', () => {
+        it('builds public keys from private when constructed', async () => {
+            const provider = new JsSignatureProvider(privateKeys);
+            const actualPublicKeys = await provider.getAvailableKeys();
+            expect(actualPublicKeys).toEqual(k1FormatPublicKeys);
+        });
+
+        it('signs a transaction', async () => {
+            const provider = new JsSignatureProvider(privateKeys);
+            const chainId = '12345';
+            const requiredKeys = k1FormatPublicKeys;
+            const serializedTransaction = new Uint8Array([
+                0, 16, 32, 128, 255,
+            ]);
+
+            const signOutput = await provider.sign(
+                { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+            );
+
+            expect(signOutput).toEqual({
+                signatures: expect.any(Array),
+                serializedTransaction,
+                serializedContextFreeData: undefined
+            });
+        });
+
+        it('confirm elliptic conversion functions are actually reciprocal', async () => {
+            const provider = new JsSignatureProvider(privateKeys);
+            const chainId = '12345';
+            const requiredKeys = k1FormatPublicKeys;
+            const serializedTransaction = new Uint8Array([
+                0, 16, 32, 128, 255,
+            ]);
+
+            const signOutput = await provider.sign(
+                { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+            );
+
+            const sig: Signature = Signature.fromString(signOutput.signatures[0]);
+            const ellipticSig: ec.Signature = sig.toElliptic();
+            const eosSig = Signature.fromElliptic(ellipticSig, KeyType.k1);
+            expect(sig).toEqual(eosSig);
+        });
+
+        it('verify a transaction', async () => {
+            const provider = new JsSignatureProvider([privateKeys[0]]);
+            const chainId = '12345';
+            const requiredKeys = [k1FormatPublicKeys[0]];
+            const serializedTransaction = new Uint8Array([
+                0, 16, 32, 128, 255,
+            ]);
+
+            const signOutput = await provider.sign(
+                { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+            );
+
+            const EC = new ec('secp256k1');
+            const ellipticSig = Signature.fromString(signOutput.signatures[0]).toElliptic();
+            expect(
+                EC.verify(
+                    digestFromSerializedData(chainId, serializedTransaction),
+                    ellipticSig,
+                    PrivateKey.fromString(privateKeys[0]).toElliptic()
+                )
+            ).toEqual(true);
+        });
+
         it('ensure public key functions are actual inverses of each other', async () => {
             const eosioPubKey = PublicKey.fromString(k1FormatPublicKeys[0]);
             const ellipticPubKey = eosioPubKey.toElliptic();
@@ -167,6 +160,72 @@ describe('JsSignatureProvider', () => {
     });
 
     describe('p256 elliptic', () => {
+        it('builds public keys from private when constructed', async () => {
+            const provider = new JsSignatureProvider(privateKeysR1);
+            const actualPublicKeys = await provider.getAvailableKeys();
+            expect(actualPublicKeys).toEqual(r1FormatPublicKeys);
+        });
+
+        it('signs a transaction', async () => {
+            const provider = new JsSignatureProvider(privateKeysR1);
+            const chainId = '12345';
+            const requiredKeys = r1FormatPublicKeys;
+            const serializedTransaction = new Uint8Array([
+                0, 16, 32, 128, 255,
+            ]);
+
+            const signOutput = await provider.sign(
+                { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+            );
+
+            expect(signOutput).toEqual({
+                signatures: expect.any(Array),
+                serializedTransaction,
+                serializedContextFreeData: undefined
+            });
+        });
+
+        it('confirm elliptic conversion functions are actually reciprocal', async () => {
+            const provider = new JsSignatureProvider(privateKeysR1);
+            const chainId = '12345';
+            const requiredKeys = r1FormatPublicKeys;
+            const serializedTransaction = new Uint8Array([
+                0, 16, 32, 128, 255,
+            ]);
+
+            const signOutput = await provider.sign(
+                { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+            );
+
+            const sig: Signature = Signature.fromString(signOutput.signatures[0]);
+            const ellipticSig: ec.Signature = sig.toElliptic();
+            const eosSig = Signature.fromElliptic(ellipticSig, KeyType.r1);
+            expect(sig).toEqual(eosSig);
+        });
+
+        it('verify a transaction', async () => {
+            const provider = new JsSignatureProvider([privateKeysR1[0]]);
+            const chainId = '12345';
+            const requiredKeys = [r1FormatPublicKeys[0]];
+            const serializedTransaction = new Uint8Array([
+                0, 16, 32, 128, 255,
+            ]);
+
+            const signOutput = await provider.sign(
+                { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
+            );
+
+            const EC = new ec('p256');
+            const ellipticSig = Signature.fromString(signOutput.signatures[0]).toElliptic();
+            expect(
+                EC.verify(
+                    digestFromSerializedData(chainId, serializedTransaction),
+                    ellipticSig,
+                    PrivateKey.fromString(privateKeysR1[0]).toElliptic()
+                )
+            ).toEqual(true);
+        });
+
         it('ensure public key functions using p256 format are actual inverses of each other', async () => {
             const eosioPubKey = PublicKey.fromString(r1FormatPublicKeys[0]);
             const ellipticPubKey = eosioPubKey.toElliptic();

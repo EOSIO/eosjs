@@ -69,6 +69,7 @@ class JsSignatureProvider implements SignatureProvider {
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {
+            const publicKey = PublicKey.fromString(key);
             const privKey = this.keys.get(convertLegacyPublicKey(key));
             let tries = 0;
             let sig: Signature;
@@ -78,7 +79,7 @@ class JsSignatureProvider implements SignatureProvider {
 
             do {
                 const ellipticSig = privKey.sign(digest, { canonical: true, pers: [++tries] });
-                sig = Signature.fromElliptic(ellipticSig, KeyType.k1);
+                sig = Signature.fromElliptic(ellipticSig, publicKey.getType());
             } while (!isCanonical(sig.toBinary()));
 
             signatures.push(sig.toString());
