@@ -109,7 +109,6 @@ export class Api {
         if (!ser.supportedAbiVersion(buffer.getString())) {
             throw new Error('Unsupported abi version');
         }
-        buffer.restartRead();
         return buffer.asUint8Array();
     }
 
