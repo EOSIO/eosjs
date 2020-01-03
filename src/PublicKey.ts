@@ -16,7 +16,7 @@ export class PublicKey {
     }
 
     /** Instantiate public key from an `elliptic`-format public key */
-    public static fromElliptic(publicKey: ec.KeyPair, keyType: KeyType = KeyType.k1): PublicKey {
+    public static fromElliptic(publicKey: ec.KeyPair, keyType: KeyType): PublicKey {
         const x = publicKey.getPublic().getX().toArray();
         const y = publicKey.getPublic().getY().toArray();
         return new PublicKey({
@@ -34,8 +34,8 @@ export class PublicKey {
     public toElliptic(ecurve?: ec): ec.KeyPair {
         /** expensive to construct; so we do it only as needed */
         if (!ecurve) {
-            if (this.key.type === KeyType.r1) {
-                ecurve = new ec('secp256r1') as any;
+            if (this.key.type === KeyType.r1 || this.key.type === KeyType.wa) {
+                ecurve = new ec('p256') as any;
             } else {
                 ecurve = new ec('secp256k1') as any;
             }
@@ -43,5 +43,9 @@ export class PublicKey {
         return ecurve.keyPair({
             pub: new Buffer(this.key.data),
         });
+    }
+
+    public getType(): KeyType {
+        return this.key.type;
     }
 }

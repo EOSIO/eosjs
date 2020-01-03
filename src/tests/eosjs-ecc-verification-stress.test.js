@@ -7,6 +7,7 @@ const { Signature, PrivateKey, PublicKey } = require('../eosjs-key-conversions')
 const {
     JsSignatureProvider,
 } = require('../eosjs-jssig');
+const { KeyType } = require('../eosjs-numeric');
 const { SignatureProviderArgs } = require('../eosjs-api-interfaces');
 
 describe('JsSignatureProvider', () => {
@@ -61,7 +62,7 @@ describe('JsSignatureProvider', () => {
                 ellipticSig.recoveryParam
             );
             const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
-            expect(PublicKey.fromElliptic(ellipticKPub).toString()).toEqual(k1FormatPublicKeys[idx]);
+            expect(PublicKey.fromElliptic(ellipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[idx]);
 
             const eccValid = ecc.verify(eccSig, dataAsString, eccKPub);
             const ellipticValid = ellipticEc.verify(
@@ -102,8 +103,8 @@ describe('JsSignatureProvider', () => {
             );
 
             const recoveredEllipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
-            expect(PublicKey.fromElliptic(recoveredEllipticKPub).toString()).toEqual(PublicKey.fromString(recoveredKPub).toString());
-            expect(PublicKey.fromElliptic(recoveredEllipticKPub).toString()).toEqual(k1FormatPublicKeys[idx]);
+            expect(PublicKey.fromElliptic(recoveredEllipticKPub, KeyType.k1).toString()).toEqual(PublicKey.fromString(recoveredKPub).toString());
+            expect(PublicKey.fromElliptic(recoveredEllipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[idx]);
 
             const ellipticValid = ellipticEc.verify(
                 ellipticHashedStringAsBuffer,
@@ -126,7 +127,7 @@ describe('JsSignatureProvider', () => {
             const ellipticHashedStringAsBuffer = Buffer.from(ellipticEc.hash().update(dataAsString).digest(), 'hex');
 
             const ellipticSig = KPrivElliptic.sign(ellipticHashedStringAsBuffer);
-            const ellipticSigAsString = Signature.fromElliptic(ellipticSig).toString();
+            const ellipticSigAsString = Signature.fromElliptic(ellipticSig, KeyType.k1).toString();
 
             const recoveredKPub = ecc.recover(ellipticSigAsString, dataAsString);
             const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
@@ -135,7 +136,7 @@ describe('JsSignatureProvider', () => {
                 ellipticSig.recoveryParam
             );
             const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
-            expect(PublicKey.fromElliptic(ellipticKPub).toString()).toEqual(k1FormatPublicKeys[idx]);
+            expect(PublicKey.fromElliptic(ellipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[idx]);
 
             const eccValid = ecc.verify(ellipticSigAsString, dataAsString, recoveredKPub);
             expect(eccValid).toEqual(true);
