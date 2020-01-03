@@ -127,6 +127,7 @@ const deserializedActions = [
 
 describe('eosjs-api', () => {
     let api: any;
+    let rpc: any;
     const fetch = async (input: any, init: any): Promise<any> => ({
         ok: true,
         json: async () => {
@@ -142,7 +143,7 @@ describe('eosjs-api', () => {
     });
 
     beforeEach(() => {
-        const rpc = new JsonRpc('', { fetch });
+        rpc = new JsonRpc('', { fetch });
         const signatureProvider = new JsSignatureProvider(['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr']);
         const chainId = '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca';
         api = new Api({
@@ -190,5 +191,33 @@ describe('eosjs-api', () => {
         const response = api.hasRequiredTaposFields(transaction);
 
         expect(response).toEqual(true);
+    });
+
+    it('rawAbiToJson returns correct Json from raw Abi', async () => {
+        const expected = await api.getAbi('testeostoken');
+        const response = await rpc.getRawAbi('testeostoken');
+        const actual = api.rawAbiToJson(response.abi);
+
+        expect(actual).toEqual(expected);
+    });
+
+    it('jsonToRawAbi returns correct raw Abi from Json', async () => {
+        const response = await rpc.getRawAbi('testeostoken');
+        const expected = response.abi;
+        const jsonAbi = await api.getAbi('testeostoken');
+        const actual = api.jsonToRawAbi(jsonAbi);
+
+        expect(actual).toEqual(expected);
+    });
+
+    it('confirms jsonToRawAbi and rawAbiToJson are reciprocal', async () => {
+        const expectedJsonAbi = await api.getAbi('testeostoken');
+        const response = await rpc.getRawAbi('testeostoken');
+        const expectedRawAbi = response.abi;
+        const jsonAbi = api.rawAbiToJson(api.jsonToRawAbi(expectedJsonAbi));
+        const rawAbi = api.jsonToRawAbi(api.rawAbiToJson(expectedRawAbi));
+
+        expect(rawAbi).toEqual(expectedRawAbi);
+        expect(jsonAbi).toEqual(expectedJsonAbi);
     });
 });
