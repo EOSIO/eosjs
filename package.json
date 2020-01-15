@@ -40,19 +40,22 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-preset-env": "1.7.0",
     "babel-preset-stage-1": "6.24.1",
-    "cypress": "3.1.5",
-    "jest": "23.5.0",
+    "cypress": "3.8.1",
+    "jest": "23.6.0",
     "jest-fetch-mock": "2.1.1",
     "json-loader": "0.5.7",
     "mocha": "5.2.0",
-    "mochawesome": "3.1.1",
+    "mochawesome": "4.1.0",
     "ts-jest": "24.0.0",
     "ts-loader": "5.3.3",
     "tslint": "5.12.1",
     "tslint-eslint-rules": "5.4.0",
     "typescript": "3.3.3",
-    "webpack": "4.29.5",
+    "webpack": "4.41.5",
     "webpack-cli": "3.2.3"
+  },
+  "resolutions": {
+    "braces": "^2.3.1"
   },
   "jest": {
     "automock": false,
