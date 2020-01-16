@@ -4,7 +4,7 @@
 // copyright defined in eosjs/LICENSE.txt
 
 import * as numeric from './eosjs-numeric';
-import { Abi, BlockTaposInfo } from './eosjs-rpc-interfaces';
+import { Abi, BlockTaposInfo, BlockHeaderStateTaposInfo } from './eosjs-rpc-interfaces';
 
 /** A field in an abi */
 export interface Field {
@@ -196,6 +196,14 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
         const result = new Uint8Array(this.array.buffer, this.array.byteOffset + this.readPos, len);
         this.readPos += len;
         return result;
+    }
+
+    /** Skip `len` bytes */
+    public skip(len: number) {
+        if (this.readPos + len > this.length) {
+            throw new Error('Read past end of buffer');
+        }
+        this.readPos += len;
     }
 
     /** Append a `uint16` */
@@ -489,7 +497,15 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
     /** Get a public key */
     public getPublicKey() {
         const type = this.get();
-        const data = this.getUint8Array(numeric.publicKeyDataSize);
+        let data: Uint8Array;
+        if (type === numeric.KeyType.wa) {
+            const begin = this.readPos;
+            this.skip(34);
+            this.skip(this.getVaruint32());
+            data = new Uint8Array(this.array.buffer, this.array.byteOffset + begin, this.readPos - begin);
+        } else {
+            data = this.getUint8Array(numeric.publicKeyDataSize);
+        }
         return numeric.publicKeyToString({ type, data });
     }
 
@@ -517,7 +533,16 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
     /** Get a signature */
     public getSignature() {
         const type = this.get();
-        const data = this.getUint8Array(numeric.signatureDataSize);
+        let data: Uint8Array;
+        if (type === numeric.KeyType.wa) {
+            const begin = this.readPos;
+            this.skip(65);
+            this.skip(this.getVaruint32());
+            this.skip(this.getVaruint32());
+            data = new Uint8Array(this.array.buffer, this.array.byteOffset + begin, this.readPos - begin);
+        } else {
+            data = this.getUint8Array(numeric.signatureDataSize);
+        }
         return numeric.signatureToString({ type, data });
     }
 } // SerialBuffer
@@ -775,8 +800,8 @@ export function createInitialTypes(): Map<string, Type> {
         bool: createType({
             name: 'bool',
             serialize(buffer: SerialBuffer, data: boolean) {
-                if (typeof data !== 'boolean') {
-                    throw new Error('Expected true or false');
+                if ( !(typeof data === 'boolean' || typeof data === 'number' && ( data === 1 || data === 0))) {
+                    throw new Error('Expected boolean or number equal to 1 or 0');
                 }
                 buffer.push(data ? 1 : 0);
             },
@@ -1048,12 +1073,19 @@ export function getTypesFromAbi(initialTypes: Map<string, Type>, abi: Abi) {
     return types;
 } // getTypesFromAbi
 
-/** TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `refBlock.timestamp` */
+function reverseHex(h: string) {
+    return h.substr(6, 2) + h.substr(4, 2) + h.substr(2, 2) + h.substr(0, 2);
+}
+
+/** TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `timestamp` */
 export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: number) {
+    const timestamp = refBlock.header ? refBlock.header.timestamp : refBlock.timestamp;
+    const prefix = parseInt(reverseHex(refBlock.id.substr(16, 8)), 16);
+
     return {
-        expiration: timePointSecToDate(dateToTimePointSec(refBlock.timestamp) + expireSeconds),
+        expiration: timePointSecToDate(dateToTimePointSec(timestamp) + expireSeconds),
         ref_block_num: refBlock.block_num & 0xffff,
-        ref_block_prefix: refBlock.ref_block_prefix,
+        ref_block_prefix: prefix,
     };
 }
 

@@ -124,11 +124,41 @@ export function signedBinaryToDecimal(bignum: Uint8Array, minDigits = 1) {
     return binaryToDecimal(bignum, minDigits);
 }
 
+function base58ToBinaryVarSize(s: string) {
+    const result = [] as number[];
+    for (let i = 0; i < s.length; ++i) {
+        let carry = base58Map[s.charCodeAt(i)];
+        if (carry < 0) {
+            throw new Error('invalid base-58 value');
+        }
+        for (let j = 0; j < result.length; ++j) {
+            const x = result[j] * 58 + carry;
+            result[j] = x & 0xff;
+            carry = x >> 8;
+        }
+        if (carry) {
+            result.push(carry);
+        }
+    }
+    for (const ch of s) {
+        if (ch === '1') {
+            result.push(0);
+        } else {
+            break;
+        }
+    }
+    result.reverse();
+    return new Uint8Array(result);
+}
+
 /**
  * Convert an unsigned base-58 number in `s` to a bignum
  * @param size bignum size (bytes)
  */
 export function base58ToBinary(size: number, s: string) {
+    if (!size) {
+        return base58ToBinaryVarSize(s);
+    }
     const result = new Uint8Array(size);
     for (let i = 0; i < s.length; ++i) {
         let carry = base58Map[s.charCodeAt(i)];
@@ -217,6 +247,7 @@ export function base64ToBinary(s: string) {
 export enum KeyType {
     k1 = 0,
     r1 = 1,
+    wa = 2,
 }
 
 /** Public key data size, excluding type field */
@@ -246,11 +277,11 @@ function digestSuffixRipemd160(data: Uint8Array, suffix: string) {
 }
 
 function stringToKey(s: string, type: KeyType, size: number, suffix: string): Key {
-    const whole = base58ToBinary(size + 4, s);
-    const result = { type, data: new Uint8Array(whole.buffer, 0, size) };
+    const whole = base58ToBinary(size ? size + 4 : 0, s);
+    const result = { type, data: new Uint8Array(whole.buffer, 0, whole.length - 4) };
     const digest = new Uint8Array(digestSuffixRipemd160(result.data, suffix));
-    if (digest[0] !== whole[size + 0] || digest[1] !== whole[size + 1]
-        || digest[2] !== whole[size + 2] || digest[3] !== whole[size + 3]) {
+    if (digest[0] !== whole[whole.length - 4] || digest[1] !== whole[whole.length - 3]
+        || digest[2] !== whole[whole.length - 2] || digest[3] !== whole[whole.length - 1]) {
         throw new Error('checksum doesn\'t match');
     }
     return result;
@@ -289,6 +320,8 @@ export function stringToPublicKey(s: string): Key {
         return stringToKey(s.substr(7), KeyType.k1, publicKeyDataSize, 'K1');
     } else if (s.substr(0, 7) === 'PUB_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, publicKeyDataSize, 'R1');
+    } else if (s.substr(0, 7) === 'PUB_WA_') {
+        return stringToKey(s.substr(7), KeyType.wa, 0, 'WA');
     } else {
         throw new Error('unrecognized public key format');
     }
@@ -300,6 +333,8 @@ export function publicKeyToString(key: Key) {
         return keyToString(key, 'K1', 'PUB_K1_');
     } else if (key.type === KeyType.r1 && key.data.length === publicKeyDataSize) {
         return keyToString(key, 'R1', 'PUB_R1_');
+    } else if (key.type === KeyType.wa) {
+        return keyToString(key, 'WA', 'PUB_WA_');
     } else {
         throw new Error('unrecognized public key format');
     }
@@ -329,8 +364,21 @@ export function stringToPrivateKey(s: string): Key {
     }
     if (s.substr(0, 7) === 'PVT_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, privateKeyDataSize, 'R1');
+    } else if (s.substr(0, 7) === 'PVT_K1_') {
+        return stringToKey(s.substr(7), KeyType.k1, privateKeyDataSize, 'K1');
     } else {
-        throw new Error('unrecognized private key format');
+        // todo: Verify checksum: sha256(sha256(key.data)).
+        //       Not critical since a bad key will fail to produce a
+        //       valid signature anyway.
+        const whole = base58ToBinary(privateKeyDataSize + 5, s);
+        const key = { type: KeyType.k1, data: new Uint8Array(privateKeyDataSize) };
+        if (whole[0] !== 0x80) {
+            throw new Error('unrecognized private key type');
+        }
+        for (let i = 0; i < privateKeyDataSize; ++i) {
+            key.data[i] = whole[i + 1];
+        }
+        return key;
     }
 }
 
@@ -338,6 +386,8 @@ export function stringToPrivateKey(s: string): Key {
 export function privateKeyToString(key: Key) {
     if (key.type === KeyType.r1) {
         return keyToString(key, 'R1', 'PVT_R1_');
+    } else if (key.type === KeyType.k1) {
+        return keyToString(key, 'K1', 'PVT_K1_');
     } else {
         throw new Error('unrecognized private key format');
     }
@@ -352,6 +402,8 @@ export function stringToSignature(s: string): Key {
         return stringToKey(s.substr(7), KeyType.k1, signatureDataSize, 'K1');
     } else if (s.substr(0, 7) === 'SIG_R1_') {
         return stringToKey(s.substr(7), KeyType.r1, signatureDataSize, 'R1');
+    } else if (s.substr(0, 7) === 'SIG_WA_') {
+        return stringToKey(s.substr(7), KeyType.wa, 0, 'WA');
     } else {
         throw new Error('unrecognized signature format');
     }
@@ -363,6 +415,8 @@ export function signatureToString(signature: Key) {
         return keyToString(signature, 'K1', 'SIG_K1_');
     } else if (signature.type === KeyType.r1) {
         return keyToString(signature, 'R1', 'SIG_R1_');
+    } else if (signature.type === KeyType.wa) {
+        return keyToString(signature, 'WA', 'SIG_WA_');
     } else {
         throw new Error('unrecognized signature format');
     }

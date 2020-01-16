@@ -1,4 +1,7 @@
-// copyright defined in eosjs/LICENSE.txt
+/**
+ * @module Javascript-API
+ * copyright defined in eosjs/LICENSE.txt
+ */
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
 
@@ -51,6 +54,9 @@ export interface SignatureProviderArgs {
 
     /** Transaction to sign */
     serializedTransaction: Uint8Array;
+
+    /** Context-free data to sign */
+    serializedContextFreeData?: Uint8Array;
 
     /** ABIs for all contracts with actions included in `serializedTransaction` */
     abis: BinaryAbi[];
