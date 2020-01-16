@@ -11,17 +11,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/technical-overview</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://eosio.github.io//eosjs/latest/API-Reference/index</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/basic-usage/browser</loc>
+    <loc>https://eosio.github.io//eosjs/latest/basic-usage/commonjs</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -32,16 +27,6 @@
   </url>
   <url>
     <loc>https://eosio.github.io//eosjs/latest/basic-usage</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eosio.github.io//eosjs/latest/faq/what-is-a-signature-provider</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eosio.github.io//eosjs/latest/faq</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -76,7 +61,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/how-to-guides/how-to-set-the-network</loc>
+    <loc>https://eosio.github.io//eosjs/latest/how-to-guides/how-to-stake</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -96,17 +81,27 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/how-to-guides</loc>
+    <loc>https://eosio.github.io//eosjs/latest/how-to-guides/index</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/troubleshooting/connectivity</loc>
+    <loc>https://eosio.github.io//eosjs/latest/faq/example-signature-providers</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/troubleshooting</loc>
+    <loc>https://eosio.github.io//eosjs/latest/faq</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eosio.github.io//eosjs/latest/troubleshooting/index</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eosio.github.io//eosjs/latest/faq/what-is-a-signature-provider</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -116,7 +111,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/API-Reference/classes/_eosjs_jsonrpc_.jsonrpc</loc>
+    <loc>https://eosio.github.io//eosjs/latest/API-Reference/classes/_eosjs_serialize_.serialbuffer</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -141,7 +136,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/API-Reference/enums/index</loc>
+    <loc>https://eosio.github.io//eosjs/latest/API-Reference/enums</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -201,7 +196,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/API-Reference/interfaces/rpc_api_methods.getblockheaderstateresult</loc>
+    <loc>https://eosio.github.io//eosjs/latest/API-Reference/interfaces/rpc_api_methods.getabiresult</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -246,7 +241,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/latest/API-Reference/modules/_signature_</loc>
+    <loc>https://eosio.github.io//eosjs/latest/API-Reference/modules/_rpc_web_</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
