@@ -1,0 +1,46 @@
+{
+	"name": "eosjs",
+	"generators": [
+    {
+			"name": "collate_markdown",
+			"options": {
+				"docs_dir": "docs"
+			}
+		},
+		{
+			"name": "typedoc",
+			"options": {
+        "theme": "markdown",
+        "exclude": ["**/index*","**/*.test.ts","**/rpc-web*"],
+        "ignoreCompilerErrors": true,
+        "includeDeclarations": false,
+        "excludeExternals": true,
+        "excludeProtected": true,
+        "excludePrivate": true,
+        "typescript": {
+          "include": [
+            "src/**/*.js"
+          ]
+        }
+      }
+		}
+	],
+  "filters": [
+    {
+      "name": "search_replace",
+      "options": {
+        "search": "numeric.md#",
+        "replace": "#",
+        "filepattern": "numeric.md"
+      }
+    },
+    {
+      "name": "search_replace",
+      "options": {
+        "search": "serialize.md#",
+        "replace": "#",
+        "filepattern": "serialize.md"
+      }
+    }
+  ]
+}

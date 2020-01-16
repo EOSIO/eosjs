@@ -5,7 +5,7 @@
 
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
-import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./eosjs-rpc-interfaces" // tslint:disable-line
+import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs, GetBlockHeaderStateResult } from "./eosjs-rpc-interfaces" // tslint:disable-line
 import { RpcError } from './eosjs-rpcerror';
 
 function arrayToHex(data: Uint8Array) {
@@ -30,7 +30,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     constructor(endpoint: string, args:
         { fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> } = {},
     ) {
-        this.endpoint = endpoint;
+        this.endpoint = endpoint.replace(/\/$/, '');
         if (args.fetch) {
             this.fetchBuiltin = args.fetch;
         } else {
@@ -73,7 +73,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/chain/get_block_header_state` */
-    public async get_block_header_state(blockNumOrId: number | string): Promise<any> {
+    public async get_block_header_state(blockNumOrId: number | string): Promise<GetBlockHeaderStateResult> {
         return await this.fetch('/v1/chain/get_block_header_state', { block_num_or_id: blockNumOrId });
     }
 
@@ -126,6 +126,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         const rawCodeAndAbi = await this.get_raw_code_and_abi(accountName);
         const abi = base64ToBinary(rawCodeAndAbi.abi);
         return { accountName: rawCodeAndAbi.account_name, abi };
+    }
+
+    /** Raw call to `/v1/chain/get_scheduled_transactions` */
+    public async get_scheduled_transactions(json = true, lowerBound = '', limit = 50): Promise<any> {
+        return await this.fetch('/v1/chain/get_scheduled_transactions', { json, lower_bound: lowerBound, limit });
     }
 
     /** Raw call to `/v1/chain/get_table_rows` */
@@ -186,12 +191,26 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         })).required_keys);
     }
 
-    /** Push a serialized transaction */
-    public async push_transaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+    /** Push a serialized transaction (replaced by send_transaction, but returned format has changed) */
+    public async push_transaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,
             compression: 0,
-            packed_context_free_data: '',
+            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
+            packed_trx: arrayToHex(serializedTransaction),
+        });
+    }
+
+    /** Send a serialized transaction */
+    public async send_transaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
+        return await this.fetch('/v1/chain/send_transaction', {
+            signatures,
+            compression: 0,
+            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
             packed_trx: arrayToHex(serializedTransaction),
         });
     }

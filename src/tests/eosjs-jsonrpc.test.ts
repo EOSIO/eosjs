@@ -2,13 +2,14 @@ import { JsonRpc } from '../eosjs-jsonrpc';
 import { RpcError } from '../eosjs-rpcerror';
 
 describe('JSON RPC', () => {
+    const endpointExtraSlash = 'http://localhost/';
     const endpoint = 'http://localhost';
     const fetchMock = fetch as any;
     let jsonRpc: JsonRpc;
 
     beforeEach(() => {
         fetchMock.resetMocks();
-        jsonRpc = new JsonRpc(endpoint);
+        jsonRpc = new JsonRpc(endpointExtraSlash);
     });
 
     it('throws error bad status', async () => {
@@ -342,6 +343,29 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls get_scheduled_transactions', async () => {
+        const expPath = '/v1/chain/get_scheduled_transactions';
+        const json = true;
+        const lowerBound = '';
+        const limit = 50;
+        const expReturn = { data: '12345' };
+        const expParams = {
+            body: JSON.stringify({
+                json,
+                lower_bound: lowerBound,
+                limit,
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_scheduled_transactions();
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls get_table_rows with all params', async () => {
         const expPath = '/v1/chain/get_table_rows';
         const json = false;
@@ -543,6 +567,41 @@ describe('JSON RPC', () => {
         fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.push_transaction(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
+    it('calls send_transaction', async () => {
+        const expPath = '/v1/chain/send_transaction';
+        const signatures = [
+            'George Washington',
+            'John Hancock',
+            'Abraham Lincoln',
+        ];
+        const serializedTransaction = new Uint8Array([
+            0, 16, 32, 128, 255,
+        ]);
+
+        const limit = 50;
+        const expReturn = { data: '12345' };
+        const callParams = {
+            signatures,
+            serializedTransaction,
+        };
+        const expParams = {
+            body: JSON.stringify({
+                signatures,
+                compression: 0,
+                packed_context_free_data: '',
+                packed_trx: '00102080ff',
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.send_transaction(callParams);
 
         expect(response).toEqual(expReturn);
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
