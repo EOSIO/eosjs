@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/index</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/installation</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/installation</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -31,12 +31,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/basic-usage</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/faq/index</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/faq/index</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/basic-usage/index</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -71,17 +71,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/how-to-guides/how-to-link-permissions</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://eosio.github.io//eosjs/v21.0/how-to-guides/how-to-propose-a-multisig-transaction</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/how-to-guides/how-to-submit-a-transaction</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/how-to-guides/how-to-set-the-network</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eosio.github.io//eosjs/v21.0/how-to-guides/how-to-stake</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -91,7 +91,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/how-to-guides/how-to-vote</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/how-to-guides/how-to-unlink-permissions</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -101,12 +101,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/troubleshooting/connectivity</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/troubleshooting/index</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/troubleshooting</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/troubleshooting/connectivity</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -121,12 +121,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/API-Reference/classes/_eosjs_webauthn_sig_.webauthnsignatureprovider</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/API-Reference/classes/_privatekey_.privatekey</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/API-Reference/classes/_signature_.signature</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/API-Reference/classes/_publickey_.publickey</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -151,7 +151,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eosio.github.io//eosjs/v21.0/API-Reference/interfaces/_eosjs_api_interfaces_.binaryabi</loc>
+    <loc>https://eosio.github.io//eosjs/v21.0/API-Reference/interfaces/_eosjs_api_interfaces_.authorityproviderargs</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
