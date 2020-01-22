@@ -58,12 +58,12 @@ export class PublicKey {
         return validationObj.result;
     }
 
-    /** Recover a public key from a message and signature */
-    public static recover(message: BNInput, signature: Signature, encoding?: string): PublicKey {
+    /** Recover a public key from a message digest and signature */
+    public static recover(digest: BNInput, signature: Signature, encoding?: string): PublicKey {
         const ec = constructElliptic(signature.getType());
         const ellipticSignature = signature.toElliptic();
         const recoveredPublicKey = ec.recoverPubKey(
-            message,
+            digest,
             ellipticSignature,
             ellipticSignature.recoveryParam,
             encoding
