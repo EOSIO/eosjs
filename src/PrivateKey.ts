@@ -5,24 +5,30 @@ import {
     privateKeyToString,
     stringToPrivateKey,
 } from './eosjs-numeric';
-import { Signature } from './Signature';
+import { constructElliptic, PublicKey, Signature } from './eosjs-key-conversions';
 
 /** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
 export class PrivateKey {
     constructor(private key: Key, private ec: EC) {}
 
     /** Instantiate private key from an `elliptic`-format private key */
-    public static fromElliptic(privKey: EC.KeyPair, keyType: KeyType): PrivateKey {
+    public static fromElliptic(privKey: EC.KeyPair, keyType: KeyType, ec?: EC): PrivateKey {
+        if (!ec) {
+            ec = constructElliptic(keyType);
+        }
         return new PrivateKey({
             type: keyType,
             data: privKey.getPrivate().toBuffer(),
-        }, constructElliptic(keyType));
+        }, ec);
     }
 
     /** Instantiate private key from an EOSIO-format private key */
-    public static fromString(keyString: string): PrivateKey {
+    public static fromString(keyString: string, ec?: EC): PrivateKey {
         const privateKey = stringToPrivateKey(keyString);
-        return new PrivateKey(privateKey, constructElliptic(privateKey.type));
+        if (!ec) {
+            ec = constructElliptic(privateKey.type);
+        }
+        return new PrivateKey(privateKey, ec);
     }
 
     /** Export private key as `elliptic`-format private key */
@@ -40,6 +46,12 @@ export class PrivateKey {
         return this.key.type;
     }
 
+    /** Retrieve the public key from a private key */
+    public getPublicKey(): PublicKey {
+        const ellipticPrivateKey = this.toElliptic();
+        return PublicKey.fromElliptic(ellipticPrivateKey, this.getType(), this.ec);
+    }
+
     /** Sign a message digest with private key */
     public sign(digest: BNInput): Signature {
         let tries = 0;
@@ -50,7 +62,7 @@ export class PrivateKey {
         const constructSignature = (options: EC.SignOptions) => {
             const ellipticPrivateKey = this.toElliptic();
             const ellipticSignature = ellipticPrivateKey.sign(digest, options);
-            return Signature.fromElliptic(ellipticSignature, this.getType());
+            return Signature.fromElliptic(ellipticSignature, this.getType(), this.ec);
         };
 
         if (this.key.type === KeyType.k1) {
@@ -63,11 +75,3 @@ export class PrivateKey {
         return signature;
     }
 }
-
-/** Construct the elliptic curve object based on key type */
-const constructElliptic = (type: KeyType): EC => {
-    if (type === KeyType.k1) {
-        return new EC('secp256k1') as any;
-    }
-    return new EC('p256') as any;
-};

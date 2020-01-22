@@ -7,20 +7,23 @@ import {
     signatureToString,
     stringToSignature,
 } from './eosjs-numeric';
-import { PublicKey } from './PublicKey';
+import { constructElliptic, PublicKey } from './eosjs-key-conversions';
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
     constructor(private signature: Key, private ec: EC) {}
 
     /** Instantiate Signature from an EOSIO-format Signature */
-    public static fromString(sig: string): Signature {
+    public static fromString(sig: string, ec?: EC): Signature {
         const signature = stringToSignature(sig);
-        return new Signature(signature, constructElliptic(signature.type));
+        if (!ec) {
+            ec = constructElliptic(signature.type);
+        }
+        return new Signature(signature, ec);
     }
 
     /** Instantiate Signature from an `elliptic`-format Signature */
-    public static fromElliptic(ellipticSig: EC.Signature, keyType: KeyType): Signature {
+    public static fromElliptic(ellipticSig: EC.Signature, keyType: KeyType, ec?: EC): Signature {
         const r = ellipticSig.r.toArray();
         const s = ellipticSig.s.toArray();
         let eosioRecoveryParam;
@@ -33,10 +36,13 @@ export class Signature {
             eosioRecoveryParam = ellipticSig.recoveryParam;
         }
         const sigData = new Uint8Array([eosioRecoveryParam].concat(r, s));
+        if (!ec) {
+            ec = constructElliptic(keyType);
+        }
         return new Signature({
             type: keyType,
             data: sigData,
-        }, constructElliptic(keyType));
+        }, ec);
     }
 
     /** Export Signature as `elliptic`-format Signature
@@ -85,12 +91,17 @@ export class Signature {
         const ellipticPublicKey = publicKey.toElliptic();
         return this.ec.verify(digest, ellipticSignature, ellipticPublicKey, encoding);
     }
-}
 
-/** Construct the elliptic curve object based on key type */
-const constructElliptic = (type: KeyType): EC => {
-    if (type === KeyType.k1) {
-        return new EC('secp256k1') as any;
+    /** Recover a public key from a message digest and signature */
+    public static recoverPublicKey(digest: BNInput, signature: Signature, encoding?: string): PublicKey {
+        const ellipticSignature = signature.toElliptic();
+        const recoveredPublicKey = signature.ec.recoverPubKey(
+            digest,
+            ellipticSignature,
+            ellipticSignature.recoveryParam,
+            encoding
+        );
+        const ellipticKPub = signature.ec.keyFromPublic(recoveredPublicKey);
+        return PublicKey.fromElliptic(ellipticKPub, signature.getType(), signature.ec);
     }
-    return new EC('p256') as any;
-};
+}
