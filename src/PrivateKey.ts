@@ -40,8 +40,8 @@ export class PrivateKey {
         return this.key.type;
     }
 
-    /** Sign a message with private key */
-    public sign(message: BNInput): Signature {
+    /** Sign a message digest with private key */
+    public sign(digest: BNInput): Signature {
         let tries = 0;
         let signature: Signature;
         const isCanonical = (sigData: Uint8Array) =>
@@ -49,7 +49,7 @@ export class PrivateKey {
             && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
         const constructSignature = (options: EC.SignOptions) => {
             const ellipticPrivateKey = this.toElliptic();
-            const ellipticSignature = ellipticPrivateKey.sign(message, options);
+            const ellipticSignature = ellipticPrivateKey.sign(digest, options);
             return Signature.fromElliptic(ellipticSignature, this.getType());
         };
 

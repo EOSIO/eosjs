@@ -79,11 +79,11 @@ export class Signature {
         return this.signature.type;
     }
 
-    /** Verify a constructed signature with a message and public key */
-    public verify(message: BNInput, publicKey: PublicKey, encoding?: string): boolean {
+    /** Verify a signature with a message digest and public key */
+    public verify(digest: BNInput, publicKey: PublicKey, encoding?: string): boolean {
         const ellipticSignature = this.toElliptic();
         const ellipticPublicKey = publicKey.toElliptic();
-        return this.ec.verify(message, ellipticSignature, ellipticPublicKey, encoding);
+        return this.ec.verify(digest, ellipticSignature, ellipticPublicKey, encoding);
     }
 }
 

@@ -45,6 +45,12 @@ describe('JsSignatureProvider', () => {
 
     // These are simplified tests simply to verify a refactor didn't mess with existing code
     describe('secp256k1 elliptic', () => {
+        it('Retrieves the public key from a private key', () => {
+            const privateKey = PrivateKey.fromString(privateKeys[0]);
+            const publicKey = PublicKey.fromPrivateKey(privateKey);
+            expect(publicKey.toString()).toEqual(k1FormatPublicKeys[0]);
+        });
+
         it('builds public keys from private when constructed', async () => {
             const provider = new JsSignatureProvider(privateKeys);
             const actualPublicKeys = await provider.getAvailableKeys();
@@ -152,6 +158,12 @@ describe('JsSignatureProvider', () => {
     });
 
     describe('p256 elliptic', () => {
+        it('Retrieves the public key from a private key', () => {
+            const privateKey = PrivateKey.fromString(privateKeysR1[0]);
+            const publicKey = PublicKey.fromPrivateKey(privateKey);
+            expect(publicKey.toString()).toEqual(r1FormatPublicKeys[0]);
+        });
+
         it('builds public keys from private when constructed', async () => {
             const provider = new JsSignatureProvider(privateKeysR1);
             const actualPublicKeys = await provider.getAvailableKeys();
