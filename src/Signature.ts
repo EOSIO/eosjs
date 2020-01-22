@@ -1,4 +1,4 @@
-import { ec } from 'elliptic';
+import { BNInput, ec as EC } from 'elliptic';
 import BN = require('bn.js');
 
 import {
@@ -7,19 +7,20 @@ import {
     signatureToString,
     stringToSignature,
 } from './eosjs-numeric';
+import { PublicKey } from './PublicKey';
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
-
-    constructor(private signature: Key) {}
+    constructor(private signature: Key, private ec: EC) {}
 
     /** Instantiate Signature from an EOSIO-format Signature */
     public static fromString(sig: string): Signature {
-        return new Signature(stringToSignature(sig));
+        const signature = stringToSignature(sig);
+        return new Signature(signature, constructElliptic(signature.type));
     }
 
     /** Instantiate Signature from an `elliptic`-format Signature */
-    public static fromElliptic(ellipticSig: ec.Signature, keyType: KeyType): Signature {
+    public static fromElliptic(ellipticSig: EC.Signature, keyType: KeyType): Signature {
         const r = ellipticSig.r.toArray();
         const s = ellipticSig.s.toArray();
         let eosioRecoveryParam;
@@ -35,7 +36,7 @@ export class Signature {
         return new Signature({
             type: keyType,
             data: sigData,
-        });
+        }, constructElliptic(keyType));
     }
 
     /** Export Signature as `elliptic`-format Signature
@@ -73,7 +74,23 @@ export class Signature {
         return this.signature.data;
     }
 
+    /** Get key type from signature */
     public getType(): KeyType {
         return this.signature.type;
     }
+
+    /** Verify a constructed signature with a message and public key */
+    public verify(message: BNInput, publicKey: PublicKey, encoding?: string): boolean {
+        const ellipticSignature = this.toElliptic();
+        const ellipticPublicKey = publicKey.toElliptic();
+        return this.ec.verify(message, ellipticSignature, ellipticPublicKey, encoding);
+    }
 }
+
+/** Construct the elliptic curve object based on key type */
+const constructElliptic = (type: KeyType): EC => {
+    if (type === KeyType.k1) {
+        return new EC('secp256k1') as any;
+    }
+    return new EC('p256') as any;
+};
