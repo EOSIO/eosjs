@@ -100,13 +100,11 @@ describe('JsSignatureProvider', () => {
                 { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
             );
 
-            const EC = new ec('secp256k1');
-            const ellipticSig = Signature.fromString(signOutput.signatures[0]).toElliptic();
+            const signature = Signature.fromString(signOutput.signatures[0]);
             expect(
-                EC.verify(
+                signature.verify(
                     digestFromSerializedData(chainId, serializedTransaction),
-                    ellipticSig,
-                    PrivateKey.fromString(privateKeys[0]).toElliptic()
+                    PublicKey.fromString(k1FormatPublicKeys[0])
                 )
             ).toEqual(true);
         });
@@ -132,30 +130,24 @@ describe('JsSignatureProvider', () => {
             expect(privEosioKey.toString()).toEqual(finalEosioKeyAsString);
         });
 
+        it('verify that public key validate function correctly assesses public keys', () => {
+            const publicKey = PublicKey.fromString(k1FormatPublicKeys[0]);
+            expect(publicKey.validate()).toEqual(true);
+        });
+
         it('Ensure elliptic sign, recover, verify flow works', () => {
             const ellipticEc = new ec('secp256k1');
-            const KPriv = privateKeys[0];
-            const KPrivElliptic = PrivateKey.fromString(KPriv).toElliptic();
+            const KPrivStr = privateKeys[0];
+            const KPriv = PrivateKey.fromString(KPrivStr);
 
             const dataAsString = 'some string';
             const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
-            // const ellipticHashedString = Buffer.from(hashedData);
+            const sig = KPriv.sign(ellipticHashedString);
+            const KPub = PublicKey.recover(ellipticHashedString, sig);
 
-            const ellipticSig = KPrivElliptic.sign(ellipticHashedString);
-            // expect(Signature.fromElliptic(ellipticSig, KeyType.k1).toString()).toEqual(signatures[0]);
-            const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
-                ellipticHashedString,
-                ellipticSig,
-                ellipticSig.recoveryParam
-            );
-            const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
-            expect(PublicKey.fromElliptic(ellipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[0]);
-            const ellipticValid = ellipticEc.verify(
-                ellipticHashedString,
-                ellipticSig,
-                ellipticEc.keyFromPublic(ellipticKPub)
-            );
-            expect(ellipticValid).toEqual(true);
+            expect(KPub.toString()).toEqual(k1FormatPublicKeys[0]);
+            const valid = sig.verify(ellipticHashedString, KPub);
+            expect(valid).toEqual(true);
         });
     });
 
@@ -215,13 +207,11 @@ describe('JsSignatureProvider', () => {
                 { chainId, requiredKeys, serializedTransaction } as SignatureProviderArgs
             );
 
-            const EC = new ec('p256');
-            const ellipticSig = Signature.fromString(signOutput.signatures[0]).toElliptic();
+            const signature = Signature.fromString(signOutput.signatures[0]);
             expect(
-                EC.verify(
+                signature.verify(
                     digestFromSerializedData(chainId, serializedTransaction),
-                    ellipticSig,
-                    PrivateKey.fromString(privateKeysR1[0]).toElliptic()
+                    PublicKey.fromString(r1FormatPublicKeys[0])
                 )
             ).toEqual(true);
         });
@@ -241,30 +231,24 @@ describe('JsSignatureProvider', () => {
             expect(privEosioKey.toString()).toEqual(finalEosioKeyAsString);
         });
 
+        it('verify that public key validate function correctly assesses public keys', () => {
+            const publicKey = PublicKey.fromString(r1FormatPublicKeys[0]);
+            expect(publicKey.validate()).toEqual(true);
+        });
+
         it('Ensure elliptic sign, recover, verify flow works', () => {
             const ellipticEc = new ec('p256');
-            const KPriv = privateKeysR1[0];
-            const KPrivElliptic = PrivateKey.fromString(KPriv).toElliptic();
+            const KPrivStr = privateKeysR1[0];
+            const KPriv = PrivateKey.fromString(KPrivStr);
 
             const dataAsString = 'some string';
             const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
-            // const ellipticHashedString = Buffer.from(hashedData);
+            const sig = KPriv.sign(ellipticHashedString);
+            const KPub = PublicKey.recover(ellipticHashedString, sig);
 
-            const ellipticSig = KPrivElliptic.sign(ellipticHashedString);
-            // expect(Signature.fromElliptic(ellipticSig, KeyType.r1).toString()).toEqual(signatures[0]);
-            const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
-                ellipticHashedString,
-                ellipticSig,
-                ellipticSig.recoveryParam
-            );
-            const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
-            expect(PublicKey.fromElliptic(ellipticKPub, KeyType.r1).toString()).toEqual(r1FormatPublicKeys[0]);
-            const ellipticValid = ellipticEc.verify(
-                ellipticHashedString,
-                ellipticSig,
-                ellipticEc.keyFromPublic(ellipticKPub)
-            );
-            expect(ellipticValid).toEqual(true);
+            expect(KPub.toString()).toEqual(r1FormatPublicKeys[0]);
+            const valid = sig.verify(ellipticHashedString, KPub);
+            expect(valid).toEqual(true);
         });
     });
 });
