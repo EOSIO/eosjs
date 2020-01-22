@@ -93,15 +93,15 @@ export class Signature {
     }
 
     /** Recover a public key from a message digest and signature */
-    public static recoverPublicKey(digest: BNInput, signature: Signature, encoding?: string): PublicKey {
-        const ellipticSignature = signature.toElliptic();
-        const recoveredPublicKey = signature.ec.recoverPubKey(
+    public recoverPublicKey(digest: BNInput, encoding?: string): PublicKey {
+        const ellipticSignature = this.toElliptic();
+        const recoveredPublicKey = this.ec.recoverPubKey(
             digest,
             ellipticSignature,
             ellipticSignature.recoveryParam,
             encoding
         );
-        const ellipticKPub = signature.ec.keyFromPublic(recoveredPublicKey);
-        return PublicKey.fromElliptic(ellipticKPub, signature.getType(), signature.ec);
+        const ellipticKPub = this.ec.keyFromPublic(recoveredPublicKey);
+        return PublicKey.fromElliptic(ellipticKPub, this.getType(), this.ec);
     }
 }

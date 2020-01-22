@@ -47,7 +47,7 @@ describe('JsSignatureProvider', () => {
     describe('secp256k1 elliptic', () => {
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeys[0]);
-            const publicKey = PublicKey.fromPrivateKey(privateKey);
+            const publicKey = privateKey.getPublicKey();
             expect(publicKey.toString()).toEqual(k1FormatPublicKeys[0]);
         });
 
@@ -149,7 +149,7 @@ describe('JsSignatureProvider', () => {
             const dataAsString = 'some string';
             const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
             const sig = KPriv.sign(ellipticHashedString);
-            const KPub = PublicKey.recover(ellipticHashedString, sig);
+            const KPub = sig.recoverPublicKey(ellipticHashedString);
 
             expect(KPub.toString()).toEqual(k1FormatPublicKeys[0]);
             const valid = sig.verify(ellipticHashedString, KPub);
@@ -160,7 +160,7 @@ describe('JsSignatureProvider', () => {
     describe('p256 elliptic', () => {
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeysR1[0]);
-            const publicKey = PublicKey.fromPrivateKey(privateKey);
+            const publicKey = privateKey.getPublicKey();
             expect(publicKey.toString()).toEqual(r1FormatPublicKeys[0]);
         });
 
@@ -256,7 +256,7 @@ describe('JsSignatureProvider', () => {
             const dataAsString = 'some string';
             const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
             const sig = KPriv.sign(ellipticHashedString);
-            const KPub = PublicKey.recover(ellipticHashedString, sig);
+            const KPub = sig.recoverPublicKey(ellipticHashedString);
 
             expect(KPub.toString()).toEqual(r1FormatPublicKeys[0]);
             const valid = sig.verify(ellipticHashedString, KPub);
