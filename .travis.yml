@@ -4,11 +4,11 @@ env:
 sudo: false
 language: node_js
 node_js:
-  - '10.0.0'    
+  - '12.14.1'    
 before_install:
   - npm i -g npm@6.4.1
   - yarn global add typescript
-  - yarn global add webpack 
+  - yarn global add webpack
 before_script:
   - source ./scripts/is_latest.sh
 script:
@@ -17,15 +17,15 @@ script:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: 
+    script:
       - ./scripts/publish-edge.sh
-    on: 
+    on:
       branch: develop
   - provider: script
     skip_cleanup: true
-    script: 
+    script:
       - ./scripts/publish-tag.sh $PUBLISH_NPM_LATEST_FROM
-    on: 
+    on:
       tags: true
       condition: $TRAVIS_IS_LATEST_TAG = true # sourced from ./scripts/is_latest.sh
 notifications:
