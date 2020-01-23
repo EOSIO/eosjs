@@ -1,4 +1,4 @@
-import { ec } from 'elliptic';
+import { BNInput, ec as EC } from 'elliptic';
 import BN = require('bn.js');
 
 import {
@@ -7,19 +7,23 @@ import {
     signatureToString,
     stringToSignature,
 } from './eosjs-numeric';
+import { constructElliptic, PublicKey } from './eosjs-key-conversions';
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
-
-    constructor(private signature: Key) {}
+    constructor(private signature: Key, private ec: EC) {}
 
     /** Instantiate Signature from an EOSIO-format Signature */
-    public static fromString(sig: string): Signature {
-        return new Signature(stringToSignature(sig));
+    public static fromString(sig: string, ec?: EC): Signature {
+        const signature = stringToSignature(sig);
+        if (!ec) {
+            ec = constructElliptic(signature.type);
+        }
+        return new Signature(signature, ec);
     }
 
     /** Instantiate Signature from an `elliptic`-format Signature */
-    public static fromElliptic(ellipticSig: ec.Signature, keyType: KeyType): Signature {
+    public static fromElliptic(ellipticSig: EC.Signature, keyType: KeyType, ec?: EC): Signature {
         const r = ellipticSig.r.toArray();
         const s = ellipticSig.s.toArray();
         let eosioRecoveryParam;
@@ -32,10 +36,13 @@ export class Signature {
             eosioRecoveryParam = ellipticSig.recoveryParam;
         }
         const sigData = new Uint8Array([eosioRecoveryParam].concat(r, s));
+        if (!ec) {
+            ec = constructElliptic(keyType);
+        }
         return new Signature({
             type: keyType,
             data: sigData,
-        });
+        }, ec);
     }
 
     /** Export Signature as `elliptic`-format Signature
@@ -73,7 +80,28 @@ export class Signature {
         return this.signature.data;
     }
 
+    /** Get key type from signature */
     public getType(): KeyType {
         return this.signature.type;
+    }
+
+    /** Verify a signature with a message digest and public key */
+    public verify(digest: BNInput, publicKey: PublicKey, encoding?: string): boolean {
+        const ellipticSignature = this.toElliptic();
+        const ellipticPublicKey = publicKey.toElliptic();
+        return this.ec.verify(digest, ellipticSignature, ellipticPublicKey, encoding);
+    }
+
+    /** Recover a public key from a message digest and signature */
+    public recoverPublicKey(digest: BNInput, encoding?: string): PublicKey {
+        const ellipticSignature = this.toElliptic();
+        const recoveredPublicKey = this.ec.recoverPubKey(
+            digest,
+            ellipticSignature,
+            ellipticSignature.recoveryParam,
+            encoding
+        );
+        const ellipticKPub = this.ec.keyFromPublic(recoveredPublicKey);
+        return PublicKey.fromElliptic(ellipticKPub, this.getType(), this.ec);
     }
 }
