@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "20.0.3",
+  "version": "20.0.0",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "test": "jest src/tests/*eosjs*",
     "test-node": "jest src/tests/*node*",
     "test-all": "yarn test && yarn test-node && yarn cypress",
-    "build": "tsc -p ./tsconfig.json && node scripts/copy-ripe-md.js",
+    "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
     "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
     "build-production": "yarn build && yarn build-web && yarn test-all",
     "clean": "rm -rf dist",
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "babel-runtime": "6.26.0",
-    "eosjs-ecc": "4.0.7",
+    "eosjs-ecc": "4.0.4",
     "text-encoding": "0.7.0"
   },
   "devDependencies": {
