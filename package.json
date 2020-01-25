@@ -1,68 +1,80 @@
 {
-  "name": "arisenjs",
-  "version": "1.0.0",
-  "description": "Javascript library for the Arisen blockchain",
-  "main": "dist/index.js",
+  "name": "eosjs",
+  "version": "16.0.8",
+  "description": "General purpose library for the EOS blockchain.",
+  "main": "lib/index.js",
+  "files": [
+    "README.md",
+    "docs",
+    "lib"
+  ],
   "scripts": {
-    "prepublish": "npm run build",
-    "test": "jest",
-    "lint": "tslint -c tslint.json src/**/*.ts",
-    "lint-fix": "tslint -c tslint.json src/**/*.ts --fix",
-    "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
-    "build-web": "webpack",
-    "clean": "rm -rf dist",
-    "docs-init": "sh .docs/scripts/init.sh",
-    "docs-build": "sh .docs/scripts/build.sh",
-    "docs-serve": "python -m SimpleHTTPServer",
-    "docs-publish": "sh .docs/scripts/publish.sh"
+    "test": "mocha --exit --use_strict src/*.test.js",
+    "test_lib": "mocha --exit --use_strict lib/*.test.js",
+    "coverage": "nyc --reporter=html npm test",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "build": "rm -fr lib && npm run build_lib && npm run build_browser",
+    "build_lib": "babel --copy-files src --out-dir lib",
+    "build_browser": "browserify -o lib/eos.js -s Eos lib/index.js",
+    "build_browser_test": "browserify -o dist/test.js lib/*.test.js",
+    "minimize": "uglifyjs lib/eos.js -o lib/eos.min.js --source-map --compress --mangle",
+    "docs": "jsdoc2md src/format.js > docs/format.md",
+    "srisum": "srisum lib/eos.*",
+    "prepublishOnly": "npm run build && npm run test_lib && npm run minimize && npm run docs && npm run srisum"
   },
-  "author": "BenchX",
-  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arisenio/arisenjs.git"
+    "url": "git+https://github.com/EOSIO/eosjs.git"
+  },
+  "keywords": [
+    "EOS",
+    "Blockchain"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EOSIO/eosjs/issues"
+  },
+  "homepage": "https://github.com/EOSIO/eosjs#readme",
+  "devDependencies": {
+    "babel-cli": "6.26.0",
+    "babel-core": "6.26.3",
+    "babel-plugin-syntax-async-functions": "6.13.0",
+    "babel-plugin-transform-regenerator": "6.26.0",
+    "babel-plugin-transform-runtime": "6.23.0",
+    "babel-preset-es2015": "6.24.1",
+    "browserify": "14.4.0",
+    "camel-case": "^3.0.0",
+    "coveralls": "^3.0.0",
+    "eosjs-keygen": "^1.3.2",
+    "jsdoc-to-markdown": "^3.0.4",
+    "mocha": "^5.2.0",
+    "nyc": "^13.0.1",
+    "srisum": "^2.0.0",
+    "uglify-js": "3.4.1"
   },
   "dependencies": {
-    "@types/jest": "^23.3.1",
-    "arisenjs-ecc": "1.0.0",
-    "babel-polyfill": "^6.26.0",
-    "text-encoding": "^0.6.4"
+    "babel-runtime": "6.26.0",
+    "binaryen": "^37.0.0",
+    "create-hash": "^1.1.3",
+    "eosjs-api": "7.0.4",
+    "eosjs-ecc": "4.0.4",
+    "fcbuffer": "2.2.1"
   },
-  "devDependencies": {
-    "@types/node": "^10.3.1",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-1": "^6.24.1",
-    "jest": "^23.5.0",
-    "jest-fetch-mock": "^1.6.5",
-    "json-loader": "^0.5.7",
-    "ts-jest": "^23.1.4",
-    "ts-loader": "^4.3.1",
-    "tslint": "^5.11.0",
-    "tslint-eslint-rules": "^5.4.0",
-    "typescript": "^2.9.1",
-    "webpack": "^4.11.0",
-    "webpack-cli": "^3.0.2"
-  },
-  "jest": {
-    "automock": false,
-    "setupFiles": [
-      "./setupJest.js"
+  "babel": {
+    "presets": [
+      "es2015"
     ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(tsx?)$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsConfigFile": "tsconfig.json"
-      }
-    },
-    "testRegex": "(/src/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "testEnvironment": "node"
+    "plugins": [
+      "syntax-async-functions",
+      "transform-regenerator",
+      [
+        "transform-runtime",
+        {
+          "polyfill": false,
+          "regenerator": true
+        }
+      ]
+    ]
   }
 }

@@ -1,0 +1,21 @@
+{
+  "version": "eosio::abi/1.0",
+  "types": [],
+  "structs": [{
+      "name": "nonce",
+      "base": "",
+      "fields": [
+        {"name":"value", "type":"string"}
+      ]
+    }
+  ],
+  "actions": [{
+      "name": "nonce",
+      "type": "nonce",
+      "ricardian_contract": ""
+    }
+  ],
+  "tables": [],
+  "ricardian_clauses": [],
+  "abi_extensions": []
+}
