@@ -1,0 +1,53 @@
+{
+  "account": {
+    "base": "",
+    "fields": {
+      "balance": "asset"
+    }
+  },
+  "account_name": "name",
+  "create": {
+    "base": "",
+    "action": {
+      "name": "create",
+      "account": "eosio.token"
+    },
+    "fields": {
+      "issuer": "account_name",
+      "maximum_supply": "asset"
+    }
+  },
+  "currency_stats": {
+    "base": "",
+    "fields": {
+      "supply": "asset",
+      "max_supply": "asset",
+      "issuer": "account_name"
+    }
+  },
+  "issue": {
+    "base": "",
+    "action": {
+      "name": "issue",
+      "account": "eosio.token"
+    },
+    "fields": {
+      "to": "account_name",
+      "quantity": "asset",
+      "memo": "string"
+    }
+  },
+  "transfer": {
+    "base": "",
+    "action": {
+      "name": "transfer",
+      "account": "eosio.token"
+    },
+    "fields": {
+      "from": "account_name",
+      "to": "account_name",
+      "quantity": "asset",
+      "memo": "string"
+    }
+  }
+}
