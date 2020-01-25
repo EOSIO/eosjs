@@ -1,8 +1,9 @@
-import "babel-polyfill";
-import { Api } from "./arisenjs-api";
-import * as Rpc from "./arisenjs-jsonrpc";
-import SignatureProvider from "./arisenjs-jssig";
-import * as Serialize from "./arisenjs-serialize";
+import { Api } from './eosjs-api';
+import * as ApiInterfaces from './eosjs-api-interfaces';
+import { JsonRpc } from './eosjs-jsonrpc';
+import * as Numeric from './eosjs-numeric';
+import * as RpcInterfaces from './eosjs-rpc-interfaces';
+import { RpcError } from './eosjs-rpcerror';
+import * as Serialize from './eosjs-serialize';
 
-export { Api, SignatureProvider, Rpc, Serialize };
-export default { Api, SignatureProvider, Rpc, Serialize };
+export { Api, ApiInterfaces, JsonRpc, Numeric, RpcInterfaces, RpcError, Serialize };

@@ -1,17 +1,14 @@
 /**
  * @module JS-Sig
  */
+// copyright defined in eosjs/LICENSE.txt
 
-// copyright defined in arisenjs/LICENSE.txt
-
-"use strict";
-
-import * as ecc from "arisenjs-ecc";
-import { SignatureProvider, SignatureProviderArgs } from "./arisenjs-api";
-import { convertLegacyPublicKey } from "./arisenjs-numeric";
+import * as ecc from 'eosjs-ecc';
+import { SignatureProvider, SignatureProviderArgs } from './eosjs-api-interfaces';
+import { convertLegacyPublicKey } from './eosjs-numeric';
 
 /** Signs transactions using in-process private keys */
-export default class JsSignatureProvider implements SignatureProvider {
+export class JsSignatureProvider implements SignatureProvider {
     /** map public to private keys */
     public keys = new Map<string, string>();
 
@@ -35,10 +32,11 @@ export default class JsSignatureProvider implements SignatureProvider {
     /** Sign a transaction */
     public async sign({ chainId, requiredKeys, serializedTransaction }: SignatureProviderArgs) {
         const signBuf = Buffer.concat([
-            new Buffer(chainId, "hex"), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32)),
+            new Buffer(chainId, 'hex'), new Buffer(serializedTransaction), new Buffer(new Uint8Array(32)),
         ]);
-        return requiredKeys.map(
+        const signatures = requiredKeys.map(
             (pub) => ecc.Signature.sign(signBuf, this.keys.get(convertLegacyPublicKey(pub))).toString(),
         );
+        return { signatures, serializedTransaction };
     }
 }

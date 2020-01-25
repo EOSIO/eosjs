@@ -1,80 +1,15 @@
 /**
  * @module API
  */
+// copyright defined in eosjs/LICENSE.txt
 
-// copyright defined in arisenjs/LICENSE.txt
+import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from './eosjs-api-interfaces';
+import { JsonRpc } from './eosjs-jsonrpc';
+import { Abi, GetInfoResult, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import * as ser from './eosjs-serialize';
 
-"use strict";
-
-import { Abi, GetInfoResult, JsonRpc, PushTransactionArgs } from "./arisenjs-jsonrpc";
-import * as ser from "./arisenjs-serialize";
-
-// tslint:disable-next-line
 const abiAbi = require('../src/abi.abi.json');
-// tslint:disable-next-line
 const transactionAbi = require('../src/transaction.abi.json');
-
-/** Reexport `arisenjs-serialize` */
-export const serialize = ser;
-
-/** Arguments to `getRequiredKeys` */
-export interface AuthorityProviderArgs {
-    /** Transaction that needs to be signed */
-    transaction: any;
-
-    /** Public keys associated with the private keys that the `SignatureProvider` holds */
-    availableKeys: string[];
-}
-
-/** Get subset of `availableKeys` needed to meet authorities in `transaction` */
-export interface AuthorityProvider {
-    /** Get subset of `availableKeys` needed to meet authorities in `transaction` */
-    getRequiredKeys: (args: AuthorityProviderArgs) => Promise<string[]>;
-}
-
-/** Retrieves raw ABIs for a specified accountName */
-export interface AbiProvider {
-    getRawAbi: (accountName: string) => Promise<BinaryAbi>;
-}
-
-/** Structure for the raw form of ABIs */
-export interface BinaryAbi {
-    account_name: string;
-    abi: Uint8Array;
-}
-
-/** Arguments to `sign` */
-export interface SignatureProviderArgs {
-    /** Chain transaction is for */
-    chainId: string;
-
-    /** Public keys associated with the private keys needed to sign the transaction */
-    requiredKeys: string[];
-
-    /** Transaction to sign */
-    serializedTransaction: Uint8Array;
-
-    /** ABIs for all contracts with actions included in `serializedTransaction` */
-    abis: BinaryAbi[];
-}
-
-/** Signs transactions */
-export interface SignatureProvider {
-    /** Public keys associated with the private keys that the `SignatureProvider` holds */
-    getAvailableKeys: () => Promise<string[]>;
-
-    /** Sign a transaction */
-    sign: (args: SignatureProviderArgs) => Promise<string[]>;
-}
-
-/** Holds a fetched abi */
-export interface CachedAbi {
-    /** abi in binary form */
-    rawAbi: Uint8Array;
-
-    /** abi in structured form */
-    abi: Abi;
-}
 
 export class Api {
     /** Issues RPC calls */
@@ -115,7 +50,7 @@ export class Api {
      *    * `signatureProvider`: Signs transactions
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-     *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
+     *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
      */
     constructor(args: {
         rpc: JsonRpc,
@@ -146,10 +81,10 @@ export class Api {
             array: rawAbi,
         });
         if (!ser.supportedAbiVersion(buffer.getString())) {
-            throw new Error("Unsupported abi version");
+            throw new Error('Unsupported abi version');
         }
         buffer.restartRead();
-        return this.abiTypes.get("abi_def").deserialize(buffer);
+        return this.abiTypes.get('abi_def').deserialize(buffer);
     }
 
     /** Get abi in both binary and structured forms. Fetch when needed. */
@@ -184,7 +119,7 @@ export class Api {
         const uniqueAccounts: Set<string> = new Set(accounts);
         const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
             async (account: string): Promise<BinaryAbi> => ({
-                account_name: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
+                accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
         return Promise.all(actionPromises);
     }
@@ -218,7 +153,7 @@ export class Api {
     /** Convert a transaction to binary */
     public serializeTransaction(transaction: any): Uint8Array {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
-        this.serialize(buffer, "transaction", {
+        this.serialize(buffer, 'transaction', {
             max_net_usage_words: 0,
             max_cpu_usage_ms: 0,
             delay_sec: 0,
@@ -234,7 +169,7 @@ export class Api {
     public deserializeTransaction(transaction: Uint8Array): any {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         buffer.pushArray(transaction);
-        return this.deserialize(buffer, "transaction");
+        return this.deserialize(buffer, 'transaction');
     }
 
     /** Convert actions to hex */
@@ -257,7 +192,7 @@ export class Api {
 
     /** Convert a transaction from binary. Also deserializes actions. */
     public async deserializeTransactionWithActions(transaction: Uint8Array | string): Promise<any> {
-        if (typeof transaction === "string") {
+        if (typeof transaction === 'string') {
             transaction = ser.hexToUint8Array(transaction);
         }
         const deserializedTransaction = this.deserializeTransaction(transaction);
@@ -270,13 +205,14 @@ export class Api {
      *
      * Named Parameters:
      *    * `broadcast`: broadcast this transaction?
+     *    * `sign`: sign this transaction?
      *    * If both `blocksBehind` and `expireSeconds` are present,
      *      then fetch the block which is `blocksBehind` behind head block,
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
+    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
+        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
         let info: GetInfoResult;
 
         if (!this.chainId) {
@@ -284,7 +220,7 @@ export class Api {
             this.chainId = info.chain_id;
         }
 
-        if (typeof blocksBehind === "number" && expireSeconds) { // use config fields to generate TAPOS if they exist
+        if (typeof blocksBehind === 'number' && expireSeconds) { // use config fields to generate TAPOS if they exist
             if (!info) {
                 info = await this.rpc.get_info();
             }
@@ -293,21 +229,24 @@ export class Api {
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {
-            throw new Error("Required configuration or TAPOS fields are not present");
+            throw new Error('Required configuration or TAPOS fields are not present');
         }
 
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
         const serializedTransaction = this.serializeTransaction(transaction);
-        const availableKeys = await this.signatureProvider.getAvailableKeys();
-        const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
-        const signatures = await this.signatureProvider.sign({
-            chainId: this.chainId,
-            requiredKeys,
-            serializedTransaction,
-            abis,
-        });
-        const pushTransactionArgs = { signatures, serializedTransaction };
+        let pushTransactionArgs: PushTransactionArgs  = { serializedTransaction, signatures: [] };
+
+        if (sign) {
+            const availableKeys = await this.signatureProvider.getAvailableKeys();
+            const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            pushTransactionArgs = await this.signatureProvider.sign({
+                chainId: this.chainId,
+                requiredKeys,
+                serializedTransaction,
+                abis,
+            });
+        }
         if (broadcast) {
             return this.pushSignedTransaction(pushTransactionArgs);
         }

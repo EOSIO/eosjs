@@ -4,12 +4,11 @@
         "module": "CommonJS",
         "outDir": "dist",
         "alwaysStrict": true,
-        "sourceMap": true,
+        "sourceMap": false,
         "noImplicitAny": true,
         "moduleResolution": "node",
-        "declaration": true,
+        "declaration": false,
         "downlevelIteration": true,
-        "skipLibCheck": true,
         "lib": [
             "es2017",
             "dom"
@@ -17,6 +16,10 @@
     },
     "include": [
         "src/**/*.ts",
-        "src/**/*.js",
+        "src/**/*.js"
+    ],
+    "exclude": [
+        "src/**/*.test.ts",
+        "src/tests/"
     ]
 }

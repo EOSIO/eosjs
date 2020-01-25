@@ -1,21 +1,14 @@
 {
-  "defaultSeverity": "error",
-  "extends": [
-    "tslint:recommended",
-    "tslint-eslint-rules"
-  ],
-  "jsRules": {},
-  "rules": {
-    "max-classes-per-file": false,
-    "object-literal-sort-keys": false,
-    "no-bitwise": false,
-    "interface-name": [true, "never-prefix"],
-    "no-console": [true, "log"],
-    "semicolon": [true, "always"],
-    "ter-indent": [true, 4]
-  },
-  "rulesDirectory": [],
-  "linterOptions": {
-    "exclude": ["src/**/*.js"]
-  }
+    "defaultSeverity": "error",
+    "extends": [
+        "@blockone/tslint-config-blockone/tslint-config"
+    ],
+    "jsRules": {},
+    "rules": { 
+        "no-bitwise": false,
+        "no-var-requires": false,
+        "semicolon": [true, "always"],
+        "ter-indent": [true, 4] 
+    },
+    "rulesDirectory": []
 }

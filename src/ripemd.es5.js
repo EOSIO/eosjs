@@ -328,12 +328,10 @@ var RIPEMD160 = function () {
 			//  The message after padding consists of t 16-word blocks that
 			// are denoted with X_i[j], with 0≤i≤(t − 1) and 0≤j≤15.
 			var X = new Array(t).fill(undefined).map(function (_, i) {
-				return new Proxy(new DataView(padded, i * block_size, block_size), {
-					get: function get(block_view, j) {
-						return block_view.getUint32(j * word_size, true // Little-endian
-						);
-					}
-				});
+				return function (j) {
+					return new DataView(padded, i * block_size, block_size).getUint32(j * word_size, true // Little-endian
+					);
+				};
 			});
 
 			//  The result of RIPEMD-160 is contained in five 32-bit words,
@@ -360,7 +358,7 @@ var RIPEMD160 = function () {
 				    EP = E;
 				for (var j = 0; j < 80; ++j) {
 					// Left rounds
-					var _T = RIPEMD160.add_modulo32(RIPEMD160.rol32(RIPEMD160.add_modulo32(A, RIPEMD160.f(j, B, C, D), X[i][r[j]], RIPEMD160.K(j)), s[j]), E);
+					var _T = RIPEMD160.add_modulo32(RIPEMD160.rol32(RIPEMD160.add_modulo32(A, RIPEMD160.f(j, B, C, D), X[i](r[j]), RIPEMD160.K(j)), s[j]), E);
 					A = E;
 					E = D;
 					D = RIPEMD160.rol32(C, 10);
@@ -368,7 +366,7 @@ var RIPEMD160 = function () {
 					B = _T;
 
 					// Right rounds
-					_T = RIPEMD160.add_modulo32(RIPEMD160.rol32(RIPEMD160.add_modulo32(AP, RIPEMD160.f(79 - j, BP, CP, DP), X[i][rP[j]], RIPEMD160.KP(j)), sP[j]), EP);
+					_T = RIPEMD160.add_modulo32(RIPEMD160.rol32(RIPEMD160.add_modulo32(AP, RIPEMD160.f(79 - j, BP, CP, DP), X[i](rP[j]), RIPEMD160.KP(j)), sP[j]), EP);
 					AP = EP;
 					EP = DP;
 					DP = RIPEMD160.rol32(CP, 10);
