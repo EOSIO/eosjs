@@ -15,11 +15,7 @@
     "build": "tsc -p ./tsconfig.json && cp src/ripemd.es5.js dist/ripemd.js",
     "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
     "build-production": "yarn build && yarn build-web && yarn test-all",
-    "clean": "rm -rf dist",
-    "docs-init": "sh .docs/scripts/init.sh",
-    "docs-build": "sh .docs/scripts/build.sh",
-    "docs-serve": "python -m SimpleHTTPServer",
-    "docs-publish": "sh .docs/scripts/publish.sh"
+    "clean": "rm -rf dist"
   },
   "author": "block.one",
   "license": "MIT",
@@ -31,8 +27,6 @@
     "babel-runtime": "6.26.0",
     "eosjs-ecc": "4.0.4",
     "text-encoding": "0.7.0",
-    "typedoc": "^0.15.0",
-    "typedoc-plugin-external-module-name": "^2.1.0",
     "typedoc-plugin-markdown": "^2.2.11"
   },
   "devDependencies": {
@@ -54,6 +48,8 @@
     "ts-loader": "5.3.3",
     "tslint": "5.12.1",
     "tslint-eslint-rules": "5.4.0",
+    "typedoc": "^0.15.0",
+    "typedoc-plugin-external-module-name": "^2.1.0",
     "typescript": "3.3.3",
     "webpack": "4.29.5",
     "webpack-cli": "3.2.3"
