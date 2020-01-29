@@ -30,7 +30,10 @@
   "dependencies": {
     "babel-runtime": "6.26.0",
     "eosjs-ecc": "4.0.4",
-    "text-encoding": "0.7.0"
+    "text-encoding": "0.7.0",
+    "typedoc": "^0.15.0",
+    "typedoc-plugin-external-module-name": "^2.1.0",
+    "typedoc-plugin-markdown": "^2.2.11"
   },
   "devDependencies": {
     "@blockone/tslint-config-blockone": "3.0.0",
