@@ -17,6 +17,7 @@ describe('Serialize', () => {
     describe('pushAsset', () => {
         let serialBuffer: SerialBuffer;
         const genericValidSymbolCharacter = 'A';
+        const invalidSymbolErrorMessage = 'Expected symbol to be A-Z and between one and seven characters';
 
         beforeEach(() => {
             serialBuffer = new SerialBuffer({
@@ -40,7 +41,7 @@ describe('Serialize', () => {
             try {
                 serialBuffer.pushAsset(asset);
             } catch (e) {
-                expect(e.message).toBe('Expected symbol to be A-Z and 1-7 characters');
+                expect(e.message).toBe(invalidSymbolErrorMessage);
                 exceptionCaught = true;
             }
 

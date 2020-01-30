@@ -420,7 +420,7 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
     /** Append a `symbol` */
     public pushSymbol({ name, precision }: { name: string, precision: number }) {
         if (!/^[A-Z]{1,7}$/.test(name)) {
-            throw new Error('Expected symbol to be A-Z and 1-7 characters');
+            throw new Error('Expected symbol to be A-Z and between one and seven characters');
         }
         const a = [precision & 0xff];
         a.push(...this.textEncoder.encode(name));
