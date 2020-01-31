@@ -9,3 +9,5 @@ docs-build/
 cypress/screenshots/
 cypress/videos/
 reports/
+
+reference/

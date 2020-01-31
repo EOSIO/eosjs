@@ -2,7 +2,6 @@
   "tsconfig": "tsconfig.json",
   "ignoreCompilerErrors": true,
   "hideGenerator": true,
-  "verbose": true,
   "includeDeclarations": false,
   "excludeExternals": true,
   "excludePrivate": true,
@@ -13,7 +12,7 @@
   "mode": "modules",
   "readme": "README.md",
   "module": "commonjs",
-  "theme": "gitbook",
+  "theme": "minimal",
   "target": "ES5",
-  "out": "./markdown"
+  "out": "./reference"
 }
