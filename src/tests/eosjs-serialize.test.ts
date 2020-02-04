@@ -1,6 +1,7 @@
 import { ec } from 'elliptic';
 
 import { createInitialTypes, Type, SerialBuffer } from '../eosjs-serialize';
+import { TextEncoder, TextDecoder } from 'text-encoding';
 
 describe('Serialize', () => {
     let types: Map<string, Type>;
@@ -11,6 +12,79 @@ describe('Serialize', () => {
 
     it('should be able to createInitialTypes', () => {
         expect(types).toBeTruthy();
+    });
+
+    describe('pushAsset', () => {
+        let serialBuffer: SerialBuffer;
+        const genericValidSymbolCharacter = 'A';
+        const invalidSymbolErrorMessage = 'Expected symbol to be A-Z and between one and seven characters';
+
+        beforeEach(() => {
+            serialBuffer = new SerialBuffer({
+                textEncoder: new TextEncoder(),
+                textDecoder: new TextDecoder()
+            });
+        });
+
+        const expectSuccessForICharactersSymbol = (i: number) => {
+            const symbol = genericValidSymbolCharacter.repeat(i);
+            const asset = `10.000 ${symbol}`;
+
+            serialBuffer.pushAsset(asset);
+
+            expect(serialBuffer.length).not.toBe(0);
+        };
+
+        const expectExceptionThrown = (asset: string) => {
+            let exceptionCaught = false;
+
+            try {
+                serialBuffer.pushAsset(asset);
+            } catch (e) {
+                expect(e.message).toBe(invalidSymbolErrorMessage);
+                exceptionCaught = true;
+            }
+
+            expect(exceptionCaught).toBeTruthy();
+        };
+
+        for (let i = 1; i <= 7; i++) {
+            it(`should be able to push asset with valid symbol of ${i} character(s)`, () => {
+                expectSuccessForICharactersSymbol(i);
+            });
+        }
+
+        it('should be able to push asset with valid EOS symbol "10.000 EOS"', () => {
+            const asset = '10.000 EOS';
+
+            serialBuffer.pushAsset(asset);
+
+            expect(serialBuffer.length).not.toBe(0);
+        });
+
+        it('should not be able to push no symbol "10.000 "', () => {
+            const asset = '10.000 ';
+
+            expectExceptionThrown(asset);
+        });
+
+        it('should not be able to push symbol with 8 or more characters "10.000 AAAAAAAA"', () => {
+            const asset = '10.000 AAAAAAAA';
+
+            expectExceptionThrown(asset);
+        });
+
+        it('should not be able to push invalid lowercase symbol "10.000 eos"', () => {
+            const asset = '10.000 eos';
+
+            expectExceptionThrown(asset);
+        });
+
+        it('should not be able to push two symbols "10.000 EOS blah"', () => {
+            const asset = '10.000 EOS blah';
+
+            expectExceptionThrown(asset);
+        });
     });
 
     describe('bool', () => {
