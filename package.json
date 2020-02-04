@@ -28,37 +28,32 @@
     "url": "https://github.com/EOSIO/eosjs.git"
   },
   "dependencies": {
+    "@babel/runtime": "7.8.3",
     "@types/elliptic": "6.4.10",
-    "babel-runtime": "6.26.0",
-    "elliptic": "6.5.0",
-    "text-encoding": "0.7.0"
+    "elliptic": "6.5.2"
   },
   "devDependencies": {
+    "@babel/core": "7.8.3",
+    "@babel/plugin-transform-runtime": "7.8.3",
+    "@babel/preset-env": "7.8.3",
+    "@babel/preset-stage-1": "7.8.3",
     "@blockone/tslint-config-blockone": "3.0.0",
-    "@types/jest": "24.0.6",
+    "@types/jest": "24.9.1",
     "@types/node": "11.9.4",
-    "@types/text-encoding": "0.0.35",
-    "babel-plugin-transform-runtime": "6.23.0",
-    "babel-preset-env": "1.7.0",
-    "babel-preset-stage-1": "6.24.1",
-    "cypress": "3.1.5",
+    "cypress": "3.8.2",
     "eosjs-ecc": "^4.0.7",
-    "jest": "23.6.0",
+    "jest": "25.1.0",
     "jest-fetch-mock": "2.1.1",
     "json-loader": "0.5.7",
     "mocha": "5.2.0",
     "mochawesome": "4.1.0",
-    "ts-jest": "24.0.0",
+    "ts-jest": "25.0.0",
     "ts-loader": "5.3.3",
     "tslint": "5.12.1",
     "tslint-eslint-rules": "5.4.0",
     "typescript": "3.3.3",
     "webpack": "4.41.5",
     "webpack-cli": "3.2.3"
-  },
-  "resolutions": {
-    "braces": "^2.3.1",
-    "lodash": "^4.17.12"
   },
   "jest": {
     "automock": false,

@@ -1,7 +1,7 @@
+const { TextEncoder, TextDecoder } = require('util');
 import { ec } from 'elliptic';
 
 import { createInitialTypes, Type, SerialBuffer } from '../eosjs-serialize';
-import { TextEncoder, TextDecoder } from 'text-encoding';
 
 describe('Serialize', () => {
     let types: Map<string, Type>;
