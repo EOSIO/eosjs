@@ -251,11 +251,18 @@ export class Api {
      *    * If both `blocksBehind` and `expireSeconds` are present,
      *      then fetch the block which is `blocksBehind` behind head block,
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
+     *    * If both `useLastIrreversible` and `expireSeconds` are present,
+     *      then fetch the last irreversible block, use it as a reference for TAPoS,
+     *      and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
+    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds, useLastIrreversible }:
+        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; useLastIrreversible?: boolean } = {}): Promise<any> {
         let info: GetInfoResult;
+
+        if (typeof blocksBehind === 'number' && useLastIrreversible) {
+            throw new Error('Use either blocksBehind or useLastIrreversible');
+        }
 
         if (!this.chainId) {
             info = await this.rpc.get_info();
@@ -268,6 +275,22 @@ export class Api {
             }
 
             const taposBlockNumber = info.head_block_num - blocksBehind;
+            let refBlock: GetBlockHeaderStateResult | GetBlockResult;
+            try {
+                refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
+            } catch (error) {
+                refBlock = await this.rpc.get_block(taposBlockNumber);
+            }
+
+            transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
+        }
+
+        if (useLastIrreversible && expireSeconds) {
+            if (!info) {
+                info = await this.rpc.get_info();
+            }
+
+            const taposBlockNumber = info.last_irreversible_block_num;
             let refBlock: GetBlockHeaderStateResult | GetBlockResult;
             try {
                 refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
