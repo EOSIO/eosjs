@@ -52,8 +52,8 @@
     "typescript": "3.3.3",
     "webpack": "4.41.5",
     "webpack-cli": "3.2.3",
-    "typedoc": "^0.15.0",
-    "typedoc-plugin-external-module-name": "^2.1.0"
+    "typedoc": "^0.16.9",
+    "typedoc-plugin-external-module-name": "^3.0.0"
   },
   "resolutions": {
     "braces": "^2.3.1",
