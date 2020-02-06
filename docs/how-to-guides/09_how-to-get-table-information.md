@@ -70,7 +70,7 @@ Above we console log the response from the EOSIO network.  An example of an expe
 ```
 
 ## Query By Secondary Index
-Finally, the `lower_bound` parameter can be used in conjunction with the `table_key` parameter to query an index different from the primary key.
+Finally, the `lower_bound` parameter can be used in conjunction with the `index_position` parameter to query an index different from the primary key.
 
 In the example shown below, the `contract` smart contract's table `profiles` is queried with the scope `contract` for the rows with secondary index `age` equal to **21**.  The `limit` is **1** which implies that only 1 row with the age **21** will be returned.
 ```javascript
@@ -80,7 +80,7 @@ In the example shown below, the `contract` smart contract's table `profiles` is 
     code: 'contract',           // Contract that we target
     scope: 'contract',          // Account that owns the data
     table: 'profiles',          // Table name
-    table_key: 'age',           // Table secondary key name
+    index_position: 2,          // Table secondary index
     lower_bound: 21,            // Table secondary key value
     limit: 1,                   // Here we limit to 1 to get only row
     reverse: false,             // Optional: Get reversed data
