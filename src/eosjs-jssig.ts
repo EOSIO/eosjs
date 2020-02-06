@@ -23,9 +23,9 @@ function digestFromSerializedData(
     serializedContextFreeData?: Uint8Array,
     e = defaultEc) {
     const signBuf = Buffer.concat([
-        new Buffer(chainId, 'hex'),
-        new Buffer(serializedTransaction),
-        new Buffer(
+        Buffer.from(chainId, 'hex'),
+        Buffer.from(serializedTransaction),
+        Buffer.from(
             serializedContextFreeData ?
                 new Uint8Array(e.hash().update(serializedContextFreeData).digest()) :
                 new Uint8Array(32)

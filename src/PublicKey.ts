@@ -41,7 +41,7 @@ export class PublicKey {
     /** Export public key as `elliptic`-format public key */
     public toElliptic(): EC.KeyPair {
         return this.ec.keyPair({
-            pub: new Buffer(this.key.data),
+            pub: Buffer.from(this.key.data),
         });
     }
 
