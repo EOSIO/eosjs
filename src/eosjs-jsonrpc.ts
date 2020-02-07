@@ -7,6 +7,7 @@ import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
 import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs, GetBlockHeaderStateResult } from "./eosjs-rpc-interfaces" // tslint:disable-line
 import { RpcError } from './eosjs-rpcerror';
+import * as pako from 'pako';
 
 function arrayToHex(data: Uint8Array) {
     let result = '';
@@ -195,9 +196,9 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     ): Promise<any> {
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,
-            compression: 0,
-            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
-            packed_trx: arrayToHex(serializedTransaction),
+            compression: 1,
+            packed_context_free_data: arrayToHex(pako.deflate(serializedContextFreeData || new Uint8Array(0), { level: 9 })),
+            packed_trx: arrayToHex(pako.deflate(serializedTransaction, { level: 9 })),
         });
     }
 
