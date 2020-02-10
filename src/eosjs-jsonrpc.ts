@@ -19,7 +19,7 @@ function arrayToHex(data: Uint8Array) {
 /** Make RPC calls */
 export class JsonRpc implements AuthorityProvider, AbiProvider {
     public endpoint: string;
-    public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
+    public fetchBuiltin: (input?: any, init?: any) => Promise<any>;
 
     /**
      * @param args
@@ -28,7 +28,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
      *    * node: provide an implementation
      */
     constructor(endpoint: string, args:
-        { fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> } = {},
+        { fetch?: (input?: any, init?: any) => Promise<any> } = {},
     ) {
         this.endpoint = endpoint.replace(/\/$/, '');
         if (args.fetch) {
