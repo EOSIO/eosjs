@@ -120,6 +120,7 @@ export interface GetRawCodeAndAbiResult {
 /** Arguments for `push_transaction` */
 export interface PushTransactionArgs {
     signatures: string[];
+    compression?: number;
     serializedTransaction: Uint8Array;
     serializedContextFreeData?: Uint8Array;
 }
