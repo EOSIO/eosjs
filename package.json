@@ -30,6 +30,7 @@
   "dependencies": {
     "@babel/runtime": "7.8.3",
     "@types/elliptic": "6.4.10",
+    "@types/long": "^4.0.1",
     "elliptic": "6.5.2"
   },
   "devDependencies": {
@@ -45,6 +46,7 @@
     "jest": "25.1.0",
     "jest-fetch-mock": "2.1.1",
     "json-loader": "0.5.7",
+    "long": "^4.0.0",
     "mocha": "5.2.0",
     "mochawesome": "4.1.0",
     "ts-jest": "25.0.0",
