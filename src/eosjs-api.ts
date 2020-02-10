@@ -342,9 +342,9 @@ export class Api {
     public async pushCompressedSignedTransaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
     ): Promise<any> {
-        const compressedSerializedTransaction = deflate(serializedTransaction);
+        const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
         const compressedSerializedContextFreeData =
-            deflate(serializedContextFreeData || new Uint8Array(0));
+            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
 
         return this.rpc.push_transaction({
             signatures,
