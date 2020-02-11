@@ -15,7 +15,7 @@ describe('Node JS environment', () => {
     });
 
     it('transacts with configuration object containing useLastIrreversible', async () => {
-        transactionResponse = await tests.transactWithConfig({ useLastIrreversible: 3, expireSeconds: 30 });
+        transactionResponse = await tests.transactWithConfig({ useLastIrreversible: true, expireSeconds: 30 });
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
@@ -24,14 +24,21 @@ describe('Node JS environment', () => {
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     }, 10000);
 
+    it('transacts with compressed transaction', async () => {
+        transactionResponse = await tests.transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true });
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
     it('transacts without broadcasting, returning signatures and packed transaction', async () => {
-        transactionSignatures = await tests.transactWithoutBroadcast();
+        transactionSignatures =
+            await tests.transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
         expect(Object.keys(transactionSignatures)).toContain('signatures');
         expect(Object.keys(transactionSignatures)).toContain('serializedTransaction');
     });
 
     it('broadcasts packed transaction, given valid signatures', async () => {
-        transactionSignatures = await tests.transactWithoutBroadcast();
+        transactionSignatures =
+            await tests.transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
         transactionResponse = await tests.broadcastResult(transactionSignatures);
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
