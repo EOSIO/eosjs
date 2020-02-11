@@ -77,5 +77,6 @@ export interface TransactConfig {
     sign?: boolean;
     compression?: boolean;
     blocksBehind?: number;
+    useLastIrreversible?: boolean;
     expireSeconds?: number;
 }

@@ -5,8 +5,17 @@ describe('Node JS environment', () => {
     let transactionSignatures: any;
     let failedAsPlanned: boolean;
 
-    it('transacts with configuration object', async () => {
-        transactionResponse = await tests.transactWithConfig();
+    beforeEach(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+    });
+
+    it('transacts with configuration object containing blocksBehind', async () => {
+        transactionResponse = await tests.transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
+    it('transacts with configuration object containing useLastIrreversible', async () => {
+        transactionResponse = await tests.transactWithConfig({ useLastIrreversible: 3, expireSeconds: 30 });
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
