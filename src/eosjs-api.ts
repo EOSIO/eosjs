@@ -10,7 +10,8 @@ import {
     AuthorityProvider,
     BinaryAbi,
     CachedAbi,
-    SignatureProvider
+    SignatureProvider,
+    TransactConfig,
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
 import {
@@ -266,9 +267,10 @@ export class Api {
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, sign = true, compression, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; sign?: boolean; compression?: boolean; blocksBehind?: number; expireSeconds?: number; }
-        = {}): Promise<any> {
+    public async transact(
+        transaction: any,
+        { broadcast = true, sign = true, compression, blocksBehind, expireSeconds }: TransactConfig = {}
+    ): Promise<any> {
         let info: GetInfoResult;
 
         if (!this.chainId) {
