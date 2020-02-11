@@ -30,10 +30,7 @@ const transactWithConfig = async (config) => await api.transact({
             memo: '',
         },
     }]
-}, {
-    blocksBehind: 3,
-    expireSeconds: 30,
-});
+}, config);
 
 const transactWithoutConfig = async () => {
     const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30});
@@ -64,48 +61,6 @@ const transactWithoutConfig = async () => {
     });
 };
 
-const transactWithCompression = async () => await api.transact({
-    actions: [{
-        account: 'eosio.token',
-        name: 'transfer',
-        authorization: [{
-            actor: 'bob',
-            permission: 'active',
-        }],
-        data: {
-            from: 'bob',
-            to: 'alice',
-            quantity: '0.0001 SYS',
-            memo: '',
-        },
-    }]
-}, {
-    blocksBehind: 3,
-    expireSeconds: 30,
-    compression: true,
-});
-
-const transactWithoutBroadcast = async () => await api.transact({
-  actions: [{
-        account: 'eosio.token',
-        name: 'transfer',
-        authorization: [{
-            actor: 'bob',
-            permission: 'active',
-        }],
-        data: {
-            from: 'bob',
-            to: 'alice',
-            quantity: '0.0001 SYS',
-            memo: '',
-        },
-    }]
-}, {
-    broadcast: false,
-    blocksBehind: 3,
-    expireSeconds: 30,
-});
-
 const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () => await api.transact({
@@ -130,8 +85,6 @@ const rpcShouldFail = async () => await rpc.get_block(-1);
 module.exports = {
     transactWithConfig,
     transactWithoutConfig,
-    transactWithCompression,
-    transactWithoutBroadcast,
     broadcastResult,
     transactShouldFail,
     rpcShouldFail

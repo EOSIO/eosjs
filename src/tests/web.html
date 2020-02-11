@@ -162,34 +162,13 @@
               return false;
             }
         
-            const transactWithoutBroadcast = async () => await api.transact({
-            actions: [{
-                    account: 'eosio.token',
-                    name: 'transfer',
-                    authorization: [{
-                        actor: 'bob',
-                        permission: 'active',
-                    }],
-                    data: {
-                        from: 'bob',
-                        to: 'alice',
-                        quantity: '0.0001 SYS',
-                        memo: '',
-                    },
-                }]
-            }, {
-                broadcast: false,
-                blocksBehind: 3,
-                expireSeconds: 30,
-            });
-                
-        
             const testTransactWithoutBroadcast = async (e) => {
                 resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionSignatures = await transactWithoutBroadcast();
+                    transactionSignatures =
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;

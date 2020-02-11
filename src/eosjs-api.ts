@@ -286,7 +286,7 @@ export class Api {
         }
 
         if ((typeof blocksBehind === 'number' || useLastIrreversible) && expireSeconds) {
-            transaction = this.generateTapos(info, transaction, blocksBehind, useLastIrreversible, expireSeconds);
+            transaction = await this.generateTapos(info, transaction, blocksBehind, useLastIrreversible, expireSeconds);
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {
