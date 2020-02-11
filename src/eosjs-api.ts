@@ -246,7 +246,7 @@ export class Api {
     }
 
     /** Deflate a serialized object */
-    public deflateSerializedArray(serializedArray: Uint8Array) {
+    public deflateSerializedArray(serializedArray: Uint8Array): Uint8Array {
         return deflate(serializedArray, { level: 9 });
     }
 
