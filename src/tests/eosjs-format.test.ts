@@ -4,7 +4,6 @@ const {
   isName, DecimalPad, DecimalUnimply,
   parseAsset
 } = require('../eosjs-format')
-const assert = require('assert')
 
 describe('format', () => {
   // In isname111111k, 'k' overflows the last 4 bits of the name
@@ -16,40 +15,40 @@ describe('format', () => {
 
     it('isName', () => {
       for(let name of nameFixture.isname) {
-        assert(isName(name), name)
+        expect(isName(name)).toBeTruthy()
       }
       for(let name of nameFixture.noname) {
-        assert(!isName(name), name)
+        expect(isName(name)).toBeFalsy()
       }
     })
 
     it('encode / decode', () => {
-      assert.equal('12373', encodeName('eos'), 'encode')
-      assert.equal('3055', encodeNameHex('eos'), 'encode hex')
-      assert.equal(decodeName(encodeName('eos')), 'eos', 'decode')
+      expect('12373').toEqual(encodeName('eos'))
+      expect('3055').toEqual(encodeNameHex('eos'))
+      expect('eos').toEqual(decodeName(encodeName('eos')))
 
-      assert.equal('572d3ccdcd', encodeNameHex('transfer'), 'encode')
-      assert.equal(decodeNameHex('572d3ccdcd'), 'transfer', 'decode')
+      expect('572d3ccdcd').toEqual(encodeNameHex('transfer'))
+      expect(decodeNameHex('572d3ccdcd')).toEqual('transfer')
 
       for(let name of nameFixture.isname) {
-        assert.equal(decodeName(encodeName(name)), name)
-        assert.equal(decodeNameHex(encodeNameHex(name)), name)
+        expect(decodeName(encodeName(name))).toEqual(name)
+        expect(decodeNameHex(encodeNameHex(name))).toEqual(name)
       }
       for(let name of nameFixture.isname) {
-        assert.equal(decodeName(encodeName(name, false), false), name)
+        expect(decodeName(encodeName(name, false), false)).toEqual(name)
       }
-      assert(decodeName(1))
+      expect(decodeName(1)).toBeTruthy()
       throws(() => decodeName(Number.MAX_SAFE_INTEGER + 1), /overflow/)
       throws(() => decodeName({}), /Long, Number or String/)
     })
   })
 
   it('DecimalPad', () => {
-    assert.throws(() => DecimalPad(), /value is required/)
-    assert.throws(() => DecimalPad('$10', 0), /invalid decimal/)
-    assert.throws(() => DecimalPad('1.1.', 0), /invalid decimal/)
-    assert.throws(() => DecimalPad('1.1,1', 0), /invalid decimal/)
-    assert.throws(() => DecimalPad('1.11', 1), /exceeds precision/)
+    throws(() => DecimalPad(), /value is required/)
+    throws(() => DecimalPad('$10', 0), /invalid decimal/)
+    throws(() => DecimalPad('1.1.', 0), /invalid decimal/)
+    throws(() => DecimalPad('1.1,1', 0), /invalid decimal/)
+    throws(() => DecimalPad('1.11', 1), /exceeds precision/)
 
     const decFixtures = [
       {value: -1, precision: null, answer: '-1'},
@@ -81,14 +80,14 @@ describe('format', () => {
     ]
     for(const test of decFixtures) {
       const {answer, value, precision} = test
-      assert.equal(DecimalPad(value, precision), answer, JSON.stringify(test))
+      expect(DecimalPad(value, precision)).toEqual(answer)
     }
   })
 
   it('DecimalUnimply', () => {
-    assert.throws(() => DecimalUnimply('1.', 1), /invalid whole number/)
-    assert.throws(() => DecimalUnimply('.1', 1), /invalid whole number/)
-    assert.throws(() => DecimalUnimply('1.1', 1), /invalid whole number/)
+    throws(() => DecimalUnimply('1.', 1), /invalid whole number/)
+    throws(() => DecimalUnimply('.1', 1), /invalid whole number/)
+    throws(() => DecimalUnimply('1.1', 1), /invalid whole number/)
 
     const decFixtures = [
       {value: -1, precision: 0, answer: '-1'},
@@ -107,7 +106,7 @@ describe('format', () => {
     ]
     for(const test of decFixtures) {
       const {answer, value, precision} = test
-      assert.equal(DecimalUnimply(value, precision), answer, JSON.stringify(test))
+      expect(DecimalUnimply(value, precision)).toEqual(answer)
     }
   })
 
@@ -126,11 +125,7 @@ describe('format', () => {
       ['1.0000 SYM', '1.0000', 4, 'SYM', null],
     ]
     for(const [str, amount, precision, symbol, contract] of parseExtendedAssets) {
-      assert.deepEqual(
-        parseAsset(str),
-        {amount, precision, symbol, contract},
-        JSON.stringify([str, amount, precision, symbol, contract])
-      )
+      expect(parseAsset(str)).toEqual({amount, precision, symbol, contract})
     }
   })
 })
@@ -139,7 +134,7 @@ describe('format', () => {
 function throws (fn: any, match: any) {
   try {
     fn()
-    assert(false, 'Expecting error')
+    expect(false).toBeTruthy()
   } catch (error) {
     if (!match.test(error)) {
       error.message = `Error did not match ${match}\n${error.message}`
