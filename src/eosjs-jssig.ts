@@ -60,19 +60,11 @@ class JsSignatureProvider implements SignatureProvider {
 
     public async signHash(dataSha256: string, signingPublicKey: string) {
         const signatures = [] as string[];
-        const privKey = this.keys.get(convertLegacyPublicKey(signingPublicKey));
-        let tries = 0;
-        let sig: Signature;
-        const isCanonical = (sigData: Uint8Array) =>
-            !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
-            && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
-
-        do {
-            const ellipticSig = privKey.sign(dataSha256, { canonical: true, pers: [++tries] });
-            sig = Signature.fromElliptic(ellipticSig, KeyType.k1);
-        } while (!isCanonical(sig.toBinary()));
-
-        signatures.push(sig.toString());
+        const publicKey = PublicKey.fromString(signingPublicKey);
+        const ellipticPrivateKey = this.keys.get(convertLegacyPublicKey(signingPublicKey));
+        const privateKey = PrivateKey.fromElliptic(ellipticPrivateKey, publicKey.getType());
+        const signature = privateKey.sign(dataSha256);
+        signatures.push(signature.toString());
 
         return { signatures };
     }
