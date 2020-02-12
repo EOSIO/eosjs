@@ -15,7 +15,7 @@ const rpc = new JsonRpc('http://localhost:8888', { fetch });
 const signatureProvider = new JsSignatureProvider([privateKey]);
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
-const transactWithConfig = async (config) => await api.transact({
+const transactWithConfig = async (config, memo) => await api.transact({
     actions: [{
         account: 'eosio.token',
         name: 'transfer',
@@ -27,13 +27,13 @@ const transactWithConfig = async (config) => await api.transact({
             from: 'bob',
             to: 'alice',
             quantity: '0.0001 SYS',
-            memo: '',
+            memo,
         },
     }]
 }, config);
 
 const transactWithoutConfig = async () => {
-    const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
+    const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30}, 'transactWithoutConfig');
     const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
     const currentDate = new Date();
     const timePlusTen = currentDate.getTime() + 10000;
@@ -55,7 +55,7 @@ const transactWithoutConfig = async () => {
                 from: 'bob',
                 to: 'alice',
                 quantity: '0.0001 SYS',
-                memo: '',
+                memo: 'transactWithoutConfig2',
             },
         }]
     });
