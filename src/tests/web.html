@@ -2,9 +2,9 @@
 <html>
     <head>
         <link rel='stylesheet' type='text/css' href='web.css'>
-        <script src='../../dist-web/eosjs-api.js'></script>
-        <script src='../../dist-web/eosjs-jsonrpc.js'></script>
-        <script src='../../dist-web/eosjs-jssig.js'></script>
+        <script src='../../dist-web/eosjs-api.min.js'></script>
+        <script src='../../dist-web/eosjs-jsonrpc.min.js'></script>
+        <script src='../../dist-web/eosjs-jssig.min.js'></script>
         <script>
             const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
             /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
@@ -21,9 +21,9 @@
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
         
-            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1000))
+            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1500))
         
-            const transactWithConfig = async () => await api.transact({
+            const transactWithConfig = async (config) => await api.transact({
                 actions: [{
                     account: 'eosio.token',
                     name: 'transfer',
@@ -38,21 +38,18 @@
                         memo: '',
                     },
                 }]
-            }, {
-                blocksBehind: 3,
-                expireSeconds: 30,
-            });
+            }, config);
         
-            const testTransactWithConfig = async (e) => {
+            const testTransactWithConfigBlocksBehind = async (e) => {
                 resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionResponse = await transactWithConfig();
+                    transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
-                    console.error('Transact With Config Test Failure: ', error.message);
+                    console.error('Transact With Config Blocks Behind Test Failure: ', error.message);
                     return false;
                 }
         
@@ -65,9 +62,32 @@
                 resultsLabel.innerText = FAILED;
                 return false;
             }
+
+            const testTransactWithConfigUseLastIrreversible = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await transactWithConfig({ useLastIrreversible: true, expireSeconds: 30 });
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact With Config Use Last Irreversible Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
         
             const transactWithoutConfig = async () => {
-                const transactionResponse = await transactWithConfig();
+                const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
                 const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
                 const currentDate = new Date();
                 const timePlusTen = currentDate.getTime() + 10000;
@@ -117,36 +137,38 @@
                 resultsLabel.innerText = FAILED;
                 return false;
             };
-                
-        
-            const transactWithoutBroadcast = async () => await api.transact({
-            actions: [{
-                    account: 'eosio.token',
-                    name: 'transfer',
-                    authorization: [{
-                        actor: 'bob',
-                        permission: 'active',
-                    }],
-                    data: {
-                        from: 'bob',
-                        to: 'alice',
-                        quantity: '0.0001 SYS',
-                        memo: '',
-                    },
-                }]
-            }, {
-                broadcast: false,
-                blocksBehind: 3,
-                expireSeconds: 30,
-            });
-                
+
+            const testTransactWithCompression = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse =
+                  await transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true });
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact With Config Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
         
             const testTransactWithoutBroadcast = async (e) => {
                 resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionSignatures = await transactWithoutBroadcast();
+                    transactionSignatures =
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -171,7 +193,8 @@
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionSignatures = await transactWithoutBroadcast();
+                    transactionSignatures =
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
                     transactionResponse = await broadcastResult(transactionSignatures);
                 } catch (error) {
                     resultsLabel.className = 'failed';
@@ -265,8 +288,10 @@
             </div>
         </div>
         <div class='tests'>
-            <div><h2>Transact with Configuration Parameter</h2><button onClick='testTransactWithConfig(event);'>Test</button></div>
+            <div><h2>Transact with blocksBehind Configuration Parameter</h2><button onClick='testTransactWithConfigBlocksBehind(event);'>Test</button></div>
+            <div><h2>Transact with useLastIrreversible Configuration Parameter</h2><button onClick='testTransactWithConfigUseLastIrreversible(event);'>Test</button></div>
             <div><h2>Transact with Manually Configured TAPOS</h2><button onClick='testTransactWithoutConfig(event);'>Test</button></div>
+            <div><h2>Transact with Compression</h2><button onClick='testTransactWithCompression(event);'>Test</button></div>
             <div><h2>Transact without Broadcasting</h2><button onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
             <div><h2>Broadcast Transaction</h2><button onClick='testBroadcastResult(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>

@@ -372,11 +372,10 @@ describe('JSON RPC', () => {
         const code = 'morse';
         const scope = 'minty';
         const table = 'coffee';
-        const tableKey = 'front_door';
         const lowerBound = 'zero';
         const upperBound = 'five';
         const limit = 20;
-        const indexPosition = 1;
+        const indexPosition = 2;
         const keyType = 'str';
         const expReturn = { data: '12345' };
         const reverse = false;
@@ -386,7 +385,6 @@ describe('JSON RPC', () => {
             code,
             scope,
             table,
-            table_key: tableKey,
             lower_bound: lowerBound,
             upper_bound: upperBound,
             index_position: indexPosition,
@@ -414,7 +412,6 @@ describe('JSON RPC', () => {
         const code = 'morse';
         const scope = 'minty';
         const table = 'coffee';
-        const tableKey = '';
         const lowerBound = '';
         const upperBound = '';
         const limit = 10;
@@ -434,7 +431,6 @@ describe('JSON RPC', () => {
                 code,
                 scope,
                 table,
-                table_key: tableKey,
                 lower_bound: lowerBound,
                 upper_bound: upperBound,
                 index_position: indexPosition,

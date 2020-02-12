@@ -3,12 +3,15 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
+import { inflate, deflate } from 'pako';
+
 import {
     AbiProvider,
     AuthorityProvider,
     BinaryAbi,
     CachedAbi,
-    SignatureProvider
+    SignatureProvider,
+    TransactConfig
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
 import {
@@ -97,6 +100,19 @@ export class Api {
         }
         buffer.restartRead();
         return this.abiTypes.get('abi_def').deserialize(buffer);
+    }
+
+    /** Encodes a json abi as Uint8Array. */
+    public jsonToRawAbi(jsonAbi: Abi): Uint8Array {
+        const buffer = new ser.SerialBuffer({
+            textEncoder: this.textEncoder,
+            textDecoder: this.textDecoder,
+        });
+        this.abiTypes.get('abi_def').serialize(buffer, jsonAbi);
+        if (!ser.supportedAbiVersion(buffer.getString())) {
+            throw new Error('Unsupported abi version');
+        }
+        return buffer.asUint8Array();
     }
 
     /** Get abi in both binary and structured forms. Fetch when needed. */
@@ -229,40 +245,48 @@ export class Api {
         };
     }
 
+    /** Deflate a serialized object */
+    public deflateSerializedArray(serializedArray: Uint8Array): Uint8Array {
+        return deflate(serializedArray, { level: 9 });
+    }
+
+    /** Inflate a compressed serialized object */
+    public inflateSerializedArray(compressedSerializedArray: Uint8Array): Uint8Array {
+        return inflate(compressedSerializedArray);
+    }
+
     /**
      * Create and optionally broadcast a transaction.
      *
      * Named Parameters:
      *    * `broadcast`: broadcast this transaction?
      *    * `sign`: sign this transaction?
+     *    * `compression`: compress this transaction?
      *    * If both `blocksBehind` and `expireSeconds` are present,
      *      then fetch the block which is `blocksBehind` behind head block,
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
+     *    * If both `useLastIrreversible` and `expireSeconds` are present,
+     *      then fetch the last irreversible block, use it as a reference for TAPoS,
+     *      and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
+    public async transact(
+        transaction: any,
+        { broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
+            TransactConfig = {}): Promise<any> {
         let info: GetInfoResult;
+
+        if (typeof blocksBehind === 'number' && useLastIrreversible) {
+            throw new Error('Use either blocksBehind or useLastIrreversible');
+        }
 
         if (!this.chainId) {
             info = await this.rpc.get_info();
             this.chainId = info.chain_id;
         }
 
-        if (typeof blocksBehind === 'number' && expireSeconds) { // use config fields to generate TAPOS if they exist
-            if (!info) {
-                info = await this.rpc.get_info();
-            }
-
-            const taposBlockNumber = info.head_block_num - blocksBehind;
-            let refBlock: GetBlockHeaderStateResult | GetBlockResult;
-            try {
-                refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
-            } catch (error) {
-                refBlock = await this.rpc.get_block(taposBlockNumber);
-            }
-
-            transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
+        if ((typeof blocksBehind === 'number' || useLastIrreversible) && expireSeconds) {
+            transaction = await this.generateTapos(info, transaction, blocksBehind, useLastIrreversible, expireSeconds);
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {
@@ -293,6 +317,9 @@ export class Api {
             });
         }
         if (broadcast) {
+            if (compression) {
+                return this.pushCompressedSignedTransaction(pushTransactionArgs);
+            }
             return this.pushSignedTransaction(pushTransactionArgs);
         }
         return pushTransactionArgs;
@@ -307,6 +334,49 @@ export class Api {
             serializedTransaction,
             serializedContextFreeData
         });
+    }
+
+    public async pushCompressedSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
+        const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
+        const compressedSerializedContextFreeData =
+            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
+
+        return this.rpc.push_transaction({
+            signatures,
+            compression: 1,
+            serializedTransaction: compressedSerializedTransaction,
+            serializedContextFreeData: compressedSerializedContextFreeData
+        });
+    }
+
+    private async generateTapos(
+        info: GetInfoResult | undefined,
+        transaction: any,
+        blocksBehind: number | undefined,
+        useLastIrreversible: boolean | undefined,
+        expireSeconds: number
+    ) {
+        if (!info) {
+            info = await this.rpc.get_info();
+        }
+
+        let taposBlockNumber: number;
+        if (useLastIrreversible) {
+            taposBlockNumber = info.last_irreversible_block_num;
+        } else {
+            taposBlockNumber = info.head_block_num - blocksBehind;
+        }
+
+        let refBlock: GetBlockHeaderStateResult | GetBlockResult;
+        try {
+            refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
+        } catch (error) {
+            refBlock = await this.rpc.get_block(taposBlockNumber);
+        }
+
+        return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
     }
 
     // eventually break out into TransactionValidator class

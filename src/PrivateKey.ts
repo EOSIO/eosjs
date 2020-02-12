@@ -1,48 +1,77 @@
-import { ec } from 'elliptic';
+import { BNInput, ec as EC } from 'elliptic';
 import {
     Key,
     KeyType,
     privateKeyToString,
     stringToPrivateKey,
 } from './eosjs-numeric';
+import { constructElliptic, PublicKey, Signature } from './eosjs-key-conversions';
 
 /** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
 export class PrivateKey {
-    constructor(private key: Key) {}
+    constructor(private key: Key, private ec: EC) {}
 
     /** Instantiate private key from an `elliptic`-format private key */
-    public static fromElliptic(privKey: ec.KeyPair, keyType = KeyType.k1): PrivateKey {
-        const privArray = privKey.getPrivate().toArray();
+    public static fromElliptic(privKey: EC.KeyPair, keyType: KeyType, ec?: EC): PrivateKey {
+        if (!ec) {
+            ec = constructElliptic(keyType);
+        }
         return new PrivateKey({
             type: keyType,
-            data: privKey.getPrivate().toBuffer(),
-        });
+            data: privKey.getPrivate().toArrayLike(Buffer, 'be', 32),
+        }, ec);
     }
 
     /** Instantiate private key from an EOSIO-format private key */
-    public static fromString(keyString: string): PrivateKey {
-        const key: Key = stringToPrivateKey(keyString);
-        if (key.type !== KeyType.k1) {
-            throw new Error('Key type isn\'t k1');
+    public static fromString(keyString: string, ec?: EC): PrivateKey {
+        const privateKey = stringToPrivateKey(keyString);
+        if (!ec) {
+            ec = constructElliptic(privateKey.type);
         }
-        return new PrivateKey(key);
+        return new PrivateKey(privateKey, ec);
     }
 
     /** Export private key as `elliptic`-format private key */
-    public toElliptic(ecurve?: ec) {
-        /** expensive to construct; so we do it only as needed */
-        if (!ecurve) {
-            if (this.key.type === KeyType.r1) {
-                ecurve = new ec('secp256r1') as any;
-            } else {
-                ecurve = new ec('secp256k1') as any;
-            }
-        }
-        return ecurve.keyFromPrivate(this.key.data);
+    public toElliptic() {
+        return this.ec.keyFromPrivate(this.key.data);
     }
 
     /** Export private key as EOSIO-format private key */
     public toString(): string {
         return privateKeyToString(this.key);
+    }
+
+    /** Get key type from key */
+    public getType(): KeyType {
+        return this.key.type;
+    }
+
+    /** Retrieve the public key from a private key */
+    public getPublicKey(): PublicKey {
+        const ellipticPrivateKey = this.toElliptic();
+        return PublicKey.fromElliptic(ellipticPrivateKey, this.getType(), this.ec);
+    }
+
+    /** Sign a message digest with private key */
+    public sign(digest: BNInput): Signature {
+        let tries = 0;
+        let signature: Signature;
+        const isCanonical = (sigData: Uint8Array) =>
+            !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
+            && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
+        const constructSignature = (options: EC.SignOptions) => {
+            const ellipticPrivateKey = this.toElliptic();
+            const ellipticSignature = ellipticPrivateKey.sign(digest, options);
+            return Signature.fromElliptic(ellipticSignature, this.getType(), this.ec);
+        };
+
+        if (this.key.type === KeyType.k1) {
+            do {
+                signature = constructSignature({canonical: true, pers: [++tries]});
+            } while (!isCanonical(signature.toBinary()));
+        } else {
+            signature = constructSignature({});
+        }
+        return signature;
     }
 }

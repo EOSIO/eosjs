@@ -11,10 +11,7 @@ import {
     PublicKey,
     Signature,
 } from './eosjs-key-conversions';
-import {
-    convertLegacyPublicKey,
-    KeyType,
-} from './eosjs-numeric';
+import { convertLegacyPublicKey } from './eosjs-numeric';
 
 /** expensive to construct; so we do it once and reuse it */
 const defaultEc = new ec('secp256k1') as any;
@@ -26,11 +23,11 @@ function digestFromSerializedData(
     serializedContextFreeData?: Uint8Array,
     e = defaultEc) {
     const signBuf = Buffer.concat([
-        new Buffer(chainId, 'hex'),
-        new Buffer(serializedTransaction),
-        new Buffer(
+        Buffer.from(chainId, 'hex'),
+        Buffer.from(serializedTransaction),
+        Buffer.from(
             serializedContextFreeData ?
-                new Uint8Array(e.hash(serializedContextFreeData).update(serializedContextFreeData).digest()) :
+                new Uint8Array(e.hash().update(serializedContextFreeData).digest()) :
                 new Uint8Array(32)
         ),
     ]);
@@ -48,9 +45,10 @@ class JsSignatureProvider implements SignatureProvider {
     /** @param privateKeys private keys to sign with */
     constructor(privateKeys: string[]) {
         for (const k of privateKeys) {
-            const priv = PrivateKey.fromString(k).toElliptic(defaultEc);
-            const pubStr = PublicKey.fromElliptic(priv, KeyType.k1).toString();
-            this.keys.set(pubStr, priv);
+            const priv = PrivateKey.fromString(k);
+            const privElliptic = priv.toElliptic();
+            const pubStr = priv.getPublicKey().toString();
+            this.keys.set(pubStr, privElliptic);
             this.availableKeys.push(pubStr);
         }
     }
@@ -87,19 +85,11 @@ class JsSignatureProvider implements SignatureProvider {
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {
-            const privKey = this.keys.get(convertLegacyPublicKey(key));
-            let tries = 0;
-            let sig: Signature;
-            const isCanonical = (sigData: Uint8Array) =>
-                !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
-                && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
-
-            do {
-                const ellipticSig = privKey.sign(digest, { canonical: true, pers: [++tries] });
-                sig = Signature.fromElliptic(ellipticSig);
-            } while (!isCanonical(sig.toBinary()));
-
-            signatures.push(sig.toString());
+            const publicKey = PublicKey.fromString(key);
+            const ellipticPrivateKey = this.keys.get(convertLegacyPublicKey(key));
+            const privateKey = PrivateKey.fromElliptic(ellipticPrivateKey, publicKey.getType());
+            const signature = privateKey.sign(digest);
+            signatures.push(signature.toString());
         }
 
         return { signatures, serializedTransaction, serializedContextFreeData };

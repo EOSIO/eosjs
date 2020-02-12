@@ -27,8 +27,8 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js']
     },
     output: {
-        filename: x => x.chunk.name.replace('_', '-') + '-debug.js',
+        filename: x => x.chunk.name.replace('_', '-') + '.js',
         library: '[name]',
-        path: path.resolve(__dirname, 'dist-web', 'debug'),
+        path: path.resolve(__dirname, 'dist-web'),
     }
 };

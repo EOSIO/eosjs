@@ -70,3 +70,13 @@ export interface SignatureProvider {
     /** Sign a transaction */
     sign: (args: SignatureProviderArgs) => Promise<PushTransactionArgs>;
 }
+
+/** Optional transact configuration object */
+export interface TransactConfig {
+    broadcast?: boolean;
+    sign?: boolean;
+    compression?: boolean;
+    blocksBehind?: number;
+    useLastIrreversible?: boolean;
+    expireSeconds?: number;
+}
