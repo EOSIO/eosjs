@@ -11,7 +11,7 @@ import {
     PublicKey,
     Signature,
 } from './eosjs-key-conversions';
-import { convertLegacyPublicKey } from './eosjs-numeric';
+import { convertLegacyPublicKey, KeyType } from './eosjs-numeric';
 
 /** expensive to construct; so we do it once and reuse it */
 const defaultEc = new ec('secp256k1') as any;
@@ -56,6 +56,25 @@ class JsSignatureProvider implements SignatureProvider {
     /** Public keys associated with the private keys that the `SignatureProvider` holds */
     public async getAvailableKeys() {
         return this.availableKeys;
+    }
+
+    public async signHash(dataSha256: string, signingPublicKey: string) {
+        const signatures = [] as string[];
+        const privKey = this.keys.get(convertLegacyPublicKey(signingPublicKey));
+        let tries = 0;
+        let sig: Signature;
+        const isCanonical = (sigData: Uint8Array) =>
+            !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
+            && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
+
+        do {
+            const ellipticSig = privKey.sign(dataSha256, { canonical: true, pers: [++tries] });
+            sig = Signature.fromElliptic(ellipticSig, KeyType.k1);
+        } while (!isCanonical(sig.toBinary()));
+
+        signatures.push(sig.toString());
+
+        return { signatures };
     }
 
     /** Sign a transaction */
