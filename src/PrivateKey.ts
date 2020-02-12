@@ -18,7 +18,7 @@ export class PrivateKey {
         }
         return new PrivateKey({
             type: keyType,
-            data: privKey.getPrivate().toBuffer(),
+            data: privKey.getPrivate().toArrayLike(Buffer, 'be', 32),
         }, ec);
     }
 

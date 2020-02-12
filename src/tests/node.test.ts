@@ -5,8 +5,12 @@ describe('Node JS environment', () => {
     let transactionSignatures: any;
     let failedAsPlanned: boolean;
 
+    beforeEach(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+    });
+
     it('transacts with configuration object', async () => {
-        transactionResponse = await tests.transactWithConfig();
+        transactionResponse = await tests.transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
@@ -16,13 +20,15 @@ describe('Node JS environment', () => {
     }, 10000);
 
     it('transacts without broadcasting, returning signatures and packed transaction', async () => {
-        transactionSignatures = await tests.transactWithoutBroadcast();
+        transactionSignatures =
+            await tests.transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
         expect(Object.keys(transactionSignatures)).toContain('signatures');
         expect(Object.keys(transactionSignatures)).toContain('serializedTransaction');
     });
 
     it('broadcasts packed transaction, given valid signatures', async () => {
-        transactionSignatures = await tests.transactWithoutBroadcast();
+        transactionSignatures =
+            await tests.transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
         transactionResponse = await tests.broadcastResult(transactionSignatures);
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });

@@ -22,8 +22,8 @@ export class PublicKey {
 
     /** Instantiate public key from an `elliptic`-format public key */
     public static fromElliptic(publicKey: EC.KeyPair, keyType: KeyType, ec?: EC): PublicKey {
-        const x = publicKey.getPublic().getX().toArray();
-        const y = publicKey.getPublic().getY().toArray();
+        const x = publicKey.getPublic().getX().toArray('be', 32);
+        const y = publicKey.getPublic().getY().toArray('be', 32);
         if (!ec) {
             ec = constructElliptic(keyType);
         }

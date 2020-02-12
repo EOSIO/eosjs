@@ -21,9 +21,9 @@
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
         
-            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1000))
+            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1500))
         
-            const transactWithConfig = async () => await api.transact({
+            const transactWithConfig = async (config) => await api.transact({
                 actions: [{
                     account: 'eosio.token',
                     name: 'transfer',
@@ -38,17 +38,14 @@
                         memo: '',
                     },
                 }]
-            }, {
-                blocksBehind: 3,
-                expireSeconds: 30,
-            });
+            }, config);
         
             const testTransactWithConfig = async (e) => {
                 resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionResponse = await transactWithConfig();
+                    transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -67,7 +64,7 @@
             }
         
             const transactWithoutConfig = async () => {
-                const transactionResponse = await transactWithConfig();
+                const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
                 const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
                 const currentDate = new Date();
                 const timePlusTen = currentDate.getTime() + 10000;
@@ -119,34 +116,13 @@
             };
                 
         
-            const transactWithoutBroadcast = async () => await api.transact({
-            actions: [{
-                    account: 'eosio.token',
-                    name: 'transfer',
-                    authorization: [{
-                        actor: 'bob',
-                        permission: 'active',
-                    }],
-                    data: {
-                        from: 'bob',
-                        to: 'alice',
-                        quantity: '0.0001 SYS',
-                        memo: '',
-                    },
-                }]
-            }, {
-                broadcast: false,
-                blocksBehind: 3,
-                expireSeconds: 30,
-            });
-                
-        
             const testTransactWithoutBroadcast = async (e) => {
                 resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionSignatures = await transactWithoutBroadcast();
+                    transactionSignatures =
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -171,7 +147,8 @@
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionSignatures = await transactWithoutBroadcast();
+                    transactionSignatures =
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
                     transactionResponse = await broadcastResult(transactionSignatures);
                 } catch (error) {
                     resultsLabel.className = 'failed';
