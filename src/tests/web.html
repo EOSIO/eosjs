@@ -21,7 +21,7 @@
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
         
-            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1000))
+            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1500))
         
             const transactWithConfig = async (config) => await api.transact({
                 actions: [{
@@ -193,7 +193,8 @@
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionSignatures = await transactWithoutBroadcast();
+                    transactionSignatures =
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
                     transactionResponse = await broadcastResult(transactionSignatures);
                 } catch (error) {
                     resultsLabel.className = 'failed';

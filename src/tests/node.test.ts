@@ -6,7 +6,7 @@ describe('Node JS environment', () => {
     let failedAsPlanned: boolean;
 
     beforeEach(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
     });
 
     it('transacts with configuration object containing blocksBehind', async () => {
