@@ -1,4 +1,4 @@
-As stated in the [introduction](00_introduction.md), `eosjs` integrates with EOSIO-based blockchains using the [EOSIO Nodeos RPC API](https://developers.eos.io/eosio-nodeos/reference).
+As stated in the [introduction](index.md), `eosjs` integrates with EOSIO-based blockchains using the [EOSIO Nodeos RPC API](https://developers.eos.io/eosio-nodeos/reference).
 
 In general, there are two objects that are used to interact with a blockchain via `eosjs`: the `JsonRpc` object, and the `Api` object.
 
