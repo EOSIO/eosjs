@@ -36,7 +36,12 @@ const { Api, JsonRpc, RpcError } = require('eosjs');
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
-const { TextEncoder, TextDecoder } = require('text-encoding');          // React Native, IE11, and Edge Browsers only
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
+
+const { TextEncoder, TextDecoder } = require('text-encoding-shim');          // React Native, IE11, and Edge Browsers only
+const textEncoder = new TextEncoder('utf-8');
+const textDecoder = new TextDecoder('utf-8');
 ```
 
 ## Basic Usage
@@ -63,7 +68,7 @@ const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 
 Include textDecoder and textEncoder when using in Node, React Native, IE11 or Edge Browsers.
 ```js
-const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+const api = new Api({ rpc, signatureProvider, textDecoder, textEncoder});
 ```
 
 ### Sending a transaction
