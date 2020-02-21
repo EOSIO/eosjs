@@ -370,10 +370,14 @@ export class Api {
         }
 
         let refBlock: GetBlockHeaderStateResult | GetBlockResult;
-        try {
-            refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
-        } catch (error) {
+        if (taposBlockNumber <= info.last_irreversible_block_num) {
             refBlock = await this.rpc.get_block(taposBlockNumber);
+        } else {
+            try {
+                refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
+            } catch (error) {
+                refBlock = await this.rpc.get_block(taposBlockNumber);
+            }
         }
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
