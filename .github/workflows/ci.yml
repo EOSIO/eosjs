@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches-ignore:
+      - develop
+  pull_request:
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.14.1]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn
+      - name: Lint
+        run: |
+          yarn lint
+      - name: Test
+        run: |
+          yarn test
