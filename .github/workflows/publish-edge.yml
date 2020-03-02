@@ -1,0 +1,37 @@
+name: Publish Edge
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  publish-edge:
+    name: Publish Edge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+      - name: Setup Node.js
+        uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
+        with:
+          node-version: '12.14.1'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn
+      - name: Lint
+        run: |
+          yarn lint
+      - name: Test
+        run: |
+          yarn test
+      - name: Publish Edge
+        run: |
+          . ./scripts/publish-utils.sh
+          setup_git
+          COMMIT=${GITHUB_SHA:0:7}
+          npm version prerelease -preid "${GITHUB_RUN_NUMBER}-${COMMIT}" -no-git-tag-version
+          git commit -a -m "Updating version [skip ci]" --allow-empty
+          npm publish --access public --tag edge
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
