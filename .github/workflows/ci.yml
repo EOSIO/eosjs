@@ -40,15 +40,15 @@ jobs:
         run: |
           yarn test
       - name: Test Node
-          run: |
-            yarn test-node
+        run: |
+          yarn test-node
       - name: Build
-          run: |
-            yarn build-web
+        run: |
+          yarn build-web
       - name: Test Web
-          uses: cypress-io/github-action@8aac1d019734a107e4eaaefe2e26beb3149e5540
-          with:
-            spec: cypress/integration/index.spec.js
+        uses: cypress-io/github-action@8aac1d019734a107e4eaaefe2e26beb3149e5540
+        with:
+          spec: cypress/integration/index.spec.js
 
     services:
       nodeos:
