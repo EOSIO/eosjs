@@ -87,7 +87,9 @@ export class Signature {
 
     /** Verify a signature with a message or hashed message digest and public key */
     public verify(data: BNInput, publicKey: PublicKey, shouldHash: boolean = true, encoding: string = 'utf8'): boolean {
-        if (shouldHash) data = this.ec.hash().update(data, encoding).digest();
+        if (shouldHash) {
+            data = this.ec.hash().update(data, encoding).digest();
+        }
         const ellipticSignature = this.toElliptic();
         const ellipticPublicKey = publicKey.toElliptic();
         return this.ec.verify(data, ellipticSignature, ellipticPublicKey, encoding);
@@ -95,7 +97,9 @@ export class Signature {
 
     /** Recover a public key from a message or hashed message digest and signature */
     public recover(data: BNInput, shouldHash: boolean = true, encoding: string = 'utf8'): PublicKey {
-        if (shouldHash) data = this.ec.hash().update(data, encoding).digest();
+        if (shouldHash) {
+            data = this.ec.hash().update(data, encoding).digest();
+        }
         const ellipticSignature = this.toElliptic();
         const recoveredPublicKey = this.ec.recoverPubKey(
             data,

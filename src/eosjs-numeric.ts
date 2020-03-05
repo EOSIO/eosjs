@@ -327,17 +327,10 @@ export function stringToPublicKey(s: string): Key {
     }
 }
 
+/** Convert `key` to legacy string (base-58) form */
 export function publicKeyToLegacyString(key: Key) {
     if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
-        const digest = new Uint8Array(digestSuffixRipemd160(key.data, ''));
-        const whole = new Uint8Array(key.data.length + 4);
-        for (let i = 0; i < key.data.length; ++i) {
-            whole[i] = key.data[i];
-        }
-        for (let i = 0; i < 4; ++i) {
-            whole[i + key.data.length] = digest[i];
-        }
-        return 'EOS' + binaryToBase58(whole);
+        return keyToString(key, '', 'EOS');
     } else if (key.type === KeyType.r1 || key.type === KeyType.wa) {
         throw new Error('Key format not supported in legacy conversion');
     } else {
