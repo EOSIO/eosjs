@@ -1,12 +1,9 @@
-import { ec } from 'elliptic';
+import {ec} from 'elliptic';
 
-import { Signature, PrivateKey, PublicKey } from '../eosjs-key-conversions';
-import {
-    JsSignatureProvider,
-    digestFromSerializedData
-} from '../eosjs-jssig';
-import { KeyType } from '../eosjs-numeric';
-import { SignatureProviderArgs } from '../eosjs-api-interfaces';
+import {generateKeyPair, PrivateKey, PublicKey, sha256, Signature} from '../eosjs-key-conversions';
+import {digestFromSerializedData, JsSignatureProvider} from '../eosjs-jssig';
+import {KeyType} from '../eosjs-numeric';
+import {SignatureProviderArgs} from '../eosjs-api-interfaces';
 
 describe('JsSignatureProvider', () => {
     const privateKeys = [
@@ -45,6 +42,20 @@ describe('JsSignatureProvider', () => {
 
     // These are simplified tests simply to verify a refactor didn't mess with existing code
     describe('secp256k1 elliptic', () => {
+        it('generates a private and public key pair', () => {
+            process.env.EOSJS_KEYGEN_ALLOWED = 'true';
+            const {privateKey, publicKey} = generateKeyPair(KeyType.k1);
+            expect(privateKey).toBeInstanceOf(PrivateKey);
+            expect(privateKey.isValidPrivate()).toBeTruthy();
+            expect(publicKey).toBeInstanceOf(PublicKey);
+            expect(publicKey.isValidPublic()).toBeTruthy();
+        });
+
+        it('throws error with no EOSJS_KEYGEN_ALLOWED environment variable', () => {
+            process.env.EOSJS_KEYGEN_ALLOWED = null;
+            expect(() => generateKeyPair(KeyType.k1)).toThrowError();
+        });
+
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeys[0]);
             const publicKey = privateKey.privateToPublic();
@@ -128,6 +139,13 @@ describe('JsSignatureProvider', () => {
             expect(PublicKey.fromElliptic(ellipticPubKey, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[0]);
         });
 
+        it('verify that toLegacyString() and toString() are consistent', () => {
+            const pubKeyFromK1 = PublicKey.fromString(k1FormatPublicKeys[0]);
+            const pubKeyFromLegacy = PublicKey.fromString(legacyPublicKeys[0]);
+            expect(pubKeyFromK1.toLegacyString()).toEqual(legacyPublicKeys[0]);
+            expect(pubKeyFromLegacy.toString()).toEqual(k1FormatPublicKeys[0]);
+        });
+
         it('ensure private key functions are actual inverses of each other', async () => {
             const priv = privateKeys[0];
             const privEosioKey = PrivateKey.fromString(priv);
@@ -142,12 +160,11 @@ describe('JsSignatureProvider', () => {
         });
 
         it('Ensure elliptic sign, recover, verify flow works', () => {
-            const ellipticEc = new ec('secp256k1');
             const KPrivStr = privateKeys[0];
             const KPriv = PrivateKey.fromString(KPrivStr);
 
             const dataAsString = 'some string';
-            const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
+            const ellipticHashedString = sha256(dataAsString, 'hex');
             const sig = KPriv.sign(ellipticHashedString);
             const KPub = sig.recover(ellipticHashedString);
 
@@ -155,9 +172,41 @@ describe('JsSignatureProvider', () => {
             const valid = sig.verify(ellipticHashedString, KPub);
             expect(valid).toEqual(true);
         });
+
+        it('Ensure elliptic sign, recover, verify flow works with shouldHash', () => {
+            const KPrivStr = privateKeys[0];
+            const KPriv = PrivateKey.fromString(KPrivStr);
+
+            const dataAsString = 'some string';
+            const sig = KPriv.sign(dataAsString, true);
+            const KPub = sig.recover(dataAsString, true);
+
+            expect(KPub.toString()).toEqual(k1FormatPublicKeys[0]);
+            const valid = sig.verify(dataAsString, KPub, true);
+            expect(valid).toEqual(true);
+        });
     });
 
     describe('p256 elliptic', () => {
+        it('generates a private and public key pair', () => {
+            process.env.EOSJS_KEYGEN_ALLOWED = 'true';
+            const {privateKey, publicKey} = generateKeyPair(KeyType.r1);
+            expect(privateKey).toBeInstanceOf(PrivateKey);
+            expect(privateKey.isValidPrivate()).toBeTruthy();
+            expect(publicKey).toBeInstanceOf(PublicKey);
+            expect(publicKey.isValidPublic()).toBeTruthy();
+        });
+
+        it('throws error with no EOSJS_KEYGEN_ALLOWED environment variable', () => {
+            process.env.EOSJS_KEYGEN_ALLOWED = null;
+            expect(() => generateKeyPair(KeyType.r1)).toThrowError();
+        });
+
+        it('throws error when attempting a legacy key from r1 format', () => {
+            const publicKey = PublicKey.fromString(r1FormatPublicKeys[0]);
+            expect(() => publicKey.toLegacyString()).toThrowError('Key format not supported in legacy conversion');
+        });
+
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeysR1[0]);
             const publicKey = privateKey.privateToPublic();
@@ -249,17 +298,29 @@ describe('JsSignatureProvider', () => {
         });
 
         it('Ensure elliptic sign, recover, verify flow works', () => {
-            const ellipticEc = new ec('p256');
             const KPrivStr = privateKeysR1[0];
             const KPriv = PrivateKey.fromString(KPrivStr);
 
             const dataAsString = 'some string';
-            const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
+            const ellipticHashedString = sha256(dataAsString, 'hex');
             const sig = KPriv.sign(ellipticHashedString);
             const KPub = sig.recover(ellipticHashedString);
 
             expect(KPub.toString()).toEqual(r1FormatPublicKeys[0]);
             const valid = sig.verify(ellipticHashedString, KPub);
+            expect(valid).toEqual(true);
+        });
+
+        it('Ensure elliptic sign, recover, verify flow works with shouldHash', () => {
+            const KPrivStr = privateKeysR1[0];
+            const KPriv = PrivateKey.fromString(KPrivStr);
+
+            const dataAsString = 'some string';
+            const sig = KPriv.sign(dataAsString, true);
+            const KPub = sig.recover(dataAsString, true);
+
+            expect(KPub.toString()).toEqual(r1FormatPublicKeys[0]);
+            const valid = sig.verify(dataAsString, KPub, true);
             expect(valid).toEqual(true);
         });
     });

@@ -36,6 +36,6 @@ export const generateKeyPair = (type: KeyType, options?: EC.GenKeyPairOptions):
     return {publicKey, privateKey};
 };
 
-export const sha256 = (data: string|Buffer, resultEncoding: 'hex'|undefined) => {
+export const sha256 = (data: string|Buffer, resultEncoding?: 'hex') => {
     return hash.sha256().update(data).digest(resultEncoding);
 };
