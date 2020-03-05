@@ -47,7 +47,7 @@ class JsSignatureProvider implements SignatureProvider {
         for (const k of privateKeys) {
             const priv = PrivateKey.fromString(k);
             const privElliptic = priv.toElliptic();
-            const pubStr = priv.getPublicKey().toString();
+            const pubStr = priv.privateToPublic().toString();
             this.keys.set(pubStr, privElliptic);
             this.availableKeys.push(pubStr);
         }

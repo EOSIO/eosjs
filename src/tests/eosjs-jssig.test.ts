@@ -47,7 +47,7 @@ describe('JsSignatureProvider', () => {
     describe('secp256k1 elliptic', () => {
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeys[0]);
-            const publicKey = privateKey.getPublicKey();
+            const publicKey = privateKey.privateToPublic();
             expect(publicKey.toString()).toEqual(k1FormatPublicKeys[0]);
         });
 
@@ -138,7 +138,7 @@ describe('JsSignatureProvider', () => {
 
         it('verify that public key validate function correctly assesses public keys', () => {
             const publicKey = PublicKey.fromString(k1FormatPublicKeys[0]);
-            expect(publicKey.validate()).toEqual(true);
+            expect(publicKey.isValidPublic()).toEqual(true);
         });
 
         it('Ensure elliptic sign, recover, verify flow works', () => {
@@ -149,7 +149,7 @@ describe('JsSignatureProvider', () => {
             const dataAsString = 'some string';
             const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
             const sig = KPriv.sign(ellipticHashedString);
-            const KPub = sig.recoverPublicKey(ellipticHashedString);
+            const KPub = sig.recover(ellipticHashedString);
 
             expect(KPub.toString()).toEqual(k1FormatPublicKeys[0]);
             const valid = sig.verify(ellipticHashedString, KPub);
@@ -160,7 +160,7 @@ describe('JsSignatureProvider', () => {
     describe('p256 elliptic', () => {
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeysR1[0]);
-            const publicKey = privateKey.getPublicKey();
+            const publicKey = privateKey.privateToPublic();
             expect(publicKey.toString()).toEqual(r1FormatPublicKeys[0]);
         });
 
@@ -245,7 +245,7 @@ describe('JsSignatureProvider', () => {
 
         it('verify that public key validate function correctly assesses public keys', () => {
             const publicKey = PublicKey.fromString(r1FormatPublicKeys[0]);
-            expect(publicKey.validate()).toEqual(true);
+            expect(publicKey.isValidPublic()).toEqual(true);
         });
 
         it('Ensure elliptic sign, recover, verify flow works', () => {
@@ -256,7 +256,7 @@ describe('JsSignatureProvider', () => {
             const dataAsString = 'some string';
             const ellipticHashedString = ellipticEc.hash().update(dataAsString).digest();
             const sig = KPriv.sign(ellipticHashedString);
-            const KPub = sig.recoverPublicKey(ellipticHashedString);
+            const KPub = sig.recover(ellipticHashedString);
 
             expect(KPub.toString()).toEqual(r1FormatPublicKeys[0]);
             const valid = sig.verify(ellipticHashedString, KPub);
