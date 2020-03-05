@@ -164,7 +164,7 @@ describe('JsSignatureProvider', () => {
             const KPriv = PrivateKey.fromString(KPrivStr);
 
             const dataAsString = 'some string';
-            const ellipticHashedString = sha256(dataAsString, 'hex');
+            const ellipticHashedString = sha256(dataAsString);
             const sig = KPriv.sign(ellipticHashedString);
             const KPub = sig.recover(ellipticHashedString);
 
@@ -302,7 +302,7 @@ describe('JsSignatureProvider', () => {
             const KPriv = PrivateKey.fromString(KPrivStr);
 
             const dataAsString = 'some string';
-            const ellipticHashedString = sha256(dataAsString, 'hex');
+            const ellipticHashedString = sha256(dataAsString);
             const sig = KPriv.sign(ellipticHashedString);
             const KPub = sig.recover(ellipticHashedString);
 

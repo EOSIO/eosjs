@@ -5,8 +5,8 @@ import {KeyType} from './eosjs-numeric';
 export const ecc = {
     initialize: () => console.error('Method deprecated'),
     unsafeRandomKey: () => console.error('Method deprecated'),
-    randomKey: (cpuEntropyBits: number = 0): Promise<string> => {
-        if (cpuEntropyBits) {
+    randomKey: (cpuEntropyBits?: number): Promise<string> => {
+        if (cpuEntropyBits !== undefined) {
             console.warn('Argument `cpuEntropyBits` is deprecated, ' +
                 'use the options argument instead');
         }
@@ -15,18 +15,18 @@ export const ecc = {
         return Promise.resolve(privateKey.toString());
     },
     seedPrivate: () => console.error('Method deprecated'),
-    privateToPublic: (key: string, pubkey_prefix: string = 'EOS'): string => { // tslint:disable-line
-        if (pubkey_prefix) {
+    privateToPublic: (key: string, pubkey_prefix?: string): string => { // tslint:disable-line
+        if (pubkey_prefix !== undefined) {
             console.warn('Argument `pubkey_prefix` is deprecated, ' +
                 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         }
 
         const privateKey = PrivateKey.fromString(key);
         const publicKey = privateKey.privateToPublic();
-        return publicKey.toString();
+        return publicKey.toLegacyString();
     },
-    isValidPublic: (pubkey: string, pubkey_prefix: string = 'EOS'): boolean => { // tslint:disable-line
-        if (pubkey_prefix) {
+    isValidPublic: (pubkey: string, pubkey_prefix?: string): boolean => { // tslint:disable-line
+        if (pubkey_prefix !== undefined) {
             console.warn('Argument `pubkey_prefix` is deprecated, ' +
                 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         }
@@ -58,17 +58,21 @@ export const ecc = {
     recover: (signature: string, data: string, encoding: string = 'utf8'): string => {
         const sig = Signature.fromString(signature);
         const publicKey = sig.recover(data, true, encoding);
-        return publicKey.toString();
+        return publicKey.toLegacyString();
     },
     recoverHash: (signature: string, dataSha256: string|Buffer, encoding: string = 'hex'): string => {
         const sig = Signature.fromString(signature);
         const publicKey = sig.recover(dataSha256, false, encoding);
-        return publicKey.toString();
+        return publicKey.toLegacyString();
     },
-    sha256: (data: string|Buffer, resultEncoding?: 'hex', encoding: string = 'utf8'): string|Buffer => {
-        if (encoding) {
+    sha256: (data: string|Buffer, resultEncoding?: string, encoding?: string): string|Buffer => {
+        if (encoding !== undefined) {
             console.warn('Argument `encoding` is deprecated');
         }
-        return require('eosjs-key-conversions').sha256(data, resultEncoding);
+        if (resultEncoding !== undefined) {
+            console.warn('Argument `resultEncoding` is deprecated');
+        }
+
+        return require('./eosjs-key-conversions').sha256(data);
     }
 };
