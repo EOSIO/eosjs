@@ -1,19 +1,35 @@
-import { PrivateKey, PublicKey, Signature } from './eosjs-jssig';
+import {PrivateKey, PublicKey, Signature} from './eosjs-jssig';
+import {generateKeyPair} from './eosjs-key-conversions';
+import {KeyType} from './eosjs-numeric';
 
 export const ecc = {
     initialize: () => console.error('Method deprecated'),
     unsafeRandomKey: () => console.error('Method deprecated'),
-    randomKey: () => console.error('Method deprecated'),
+    randomKey: (cpuEntropyBits: number = 0): Promise<string> => {
+        if (cpuEntropyBits) {
+            console.warn('Argument `cpuEntropyBits` is deprecated, ' +
+                'use the options argument instead');
+        }
+
+        const { privateKey } = generateKeyPair(KeyType.k1);
+        return Promise.resolve(privateKey.toString());
+    },
     seedPrivate: () => console.error('Method deprecated'),
-    privateToPublic: (key: string, pubkey_prefix: string = 'EOS'): string => {
-        if (pubkey_prefix) console.warn('Argument `pubkey_prefix` is deprecated, keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_');
+    privateToPublic: (key: string, pubkey_prefix: string = 'EOS'): string => { // tslint:disable-line
+        if (pubkey_prefix) {
+            console.warn('Argument `pubkey_prefix` is deprecated, ' +
+                'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
+        }
 
         const privateKey = PrivateKey.fromString(key);
         const publicKey = privateKey.privateToPublic();
         return publicKey.toString();
     },
-    isValidPublic: (pubkey: string, pubkey_prefix: string = 'EOS'): boolean => {
-        if (pubkey_prefix) console.warn('Argument `pubkey_prefix` is deprecated, keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_');
+    isValidPublic: (pubkey: string, pubkey_prefix: string = 'EOS'): boolean => { // tslint:disable-line
+        if (pubkey_prefix) {
+            console.warn('Argument `pubkey_prefix` is deprecated, ' +
+                'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
+        }
 
         const publicKey = PublicKey.fromString(pubkey);
         return publicKey.isValidPublic();
@@ -32,7 +48,9 @@ export const ecc = {
         const signature = privKey.sign(dataSha256, false, encoding);
         return signature.toString();
     },
-    verify: (signature: string, data: string, pubKey: string|PublicKey, encoding: string = 'utf8', hashData: boolean = true): boolean => {
+    verify: (
+        signature: string, data: string, pubKey: string|PublicKey, encoding: string = 'utf8', hashData: boolean = true
+    ): boolean => {
         const publicKey = typeof pubKey === 'string' ? PublicKey.fromString(pubKey) : pubKey;
         const sig = Signature.fromString(signature);
         return sig.verify(data, publicKey, hashData, encoding);
@@ -48,7 +66,9 @@ export const ecc = {
         return publicKey.toString();
     },
     sha256: (data: string|Buffer, resultEncoding?: 'hex', encoding: string = 'utf8'): string|Buffer => {
-        if (encoding) console.warn('Argument `encoding` is deprecated');
+        if (encoding) {
+            console.warn('Argument `encoding` is deprecated');
+        }
         return require('eosjs-key-conversions').sha256(data, resultEncoding);
     }
 };
