@@ -6,7 +6,7 @@ import {
     publicKeyToString,
     stringToPublicKey,
 } from './eosjs-numeric';
-import { constructElliptic, PrivateKey, Signature } from './eosjs-key-conversions';
+import { constructElliptic } from './eosjs-key-conversions';
 
 /** Represents/stores a public key and provides easy conversion for use with `elliptic` lib */
 export class PublicKey {
@@ -58,8 +58,12 @@ export class PublicKey {
 
     /** Validate a public key */
     public isValidPublic(): boolean {
-        const ellipticPublicKey = this.toElliptic();
-        const validationObj = ellipticPublicKey.validate();
-        return validationObj.result;
+        try {
+            const ellipticPublicKey = this.toElliptic();
+            const validationObj = ellipticPublicKey.validate();
+            return validationObj.result;
+        } catch {
+            return false;
+        }
     }
 }
