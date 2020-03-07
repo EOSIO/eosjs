@@ -85,8 +85,12 @@ export class PrivateKey {
 
     /** Validate a private key */
     public isValidPrivate(): boolean {
-        const ellipticPrivateKey = this.toElliptic();
-        const validationObj = ellipticPrivateKey.validate();
-        return validationObj.result;
+        try {
+            const ellipticPrivateKey = this.toElliptic();
+            const validationObj = ellipticPrivateKey.validate();
+            return validationObj.result;
+        } catch {
+            return false;
+        }
     }
 }
