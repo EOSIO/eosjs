@@ -2,6 +2,7 @@ import { BNInput, ec as EC } from 'elliptic';
 import {
     Key,
     KeyType,
+    privateKeyToLegacyString,
     privateKeyToString,
     stringToPrivateKey,
 } from './eosjs-numeric';
@@ -34,6 +35,10 @@ export class PrivateKey {
     /** Export private key as `elliptic`-format private key */
     public toElliptic() {
         return this.ec.keyFromPrivate(this.key.data);
+    }
+
+    public toLegacyString(): string {
+        return privateKeyToLegacyString(this.key);
     }
 
     /** Export private key as EOSIO-format private key */

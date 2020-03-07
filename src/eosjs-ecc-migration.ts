@@ -12,7 +12,7 @@ export const ecc = {
         }
 
         const { privateKey } = generateKeyPair(KeyType.k1);
-        return Promise.resolve(privateKey.toString());
+        return Promise.resolve(privateKey.toLegacyString());
     },
     seedPrivate: () => console.error('Method deprecated'),
     privateToPublic: (key: string, pubkey_prefix?: string): string => { // tslint:disable-line
