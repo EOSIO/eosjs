@@ -11,6 +11,11 @@ describe('JsSignatureProvider', () => {
         '5JnHjSFwe4r7xyqAUAaVs51G7HmzE86DWGa3VAA5VvQriGYnSUr',
         '5K4XZH5XR2By7Q5KTcZnPAmUMU5yjUNBdoKzzXyrLfmiEZJqoKE',
     ];
+    const privateKeysK1 = [
+        'PVT_K1_26fMPzM27mXhoSF8y56ro7pN2te7rFT6W6wXiUi5joY79NHfZf',
+        'PVT_K1_y19korZcH8hyStRy8bn2G8tgx51zE8nTWGFz7LG3ZDYkaELTY',
+        'PVT_K1_2FEybdSLZcyrPh3RR7tJ82M8sG4XLW6uzGDmMw76nv54xk8FLu',
+    ];
     const privateKeysR1 = [
         'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT',
         'PVT_R1_wCpPsaY9o8NU9ZsuwaYVQUDkCfj1aWJZGVcmMM6XyYHJVqvqp',
@@ -139,7 +144,14 @@ describe('JsSignatureProvider', () => {
             expect(PublicKey.fromElliptic(ellipticPubKey, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[0]);
         });
 
-        it('verify that toLegacyString() and toString() are consistent', () => {
+        it('verify that privateKey toLegacyString() and toString() are consistent', () => {
+            const privKeyFromK1 = PrivateKey.fromString(privateKeysK1[0]);
+            const privKeyFromLegacy = PrivateKey.fromString(privateKeys[0]);
+            expect(privKeyFromK1.toLegacyString()).toEqual(privateKeys[0]);
+            expect(privKeyFromLegacy.toString()).toEqual(privateKeysK1[0]);
+        });
+
+        it('verify that publicKey toLegacyString() and toString() are consistent', () => {
             const pubKeyFromK1 = PublicKey.fromString(k1FormatPublicKeys[0]);
             const pubKeyFromLegacy = PublicKey.fromString(legacyPublicKeys[0]);
             expect(pubKeyFromK1.toLegacyString()).toEqual(legacyPublicKeys[0]);
@@ -202,7 +214,12 @@ describe('JsSignatureProvider', () => {
             expect(() => generateKeyPair(KeyType.r1)).toThrowError();
         });
 
-        it('throws error when attempting a legacy key from r1 format', () => {
+        it('throws error when attempting a legacy private key from r1 format', () => {
+            const privateKey = PrivateKey.fromString(privateKeysR1[0]);
+            expect(() => privateKey.toLegacyString()).toThrowError('Key format not supported in legacy conversion');
+        });
+
+        it('throws error when attempting a legacy public key from r1 format', () => {
             const publicKey = PublicKey.fromString(r1FormatPublicKeys[0]);
             expect(() => publicKey.toLegacyString()).toThrowError('Key format not supported in legacy conversion');
         });
