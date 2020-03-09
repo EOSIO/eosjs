@@ -34,7 +34,7 @@ describe('ecc Migration', () => {
         expect(console.warn).toHaveBeenCalledWith('Argument `cpuEntropyBits` is deprecated, ' +
             'use the options argument instead');
         expect(typeof privateKey).toEqual('string');
-        expect(PrivateKey.fromString(privateKey).isValidPrivate()).toBeTruthy();
+        expect(PrivateKey.fromString(privateKey).isValid()).toBeTruthy();
     });
 
     it('verifies `seedPrivate` returns console.error message', () => {

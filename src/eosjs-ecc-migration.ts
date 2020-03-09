@@ -22,7 +22,7 @@ export const ecc = {
         }
 
         const privateKey = PrivateKey.fromString(key);
-        const publicKey = privateKey.privateToPublic();
+        const publicKey = privateKey.getPublicKey();
         return publicKey.toLegacyString();
     },
     isValidPublic: (pubkey: string, pubkey_prefix?: string): boolean => { // tslint:disable-line
@@ -32,11 +32,11 @@ export const ecc = {
         }
 
         const publicKey = PublicKey.fromString(pubkey);
-        return publicKey.isValidPublic();
+        return publicKey.isValid();
     },
     isValidPrivate: (wif: string): boolean => {
         const privateKey = PrivateKey.fromString(wif);
-        return privateKey.isValidPrivate();
+        return privateKey.isValid();
     },
     sign: (data: string|Buffer, privateKey: string|PrivateKey, encoding: string = 'utf8'): string => {
         const privKey = typeof privateKey === 'string' ? PrivateKey.fromString(privateKey) : privateKey;
