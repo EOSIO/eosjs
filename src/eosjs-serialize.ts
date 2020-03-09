@@ -651,8 +651,9 @@ function deserializeUnknown(buffer: SerialBuffer): SerialBuffer {
     throw new Error('Don\'t know how to deserialize ' + this.name);
 }
 
-function serializeStruct(this: Type, buffer: SerialBuffer, data: any,
-    state = new SerializerState(), allowExtensions = true) {
+function serializeStruct(
+    this: Type, buffer: SerialBuffer, data: any, state = new SerializerState(), allowExtensions = true
+) {
     if (typeof data !== 'object') {
         throw new Error('expected object containing data: ' + JSON.stringify(data));
     }
@@ -693,8 +694,9 @@ function deserializeStruct(this: Type, buffer: SerialBuffer, state = new Seriali
     return result;
 }
 
-function serializeVariant(this: Type, buffer: SerialBuffer, data: any,
-    state?: SerializerState, allowExtensions?: boolean) {
+function serializeVariant(
+    this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
+) {
     if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== 'string') {
         throw new Error('expected variant: ["type", value]');
     }
@@ -715,8 +717,9 @@ function deserializeVariant(this: Type, buffer: SerialBuffer, state?: Serializer
     return [field.name, field.type.deserialize(buffer, state, allowExtensions)];
 }
 
-function serializeArray(this: Type, buffer: SerialBuffer, data: any[],
-    state?: SerializerState, allowExtensions?: boolean) {
+function serializeArray(
+    this: Type, buffer: SerialBuffer, data: any[], state?: SerializerState, allowExtensions?: boolean
+) {
     buffer.pushVaruint32(data.length);
     for (const item of data) {
         this.arrayOf.serialize(buffer, item, state, false);
@@ -732,8 +735,9 @@ function deserializeArray(this: Type, buffer: SerialBuffer, state?: SerializerSt
     return result;
 }
 
-function serializeOptional(this: Type, buffer: SerialBuffer, data: any,
-    state?: SerializerState, allowExtensions?: boolean) {
+function serializeOptional(
+    this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
+) {
     if (data === null || data === undefined) {
         buffer.push(0);
     } else {
@@ -750,8 +754,9 @@ function deserializeOptional(this: Type, buffer: SerialBuffer, state?: Serialize
     }
 }
 
-function serializeExtension(this: Type, buffer: SerialBuffer, data: any,
-    state?: SerializerState, allowExtensions?: boolean) {
+function serializeExtension(
+    this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
+) {
     this.extensionOf.serialize(buffer, data, state, allowExtensions);
 }
 
@@ -1095,8 +1100,9 @@ export const transactionHeader = (refBlock: BlockTaposInfo, expireSeconds: numbe
 };
 
 /** Convert action data to serialized form (hex) */
-export const serializeActionData = (contract: Contract, account: string, name: string, data: any,
-    textEncoder: TextEncoder, textDecoder: TextDecoder): string => {
+export const serializeActionData = (
+    contract: Contract, account: string, name: string, data: any, textEncoder: TextEncoder, textDecoder: TextDecoder
+): string => {
     const action = contract.actions.get(name);
     if (!action) {
         throw new Error(`Unknown action ${name} in contract ${account}`);
@@ -1107,9 +1113,10 @@ export const serializeActionData = (contract: Contract, account: string, name: s
 };
 
 /** Return action in serialized form */
-export const serializeAction = (contract: Contract, account: string, name: string,
-    authorization: Authorization[], data: any, textEncoder: TextEncoder,
-    textDecoder: TextDecoder): SerializedAction => {
+export const serializeAction = (
+    contract: Contract, account: string, name: string, authorization: Authorization[],
+    data: any, textEncoder: TextEncoder, textDecoder: TextDecoder
+): SerializedAction => {
     return {
         account,
         name,
@@ -1119,9 +1126,10 @@ export const serializeAction = (contract: Contract, account: string, name: strin
 };
 
 /** Deserialize action data. If `data` is a `string`, then it's assumed to be in hex. */
-export const deserializeActionData = (contract: Contract, account: string, name: string,
-    data: string | Uint8Array | number[], textEncoder: TextEncoder,
-    textDecoder: TextDecoder): any => {
+export const deserializeActionData = (
+    contract: Contract, account: string, name: string, data: string | Uint8Array | number[],
+    textEncoder: TextEncoder, textDecoder: TextDecoder
+): any => {
     const action = contract.actions.get(name);
     if (typeof data === 'string') {
         data = hexToUint8Array(data);
@@ -1135,9 +1143,10 @@ export const deserializeActionData = (contract: Contract, account: string, name:
 };
 
 /** Deserialize action. If `data` is a `string`, then it's assumed to be in hex. */
-export const deserializeAction = (contract: Contract, account: string, name: string, authorization: Authorization[],
-    data: string | Uint8Array | number[], textEncoder: TextEncoder,
-    textDecoder: TextDecoder): Action => {
+export const deserializeAction = (
+    contract: Contract, account: string, name: string, authorization: Authorization[],
+    data: string | Uint8Array | number[], textEncoder: TextEncoder, textDecoder: TextDecoder
+): Action => {
     return {
         account,
         name,

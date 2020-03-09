@@ -275,8 +275,10 @@ export class Api {
      */
     public async transact(
         transaction: any,
-        { broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-        TransactConfig = {}): Promise<any> {
+        {
+            broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds
+        }: TransactConfig = {}
+    ): Promise<any> {
         let info: GetInfoResult;
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
