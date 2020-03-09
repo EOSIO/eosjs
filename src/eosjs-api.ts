@@ -59,13 +59,13 @@ export class Api {
 
     /**
      * @param args
-     *    * `rpc`: Issues RPC calls
-     *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
-     *    * `abiProvider`: Supplies ABIs in raw form (binary)
-     *    * `signatureProvider`: Signs transactions
-     *    * `chainId`: Identifies chain
-     *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-     *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
+     * `rpc`: Issues RPC calls
+     * `authorityProvider`: Get public keys needed to meet authorities in a transaction
+     * `abiProvider`: Supplies ABIs in raw form (binary)
+     * `signatureProvider`: Signs transactions
+     * `chainId`: Identifies chain
+     * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
+     * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
      */
     constructor(args: {
         rpc: JsonRpc,
@@ -259,15 +259,17 @@ export class Api {
      * Create and optionally broadcast a transaction.
      *
      * Named Parameters:
-     *    * `broadcast`: broadcast this transaction?
-     *    * `sign`: sign this transaction?
-     *    * `compression`: compress this transaction?
-     *    * If both `blocksBehind` and `expireSeconds` are present,
-     *      then fetch the block which is `blocksBehind` behind head block,
-     *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
-     *    * If both `useLastIrreversible` and `expireSeconds` are present,
-     *      then fetch the last irreversible block, use it as a reference for TAPoS,
-     *      and expire the transaction `expireSeconds` after that block's time.
+     * `broadcast`: broadcast this transaction?
+     * `sign`: sign this transaction?
+     * `compression`: compress this transaction?
+     *
+     * If both `blocksBehind` and `expireSeconds` are present,
+     * hen fetch the block which is `blocksBehind` behind head block,
+     * use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
+     *
+     * If both `useLastIrreversible` and `expireSeconds` are present,
+     * then fetch the last irreversible block, use it as a reference for TAPoS,
+     * and expire the transaction `expireSeconds` after that block's time.
      *
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
