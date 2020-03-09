@@ -264,7 +264,7 @@ export class Api {
      * `compression`: compress this transaction?
      *
      * If both `blocksBehind` and `expireSeconds` are present,
-     * hen fetch the block which is `blocksBehind` behind head block,
+     * then fetch the block which is `blocksBehind` behind head block,
      * use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
      *
      * If both `useLastIrreversible` and `expireSeconds` are present,
