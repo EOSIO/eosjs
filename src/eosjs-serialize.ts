@@ -105,24 +105,24 @@ export interface SerializedAction {
 
 /** Serialize and deserialize data */
 export class SerialBuffer { // tslint:disable-line max-classes-per-file
-  /** Amount of valid data in `array` */
+    /** Amount of valid data in `array` */
     public length: number;
 
-  /** Data in serialized (binary) form */
+    /** Data in serialized (binary) form */
     public array: Uint8Array;
 
-  /** Current position while reading (deserializing) */
+    /** Current position while reading (deserializing) */
     public readPos = 0;
 
     public textEncoder: TextEncoder;
     public textDecoder: TextDecoder;
 
-  /**
-   * @param __namedParameters
-   *    * `array`: `null` if serializing, or binary data to deserialize
-   *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-   *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
-   */
+    /**
+     * @param __namedParameters
+     *    * `array`: `null` if serializing, or binary data to deserialize
+     *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
+     *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
+     */
     constructor({ textEncoder, textDecoder, array } = {} as
         { textEncoder?: TextEncoder, textDecoder?: TextDecoder, array?: Uint8Array }) {
         this.array = array || new Uint8Array(1024);
@@ -651,7 +651,7 @@ function deserializeUnknown(buffer: SerialBuffer): SerialBuffer {
 }
 
 function serializeStruct(this: Type, buffer: SerialBuffer, data: any,
-                         state = new SerializerState(), allowExtensions = true) {
+    state = new SerializerState(), allowExtensions = true) {
     if (typeof data !== 'object') {
         throw new Error('expected object containing data: ' + JSON.stringify(data));
     }
@@ -693,7 +693,7 @@ function deserializeStruct(this: Type, buffer: SerialBuffer, state = new Seriali
 }
 
 function serializeVariant(this: Type, buffer: SerialBuffer, data: any,
-                          state?: SerializerState, allowExtensions?: boolean) {
+    state?: SerializerState, allowExtensions?: boolean) {
     if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== 'string') {
         throw new Error('expected variant: ["type", value]');
     }
@@ -715,7 +715,7 @@ function deserializeVariant(this: Type, buffer: SerialBuffer, state?: Serializer
 }
 
 function serializeArray(this: Type, buffer: SerialBuffer, data: any[],
-                        state?: SerializerState, allowExtensions?: boolean) {
+    state?: SerializerState, allowExtensions?: boolean) {
     buffer.pushVaruint32(data.length);
     for (const item of data) {
         this.arrayOf.serialize(buffer, item, state, false);
@@ -732,7 +732,7 @@ function deserializeArray(this: Type, buffer: SerialBuffer, state?: SerializerSt
 }
 
 function serializeOptional(this: Type, buffer: SerialBuffer, data: any,
-                           state?: SerializerState, allowExtensions?: boolean) {
+    state?: SerializerState, allowExtensions?: boolean) {
     if (data === null || data === undefined) {
         buffer.push(0);
     } else {
@@ -750,7 +750,7 @@ function deserializeOptional(this: Type, buffer: SerialBuffer, state?: Serialize
 }
 
 function serializeExtension(this: Type, buffer: SerialBuffer, data: any,
-                            state?: SerializerState, allowExtensions?: boolean) {
+    state?: SerializerState, allowExtensions?: boolean) {
     this.extensionOf.serialize(buffer, data, state, allowExtensions);
 }
 
@@ -1033,6 +1033,7 @@ export function getType(types: Map<string, Type>, name: string): Type {
 
 /**
  * Get types from abi
+ *
  * @param initialTypes Set of types to build on.
  *     In most cases, it's best to fill this from a fresh call to `getTypesFromAbi()`.
  */
@@ -1094,7 +1095,7 @@ export function transactionHeader(refBlock: BlockTaposInfo, expireSeconds: numbe
 
 /** Convert action data to serialized form (hex) */
 export function serializeActionData(contract: Contract, account: string, name: string, data: any,
-                                    textEncoder: TextEncoder, textDecoder: TextDecoder): string {
+    textEncoder: TextEncoder, textDecoder: TextDecoder): string {
     const action = contract.actions.get(name);
     if (!action) {
         throw new Error(`Unknown action ${name} in contract ${account}`);
@@ -1106,8 +1107,8 @@ export function serializeActionData(contract: Contract, account: string, name: s
 
 /** Return action in serialized form */
 export function serializeAction(contract: Contract, account: string, name: string,
-                                authorization: Authorization[], data: any, textEncoder: TextEncoder,
-                                textDecoder: TextDecoder): SerializedAction {
+    authorization: Authorization[], data: any, textEncoder: TextEncoder,
+    textDecoder: TextDecoder): SerializedAction {
     return {
         account,
         name,
@@ -1118,8 +1119,8 @@ export function serializeAction(contract: Contract, account: string, name: strin
 
 /** Deserialize action data. If `data` is a `string`, then it's assumed to be in hex. */
 export function deserializeActionData(contract: Contract, account: string, name: string,
-                                      data: string | Uint8Array | number[], textEncoder: TextEncoder,
-                                      textDecoder: TextDecoder): any {
+    data: string | Uint8Array | number[], textEncoder: TextEncoder,
+    textDecoder: TextDecoder): any {
     const action = contract.actions.get(name);
     if (typeof data === 'string') {
         data = hexToUint8Array(data);
@@ -1134,8 +1135,8 @@ export function deserializeActionData(contract: Contract, account: string, name:
 
 /** Deserialize action. If `data` is a `string`, then it's assumed to be in hex. */
 export function deserializeAction(contract: Contract, account: string, name: string, authorization: Authorization[],
-                                  data: string | Uint8Array | number[], textEncoder: TextEncoder,
-                                  textDecoder: TextDecoder): Action {
+    data: string | Uint8Array | number[], textEncoder: TextEncoder,
+    textDecoder: TextDecoder): Action {
     return {
         account,
         name,

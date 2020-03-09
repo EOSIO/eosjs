@@ -1,5 +1,5 @@
 // eosjs-ecc stuff
-const ecc = require('eosjs-ecc')
+const ecc = require('eosjs-ecc');
 
 const { ec } = require('elliptic');
 
