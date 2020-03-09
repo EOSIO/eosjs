@@ -52,7 +52,7 @@ export class PrivateKey {
     }
 
     /** Retrieve the public key from a private key */
-    public privateToPublic(): PublicKey {
+    public getPublicKey(): PublicKey {
         const ellipticPrivateKey = this.toElliptic();
         return PublicKey.fromElliptic(ellipticPrivateKey, this.getType(), this.ec);
     }
@@ -84,7 +84,7 @@ export class PrivateKey {
     }
 
     /** Validate a private key */
-    public isValidPrivate(): boolean {
+    public isValid(): boolean {
         try {
             const ellipticPrivateKey = this.toElliptic();
             const validationObj = ellipticPrivateKey.validate();

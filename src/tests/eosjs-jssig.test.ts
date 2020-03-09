@@ -51,9 +51,9 @@ describe('JsSignatureProvider', () => {
             process.env.EOSJS_KEYGEN_ALLOWED = 'true';
             const {privateKey, publicKey} = generateKeyPair(KeyType.k1);
             expect(privateKey).toBeInstanceOf(PrivateKey);
-            expect(privateKey.isValidPrivate()).toBeTruthy();
+            expect(privateKey.isValid()).toBeTruthy();
             expect(publicKey).toBeInstanceOf(PublicKey);
-            expect(publicKey.isValidPublic()).toBeTruthy();
+            expect(publicKey.isValid()).toBeTruthy();
         });
 
         it('throws error with no EOSJS_KEYGEN_ALLOWED environment variable', () => {
@@ -63,7 +63,7 @@ describe('JsSignatureProvider', () => {
 
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeys[0]);
-            const publicKey = privateKey.privateToPublic();
+            const publicKey = privateKey.getPublicKey();
             expect(publicKey.toString()).toEqual(k1FormatPublicKeys[0]);
         });
 
@@ -168,7 +168,7 @@ describe('JsSignatureProvider', () => {
 
         it('verify that public key validate function correctly assesses public keys', () => {
             const publicKey = PublicKey.fromString(k1FormatPublicKeys[0]);
-            expect(publicKey.isValidPublic()).toEqual(true);
+            expect(publicKey.isValid()).toEqual(true);
         });
 
         it('Ensure elliptic sign, recover, verify flow works', () => {
@@ -204,9 +204,9 @@ describe('JsSignatureProvider', () => {
             process.env.EOSJS_KEYGEN_ALLOWED = 'true';
             const {privateKey, publicKey} = generateKeyPair(KeyType.r1);
             expect(privateKey).toBeInstanceOf(PrivateKey);
-            expect(privateKey.isValidPrivate()).toBeTruthy();
+            expect(privateKey.isValid()).toBeTruthy();
             expect(publicKey).toBeInstanceOf(PublicKey);
-            expect(publicKey.isValidPublic()).toBeTruthy();
+            expect(publicKey.isValid()).toBeTruthy();
         });
 
         it('throws error with no EOSJS_KEYGEN_ALLOWED environment variable', () => {
@@ -226,7 +226,7 @@ describe('JsSignatureProvider', () => {
 
         it('Retrieves the public key from a private key', () => {
             const privateKey = PrivateKey.fromString(privateKeysR1[0]);
-            const publicKey = privateKey.privateToPublic();
+            const publicKey = privateKey.getPublicKey();
             expect(publicKey.toString()).toEqual(r1FormatPublicKeys[0]);
         });
 
@@ -311,7 +311,7 @@ describe('JsSignatureProvider', () => {
 
         it('verify that public key validate function correctly assesses public keys', () => {
             const publicKey = PublicKey.fromString(r1FormatPublicKeys[0]);
-            expect(publicKey.isValidPublic()).toEqual(true);
+            expect(publicKey.isValid()).toEqual(true);
         });
 
         it('Ensure elliptic sign, recover, verify flow works', () => {
