@@ -20,8 +20,7 @@ export class WebAuthnSignatureProvider implements SignatureProvider {
 
     /** Sign a transaction */
     public async sign(
-        { chainId, requiredKeys, serializedTransaction, serializedContextFreeData }:
-        SignatureProviderArgs,
+        { chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs,
     ) {
         const signBuf = new ser.SerialBuffer();
         signBuf.pushArray(ser.hexToUint8Array(chainId));

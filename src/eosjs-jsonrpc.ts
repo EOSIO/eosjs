@@ -35,8 +35,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
      * browsers: leave `null` or `undefined`
      * node: provide an implementation
      */
-    constructor(endpoint: string, args:
-    { fetch?: (input?: any, init?: any) => Promise<any> } = {},
+    constructor(
+        endpoint: string,
+        args: {
+            fetch?: (input?: any, init?: any) => Promise<any>
+        } = {}
     ) {
         this.endpoint = endpoint.replace(/\/$/, '');
         if (args.fetch) {
