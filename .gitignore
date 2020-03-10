@@ -1,4 +1,5 @@
 .DS_Store
+.idea
 dist/
 dist-web/
 node_modules/
@@ -8,4 +9,3 @@ docs-build/
 #cypress artifacts
 cypress/screenshots/
 cypress/videos/
-reports/
