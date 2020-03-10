@@ -36,6 +36,9 @@ jobs:
       - name: Lint
         run: |
           yarn lint
+      - name: Audit
+        run: |
+          yarn audit
       - name: Test
         run: |
           yarn test
