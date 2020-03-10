@@ -57,6 +57,9 @@
     "webpack": "4.41.5",
     "webpack-cli": "3.2.3"
   },
+  "resolutions": {
+    "acorn": "^7.1.1"
+  },
   "jest": {
     "automock": false,
     "setupFiles": [
