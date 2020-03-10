@@ -50,7 +50,7 @@ jobs:
           . ./scripts/publish-utils.sh
           setup_git
           COMMIT=${GITHUB_SHA:0:7}
-          npm version prerelease -preid "${GITHUB_RUN_NUMBER}-${COMMIT}" -no-git-tag-version
+          sed -i "s/  \"version\": \"\([0-9]\+\).\([0-9]\+\).\([0-9]\+\)/&-$GITHUB_RUN_NUMBER-$COMMIT/" package.json
           git commit -a -m "Updating version [skip ci]" --allow-empty
           npm publish --access public --tag edge
         env:
