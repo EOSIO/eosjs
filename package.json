@@ -56,6 +56,9 @@
     "typedoc": "^0.16.9",
     "typedoc-plugin-external-module-name": "^3.0.0"
   },
+  "resolutions": {
+    "acorn": "^7.1.1"
+  },
   "jest": {
     "automock": false,
     "setupFiles": [
