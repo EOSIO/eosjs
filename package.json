@@ -8,7 +8,6 @@
     "cypress-ui": "./scripts/run-cypress.sh ui",
     "prepare": "npm run build",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src",
-    "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx src --fix",
     "test": "jest src/tests/*eosjs*",
     "test-node": "jest src/tests/*node*",
     "test-all": "yarn test && yarn test-node && yarn cypress",
