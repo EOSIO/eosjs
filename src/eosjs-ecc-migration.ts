@@ -31,12 +31,20 @@ export const ecc = {
                 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         }
 
-        const publicKey = PublicKey.fromString(pubkey);
-        return publicKey.isValid();
+        try {
+            const publicKey = PublicKey.fromString(pubkey);
+            return publicKey.isValid();
+        } catch {
+            return false;
+        }
     },
     isValidPrivate: (wif: string): boolean => {
-        const privateKey = PrivateKey.fromString(wif);
-        return privateKey.isValid();
+        try {
+            const privateKey = PrivateKey.fromString(wif);
+            return privateKey.isValid();
+        } catch {
+            return false;
+        }
     },
     sign: (data: string|Buffer, privateKey: string|PrivateKey, encoding: string = 'utf8'): string => {
         const privKey = typeof privateKey === 'string' ? PrivateKey.fromString(privateKey) : privateKey;
