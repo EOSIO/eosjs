@@ -50,11 +50,15 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit package.json yarn.lock -m "Updating package.json and yarn.lock" || echo "Nothing to commit"
+      - name: Get Branch Name
+        id: branch_name
+        run: |
+          echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
       - name: Push
         uses: ad-m/github-push-action@68af9897f2b021035ca3952bf354bbb4675c1762
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.head_ref }}
+          branch: ${{ steps.branch_name.outputs.short_ref }}
 
     services:
       nodeos:
