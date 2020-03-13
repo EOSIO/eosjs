@@ -1,7 +1,8 @@
-import { BNInput, ec as EC } from 'elliptic';
+import { ec as EC } from 'elliptic';
 import {
     Key,
     KeyType,
+    publicKeyToLegacyString,
     publicKeyToString,
     stringToPublicKey,
 } from './eosjs-numeric';
@@ -36,6 +37,11 @@ export class PublicKey {
     /** Export public key as EOSIO-format public key */
     public toString(): string {
         return publicKeyToString(this.key);
+    }
+
+    /** Export public key as Legacy EOSIO-format public key */
+    public toLegacyString(): string {
+        return publicKeyToLegacyString(this.key);
     }
 
     /** Export public key as `elliptic`-format public key */
