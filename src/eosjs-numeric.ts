@@ -1,6 +1,8 @@
 /**
  * @module Numeric
  */
+import { sha256 } from 'hash.js';
+
 // copyright defined in eosjs/LICENSE.txt
 
 const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
@@ -327,6 +329,17 @@ export function stringToPublicKey(s: string): Key {
     }
 }
 
+/** Convert public `key` to legacy string (base-58) form */
+export function publicKeyToLegacyString(key: Key) {
+    if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
+        return keyToString(key, '', 'EOS');
+    } else if (key.type === KeyType.r1 || key.type === KeyType.wa) {
+        throw new Error('Key format not supported in legacy conversion');
+    } else {
+        throw new Error('unrecognized public key format');
+    }
+}
+
 /** Convert `key` to string (base-58) form */
 export function publicKeyToString(key: Key) {
     if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
@@ -379,6 +392,33 @@ export function stringToPrivateKey(s: string): Key {
             key.data[i] = whole[i + 1];
         }
         return key;
+    }
+}
+
+/** Convert private `key` to legacy string (base-58) form */
+export function privateKeyToLegacyString(key: Key) {
+    if (key.type === KeyType.k1 && key.data.length === privateKeyDataSize) {
+        const whole = [] as number[];
+        whole.push(128);
+        key.data.forEach((byte) => whole.push(byte));
+        const digest = new Uint8Array(
+            sha256().update(
+                sha256().update(whole).digest()
+            ).digest()
+        );
+
+        const result = new Uint8Array(privateKeyDataSize + 5);
+        for (let i = 0; i < whole.length; i++) {
+            result[i] = whole[i];
+        }
+        for (let i = 0; i < 4; i++) {
+            result[i + whole.length] = digest[i];
+        }
+        return binaryToBase58(result);
+    } else if (key.type === KeyType.r1 || key.type === KeyType.wa) {
+        throw new Error('Key format not supported in legacy conversion');
+    } else {
+        throw new Error('unrecognized public key format');
     }
 }
 
