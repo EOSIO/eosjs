@@ -51,7 +51,7 @@ export class PublicKey {
     }
 
     /** Validate a public key */
-    public validate(): boolean {
+    public isValidPublic(): boolean {
         const ellipticPublicKey = this.toElliptic();
         const validationObj = ellipticPublicKey.validate();
         return validationObj.result;
