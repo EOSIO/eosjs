@@ -2,6 +2,7 @@ import { BNInput, ec as EC } from 'elliptic';
 import {
     Key,
     KeyType,
+    privateKeyToLegacyString,
     privateKeyToString,
     stringToPrivateKey,
 } from './eosjs-numeric';
@@ -36,6 +37,10 @@ export class PrivateKey {
         return this.ec.keyFromPrivate(this.key.data);
     }
 
+    public toLegacyString(): string {
+        return privateKeyToLegacyString(this.key);
+    }
+
     /** Export private key as EOSIO-format private key */
     public toString(): string {
         return privateKeyToString(this.key);
@@ -52,8 +57,11 @@ export class PrivateKey {
         return PublicKey.fromElliptic(ellipticPrivateKey, this.getType(), this.ec);
     }
 
-    /** Sign a message digest with private key */
-    public sign(digest: BNInput): Signature {
+    /** Sign a message or hashed message digest with private key */
+    public sign(data: BNInput, shouldHash: boolean = true, encoding: string = 'utf8'): Signature {
+        if (shouldHash) {
+            data = this.ec.hash().update(data, encoding).digest();
+        }
         let tries = 0;
         let signature: Signature;
         const isCanonical = (sigData: Uint8Array) =>
@@ -61,7 +69,7 @@ export class PrivateKey {
             && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
         const constructSignature = (options: EC.SignOptions) => {
             const ellipticPrivateKey = this.toElliptic();
-            const ellipticSignature = ellipticPrivateKey.sign(digest, options);
+            const ellipticSignature = ellipticPrivateKey.sign(data, options);
             return Signature.fromElliptic(ellipticSignature, this.getType(), this.ec);
         };
 
@@ -73,5 +81,16 @@ export class PrivateKey {
             signature = constructSignature({});
         }
         return signature;
+    }
+
+    /** Validate a private key */
+    public isValid(): boolean {
+        try {
+            const ellipticPrivateKey = this.toElliptic();
+            const validationObj = ellipticPrivateKey.validate();
+            return validationObj.result;
+        } catch {
+            return false;
+        }
     }
 }
