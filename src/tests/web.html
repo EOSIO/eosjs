@@ -20,10 +20,8 @@
         
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
-        
-            const waitOneSecond = () => new Promise(resolve => setTimeout(resolve, 1500))
-        
-            const transactWithConfig = async (config) => await api.transact({
+
+            const transactWithConfig = async (config, memo) => await api.transact({
                 actions: [{
                     account: 'eosio.token',
                     name: 'transfer',
@@ -35,7 +33,7 @@
                         from: 'bob',
                         to: 'alice',
                         quantity: '0.0001 SYS',
-                        memo: '',
+                        memo,
                     },
                 }]
             }, config);
@@ -45,7 +43,7 @@
                 resultsLabel.innerText = EXECUTING;
         
                 try {
-                    transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
+                    transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithBlocksBehind');
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -68,7 +66,7 @@
               resultsLabel.innerText = EXECUTING;
 
               try {
-                transactionResponse = await transactWithConfig({ useLastIrreversible: true, expireSeconds: 30 });
+                transactionResponse = await transactWithConfig({ useLastIrreversible: true, expireSeconds: 30 }, 'transactWithUseLastIrreversible');
               } catch (error) {
                 resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
@@ -87,7 +85,7 @@
             }
         
             const transactWithoutConfig = async () => {
-                const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 });
+                const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutConfig');
                 const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
                 const currentDate = new Date();
                 const timePlusTen = currentDate.getTime() + 10000;
@@ -109,7 +107,7 @@
                             from: 'bob',
                             to: 'alice',
                             quantity: '0.0001 SYS',
-                            memo: '',
+                            memo: 'transactWithoutConfig2',
                         },
                     }]
                 });
@@ -144,7 +142,7 @@
 
               try {
                 transactionResponse =
-                  await transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true });
+                  await transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true }, 'transactWithCompression');
               } catch (error) {
                 resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
@@ -168,7 +166,7 @@
         
                 try {
                     transactionSignatures =
-                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutBroadcast');
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -194,7 +192,7 @@
         
                 try {
                     transactionSignatures =
-                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 });
+                      await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutBroadcast2');
                     transactionResponse = await broadcastResult(transactionSignatures);
                 } catch (error) {
                     resultsLabel.className = 'failed';
@@ -273,7 +271,7 @@
                 for (var i = 1; i < buttons.length; i++) {
                     var button = buttons[i];
                     button.click();
-                    await waitOneSecond();
+                    await new Promise(resolve => setTimeout(resolve, 150))
                 }
                 return;
             }
