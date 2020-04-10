@@ -126,7 +126,8 @@ describe('JsSignatureProvider', () => {
             expect(
                 signature.verify(
                     digestFromSerializedData(chainId, serializedTransaction),
-                    PublicKey.fromString(k1FormatPublicKeys[0])
+                    PublicKey.fromString(k1FormatPublicKeys[0]),
+                    false
                 )
             ).toEqual(true);
         });
@@ -289,7 +290,8 @@ describe('JsSignatureProvider', () => {
             expect(
                 signature.verify(
                     digestFromSerializedData(chainId, serializedTransaction),
-                    PublicKey.fromString(r1FormatPublicKeys[0])
+                    PublicKey.fromString(r1FormatPublicKeys[0]),
+                    false
                 )
             ).toEqual(true);
         });
