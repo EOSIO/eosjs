@@ -5,7 +5,7 @@
 
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
-import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs } from "./eosjs-rpc-interfaces" // tslint:disable-line
+import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs, GetBlockHeaderStateResult } from "./eosjs-rpc-interfaces" // tslint:disable-line
 import { RpcError } from './eosjs-rpcerror';
 
 function arrayToHex(data: Uint8Array) {
@@ -19,7 +19,7 @@ function arrayToHex(data: Uint8Array) {
 /** Make RPC calls */
 export class JsonRpc implements AuthorityProvider, AbiProvider {
     public endpoint: string;
-    public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
+    public fetchBuiltin: (input?: any, init?: any) => Promise<any>;
 
     /**
      * @param args
@@ -28,9 +28,9 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
      *    * node: provide an implementation
      */
     constructor(endpoint: string, args:
-        { fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> } = {},
+        { fetch?: (input?: any, init?: any) => Promise<any> } = {},
     ) {
-        this.endpoint = endpoint;
+        this.endpoint = endpoint.replace(/\/$/, '');
         if (args.fetch) {
             this.fetchBuiltin = args.fetch;
         } else {
@@ -73,7 +73,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/chain/get_block_header_state` */
-    public async get_block_header_state(blockNumOrId: number | string): Promise<any> {
+    public async get_block_header_state(blockNumOrId: number | string): Promise<GetBlockHeaderStateResult> {
         return await this.fetch('/v1/chain/get_block_header_state', { block_num_or_id: blockNumOrId });
     }
 
@@ -84,7 +84,10 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
 
     /** Raw call to `/v1/chain/get_code` */
     public async get_code(accountName: string): Promise<GetCodeResult> {
-        return await this.fetch('/v1/chain/get_code', { account_name: accountName });
+        return await this.fetch('/v1/chain/get_code', {
+            account_name: accountName,
+            code_as_wasm: true
+        });
     }
 
     /** Raw call to `/v1/chain/get_currency_balance` */
@@ -125,13 +128,17 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         return { accountName: rawCodeAndAbi.account_name, abi };
     }
 
+    /** Raw call to `/v1/chain/get_scheduled_transactions` */
+    public async get_scheduled_transactions(json = true, lowerBound = '', limit = 50): Promise<any> {
+        return await this.fetch('/v1/chain/get_scheduled_transactions', { json, lower_bound: lowerBound, limit });
+    }
+
     /** Raw call to `/v1/chain/get_table_rows` */
     public async get_table_rows({
         json = true,
         code,
         scope,
         table,
-        table_key = '',
         lower_bound = '',
         upper_bound = '',
         index_position = 1,
@@ -146,7 +153,6 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
                 code,
                 scope,
                 table,
-                table_key,
                 lower_bound,
                 upper_bound,
                 index_position,
@@ -183,12 +189,26 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         })).required_keys);
     }
 
-    /** Push a serialized transaction */
-    public async push_transaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+    /** Push a serialized transaction (replaced by send_transaction, but returned format has changed) */
+    public async push_transaction(
+        { signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,
-            compression: 0,
-            packed_context_free_data: '',
+            compression,
+            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
+            packed_trx: arrayToHex(serializedTransaction),
+        });
+    }
+
+    /** Send a serialized transaction */
+    public async send_transaction(
+        { signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
+        return await this.fetch('/v1/chain/send_transaction', {
+            signatures,
+            compression,
+            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
             packed_trx: arrayToHex(serializedTransaction),
         });
     }

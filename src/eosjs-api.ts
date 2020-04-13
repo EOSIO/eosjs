@@ -3,9 +3,24 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from './eosjs-api-interfaces';
+import { inflate, deflate } from 'pako';
+
+import {
+    AbiProvider,
+    AuthorityProvider,
+    BinaryAbi,
+    CachedAbi,
+    SignatureProvider,
+    TransactConfig
+} from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
-import { Abi, GetInfoResult, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import {
+    Abi,
+    GetInfoResult,
+    PushTransactionArgs,
+    GetBlockHeaderStateResult,
+    GetBlockResult
+} from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
 const abiAbi = require('../src/abi.abi.json');
@@ -87,6 +102,19 @@ export class Api {
         return this.abiTypes.get('abi_def').deserialize(buffer);
     }
 
+    /** Encodes a json abi as Uint8Array. */
+    public jsonToRawAbi(jsonAbi: Abi): Uint8Array {
+        const buffer = new ser.SerialBuffer({
+            textEncoder: this.textEncoder,
+            textDecoder: this.textDecoder,
+        });
+        this.abiTypes.get('abi_def').serialize(buffer, jsonAbi);
+        if (!ser.supportedAbiVersion(buffer.getString())) {
+            throw new Error('Unsupported abi version');
+        }
+        return buffer.asUint8Array();
+    }
+
     /** Get abi in both binary and structured forms. Fetch when needed. */
     public async getCachedAbi(accountName: string, reload = false): Promise<CachedAbi> {
         if (!reload && this.cachedAbis.get(accountName)) {
@@ -115,7 +143,8 @@ export class Api {
 
     /** Get abis needed by a transaction */
     public async getTransactionAbis(transaction: any, reload = false): Promise<BinaryAbi[]> {
-        const accounts: string[] = transaction.actions.map((action: ser.Action): string => action.account);
+        const actions = (transaction.context_free_actions || []).concat(transaction.actions);
+        const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
         const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
             async (account: string): Promise<BinaryAbi> => ({
@@ -165,6 +194,19 @@ export class Api {
         return buffer.asUint8Array();
     }
 
+    /** Serialize context-free data */
+    public serializeContextFreeData(contextFreeData: Uint8Array[]): Uint8Array {
+        if (!contextFreeData || !contextFreeData.length) {
+            return null;
+        }
+        const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+        buffer.pushVaruint32(contextFreeData.length);
+        for (const data of contextFreeData) {
+            buffer.pushBytes(data);
+        }
+        return buffer.asUint8Array();
+    }
+
     /** Convert a transaction from binary. Leaves actions in hex. */
     public deserializeTransaction(transaction: Uint8Array): any {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
@@ -196,8 +238,21 @@ export class Api {
             transaction = ser.hexToUint8Array(transaction);
         }
         const deserializedTransaction = this.deserializeTransaction(transaction);
+        const deserializedCFActions = await this.deserializeActions(deserializedTransaction.context_free_actions);
         const deserializedActions = await this.deserializeActions(deserializedTransaction.actions);
-        return { ...deserializedTransaction, actions: deserializedActions };
+        return {
+            ...deserializedTransaction, context_free_actions: deserializedCFActions, actions: deserializedActions
+        };
+    }
+
+    /** Deflate a serialized object */
+    public deflateSerializedArray(serializedArray: Uint8Array): Uint8Array {
+        return deflate(serializedArray, { level: 9 });
+    }
+
+    /** Inflate a compressed serialized object */
+    public inflateSerializedArray(compressedSerializedArray: Uint8Array): Uint8Array {
+        return inflate(compressedSerializedArray);
     }
 
     /**
@@ -206,26 +261,32 @@ export class Api {
      * Named Parameters:
      *    * `broadcast`: broadcast this transaction?
      *    * `sign`: sign this transaction?
+     *    * `compression`: compress this transaction?
      *    * If both `blocksBehind` and `expireSeconds` are present,
      *      then fetch the block which is `blocksBehind` behind head block,
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
+     *    * If both `useLastIrreversible` and `expireSeconds` are present,
+     *      then fetch the last irreversible block, use it as a reference for TAPoS,
+     *      and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
+    public async transact(
+        transaction: any,
+        { broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
+            TransactConfig = {}): Promise<any> {
         let info: GetInfoResult;
+
+        if (typeof blocksBehind === 'number' && useLastIrreversible) {
+            throw new Error('Use either blocksBehind or useLastIrreversible');
+        }
 
         if (!this.chainId) {
             info = await this.rpc.get_info();
             this.chainId = info.chain_id;
         }
 
-        if (typeof blocksBehind === 'number' && expireSeconds) { // use config fields to generate TAPOS if they exist
-            if (!info) {
-                info = await this.rpc.get_info();
-            }
-            const refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
-            transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
+        if ((typeof blocksBehind === 'number' || useLastIrreversible) && expireSeconds) {
+            transaction = await this.generateTapos(info, transaction, blocksBehind, useLastIrreversible, expireSeconds);
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {
@@ -233,9 +294,16 @@ export class Api {
         }
 
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
-        transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
+        transaction = {
+            ...transaction,
+            context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
+            actions: await this.serializeActions(transaction.actions)
+        };
         const serializedTransaction = this.serializeTransaction(transaction);
-        let pushTransactionArgs: PushTransactionArgs  = { serializedTransaction, signatures: [] };
+        const serializedContextFreeData = this.serializeContextFreeData(transaction.context_free_data);
+        let pushTransactionArgs: PushTransactionArgs = {
+            serializedTransaction, serializedContextFreeData, signatures: []
+        };
 
         if (sign) {
             const availableKeys = await this.signatureProvider.getAvailableKeys();
@@ -244,26 +312,78 @@ export class Api {
                 chainId: this.chainId,
                 requiredKeys,
                 serializedTransaction,
+                serializedContextFreeData,
                 abis,
             });
         }
         if (broadcast) {
+            if (compression) {
+                return this.pushCompressedSignedTransaction(pushTransactionArgs);
+            }
             return this.pushSignedTransaction(pushTransactionArgs);
         }
         return pushTransactionArgs;
     }
 
     /** Broadcast a signed transaction */
-    public async pushSignedTransaction({ signatures, serializedTransaction }: PushTransactionArgs): Promise<any> {
+    public async pushSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
+            serializedContextFreeData
         });
     }
 
-    // eventually break out into TransactionValidator class
-    private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix, ...transaction }: any): boolean {
-        return !!(expiration && ref_block_num && ref_block_prefix);
+    public async pushCompressedSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
+        const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
+        const compressedSerializedContextFreeData =
+            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
+
+        return this.rpc.push_transaction({
+            signatures,
+            compression: 1,
+            serializedTransaction: compressedSerializedTransaction,
+            serializedContextFreeData: compressedSerializedContextFreeData
+        });
     }
 
+    private async generateTapos(
+        info: GetInfoResult | undefined,
+        transaction: any,
+        blocksBehind: number | undefined,
+        useLastIrreversible: boolean | undefined,
+        expireSeconds: number
+    ) {
+        if (!info) {
+            info = await this.rpc.get_info();
+        }
+
+        const taposBlockNumber: number = useLastIrreversible
+          ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
+
+        const refBlock: GetBlockHeaderStateResult | GetBlockResult =
+          taposBlockNumber <= info.last_irreversible_block_num
+          ? await this.rpc.get_block(taposBlockNumber)
+          : await this.tryGetBlockHeaderState(taposBlockNumber);
+
+        return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
+    }
+
+    // eventually break out into TransactionValidator class
+    private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix }: any): boolean {
+        return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
+    }
+
+    private async tryGetBlockHeaderState(taposBlockNumber: number):
+        Promise<GetBlockHeaderStateResult | GetBlockResult> {
+        try {
+            return await this.rpc.get_block_header_state(taposBlockNumber);
+        } catch (error) {
+            return await this.rpc.get_block(taposBlockNumber);
+        }
+    }
 } // Api
