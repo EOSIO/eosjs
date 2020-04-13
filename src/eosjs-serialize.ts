@@ -1143,3 +1143,23 @@ export function deserializeAction(contract: Contract, account: string, name: str
         data: deserializeActionData(contract, account, name, data, textEncoder, textDecoder),
     };
 }
+
+/** Deserialize struct type. If `data` is a `string`, then it's assumed to be in hex. */
+export function deserializeTypeData(
+    contract: Contract,
+    account: string,
+    structName: string,
+    data: string | Uint8Array,
+    textEncoder: TextEncoder,
+    textDecoder: TextDecoder): any {
+    const type = contract.types.get(structName);
+    if (typeof data === 'string') {
+        data = hexToUint8Array(data);
+    }
+    if (!type) {
+        throw new Error(`Unknown type ${structName} in contract ${account}`);
+    }
+    const buffer = new SerialBuffer({textDecoder, textEncoder});
+    buffer.pushArray(data);
+    return type.deserialize(buffer);
+}
