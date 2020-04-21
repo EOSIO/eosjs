@@ -4,6 +4,7 @@
  */
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import { Anyvar } from './eosjs-serialize'
 
 /** Arguments to `getRequiredKeys` */
 export interface AuthorityProviderArgs {
@@ -81,3 +82,12 @@ export interface TransactConfig {
     useLastIrreversible?: boolean;
     expireSeconds?: number;
 }
+
+/**
+ * A Query may be any of the following:
+ *  * string:                                           method
+ *  * [string, Query[]]:                                [method, filter]
+ *  * [string, Anyvar, Query[]]:                        [method, arg, filter]
+ *  * {method: string, arg?: Anyvar, filter?: Query[]}  explicit form
+ */
+export type Query = string | [string, Query[]] | [string, Anyvar, Query[]] | { method: string, arg?: Anyvar, filter?: Query[] };

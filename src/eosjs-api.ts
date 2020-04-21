@@ -11,7 +11,8 @@ import {
     BinaryAbi,
     CachedAbi,
     SignatureProvider,
-    TransactConfig
+    TransactConfig,
+    Query
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
 import {
@@ -22,6 +23,7 @@ import {
     GetBlockResult
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
+import { RpcError } from './eosjs-rpcerror';
 
 const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
@@ -327,6 +329,47 @@ export class Api {
             return this.pushSignedTransaction(pushTransactionArgs);
         }
         return pushTransactionArgs;
+    }
+
+    public async query(account: string, short: boolean, query: Query) {
+        const info = await this.rpc.get_info();
+        const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);     // TODO: replace get_block; needs rodeos changes
+        const queryBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+        ser.serializeQuery(queryBuffer, query);
+    
+        const transaction = {
+            ...ser.transactionHeader(refBlock, 60 * 30),
+            context_free_actions: [] as any[],
+            actions: [{
+                account,
+                name: 'queryit',
+                authorization: [] as any[],
+                data: ser.arrayToHex(queryBuffer.asUint8Array()),
+            }],
+        };
+    
+        const response = await this.rpc.fetchBuiltin(this.rpc.endpoint + '/v1/chain/send_transaction', {
+            body: JSON.stringify({
+                signatures: [],
+                compression: 0,
+                packed_context_free_data: '',
+                packed_trx: ser.arrayToHex(this.serializeTransaction(transaction)),
+            }),
+            method: 'POST',
+        });
+        const json = await response.json();
+        if (json.code)
+            throw new RpcError(json);
+    
+        const returnBuffer = new ser.SerialBuffer({
+            textEncoder: this.textEncoder,
+            textDecoder: this.textDecoder,
+            array: ser.hexToUint8Array(json.processed.action_traces[0][1].return_value)
+        });
+        if (short)
+            return ser.deserializeAnyvarShort(returnBuffer);
+        else
+            return ser.deserializeAnyvar(returnBuffer);
     }
 
     /** Broadcast a signed transaction */
