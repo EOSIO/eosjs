@@ -272,9 +272,10 @@ export class Api {
      */
     public async transact(
         transaction: any,
-        { broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
+        { broadcast = true, sign = true, lookupKeys = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
             TransactConfig = {}): Promise<any> {
         let info: GetInfoResult;
+        let requiredKeys: string[];
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
             throw new Error('Use either blocksBehind or useLastIrreversible');
@@ -305,9 +306,12 @@ export class Api {
             serializedTransaction, serializedContextFreeData, signatures: []
         };
 
-        if (sign) {
+        if (lookupKeys) {
             const availableKeys = await this.signatureProvider.getAvailableKeys();
-            const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+        }
+
+        if (sign) {
             pushTransactionArgs = await this.signatureProvider.sign({
                 chainId: this.chainId,
                 requiredKeys,
