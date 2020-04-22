@@ -76,6 +76,7 @@ export interface SignatureProvider {
 export interface TransactConfig {
     broadcast?: boolean;
     sign?: boolean;
+    requiredKeys?: string[];
     compression?: boolean;
     blocksBehind?: number;
     useLastIrreversible?: boolean;
