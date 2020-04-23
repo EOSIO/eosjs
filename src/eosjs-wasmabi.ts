@@ -5,6 +5,7 @@ export class WasmAbi {
     mod: any;
     textEncoder: any;
     textDecoder: any;
+    memoryThreshold: number;
     print: (s: string) => void;
 
     inputData: Uint8Array;
@@ -14,11 +15,12 @@ export class WasmAbi {
     primitives: any;
     actions: any;
 
-    constructor({ account, mod, textEncoder, textDecoder, print }: { account: string, mod: any, textEncoder: any, textDecoder: any, print?: (s: string) => void }) {
+    constructor({ account, mod, textEncoder, textDecoder, memoryThreshold, print }: { account: string, mod: any, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
         this.mod = mod;
         this.textEncoder = textEncoder;
         this.textDecoder = textDecoder;
         this.account = account;
+        this.memoryThreshold = memoryThreshold
         this.print = print;
         this.inputData = new Uint8Array(0);
 

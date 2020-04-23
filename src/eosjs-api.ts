@@ -10,9 +10,10 @@ import {
     AuthorityProvider,
     BinaryAbi,
     CachedAbi,
+    Query,
     SignatureProvider,
     TransactConfig,
-    Query
+    WasmAbiProvider
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
 import {
@@ -24,11 +25,12 @@ import {
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 import { RpcError } from './eosjs-rpcerror';
+import { WasmAbi } from './eosjs-wasmabi';
 
 const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
 
-export class Api {
+export class Api implements WasmAbiProvider{
     /** Issues RPC calls */
     public rpc: JsonRpc;
 
@@ -58,6 +60,9 @@ export class Api {
 
     /** Fetched abis */
     public cachedAbis = new Map<string, CachedAbi>();
+
+    /** WASM Abis */
+    public wasmAbis = new Map<string, WasmAbi>();
 
     /**
      * @param args
@@ -136,6 +141,23 @@ export class Api {
         }
         this.cachedAbis.set(accountName, cachedAbi);
         return cachedAbi;
+    }
+
+    /** Initialize/Reset and retrieve a wasmAbi object based on account name */
+    public async getWasmAbi(accountName: string): Promise<WasmAbi> {
+        const wasmAbi = this.wasmAbis.get(accountName);
+        if (!wasmAbi) {
+            throw new Error(`Missing wasm abi for ${accountName}, set with setWasmAbis()`)
+        }
+        if (!wasmAbi.inst || wasmAbi.inst.exports.memory.buffer > wasmAbi.memoryThreshold) {
+            await wasmAbi.reset()
+        }
+        return wasmAbi;
+    }
+
+    /** Set an array of wasmAbi objects, existing entries overwritten */
+    public async setWasmAbis(wasmAbis: WasmAbi[]) {
+        wasmAbis.forEach(wasmAbi => this.wasmAbis.set(wasmAbi.account, wasmAbi))
     }
 
     /** Get abi in structured form. Fetch when needed. */

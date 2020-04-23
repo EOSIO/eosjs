@@ -1010,7 +1010,7 @@ export function createInitialTypes(): Map<string, Type> {
             name: 'signature',
             serialize(buffer: SerialBuffer, data: string) { buffer.pushSignature(data); },
             deserialize(buffer: SerialBuffer) { return buffer.getSignature(); },
-        })
+        }),
     }));
 
     result.set('extended_asset', createType({
