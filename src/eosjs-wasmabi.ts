@@ -95,7 +95,7 @@ export class WasmAbi {
             this.actions = {};
             const actions = JSON.parse(this.textDecoder.decode(this.outputData0)) as string[];
             for (let actionName of actions) {
-                this.actions[actionName] = (authorization: ser.Authorization[], ...args: any[]) => {
+                this.actions[actionName] = (authorization: ser.Authorization, ...args: any[]) => {
                     const { bin, shortName } = this.action_to_bin(actionName, ...args);
                     return {
                         account: this.account,
