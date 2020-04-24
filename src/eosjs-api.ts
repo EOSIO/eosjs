@@ -149,7 +149,7 @@ export class Api implements WasmAbiProvider{
         if (!wasmAbi) {
             throw new Error(`Missing wasm abi for ${accountName}, set with setWasmAbis()`)
         }
-        if (!wasmAbi.inst || wasmAbi.inst.exports.memory.buffer > wasmAbi.memoryThreshold) {
+        if (!wasmAbi.inst || wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
             await wasmAbi.reset()
         }
         return wasmAbi;
