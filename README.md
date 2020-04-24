@@ -126,6 +126,44 @@ try {
 ...
 ```
 
+### WasmABI
+
+## Node.js
+
+```js
+const module = new (global as any).WebAssembly.Module(fs.readFileSync('./contract_abi.wasm'))
+
+wasmAbi = new WasmAbi({
+  account: chainSettings.exchangeContractAccount,
+  mod: module,
+  textEncoder: new TextEncoder(),
+  textDecoder: new TextDecoder('utf-8', { fatal: true }),
+  print: (x) => console.info(x),
+})
+
+await wasmAbi.reset()
+```
+
+### Browser
+
+```js
+// Wasm ABI must be hosted at a public url
+// Ex. contract_abi.wasm served in /public folder of app and can be fetched at <app url>/contract_abi.wasm
+const response = await fetch('/contract_abi.wasm')
+const buffer = await response.arrayBuffer()
+const module = await WebAssembly.compile(buffer)
+
+wasmAbi = new WasmAbi({
+  account: chainSettings.exchangeContractAccount,
+  mod: module,
+  textEncoder: new TextEncoder(),
+  textDecoder: new TextDecoder('utf-8', { fatal: true }),
+  print: (x) => console.info(x),
+})
+
+await wasmAbi.reset()
+```
+
 ## Contributing
 
 [Contributing Guide](./CONTRIBUTING.md)
