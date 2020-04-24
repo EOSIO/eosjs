@@ -1,8 +1,9 @@
 import * as ser from './eosjs-serialize';
+import { WasmAction } from './eosjs-wasmabi-interfaces';
 
 export class WasmAbi {
     account: string;
-    mod: any;
+    module: WebAssembly.Module;
     textEncoder: any;
     textDecoder: any;
     memoryThreshold: number;
@@ -13,10 +14,10 @@ export class WasmAbi {
     outputData1: Uint8Array;
     inst: any;
     primitives: any;
-    actions: any;
+    actions: WasmAction = {};
 
-    constructor({ account, mod, textEncoder, textDecoder, memoryThreshold, print }: { account: string, mod: any, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
-        this.mod = mod;
+    constructor({ account, module, textEncoder, textDecoder, memoryThreshold, print }: { account: string, module: WebAssembly.Module, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
+        this.module = module;
         this.textEncoder = textEncoder;
         this.textDecoder = textDecoder;
         this.account = account;
@@ -74,18 +75,28 @@ export class WasmAbi {
     }
 
     /**
+     * Support for global in node.js envs & window for browser based envs
+     */
+    getWindowOrGlobal() {
+        const windowOrGlobal = (typeof self === 'object' && self.self === self && self) ||
+            (typeof global === 'object' && global.global === global && global)
+
+        return windowOrGlobal
+    }
+
+    /**
      * User must call this before first use. If this object is long-lived, then user should call this
      * periodically to garbage collect wasm memory
      **/
     async reset() {
-        this.inst = await (global as any).WebAssembly.instantiate(this.mod, { env: this.primitives });
+        this.inst = await (this.getWindowOrGlobal() as any).WebAssembly.instantiate(this.module, { env: this.primitives });
         this.inst.exports.initialize();
         if (!this.actions) {
             this.inst.exports.get_actions();
             this.actions = {};
             const actions = JSON.parse(this.textDecoder.decode(this.outputData0)) as string[];
             for (let actionName of actions) {
-                this.actions[actionName] = (authorization: ser.Authorization, ...args: any[]) => {
+                this.actions[actionName] = (authorization: ser.Authorization[], ...args: any[]) => {
                     const { bin, shortName } = this.action_to_bin(actionName, ...args);
                     return {
                         account: this.account,
