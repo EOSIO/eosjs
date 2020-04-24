@@ -13,7 +13,7 @@ export class WasmAbi {
     outputData1: Uint8Array;
     inst: any;
     primitives: any;
-    actions: any = {};
+    actions: any;
 
     constructor({ account, module, textEncoder, textDecoder, memoryThreshold, print }: { account: string, module: WebAssembly.Module, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
         this.module = module;
