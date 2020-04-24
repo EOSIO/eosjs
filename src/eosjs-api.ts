@@ -156,7 +156,7 @@ export class Api implements WasmAbiProvider{
     }
 
     /** Set an array of wasmAbi objects, existing entries overwritten */
-    public async setWasmAbis(wasmAbis: WasmAbi[]) {
+    public setWasmAbis(wasmAbis: WasmAbi[]) {
         wasmAbis.forEach(wasmAbi => this.wasmAbis.set(wasmAbi.account, wasmAbi))
     }
 
@@ -299,6 +299,8 @@ export class Api implements WasmAbiProvider{
         { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
             TransactConfig = {}): Promise<any> {
         let info: GetInfoResult;
+        let abis: BinaryAbi[] = [];
+        let wasmAbis: WasmAbi[] = [];
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
             throw new Error('Use either blocksBehind or useLastIrreversible');
@@ -317,7 +319,12 @@ export class Api implements WasmAbiProvider{
             throw new Error('Required configuration or TAPOS fields are not present');
         }
 
-        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
+        wasmAbis = this.hasWasmAbis(transaction);
+
+        if (wasmAbis.length === 0) {
+            abis = await this.getTransactionAbis(transaction);
+        }
+
         transaction = {
             ...transaction,
             context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
@@ -328,13 +335,16 @@ export class Api implements WasmAbiProvider{
         let pushTransactionArgs: PushTransactionArgs = {
             serializedTransaction, serializedContextFreeData, signatures: []
         };
-
-        if (!requiredKeys) {
-            const availableKeys = await this.signatureProvider.getAvailableKeys();
-            requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+        if (compression) {
+            pushTransactionArgs.compression = 1;
         }
 
         if (sign) {
+            if (!requiredKeys) {
+                const availableKeys = await this.signatureProvider.getAvailableKeys();
+                requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            }
+
             pushTransactionArgs = await this.signatureProvider.sign({
                 chainId: this.chainId,
                 requiredKeys,
@@ -344,10 +354,30 @@ export class Api implements WasmAbiProvider{
             });
         }
         if (broadcast) {
-            if (compression) {
-                return this.pushCompressedSignedTransaction(pushTransactionArgs);
+            const result = await this.rpc.send_transaction(pushTransactionArgs);
+            if (wasmAbis.length !== 0 && result.processed && result.processed.action_traces) {
+                for (const at of result.processed.action_traces) {
+                    if (at.act && at.act.account in wasmAbis) {
+                        const abi = wasmAbis[at.act.account];
+                        const name = at.act.name;
+                        if (at.act.hasOwnProperty('data')) {
+                            try {
+                                const j = abi.action_args_bin_to_json(name, ser.hexToUint8Array(at.act.data));
+                                at.act.name = j.long_name;
+                                at.act.data = j.args;
+                            } catch (e) { }
+                        }
+                        if (at.hasOwnProperty('return_value')) {
+                            try {
+                                const j = abi.action_ret_bin_to_json(name, ser.hexToUint8Array(at.return_value));
+                                at.act.name = j.long_name;
+                                at.return_value = j.return_value;
+                            } catch (e) { }
+                        }
+                    }
+                }
             }
-            return this.pushSignedTransaction(pushTransactionArgs);
+            return result;
         }
         return pushTransactionArgs;
     }
@@ -417,6 +447,12 @@ export class Api implements WasmAbiProvider{
             serializedTransaction: compressedSerializedTransaction,
             serializedContextFreeData: compressedSerializedContextFreeData
         });
+    }
+
+    private hasWasmAbis({context_free_actions, actions}: any): WasmAbi[] {
+        // check through actions and context_free_actions for matching WasmAbis and return.
+        // Otherwise return empty array
+        // Error if both types are used in the transaction?  "You combined both new WasmAbi actions and CachedAbi actions"
     }
 
     private async generateTapos(
