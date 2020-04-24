@@ -30,7 +30,7 @@ import { WasmAbi } from './eosjs-wasmabi';
 const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
 
-export class Api implements WasmAbiProvider{
+export class Api {
     /** Issues RPC calls */
     public rpc: JsonRpc;
 
@@ -42,6 +42,9 @@ export class Api implements WasmAbiProvider{
 
     /** Signs transactions */
     public signatureProvider: SignatureProvider;
+
+    /** Manages WASM Abis */
+    public wasmAbiProvider: WasmAbiProvider;
 
     /** Identifies chain */
     public chainId: string;
@@ -70,6 +73,7 @@ export class Api implements WasmAbiProvider{
      *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
      *    * `abiProvider`: Supplies ABIs in raw form (binary)
      *    * `signatureProvider`: Signs transactions
+     *    * `wasmAbiProvider`: Manages WASM Abis
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
      *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
@@ -79,6 +83,7 @@ export class Api implements WasmAbiProvider{
         authorityProvider?: AuthorityProvider,
         abiProvider?: AbiProvider,
         signatureProvider: SignatureProvider,
+        wasmAbiProvider?: WasmAbiProvider,
         chainId?: string,
         textEncoder?: TextEncoder,
         textDecoder?: TextDecoder,
@@ -87,6 +92,7 @@ export class Api implements WasmAbiProvider{
         this.authorityProvider = args.authorityProvider || args.rpc;
         this.abiProvider = args.abiProvider || args.rpc;
         this.signatureProvider = args.signatureProvider;
+        this.wasmAbiProvider = args.wasmAbiProvider;
         this.chainId = args.chainId;
         this.textEncoder = args.textEncoder;
         this.textDecoder = args.textDecoder;
@@ -143,23 +149,6 @@ export class Api implements WasmAbiProvider{
         return cachedAbi;
     }
 
-    /** Initialize/Reset and retrieve a wasmAbi object based on account name */
-    public async getWasmAbi(accountName: string): Promise<WasmAbi> {
-        const wasmAbi = this.wasmAbis.get(accountName);
-        if (!wasmAbi) {
-            throw new Error(`Missing wasm abi for ${accountName}, set with setWasmAbis()`)
-        }
-        if (!wasmAbi.inst || wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
-            await wasmAbi.reset()
-        }
-        return wasmAbi;
-    }
-
-    /** Set an array of wasmAbi objects, existing entries overwritten */
-    public setWasmAbis(wasmAbis: WasmAbi[]) {
-        wasmAbis.forEach(wasmAbi => this.wasmAbis.set(wasmAbi.account, wasmAbi))
-    }
-
     /** Get abi in structured form. Fetch when needed. */
     public async getAbi(accountName: string, reload = false): Promise<Abi> {
         return (await this.getCachedAbi(accountName, reload)).abi;
@@ -170,10 +159,18 @@ export class Api implements WasmAbiProvider{
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
-            async (account: string): Promise<BinaryAbi> => ({
-                accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
-            }));
+        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts]
+            .filter(account => {
+                if (this.wasmAbiProvider.wasmAbis.get(account)) {
+                    return false;
+                }
+                return true;
+            })
+            .map(
+                async (account: string): Promise<BinaryAbi> => ({
+                    accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
+                })
+            );
         return Promise.all(actionPromises);
     }
 
@@ -299,8 +296,6 @@ export class Api implements WasmAbiProvider{
         { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
             TransactConfig = {}): Promise<any> {
         let info: GetInfoResult;
-        let abis: BinaryAbi[] = [];
-        let wasmAbis: WasmAbi[] = [];
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
             throw new Error('Use either blocksBehind or useLastIrreversible');
@@ -319,12 +314,7 @@ export class Api implements WasmAbiProvider{
             throw new Error('Required configuration or TAPOS fields are not present');
         }
 
-        wasmAbis = this.hasWasmAbis(transaction);
-
-        if (wasmAbis.length === 0) {
-            abis = await this.getTransactionAbis(transaction);
-        }
-
+        const abis = await this.getTransactionAbis(transaction);
         transaction = {
             ...transaction,
             context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
@@ -355,10 +345,10 @@ export class Api implements WasmAbiProvider{
         }
         if (broadcast) {
             const result = await this.rpc.send_transaction(pushTransactionArgs);
-            if (wasmAbis.length !== 0 && result.processed && result.processed.action_traces) {
+            if (this.wasmAbiProvider && result.processed && result.processed.action_traces) {
                 for (const at of result.processed.action_traces) {
-                    if (at.act && at.act.account in wasmAbis) {
-                        const abi = wasmAbis[at.act.account];
+                    if (at.act && this.wasmAbiProvider.wasmAbis.get(at.act.account)) {
+                        const abi = this.wasmAbiProvider.wasmAbis.get(at.act.account);
                         const name = at.act.name;
                         if (at.act.hasOwnProperty('data')) {
                             try {
@@ -447,12 +437,6 @@ export class Api implements WasmAbiProvider{
             serializedTransaction: compressedSerializedTransaction,
             serializedContextFreeData: compressedSerializedContextFreeData
         });
-    }
-
-    private hasWasmAbis({context_free_actions, actions}: any): WasmAbi[] {
-        // check through actions and context_free_actions for matching WasmAbis and return.
-        // Otherwise return empty array
-        // Error if both types are used in the transaction?  "You combined both new WasmAbi actions and CachedAbi actions"
     }
 
     private async generateTapos(

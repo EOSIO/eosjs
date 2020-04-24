@@ -1,5 +1,27 @@
 import * as ser from './eosjs-serialize';
 
+export class WasmAbiProvider implements WasmAbiProvider {
+    /** WASM Abis */
+    public wasmAbis = new Map<string, WasmAbi>();
+
+    /** Initialize/Reset and retrieve a wasmAbi object based on account name */
+    public async getWasmAbi(accountName: string): Promise<WasmAbi> {
+        const wasmAbi = this.wasmAbis.get(accountName);
+        if (!wasmAbi) {
+            throw new Error(`Missing wasm abi for ${accountName}, set with setWasmAbis()`)
+        }
+        if (!wasmAbi.inst || wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
+            await wasmAbi.reset()
+        }
+        return wasmAbi;
+    }
+
+    /** Set an array of wasmAbi objects, existing entries overwritten */
+    public setWasmAbis(wasmAbis: WasmAbi[]) {
+        wasmAbis.forEach(wasmAbi => this.wasmAbis.set(wasmAbi.account, wasmAbi))
+    }
+}
+
 export class WasmAbi {
     account: string;
     mod: any;
