@@ -1,5 +1,4 @@
 import * as ser from './eosjs-serialize';
-import { WasmAction } from './eosjs-wasmabi-interfaces';
 
 export class WasmAbi {
     account: string;
@@ -14,7 +13,7 @@ export class WasmAbi {
     outputData1: Uint8Array;
     inst: any;
     primitives: any;
-    actions: WasmAction = {};
+    actions: any = {};
 
     constructor({ account, module, textEncoder, textDecoder, memoryThreshold, print }: { account: string, module: WebAssembly.Module, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
         this.module = module;
