@@ -346,14 +346,14 @@ export class Api {
                         const name = at.act.name;
                         if (at.act.hasOwnProperty('data')) {
                             try {
-                                const j = abi.action_args_bin_to_json(name, ser.hexToUint8Array(at.act.data));
+                                const j = abi.action_to_bin(name, ser.hexToUint8Array(at.act.data)) as any;
                                 at.act.name = j.long_name;
                                 at.act.data = j.args;
                             } catch (e) { }
                         }
                         if (at.hasOwnProperty('return_value')) {
                             try {
-                                const j = abi.action_ret_bin_to_json(name, ser.hexToUint8Array(at.return_value));
+                                const j = abi.action_to_bin(name, ser.hexToUint8Array(at.return_value)) as any;
                                 at.act.name = j.long_name;
                                 at.return_value = j.return_value;
                             } catch (e) { }

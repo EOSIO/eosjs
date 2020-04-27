@@ -24,7 +24,7 @@ export class WasmAbiProvider implements WasmAbiProvider {
 
 export class WasmAbi {
     account: string;
-    mod: any;
+    module: WebAssembly.Module;
     textEncoder: any;
     textDecoder: any;
     memoryThreshold: number;
@@ -37,8 +37,8 @@ export class WasmAbi {
     primitives: any;
     actions: any;
 
-    constructor({ account, mod, textEncoder, textDecoder, memoryThreshold, print }: { account: string, mod: any, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
-        this.mod = mod;
+    constructor({ account, module, textEncoder, textDecoder, memoryThreshold, print }: { account: string, module: WebAssembly.Module, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
+        this.module = module;
         this.textEncoder = textEncoder;
         this.textDecoder = textDecoder;
         this.account = account;
@@ -88,29 +88,11 @@ export class WasmAbi {
         };
     }
 
-    action_args_json_to_bin(action: string, ...args: any[]) {
+    action_to_bin(action: string, ...args: any[]) {
         this.inputData = this.textEncoder.encode(JSON.stringify([action, [...args]]));
-        this.inst.exports.action_args_json_to_bin();
+        this.inst.exports.action_to_bin();
         const buf = new ser.SerialBuffer({ textDecoder: this.textDecoder, textEncoder: this.textEncoder, array: this.outputData1 });
         return { bin: this.outputData0, shortName: buf.getName() };
-    }
-
-    action_args_bin_to_json(shortName: string, bin: Uint8Array) {
-        const buf = new ser.SerialBuffer({ textDecoder: this.textDecoder, textEncoder: this.textEncoder });
-        buf.pushName(shortName);
-        buf.pushArray(bin);
-        this.inputData = buf.asUint8Array();
-        this.inst.exports.action_args_bin_to_json();
-        return JSON.parse(this.textDecoder.decode(this.outputData0));
-    }
-
-    action_ret_bin_to_json(shortName: string, bin: Uint8Array) {
-        const buf = new ser.SerialBuffer({ textDecoder: this.textDecoder, textEncoder: this.textEncoder });
-        buf.pushName(shortName);
-        buf.pushArray(bin);
-        this.inputData = buf.asUint8Array();
-        this.inst.exports.action_ret_bin_to_json();
-        return JSON.parse(this.textDecoder.decode(this.outputData0));
     }
 
     /**
@@ -128,7 +110,7 @@ export class WasmAbi {
      * periodically to garbage collect wasm memory
      **/
     async reset() {
-        this.inst = await (this.getWindowOrGlobal() as any).WebAssembly.instantiate(this.mod, { env: this.primitives });
+        this.inst = await (this.getWindowOrGlobal() as any).WebAssembly.instantiate(this.module, { env: this.primitives });
         this.inst.exports.initialize();
         if (!this.actions) {
             this.inst.exports.get_actions();
@@ -136,7 +118,7 @@ export class WasmAbi {
             const actions = JSON.parse(this.textDecoder.decode(this.outputData0)) as string[];
             for (let actionName of actions) {
                 this.actions[actionName] = (authorization: ser.Authorization, ...args: any[]) => {
-                    const { bin, shortName } = this.action_args_json_to_bin(actionName, ...args);
+                    const { bin, shortName } = this.action_to_bin(actionName, ...args);
                     return {
                         account: this.account,
                         name: shortName,
