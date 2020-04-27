@@ -8,41 +8,50 @@ export class WasmAbiProvider implements WasmAbiProvider {
     public async getWasmAbi(accountName: string): Promise<WasmAbi> {
         const wasmAbi = this.wasmAbis.get(accountName);
         if (!wasmAbi) {
-            throw new Error(`Missing wasm abi for ${accountName}, set with setWasmAbis()`)
+            throw new Error(`Missing wasm abi for ${accountName}, set with setWasmAbis()`);
         }
         if (!wasmAbi.inst || wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
-            await wasmAbi.reset()
+            await wasmAbi.reset();
         }
         return wasmAbi;
     }
 
     /** Set an array of wasmAbi objects, existing entries overwritten */
     public setWasmAbis(wasmAbis: WasmAbi[]) {
-        wasmAbis.forEach(wasmAbi => this.wasmAbis.set(wasmAbi.account, wasmAbi))
+        wasmAbis.forEach((wasmAbi) => this.wasmAbis.set(wasmAbi.account, wasmAbi));
     }
 }
 
-export class WasmAbi {
+interface WasmAbiOptions {
     account: string;
     mod: any;
     textEncoder: any;
     textDecoder: any;
     memoryThreshold: number;
-    print: (s: string) => void;
+    print?: (s: string) => void;
+}
 
-    inputData: Uint8Array;
-    outputData0: Uint8Array;
-    outputData1: Uint8Array;
-    inst: any;
-    primitives: any;
-    actions: any;
+export class WasmAbi { // tslint:disable-line max-classes-per-file
+    public account: string;
+    public mod: any;
+    public textEncoder: any;
+    public textDecoder: any;
+    public memoryThreshold: number;
+    public print: (s: string) => void;
 
-    constructor({ account, mod, textEncoder, textDecoder, memoryThreshold, print }: { account: string, mod: any, textEncoder: any, textDecoder: any, memoryThreshold: number, print?: (s: string) => void }) {
+    public inputData: Uint8Array;
+    public outputData0: Uint8Array;
+    public outputData1: Uint8Array;
+    public inst: any;
+    public primitives: any;
+    public actions: any;
+
+    constructor({ account, mod, textEncoder, textDecoder, memoryThreshold, print }: WasmAbiOptions) {
         this.mod = mod;
         this.textEncoder = textEncoder;
         this.textDecoder = textDecoder;
         this.account = account;
-        this.memoryThreshold = memoryThreshold
+        this.memoryThreshold = memoryThreshold;
         this.print = print;
         this.inputData = new Uint8Array(0);
 
@@ -55,30 +64,36 @@ export class WasmAbi {
                 if (!test) {
                     let e;
                     try {
-                        e = new Error('assert failed with message: ' + textDecoder.decode(new Uint8Array(self.inst.exports.memory.buffer, begin, len)));
-                    }
-                    catch (x) {
+                        e = new Error(
+                            'assert failed with message: ' +
+                            textDecoder.decode(new Uint8Array(self.inst.exports.memory.buffer, begin, len))
+                        );
+                    } catch (x) {
                         e = new Error('assert failed');
                     }
                     throw e;
                 }
             },
-            eosio_assert_code(test: number, error_code: number) {
-                if (!test)
+            eosio_assert_code(test: number, error_code: number) { // tslint:disable-line variable-name
+                if (!test) {
                     throw new Error('assert failed with code: ' + error_code);
+                }
             },
             prints_l(begin: number, len: number) {
-                if (len && self.print)
+                if (len && self.print) {
                     self.print(textDecoder.decode(new Uint8Array(self.inst.exports.memory.buffer, begin, len)));
+                }
             },
             get_input_data(ptr: number, size: number) {
-                const input_data = self.inputData;
-                if (!size)
+                const input_data = self.inputData; // tslint:disable-line variable-name
+                if (!size) {
                     return input_data.length;
-                const copy_size = Math.min(input_data.length, size);
+                }
+                const copy_size = Math.min(input_data.length, size); // tslint:disable-line variable-name
                 const dest = new Uint8Array(self.inst.exports.memory.buffer, ptr, copy_size);
-                for (let i = 0; i < copy_size; ++i)
+                for (let i = 0; i < copy_size; ++i) {
                     dest[i] = input_data[i];
+                }
                 return copy_size;
             },
             set_output_data(ptr: number, size: number) {
@@ -88,14 +103,16 @@ export class WasmAbi {
         };
     }
 
-    action_args_json_to_bin(action: string, ...args: any[]) {
+    public action_args_json_to_bin(action: string, ...args: any[]) {
         this.inputData = this.textEncoder.encode(JSON.stringify([action, [...args]]));
         this.inst.exports.action_args_json_to_bin();
-        const buf = new ser.SerialBuffer({ textDecoder: this.textDecoder, textEncoder: this.textEncoder, array: this.outputData1 });
+        const buf = new ser.SerialBuffer(
+            { textDecoder: this.textDecoder, textEncoder: this.textEncoder, array: this.outputData1 }
+        );
         return { bin: this.outputData0, shortName: buf.getName() };
     }
 
-    action_args_bin_to_json(shortName: string, bin: Uint8Array) {
+    public action_args_bin_to_json(shortName: string, bin: Uint8Array) {
         const buf = new ser.SerialBuffer({ textDecoder: this.textDecoder, textEncoder: this.textEncoder });
         buf.pushName(shortName);
         buf.pushArray(bin);
@@ -104,7 +121,7 @@ export class WasmAbi {
         return JSON.parse(this.textDecoder.decode(this.outputData0));
     }
 
-    action_ret_bin_to_json(shortName: string, bin: Uint8Array) {
+    public action_ret_bin_to_json(shortName: string, bin: Uint8Array) {
         const buf = new ser.SerialBuffer({ textDecoder: this.textDecoder, textEncoder: this.textEncoder });
         buf.pushName(shortName);
         buf.pushArray(bin);
@@ -116,15 +133,15 @@ export class WasmAbi {
     /**
      * User must call this before first use. If this object is long-lived, then user should call this
      * periodically to garbage collect wasm memory
-     **/
-    async reset() {
+     */
+    public async reset() {
         this.inst = await (global as any).WebAssembly.instantiate(this.mod, { env: this.primitives });
         this.inst.exports.initialize();
         if (!this.actions) {
             this.inst.exports.get_actions();
             this.actions = {};
             const actions = JSON.parse(this.textDecoder.decode(this.outputData0)) as string[];
-            for (let actionName of actions) {
+            for (const actionName of actions) {
                 this.actions[actionName] = (authorization: ser.Authorization, ...args: any[]) => {
                     const { bin, shortName } = this.action_args_json_to_bin(actionName, ...args);
                     return {

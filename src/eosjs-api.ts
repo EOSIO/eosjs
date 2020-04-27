@@ -11,6 +11,7 @@ import {
     BinaryAbi,
     CachedAbi,
     Query,
+    QueryConfig,
     SignatureProvider,
     TransactConfig,
     WasmAbiProvider
@@ -157,7 +158,7 @@ export class Api {
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
         const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts]
-            .filter(account => {
+            .filter((account) => {
                 if (this.wasmAbiProvider.wasmAbis.get(account)) {
                     return false;
                 }
@@ -352,14 +353,14 @@ export class Api {
                                 const j = abi.action_args_bin_to_json(name, ser.hexToUint8Array(at.act.data));
                                 at.act.name = j.long_name;
                                 at.act.data = j.args;
-                            } catch (e) { }
+                            } catch (e) { } // tslint:disable-line no-empty
                         }
                         if (at.hasOwnProperty('return_value')) {
                             try {
                                 const j = abi.action_ret_bin_to_json(name, ser.hexToUint8Array(at.return_value));
                                 at.act.name = j.long_name;
                                 at.return_value = j.return_value;
-                            } catch (e) { }
+                            } catch (e) { } // tslint:disable-line no-empty
                         }
                     }
                 }
@@ -369,13 +370,16 @@ export class Api {
         return pushTransactionArgs;
     }
 
-    public async query(account: string, short: boolean, query: Query,
-        { sign, requiredKeys, authorization = [] }: { sign?: boolean; requiredKeys?: string[]; authorization?: any[];}): Promise<any> {
+    public async query(
+            account: string, short: boolean, query: Query,
+            { sign, requiredKeys, authorization = [] }: QueryConfig
+        ): Promise<any> {
         const info = await this.rpc.get_info();
-        const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);     // TODO: replace get_block; needs rodeos changes
+        // TODO: replace get_block; needs rodeos changes
+        const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);
         const queryBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         ser.serializeQuery(queryBuffer, query);
-    
+
         const transaction = {
             ...ser.transactionHeader(refBlock, 60 * 30),
             context_free_actions: [] as any[],
@@ -406,7 +410,7 @@ export class Api {
 
             signatures = signResponse.signatures;
         }
-    
+
         const response = await this.rpc.fetchBuiltin(this.rpc.endpoint + '/v1/chain/send_transaction', {
             body: JSON.stringify({
                 signatures,
@@ -417,18 +421,20 @@ export class Api {
             method: 'POST',
         });
         const json = await response.json();
-        if (json.code)
+        if (json.code) {
             throw new RpcError(json);
-    
+        }
+
         const returnBuffer = new ser.SerialBuffer({
             textEncoder: this.textEncoder,
             textDecoder: this.textDecoder,
             array: ser.hexToUint8Array(json.processed.action_traces[0][1].return_value)
         });
-        if (short)
+        if (short) {
             return ser.deserializeAnyvarShort(returnBuffer);
-        else
+        } else {
             return ser.deserializeAnyvar(returnBuffer);
+        }
     }
 
     /** Broadcast a signed transaction */
