@@ -64,9 +64,6 @@ export class Api {
     /** Fetched abis */
     public cachedAbis = new Map<string, CachedAbi>();
 
-    /** WASM Abis */
-    public wasmAbis = new Map<string, WasmAbi>();
-
     /**
      * @param args
      *    * `rpc`: Issues RPC calls
@@ -314,7 +311,7 @@ export class Api {
             throw new Error('Required configuration or TAPOS fields are not present');
         }
 
-        const abis = await this.getTransactionAbis(transaction);
+        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = {
             ...transaction,
             context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
@@ -372,7 +369,8 @@ export class Api {
         return pushTransactionArgs;
     }
 
-    public async query(account: string, short: boolean, query: Query) {
+    public async query(account: string, short: boolean, query: Query,
+        { sign, requiredKeys, authorization = [] }: { sign?: boolean; requiredKeys?: string[]; authorization?: any[];}): Promise<any> {
         const info = await this.rpc.get_info();
         const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);     // TODO: replace get_block; needs rodeos changes
         const queryBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
@@ -384,17 +382,37 @@ export class Api {
             actions: [{
                 account,
                 name: 'queryit',
-                authorization: [] as any[],
+                authorization,
                 data: ser.arrayToHex(queryBuffer.asUint8Array()),
             }],
         };
+
+        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
+        const serializedTransaction = this.serializeTransaction(transaction);
+        let signatures: string[] = [];
+        if (sign) {
+            if (!requiredKeys) {
+                const availableKeys = await this.signatureProvider.getAvailableKeys();
+                requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            }
+
+            const signResponse = await this.signatureProvider.sign({
+                chainId: this.chainId,
+                requiredKeys,
+                serializedTransaction,
+                serializedContextFreeData: null,
+                abis,
+            });
+
+            signatures = signResponse.signatures;
+        }
     
         const response = await this.rpc.fetchBuiltin(this.rpc.endpoint + '/v1/chain/send_transaction', {
             body: JSON.stringify({
-                signatures: [],
+                signatures,
                 compression: 0,
                 packed_context_free_data: '',
-                packed_trx: ser.arrayToHex(this.serializeTransaction(transaction)),
+                packed_trx: ser.arrayToHex(serializedTransaction),
             }),
             method: 'POST',
         });
