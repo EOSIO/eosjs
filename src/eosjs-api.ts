@@ -30,7 +30,7 @@ import { WasmAbi } from './eosjs-wasmabi';
 const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
 
-export class Api implements WasmAbiProvider{
+export class Api {
     /** Issues RPC calls */
     public rpc: JsonRpc;
 
@@ -42,6 +42,9 @@ export class Api implements WasmAbiProvider{
 
     /** Signs transactions */
     public signatureProvider: SignatureProvider;
+
+    /** Manages WASM Abis */
+    public wasmAbiProvider: WasmAbiProvider;
 
     /** Identifies chain */
     public chainId: string;
@@ -61,15 +64,13 @@ export class Api implements WasmAbiProvider{
     /** Fetched abis */
     public cachedAbis = new Map<string, CachedAbi>();
 
-    /** WASM Abis */
-    public wasmAbis = new Map<string, WasmAbi>();
-
     /**
      * @param args
      *    * `rpc`: Issues RPC calls
      *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
      *    * `abiProvider`: Supplies ABIs in raw form (binary)
      *    * `signatureProvider`: Signs transactions
+     *    * `wasmAbiProvider`: Manages WASM Abis
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
      *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
@@ -79,6 +80,7 @@ export class Api implements WasmAbiProvider{
         authorityProvider?: AuthorityProvider,
         abiProvider?: AbiProvider,
         signatureProvider: SignatureProvider,
+        wasmAbiProvider?: WasmAbiProvider,
         chainId?: string,
         textEncoder?: TextEncoder,
         textDecoder?: TextDecoder,
@@ -87,6 +89,7 @@ export class Api implements WasmAbiProvider{
         this.authorityProvider = args.authorityProvider || args.rpc;
         this.abiProvider = args.abiProvider || args.rpc;
         this.signatureProvider = args.signatureProvider;
+        this.wasmAbiProvider = args.wasmAbiProvider;
         this.chainId = args.chainId;
         this.textEncoder = args.textEncoder;
         this.textDecoder = args.textDecoder;
@@ -143,23 +146,6 @@ export class Api implements WasmAbiProvider{
         return cachedAbi;
     }
 
-    /** Initialize/Reset and retrieve a wasmAbi object based on account name */
-    public async getWasmAbi(accountName: string): Promise<WasmAbi> {
-        const wasmAbi = this.wasmAbis.get(accountName);
-        if (!wasmAbi) {
-            throw new Error(`Missing wasm abi for ${accountName}, set with setWasmAbis()`)
-        }
-        if (!wasmAbi.inst || wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
-            await wasmAbi.reset()
-        }
-        return wasmAbi;
-    }
-
-    /** Set an array of wasmAbi objects, existing entries overwritten */
-    public async setWasmAbis(wasmAbis: WasmAbi[]) {
-        wasmAbis.forEach(wasmAbi => this.wasmAbis.set(wasmAbi.account, wasmAbi))
-    }
-
     /** Get abi in structured form. Fetch when needed. */
     public async getAbi(accountName: string, reload = false): Promise<Abi> {
         return (await this.getCachedAbi(accountName, reload)).abi;
@@ -170,10 +156,18 @@ export class Api implements WasmAbiProvider{
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
-            async (account: string): Promise<BinaryAbi> => ({
-                accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
-            }));
+        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts]
+            .filter(account => {
+                if (this.wasmAbiProvider.wasmAbis.get(account)) {
+                    return false;
+                }
+                return true;
+            })
+            .map(
+                async (account: string): Promise<BinaryAbi> => ({
+                    accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
+                })
+            );
         return Promise.all(actionPromises);
     }
 
@@ -344,44 +338,85 @@ export class Api implements WasmAbiProvider{
             });
         }
         if (broadcast) {
-            if (compression) {
-                return this.pushCompressedSignedTransaction(pushTransactionArgs);
+            const result = await this.rpc.send_transaction(pushTransactionArgs);
+            if (this.wasmAbiProvider && result.processed && result.processed.action_traces) {
+                for (const at of result.processed.action_traces) {
+                    if (at.act && this.wasmAbiProvider.wasmAbis.get(at.act.account)) {
+                        const abi = this.wasmAbiProvider.wasmAbis.get(at.act.account);
+                        const name = at.act.name;
+                        if (at.act.hasOwnProperty('data')) {
+                            try {
+                                const j = abi.action_args_bin_to_json(name, ser.hexToUint8Array(at.act.data));
+                                at.act.name = j.long_name;
+                                at.act.data = j.args;
+                            } catch (e) { }
+                        }
+                        if (at.hasOwnProperty('return_value')) {
+                            try {
+                                const j = abi.action_ret_bin_to_json(name, ser.hexToUint8Array(at.return_value));
+                                at.act.name = j.long_name;
+                                at.return_value = j.return_value;
+                            } catch (e) { }
+                        }
+                    }
+                }
             }
             return this.pushSignedTransaction(pushTransactionArgs);
         }
         return pushTransactionArgs;
     }
 
-    public async query(account: string, short: boolean, query: Query) {
+    public async query(account: string, short: boolean, query: Query,
+        { sign, requiredKeys, authorization = [] }: { sign?: boolean; requiredKeys?: string[]; authorization?: any[]; }): Promise<any> {
         const info = await this.rpc.get_info();
         const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);     // TODO: replace get_block; needs rodeos changes
         const queryBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         ser.serializeQuery(queryBuffer, query);
-    
+
         const transaction = {
             ...ser.transactionHeader(refBlock, 60 * 30),
             context_free_actions: [] as any[],
             actions: [{
                 account,
                 name: 'queryit',
-                authorization: [] as any[],
+                authorization,
                 data: ser.arrayToHex(queryBuffer.asUint8Array()),
             }],
         };
-    
+
+        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
+        const serializedTransaction = this.serializeTransaction(transaction);
+        let signatures: string[] = [];
+        if (sign) {
+            if (!requiredKeys) {
+                const availableKeys = await this.signatureProvider.getAvailableKeys();
+                requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            }
+
+            const signResponse = await this.signatureProvider.sign({
+                chainId: this.chainId,
+                requiredKeys,
+                serializedTransaction,
+                serializedContextFreeData: null,
+                abis,
+            });
+
+            signatures = signResponse.signatures;
+        }
+
         const response = await this.rpc.fetchBuiltin(this.rpc.endpoint + '/v1/chain/send_transaction', {
             body: JSON.stringify({
-                signatures: [],
+                signatures,
                 compression: 0,
                 packed_context_free_data: '',
-                packed_trx: ser.arrayToHex(this.serializeTransaction(transaction)),
+                packed_trx: ser.arrayToHex(serializedTransaction),
             }),
             method: 'POST',
         });
         const json = await response.json();
         if (json.code)
             throw new RpcError(json);
-    
+
         const returnBuffer = new ser.SerialBuffer({
             textEncoder: this.textEncoder,
             textDecoder: this.textDecoder,
@@ -431,19 +466,19 @@ export class Api implements WasmAbiProvider{
         }
 
         const taposBlockNumber: number = useLastIrreversible
-          ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
+            ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
 
         const refBlock: GetBlockHeaderStateResult | GetBlockResult =
-          taposBlockNumber <= info.last_irreversible_block_num
-          ? await this.rpc.get_block(taposBlockNumber)
-          : await this.tryGetBlockHeaderState(taposBlockNumber);
+            taposBlockNumber <= info.last_irreversible_block_num
+                ? await this.rpc.get_block(taposBlockNumber)
+                : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
     }
 
     // eventually break out into TransactionValidator class
     private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix }: any): boolean {
-        return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
+        return !!(expiration && typeof (ref_block_num) === 'number' && typeof (ref_block_prefix) === 'number');
     }
 
     private async tryGetBlockHeaderState(taposBlockNumber: number):
