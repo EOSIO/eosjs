@@ -4,7 +4,7 @@
  */
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
-import { Anyvar } from './eosjs-serialize'
+import { Anyvar } from './eosjs-serialize';
 import { WasmAbi } from './eosjs-wasmabi';
 
 /** Arguments to `getRequiredKeys` */
@@ -96,6 +96,13 @@ export interface TransactConfig {
     expireSeconds?: number;
 }
 
+/** Optional query configuration object */
+export interface QueryConfig {
+    sign?: boolean;
+    requiredKeys?: string[];
+    authorization?: any[];
+}
+
 /**
  * A Query may be any of the following:
  *  * string:                                           method
@@ -103,4 +110,5 @@ export interface TransactConfig {
  *  * [string, Anyvar, Query[]]:                        [method, arg, filter]
  *  * {method: string, arg?: Anyvar, filter?: Query[]}  explicit form
  */
-export type Query = string | [string, Query[]] | [string, Anyvar, Query[]] | { method: string, arg?: Anyvar, filter?: Query[] };
+export type Query =
+   string | [string, Query[]] | [string, Anyvar, Query[]] | { method: string, arg?: Anyvar, filter?: Query[] };

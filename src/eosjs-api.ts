@@ -11,6 +11,7 @@ import {
     BinaryAbi,
     CachedAbi,
     Query,
+    QueryConfig,
     SignatureProvider,
     TransactConfig,
     WasmAbiProvider
@@ -157,8 +158,8 @@ export class Api {
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
         const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts]
-            .filter(account => {
-                if (this.wasmAbiProvider.wasmAbis.get(account)) {
+            .filter((account) => {
+                if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
                     return false;
                 }
                 return true;
@@ -234,7 +235,11 @@ export class Api {
 
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
-        return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
+        return await Promise.all(actions.map(async (action) => {
+            const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
+                return action;
+            }
             const contract = await this.getContract(account);
             return ser.serializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
@@ -243,7 +248,11 @@ export class Api {
 
     /** Convert actions from hex */
     public async deserializeActions(actions: ser.Action[]): Promise<ser.Action[]> {
-        return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
+        return await Promise.all(actions.map(async (action) => {
+            const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
+                return action;
+            }
             const contract = await this.getContract(account);
             return ser.deserializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
@@ -349,14 +358,14 @@ export class Api {
                                 const j = abi.action_to_bin(name, ser.hexToUint8Array(at.act.data)) as any;
                                 at.act.name = j.long_name;
                                 at.act.data = j.args;
-                            } catch (e) { }
+                            } catch (e) { } // tslint:disable-line no-empty
                         }
                         if (at.hasOwnProperty('return_value')) {
                             try {
                                 const j = abi.action_to_bin(name, ser.hexToUint8Array(at.return_value)) as any;
                                 at.act.name = j.long_name;
                                 at.return_value = j.return_value;
-                            } catch (e) { }
+                            } catch (e) { } // tslint:disable-line no-empty
                         }
                     }
                 }
@@ -366,10 +375,13 @@ export class Api {
         return pushTransactionArgs;
     }
 
-    public async query(account: string, short: boolean, query: Query,
-        { sign, requiredKeys, authorization = [] }: { sign?: boolean; requiredKeys?: string[]; authorization?: any[]; }): Promise<any> {
+    public async query(
+        account: string, short: boolean, query: Query,
+        { sign, requiredKeys, authorization = [] }: QueryConfig
+    ): Promise<any> {
         const info = await this.rpc.get_info();
-        const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);     // TODO: replace get_block; needs rodeos changes
+        // TODO: replace get_block; needs rodeos changes
+        const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);
         const queryBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         ser.serializeQuery(queryBuffer, query);
 
@@ -414,18 +426,20 @@ export class Api {
             method: 'POST',
         });
         const json = await response.json();
-        if (json.code)
+        if (json.code) {
             throw new RpcError(json);
+        }
 
         const returnBuffer = new ser.SerialBuffer({
             textEncoder: this.textEncoder,
             textDecoder: this.textDecoder,
             array: ser.hexToUint8Array(json.processed.action_traces[0][1].return_value)
         });
-        if (short)
+        if (short) {
             return ser.deserializeAnyvarShort(returnBuffer);
-        else
+        } else {
             return ser.deserializeAnyvar(returnBuffer);
+        }
     }
 
     /** Broadcast a signed transaction */
