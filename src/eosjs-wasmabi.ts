@@ -135,7 +135,7 @@ export class WasmAbi { // tslint:disable-line max-classes-per-file
      * periodically to garbage collect wasm memory
      */
     public async reset() {
-        this.inst = await (global as any).WebAssembly.instantiate(this.mod, { env: this.primitives });
+        this.inst = await (this.getGlobal() as any).WebAssembly.instantiate(this.mod, { env: this.primitives });
         this.inst.exports.initialize();
         if (!this.actions) {
             this.inst.exports.get_actions();
@@ -153,5 +153,13 @@ export class WasmAbi { // tslint:disable-line max-classes-per-file
                 };
             }
         }
+    }
+
+    /**
+     * Support for global in node.js envs & window for browser based envs
+     */
+    private getGlobal() {
+        return (typeof self === 'object' && self.self === self && self) ||
+            (typeof global === 'object' && global.global === global && global)
     }
 }
