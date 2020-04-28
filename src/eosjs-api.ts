@@ -331,13 +331,16 @@ export class Api {
         let pushTransactionArgs: PushTransactionArgs = {
             serializedTransaction, serializedContextFreeData, signatures: []
         };
-
-        if (!requiredKeys) {
-            const availableKeys = await this.signatureProvider.getAvailableKeys();
-            requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+        if (compression) {
+            pushTransactionArgs.compression = 1;
         }
 
         if (sign) {
+            if (!requiredKeys) {
+                const availableKeys = await this.signatureProvider.getAvailableKeys();
+                requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            }
+
             pushTransactionArgs = await this.signatureProvider.sign({
                 chainId: this.chainId,
                 requiredKeys,
@@ -355,14 +358,14 @@ export class Api {
                         const name = at.act.name;
                         if (at.act.hasOwnProperty('data')) {
                             try {
-                                const j = abi.action_to_bin(name, ser.hexToUint8Array(at.act.data)) as any;
+                                const j = abi.action_args_bin_to_json(name, ser.hexToUint8Array(at.act.data));
                                 at.act.name = j.long_name;
                                 at.act.data = j.args;
                             } catch (e) { } // tslint:disable-line no-empty
                         }
                         if (at.hasOwnProperty('return_value')) {
                             try {
-                                const j = abi.action_to_bin(name, ser.hexToUint8Array(at.return_value)) as any;
+                                const j = abi.action_ret_bin_to_json(name, ser.hexToUint8Array(at.return_value));
                                 at.act.name = j.long_name;
                                 at.return_value = j.return_value;
                             } catch (e) { } // tslint:disable-line no-empty
@@ -370,7 +373,7 @@ export class Api {
                     }
                 }
             }
-            return this.pushSignedTransaction(pushTransactionArgs);
+            return result;
         }
         return pushTransactionArgs;
     }
