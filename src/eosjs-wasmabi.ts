@@ -160,6 +160,6 @@ export class WasmAbi { // tslint:disable-line max-classes-per-file
      */
     private getGlobal() {
         return (typeof self === 'object' && self.self === self && self) ||
-            (typeof global === 'object' && global.global === global && global)
+            (typeof global === 'object' && global.global === global && global);
     }
 }
