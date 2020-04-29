@@ -230,10 +230,10 @@ export class Api {
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
         return await Promise.all(actions.map(async (action) => {
-            if (typeof action !== 'object' || !action.hasOwnProperty('account')) {
-                return action;
-            }
             const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
+                return action
+            }
             const contract = await this.getContract(account);
             return ser.serializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
@@ -243,10 +243,11 @@ export class Api {
     /** Convert actions from hex */
     public async deserializeActions(actions: ser.Action[]): Promise<ser.Action[]> {
         return await Promise.all(actions.map(async (action) => {
-            if (typeof action !== 'object' || !action.hasOwnProperty('account')) {
+            const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
                 return action;
             }
-            const { account, name, authorization, data } = action;
+
             const contract = await this.getContract(account);
             return ser.deserializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
