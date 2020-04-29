@@ -155,12 +155,11 @@ export class Api {
     /** Get abis needed by a transaction */
     public async getTransactionAbis(transaction: any, reload = false): Promise<BinaryAbi[]> {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
-        const accounts: string[] = actions
-            .filter((action: any): ser.Action => typeof action === 'object' && action.hasOwnProperty('account'))
-            .map((action: ser.Action): string => action.account);
+        const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
-            async (account: string): Promise<BinaryAbi> => ({
+        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts]
+            .filter((account: string) => !this.wasmAbiProvider || !this.wasmAbiProvider.wasmAbis.get(account))
+            .map(async (account: string): Promise<BinaryAbi> => ({
                 accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
         return Promise.all(actionPromises);
@@ -230,10 +229,10 @@ export class Api {
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
         return await Promise.all(actions.map(async (action) => {
-            if (typeof action !== 'object' || !action.hasOwnProperty('account')) {
+            const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
                 return action;
             }
-            const { account, name, authorization, data } = action;
             const contract = await this.getContract(account);
             return ser.serializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
@@ -243,10 +242,10 @@ export class Api {
     /** Convert actions from hex */
     public async deserializeActions(actions: ser.Action[]): Promise<ser.Action[]> {
         return await Promise.all(actions.map(async (action) => {
-            if (typeof action !== 'object' || !action.hasOwnProperty('account')) {
+            const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
                 return action;
             }
-            const { account, name, authorization, data } = action;
             const contract = await this.getContract(account);
             return ser.deserializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
@@ -393,10 +392,10 @@ export class Api {
             }],
         };
 
-        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         const serializedTransaction = this.serializeTransaction(transaction);
         let signatures: string[] = [];
         if (sign) {
+            const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
             if (!requiredKeys) {
                 const availableKeys = await this.signatureProvider.getAvailableKeys();
                 requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
