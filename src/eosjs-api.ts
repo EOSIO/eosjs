@@ -394,10 +394,10 @@ export class Api {
             }],
         };
 
-        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         const serializedTransaction = this.serializeTransaction(transaction);
         let signatures: string[] = [];
         if (sign) {
+            const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
             if (!requiredKeys) {
                 const availableKeys = await this.signatureProvider.getAvailableKeys();
                 requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
@@ -414,24 +414,16 @@ export class Api {
             signatures = signResponse.signatures;
         }
 
-        const response = await this.rpc.fetchBuiltin(this.rpc.endpoint + '/v1/chain/send_transaction', {
-            body: JSON.stringify({
-                signatures,
-                compression: 0,
-                packed_context_free_data: '',
-                packed_trx: ser.arrayToHex(serializedTransaction),
-            }),
-            method: 'POST',
-        });
-        const json = await response.json();
-        if (json.code) {
-            throw new RpcError(json);
-        }
+        const response = await this.rpc.send_transaction({
+            signatures,
+            compression: 0,
+            serializedTransaction,
+        })
 
         const returnBuffer = new ser.SerialBuffer({
             textEncoder: this.textEncoder,
             textDecoder: this.textDecoder,
-            array: ser.hexToUint8Array(json.processed.action_traces[0][1].return_value)
+            array: ser.hexToUint8Array(response.processed.action_traces[0][1].return_value)
         });
         if (short) {
             return ser.deserializeAnyvarShort(returnBuffer);
