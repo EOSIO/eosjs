@@ -5,8 +5,8 @@ import * as ser from './eosjs-serialize';
 export class Api2 {
     private api: Api;
     private accountName: string;
-    public actions: any[];
-    public contextFreeActions: any[];
+    public actions: Array<Promise<any>>;
+    public contextFreeActions: Array<Promise<any>>;
     public contextFreeData: any[];
     constructor(args: {
         api: Api
@@ -15,12 +15,12 @@ export class Api2 {
     }
 
     public addActions(actions: Array<Promise<any>>) {
-        this.actions = [...this.actions, actions];
+        this.actions = [...this.actions, ...actions];
         return this;
     }
 
     public addContextFreeActions(actions: Array<Promise<any>>) {
-        this.contextFreeActions = [...this.contextFreeActions, actions];
+        this.contextFreeActions = [...this.contextFreeActions, ...actions];
         return this;
     }
 
@@ -34,8 +34,12 @@ export class Api2 {
         return this;
     }
 
-    public as(actorName: string) {
+    public as(actorName?: string) {
         const returnObj: { [index: string]: any } = {};
+        let authorization: any[] = [];
+        if (actorName) {
+            authorization = [{ actor: actorName, permission: 'active'}];
+        }
         const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
         if (wasmAbi) {
             Object.keys(wasmAbi.actions).forEach((action) => {
@@ -43,7 +47,7 @@ export class Api2 {
                     if (wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
                         await wasmAbi.reset();
                     }
-                    return wasmAbi.actions[action]([{ actor: actorName, permission: 'active'}], ...args);
+                    return wasmAbi.actions[action](authorization, ...args);
                 };
             });
             return returnObj;
@@ -60,7 +64,7 @@ export class Api2 {
                             { types, actions },
                             this.accountName,
                             name,
-                            [{ actor: actorName, permission: 'active'}],
+                            authorization,
                             data,
                             this.api.textEncoder,
                             this.api.textDecoder
@@ -72,10 +76,15 @@ export class Api2 {
     }
 
     public async send(config?: TransactConfig) {
-        return await this.api.transact({
-            contextFreeData: this.contextFreeData,
-            contextFreeActions: this.contextFreeActions,
-            actions: this.actions
-        }, config);
+        const contextFreeData = this.contextFreeData;
+        const contextFreeActions = await Promise.all(this.contextFreeActions.map(async (action) => await action));
+        const actions = await Promise.all(this.actions.map(async (action) => await action));
+        return await this.api.transact({contextFreeData, contextFreeActions, actions}, config);
+    }
+
+    private reset() {
+        this.contextFreeData = [];
+        this.contextFreeActions = [];
+        this.actions = [];
     }
 }
