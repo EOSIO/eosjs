@@ -1,13 +1,32 @@
 import { Api } from './eosjs-api';
+import { TransactConfig } from './eosjs-api-interfaces';
 import * as ser from './eosjs-serialize';
 
 export class Api2 {
     private api: Api;
     private accountName: string;
+    public actions: any[];
+    public contextFreeActions: any[];
+    public contextFreeData: any[];
     constructor(args: {
         api: Api
     }) {
         this.api = args.api;
+    }
+
+    public addActions(actions: Array<Promise<any>>) {
+        this.actions = [...this.actions, actions];
+        return this;
+    }
+
+    public addContextFreeActions(actions: Array<Promise<any>>) {
+        this.contextFreeActions = [...this.contextFreeActions, actions];
+        return this;
+    }
+
+    public addContextFreeData(dataSets: any[]) {
+        this.contextFreeData = [...this.contextFreeData, dataSets];
+        return this;
     }
 
     public with(accountName: string): Api2 {
@@ -50,5 +69,13 @@ export class Api2 {
                 });
             });
         }
+    }
+
+    public async send(config?: TransactConfig) {
+        return await this.api.transact({
+            contextFreeData: this.contextFreeData,
+            contextFreeActions: this.contextFreeActions,
+            actions: this.actions
+        }, config);
     }
 }
