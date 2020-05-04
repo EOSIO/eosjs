@@ -33,9 +33,6 @@ export interface WasmAbiProvider {
     /** WasmAbi objects associated with account name */
     wasmAbis: Map<string, WasmAbi>;
 
-    /** Initialize/Reset and retrieve WasmAbi object */
-    getWasmAbi: (accountName: string) => Promise<WasmAbi>;
-
     /** Set an array of WasmAbis */
     setWasmAbis: (wasmAbis: WasmAbi[]) => void;
 }
