@@ -155,16 +155,16 @@ export class Api {
     /** Get abis needed by a transaction */
     public async getTransactionAbis(transaction: any, reload = false): Promise<BinaryAbi[]> {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
-        const accounts: string[] = actions
-            .filter((action: any): ser.Action => typeof action === 'object' && action.hasOwnProperty('account'))
-            .map((action: ser.Action): string => action.account);
+        const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
-            async (account: string): Promise<BinaryAbi> => ({
+        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts]
+            .filter((account: string) => !this.wasmAbiProvider || !this.wasmAbiProvider.wasmAbis.get(account))
+            .map(async (account: string): Promise<BinaryAbi> => ({
                 accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
         return Promise.all(actionPromises);
     }
+
 
     /** Get data needed to serialize actions in a contract */
     public async getContract(accountName: string, reload = false): Promise<ser.Contract> {
