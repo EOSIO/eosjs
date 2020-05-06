@@ -2,12 +2,22 @@ import { Api } from './eosjs-api';
 import { TransactConfig } from './eosjs-api-interfaces';
 import * as ser from './eosjs-serialize';
 
+interface ContextFreeIndexes {
+    cfd: number;
+    cfa: number;
+}
+
+interface ContextFreeGroup {
+    action?: Promise<any>;
+    contextFreeAction?: Promise<any>;
+    contextFreeData?: any;
+}
+
 export class Api2 {
     private api: Api;
     private accountName: string;
     public actions: Array<Promise<any>>;
-    public contextFreeActions: Array<Promise<any>>;
-    public contextFreeData: any[];
+    public contextFreeGroups: Array<() => object>;
     constructor(args: {
         api: Api
     }) {
@@ -19,13 +29,8 @@ export class Api2 {
         return this;
     }
 
-    public addContextFreeActions(actions: Array<Promise<any>>) {
-        this.contextFreeActions = [...this.contextFreeActions, ...actions];
-        return this;
-    }
-
-    public addContextFreeData(dataSets: any[]) {
-        this.contextFreeData = [...this.contextFreeData, dataSets];
+    public associateContextFree(contextFreeGroups: Array<() => object>) {
+        this.contextFreeGroups = [...this.contextFreeGroups, ...contextFreeGroups];
         return this;
     }
 
@@ -71,20 +76,41 @@ export class Api2 {
                         );
                     };
                 });
-            });
+            })
+                .catch(() => {
+                    throw new Error(`ABI could not be found: ${this.accountName}`);
+                });
         }
     }
 
     public async send(config?: TransactConfig) {
-        const contextFreeData = this.contextFreeData;
-        const contextFreeActions = await Promise.all(this.contextFreeActions.map(async (action) => await action));
-        const actions = await Promise.all(this.actions.map(async (action) => await action));
-        return await this.api.transact({contextFreeData, contextFreeActions, actions}, config);
-    }
-
-    private reset() {
-        this.contextFreeData = [];
-        this.contextFreeActions = [];
-        this.actions = [];
+        let contextFreeDataSet: any[] = [];
+        let contextFreeActions: any[] = [];
+        let actions = await Promise.all(this.actions.map(async (action) => await action));
+        await Promise.all(this.contextFreeGroups.map(
+            async (contextFreeCallback: (indexes: ContextFreeIndexes) => ContextFreeGroup) => {
+                const { action, contextFreeAction, contextFreeData } = contextFreeCallback({
+                    cfd: contextFreeDataSet.length,
+                    cfa: contextFreeActions.length
+                });
+                if (action) {
+                    actions = [...actions, await action];
+                }
+                if (contextFreeAction) {
+                    contextFreeActions = [...contextFreeActions, await contextFreeAction];
+                }
+                if (contextFreeData) {
+                    contextFreeDataSet = [...contextFreeDataSet, contextFreeData];
+                }
+            }
+        ));
+        try {
+            const transaction = await this.api.transact({contextFreeDataSet, contextFreeActions, actions}, config);
+            this.contextFreeGroups = [];
+            this.actions = [];
+            return transaction;
+        } catch {
+            throw new Error('Unable to construct and send transaction');
+        }
     }
 }
