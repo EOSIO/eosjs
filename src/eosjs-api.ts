@@ -231,9 +231,16 @@ export class Api {
         return await Promise.all(actions.map(async (action) => {
             const { account, name, authorization, data } = action;
             if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
+                const wasmAbi = this.wasmAbiProvider.wasmAbis.get(account);
+                if (wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
+                    await wasmAbi.reset();
+                }
                 return action;
             }
             const contract = await this.getContract(account);
+            if (typeof data !== 'object') {
+                return action;
+            }
             return ser.serializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
         }));
@@ -499,4 +506,119 @@ export class Api {
             return await this.rpc.get_block(taposBlockNumber);
         }
     }
+
+    public with(accountName: string): ActionBuilder {
+        return new ActionBuilder(this, accountName);
+    }
+
+    public buildTransaction(cb?: (tx: TransactionBuilder) => void) {
+        const tx = new TransactionBuilder(this);
+        if (cb) {
+            return cb(tx);
+        }
+        return tx;
+    }
 } // Api
+
+class TransactionBuilder { // tslint:disable-line max-classes-per-file
+    private api: Api;
+    private actions: ActionBuilder[] = [];
+    private contextFreeGroups: any[] = [];
+    constructor(api: Api) {
+        this.api = api;
+    }
+
+    public with(accountName: string): ActionBuilder {
+        const actionBuilder = new ActionBuilder(this.api, accountName);
+        this.actions.push(actionBuilder);
+        return actionBuilder;
+    }
+
+    public associateContextFree(contextFreeGroup: () => object) {
+        this.contextFreeGroups.push(contextFreeGroup);
+        return this;
+    }
+
+    public async send(config?: TransactConfig) {
+        const contextFreeDataSet: any[] = [];
+        const contextFreeActions: ActionBuilder[] = [];
+        const actions: ActionBuilder[] = [...this.actions];
+        await Promise.all(this.contextFreeGroups.map(
+            async (contextFreeCallback: (indexes: {cfa: number, cfd: number}) =>
+                           { action?: ActionBuilder; contextFreeAction?: ActionBuilder; contextFreeData?: any; }) => {
+                const { action, contextFreeAction, contextFreeData } = contextFreeCallback({
+                    cfd: contextFreeDataSet.length,
+                    cfa: contextFreeActions.length
+                });
+                if (action) {
+                    actions.push(action);
+                }
+                if (contextFreeAction) {
+                    contextFreeActions.push(contextFreeAction);
+                }
+                if (contextFreeData) {
+                    contextFreeDataSet.push(contextFreeData);
+                }
+            }
+        ));
+        try {
+            const transaction = await this.api.transact({contextFreeDataSet, contextFreeActions, actions}, config);
+            this.contextFreeGroups = [];
+            this.actions = [];
+            return transaction;
+        } catch {
+            throw new Error('Unable to construct and send transaction');
+        }
+    }
+}
+
+class ActionBuilder { // tslint:disable-line max-classes-per-file
+    private api: Api;
+    private readonly accountName: string;
+
+    constructor(api: Api, accountName: string) {
+        this.api = api;
+        this.accountName = accountName;
+    }
+
+    public as(actorName?: string) {
+        const returnObj: { [index: string]: any } = {};
+        let authorization: any[] = [];
+        if (actorName) {
+            authorization = [{ actor: actorName, permission: 'active'}];
+        }
+        const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
+        if (wasmAbi) {
+            Object.keys(wasmAbi.actions).forEach((action) => {
+                returnObj[action] = (...args: any[]) => {
+                    return wasmAbi.actions[action](authorization, ...args);
+                };
+            });
+            return returnObj;
+        } else {
+            this.api.getAbi(this.accountName).then((jsonAbi) => {
+                const types = ser.getTypesFromAbi(ser.createInitialTypes(), jsonAbi);
+                const actions = new Map<string, ser.Type>();
+                for (const { name, type } of jsonAbi.actions) {
+                    actions.set(name, ser.getType(types, type));
+                }
+                actions.forEach((type, name) => {
+                    returnObj[name] = (data: any) => {
+                        return ser.serializeAction(
+                            { types, actions },
+                            this.accountName,
+                            name,
+                            authorization,
+                            data,
+                            this.api.textEncoder,
+                            this.api.textDecoder
+                        );
+                    };
+                });
+            })
+                .catch(() => {
+                    throw new Error(`ABI could not be found: ${this.accountName}`);
+                });
+        }
+    }
+}
