@@ -596,29 +596,29 @@ class ActionBuilder { // tslint:disable-line max-classes-per-file
             });
             return returnObj;
         } else {
-            this.api.getAbi(this.accountName).then((jsonAbi) => {
-                const types = ser.getTypesFromAbi(ser.createInitialTypes(), jsonAbi);
-                const actions = new Map<string, ser.Type>();
-                for (const { name, type } of jsonAbi.actions) {
-                    actions.set(name, ser.getType(types, type));
-                }
-                actions.forEach((type, name) => {
-                    returnObj[name] = (data: any) => {
-                        return ser.serializeAction(
-                            { types, actions },
-                            this.accountName,
-                            name,
-                            authorization,
-                            data,
-                            this.api.textEncoder,
-                            this.api.textDecoder
-                        );
-                    };
-                });
-            })
-                .catch(() => {
-                    throw new Error(`ABI could not be found: ${this.accountName}`);
-                });
+            const jsonAbi = this.api.cachedAbis.get(this.accountName);
+            if (!jsonAbi) {
+                return null;
+            }
+            const types = ser.getTypesFromAbi(ser.createInitialTypes(), jsonAbi.abi);
+            const actions = new Map<string, ser.Type>();
+            for (const { name, type } of jsonAbi.abi.actions) {
+                actions.set(name, ser.getType(types, type));
+            }
+            actions.forEach((type, name) => {
+                returnObj[name] = (data: any) => {
+                    return ser.serializeAction(
+                        { types, actions },
+                        this.accountName,
+                        name,
+                        authorization,
+                        data,
+                        this.api.textEncoder,
+                        this.api.textDecoder
+                    );
+                };
+            });
+            return returnObj;
         }
     }
 }

@@ -1,3 +1,5 @@
+import {WasmAbiProvider} from '../eosjs-wasmabi';
+
 const { TextEncoder, TextDecoder } = require('util');
 import { Api } from '../eosjs-api';
 import { JsonRpc } from '../eosjs-jsonrpc';
@@ -146,8 +148,14 @@ describe('eosjs-api', () => {
         rpc = new JsonRpc('', { fetch });
         const signatureProvider = new JsSignatureProvider(['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr']);
         const chainId = '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca';
+        const wasmAbiProvider = new WasmAbiProvider();
         api = new Api({
-            rpc, signatureProvider, chainId, textDecoder: new TextDecoder(), textEncoder: new TextEncoder()
+            rpc,
+            signatureProvider,
+            wasmAbiProvider,
+            chainId,
+            textDecoder: new TextDecoder(),
+            textEncoder: new TextEncoder()
         });
     });
 
@@ -219,5 +227,25 @@ describe('eosjs-api', () => {
 
         expect(rawAbi).toEqual(expectedRawAbi);
         expect(jsonAbi).toEqual(expectedJsonAbi);
+    });
+
+    it('confirms serializeActions and ActionBuilder return same serialized data', async () => {
+        const response = await api.serializeActions(transaction.actions);
+
+        const firstAction = api.with('testeostoken').as('thegazelle').transfer({
+            from: 'thegazelle',
+            to: 'remasteryoda',
+            quantity: '1.0000 EOS',
+            memo: 'For a secure future.',
+        });
+
+        const secondAction = api.with('testeostoken').as('thegazelle').transfer({
+            from: 'thegazelle',
+            to: 'remasteryoda',
+            quantity: '2.0000 EOS',
+            memo: 'For a second secure future (multiverse?)',
+        });
+
+        expect([firstAction, secondAction]).toEqual(response);
     });
 });
