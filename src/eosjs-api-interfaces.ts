@@ -6,6 +6,7 @@
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
 import { Anyvar } from './eosjs-serialize';
 import { WasmAbi } from './eosjs-wasmabi';
+import { ActionBuilder } from './eosjs-api';
 
 /** Arguments to `getRequiredKeys` */
 export interface AuthorityProviderArgs {
@@ -109,3 +110,7 @@ export interface QueryConfig {
  */
 export type Query =
    string | [string, Query[]] | [string, Anyvar, Query[]] | { method: string, arg?: Anyvar, filter?: Query[] };
+
+export type ContextFreeGroupCallback =
+    (index: {cfa: number, cfd: number}) =>
+        { action?: ActionBuilder; contextFreeAction?: ActionBuilder; contextFreeData?: any; };

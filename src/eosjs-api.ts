@@ -10,6 +10,7 @@ import {
     AuthorityProvider,
     BinaryAbi,
     CachedAbi,
+    ContextFreeGroupCallback,
     Query,
     QueryConfig,
     SignatureProvider,
@@ -26,7 +27,6 @@ import {
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 import { RpcError } from './eosjs-rpcerror';
-import { WasmAbi } from './eosjs-wasmabi';
 
 const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
@@ -520,32 +520,33 @@ export class Api {
     }
 } // Api
 
-class TransactionBuilder { // tslint:disable-line max-classes-per-file
+export class TransactionBuilder { // tslint:disable-line max-classes-per-file
     private api: Api;
-    private actions: ActionBuilder[] = [];
+    private actions: any[] = [];
     private contextFreeGroups: any[] = [];
     constructor(api: Api) {
         this.api = api;
     }
 
     public with(accountName: string): ActionBuilder {
-        const actionBuilder = new ActionBuilder(this.api, accountName);
-        this.actions.push(actionBuilder);
-        return actionBuilder;
+        return new ActionBuilder(this.api, accountName);
     }
 
-    public associateContextFree(contextFreeGroup: () => object) {
+    public addAction(action: any) {
+        this.actions.push(action);
+    }
+
+    public associateContextFree(contextFreeGroup: ContextFreeGroupCallback) {
         this.contextFreeGroups.push(contextFreeGroup);
         return this;
     }
 
-    public async send(config?: TransactConfig) {
+    public async send(config?: TransactConfig): Promise<any> {
         const contextFreeDataSet: any[] = [];
         const contextFreeActions: ActionBuilder[] = [];
         const actions: ActionBuilder[] = [...this.actions];
         await Promise.all(this.contextFreeGroups.map(
-            async (contextFreeCallback: (indexes: {cfa: number, cfd: number}) =>
-                           { action?: ActionBuilder; contextFreeAction?: ActionBuilder; contextFreeData?: any; }) => {
+            async (contextFreeCallback: ContextFreeGroupCallback) => {
                 const { action, contextFreeAction, contextFreeData } = contextFreeCallback({
                     cfd: contextFreeDataSet.length,
                     cfa: contextFreeActions.length
@@ -561,18 +562,17 @@ class TransactionBuilder { // tslint:disable-line max-classes-per-file
                 }
             }
         ));
-        try {
-            const transaction = await this.api.transact({contextFreeDataSet, contextFreeActions, actions}, config);
-            this.contextFreeGroups = [];
-            this.actions = [];
-            return transaction;
-        } catch {
-            throw new Error('Unable to construct and send transaction');
-        }
+        this.contextFreeGroups = [];
+        this.actions = [];
+        return await this.api.transact({
+            contextFreeData: contextFreeDataSet,
+            contextFreeActions,
+            actions
+        }, config);
     }
 }
 
-class ActionBuilder { // tslint:disable-line max-classes-per-file
+export class ActionBuilder { // tslint:disable-line max-classes-per-file
     private api: Api;
     private readonly accountName: string;
 
@@ -581,10 +581,10 @@ class ActionBuilder { // tslint:disable-line max-classes-per-file
         this.accountName = accountName;
     }
 
-    public as(actorName?: string) {
+    public as(actorName?: string | ser.Authorization[]) {
         const returnObj: { [index: string]: any } = {};
         let authorization: any[] = [];
-        if (actorName) {
+        if (actorName && typeof actorName === 'string') {
             authorization = [{ actor: actorName, permission: 'active'}];
         }
         const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
@@ -598,7 +598,7 @@ class ActionBuilder { // tslint:disable-line max-classes-per-file
         } else {
             const jsonAbi = this.api.cachedAbis.get(this.accountName);
             if (!jsonAbi) {
-                return null;
+                throw new Error('ABI must be cached before using ActionBuilder, run api.getAbi()');
             }
             const types = ser.getTypesFromAbi(ser.createInitialTypes(), jsonAbi.abi);
             const actions = new Map<string, ser.Type>();
