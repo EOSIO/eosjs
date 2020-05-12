@@ -27,6 +27,7 @@ import {
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 import { RpcError } from './eosjs-rpcerror';
+import { WasmAbi } from './eosjs-wasmabi';
 
 const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
@@ -522,18 +523,16 @@ export class Api {
 
 export class TransactionBuilder { // tslint:disable-line max-classes-per-file
     private api: Api;
-    private actions: any[] = [];
+    private actions: ActionBuilder[] = [];
     private contextFreeGroups: any[] = [];
     constructor(api: Api) {
         this.api = api;
     }
 
     public with(accountName: string): ActionBuilder {
-        return new ActionBuilder(this.api, accountName);
-    }
-
-    public addAction(action: any) {
-        this.actions.push(action);
+        const actionBuilder = new ActionBuilder(this.api, accountName);
+        this.actions.push(actionBuilder);
+        return actionBuilder;
     }
 
     public associateContextFree(contextFreeGroup: ContextFreeGroupCallback) {
@@ -544,7 +543,7 @@ export class TransactionBuilder { // tslint:disable-line max-classes-per-file
     public async send(config?: TransactConfig): Promise<any> {
         const contextFreeDataSet: any[] = [];
         const contextFreeActions: ActionBuilder[] = [];
-        const actions: ActionBuilder[] = [...this.actions];
+        const actions: any[] = this.actions.map((actionBuilder) => actionBuilder.serializedData);
         await Promise.all(this.contextFreeGroups.map(
             async (contextFreeCallback: ContextFreeGroupCallback) => {
                 const { action, contextFreeAction, contextFreeData } = contextFreeCallback({
@@ -575,6 +574,7 @@ export class TransactionBuilder { // tslint:disable-line max-classes-per-file
 export class ActionBuilder { // tslint:disable-line max-classes-per-file
     private api: Api;
     private readonly accountName: string;
+    public serializedData: any;
 
     constructor(api: Api, accountName: string) {
         this.api = api;
@@ -582,21 +582,36 @@ export class ActionBuilder { // tslint:disable-line max-classes-per-file
     }
 
     public as(actorName?: string | ser.Authorization[]) {
-        const returnObj: { [index: string]: any } = {};
         let authorization: any[] = [];
         if (actorName && typeof actorName === 'string') {
             authorization = [{ actor: actorName, permission: 'active'}];
         }
+
         const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
+        return new ActionSerializer(this, this.api, this.accountName, authorization, wasmAbi);
+    }
+}
+
+class ActionSerializer { // tslint:disable-line max-classes-per-file
+    constructor(
+        parent: ActionBuilder,
+        api: Api,
+        accountName: string,
+        authorization: ser.Authorization[],
+        wasmAbi: WasmAbi
+    ) {
         if (wasmAbi) {
             Object.keys(wasmAbi.actions).forEach((action) => {
-                returnObj[action] = (...args: any[]) => {
-                    return wasmAbi.actions[action](authorization, ...args);
-                };
+                Object.assign(this, {
+                    [action]: (...args: any[]) => {
+                        const serializedData = wasmAbi.actions[action](authorization, ...args);
+                        parent.serializedData = serializedData;
+                        return serializedData;
+                    }
+                });
             });
-            return returnObj;
         } else {
-            const jsonAbi = this.api.cachedAbis.get(this.accountName);
+            const jsonAbi = api.cachedAbis.get(accountName);
             if (!jsonAbi) {
                 throw new Error('ABI must be cached before using ActionBuilder, run api.getAbi()');
             }
@@ -606,19 +621,20 @@ export class ActionBuilder { // tslint:disable-line max-classes-per-file
                 actions.set(name, ser.getType(types, type));
             }
             actions.forEach((type, name) => {
-                returnObj[name] = (data: any) => {
-                    return ser.serializeAction(
-                        { types, actions },
-                        this.accountName,
-                        name,
-                        authorization,
-                        data,
-                        this.api.textEncoder,
-                        this.api.textDecoder
-                    );
-                };
+                Object.assign(this, {
+                    [name]: (data: any) => {
+                        return ser.serializeAction(
+                            { types, actions },
+                            accountName,
+                            name,
+                            authorization,
+                            data,
+                            api.textEncoder,
+                            api.textDecoder
+                        );
+                    }
+                });
             });
-            return returnObj;
         }
     }
 }

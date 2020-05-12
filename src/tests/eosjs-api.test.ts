@@ -231,23 +231,106 @@ describe('eosjs-api', () => {
         expect(jsonAbi).toEqual(expectedJsonAbi);
     });
 
-    it('confirms serializeActions and ActionBuilder return same serialized data', async () => {
-        const response = await api.serializeActions(transaction.actions);
-
-        const firstAction = api.with('testeostoken').as('thegazelle').transfer({
-            from: 'thegazelle',
-            to: 'remasteryoda',
-            quantity: '1.0000 EOS',
-            memo: 'For a secure future.',
+    describe('Api shorthand design (JsonAbi)', () => {
+        it('errors if abi is not cached', () => {
+            const abiCheck = () => {
+                api.with('testeostoken').as('bob').transfer({
+                    from: 'thegazelle',
+                    to: 'remasteryoda',
+                    quantity: '1.0000 EOS',
+                    memo: 'For a secure future.',
+                });
+            };
+            expect(abiCheck).toThrowError('ABI must be cached before using ActionBuilder, run api.getAbi()');
         });
 
-        const secondAction = api.with('testeostoken').as('thegazelle').transfer({
-            from: 'thegazelle',
-            to: 'remasteryoda',
-            quantity: '2.0000 EOS',
-            memo: 'For a second secure future (multiverse?)',
+        it('generates a valid serialized action using api.with()', async () => {
+            await api.getAbi('testeostoken');
+
+            const serializedAction = api.with('testeostoken').as('thegazelle').transfer({
+                from: 'thegazelle',
+                to: 'remasteryoda',
+                quantity: '1.0000 EOS',
+                memo: 'For a secure future.',
+            });
+            expect(serializedAction).toEqual(serializedActions[0]);
         });
 
-        expect([firstAction, secondAction]).toEqual(response);
+        it('generates a valid serialized action using tx.with()', async () => {
+            await api.getAbi('testeostoken');
+
+            const tx = api.buildTransaction();
+            const serializedAction = tx.with('testeostoken').as('thegazelle').transfer({
+                from: 'thegazelle',
+                to: 'remasteryoda',
+                quantity: '2.0000 EOS',
+                memo: 'For a second secure future (multiverse?)',
+            });
+            expect(serializedAction).toEqual(serializedActions[1]);
+        });
+
+        it('confirms serializeActions and ActionBuilder return same serialized data', async () => {
+            const response = await api.serializeActions(transaction.actions);
+
+            const firstAction = api.with('testeostoken').as('thegazelle').transfer({
+                from: 'thegazelle',
+                to: 'remasteryoda',
+                quantity: '1.0000 EOS',
+                memo: 'For a secure future.',
+            });
+
+            const secondAction = api.with('testeostoken').as('thegazelle').transfer({
+                from: 'thegazelle',
+                to: 'remasteryoda',
+                quantity: '2.0000 EOS',
+                memo: 'For a second secure future (multiverse?)',
+            });
+
+            expect([firstAction, secondAction]).toEqual(response);
+        });
+    });
+
+    it('WasmAbiProvider stores and retrieves WasmAbi correctly', async () => {
+        await api.wasmAbiProvider.setWasmAbis([
+            new WasmAbi({
+                account: 'token',
+                mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+                memoryThreshold: 32000,
+                textEncoder: api.textEncoder,
+                textDecoder: api.textDecoder,
+                print(x) { process.stdout.write(x); },
+            })
+        ]);
+        expect(api.wasmAbiProvider.wasmAbis.get('token')).not.toBeUndefined();
+    });
+
+    describe('Api shorthand design (WasmAbi)', () => {
+        beforeEach(async () => {
+            await api.wasmAbiProvider.setWasmAbis([
+                new WasmAbi({
+                    account: 'token',
+                    mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+                    memoryThreshold: 32000,
+                    textEncoder: api.textEncoder,
+                    textDecoder: api.textDecoder,
+                    print(x) { process.stdout.write(x); },
+                })
+            ]);
+        });
+
+        it('generates a valid serialized action using api.with()', async () => {
+            const serializedAction = api.with('token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
+            expect(serializedAction.account).toEqual('token');
+            expect(serializedAction.authorization).toEqual([{ actor: 'bob', permission: 'active'}]);
+            expect(serializedAction.name).toEqual('transfer');
+        });
+
+        it('generates a valid serialized action using tx.with()', async () => {
+            const tx = api.buildTransaction();
+            const serializedAction = tx.with('token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
+            expect(serializedAction.account).toEqual('token');
+            expect(serializedAction.authorization).toEqual([{ actor: 'bob', permission: 'active'}]);
+            expect(serializedAction.name).toEqual('transfer');
+        });
     });
 });

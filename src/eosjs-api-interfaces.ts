@@ -4,7 +4,7 @@
  */
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
-import { Anyvar } from './eosjs-serialize';
+import { Anyvar, Authorization } from './eosjs-serialize';
 import { WasmAbi } from './eosjs-wasmabi';
 import { ActionBuilder } from './eosjs-api';
 
@@ -98,7 +98,7 @@ export interface TransactConfig {
 export interface QueryConfig {
     sign?: boolean;
     requiredKeys?: string[];
-    authorization?: any[];
+    authorization?: Authorization[];
 }
 
 /**
