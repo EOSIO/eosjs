@@ -605,6 +605,7 @@ class ActionSerializer { // tslint:disable-line max-classes-per-file
                 Object.assign(this, {
                     [action]: (...args: any[]) => {
                         const serializedData = wasmAbi.actions[action](authorization, ...args);
+                        serializedData.data = ser.arrayToHex(serializedData.data);
                         parent.serializedData = serializedData;
                         return serializedData;
                     }
@@ -623,7 +624,7 @@ class ActionSerializer { // tslint:disable-line max-classes-per-file
             actions.forEach((type, name) => {
                 Object.assign(this, {
                     [name]: (data: any) => {
-                        return ser.serializeAction(
+                        const serializedData = ser.serializeAction(
                             { types, actions },
                             accountName,
                             name,
@@ -632,6 +633,8 @@ class ActionSerializer { // tslint:disable-line max-classes-per-file
                             api.textEncoder,
                             api.textDecoder
                         );
+                        parent.serializedData = serializedData;
+                        return serializedData;
                     }
                 });
             });

@@ -293,7 +293,7 @@ describe('eosjs-api', () => {
     it('WasmAbiProvider stores and retrieves WasmAbi correctly', async () => {
         await api.wasmAbiProvider.setWasmAbis([
             new WasmAbi({
-                account: 'token',
+                account: 'eosio.token',
                 mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
                 memoryThreshold: 32000,
                 textEncoder: api.textEncoder,
@@ -301,14 +301,14 @@ describe('eosjs-api', () => {
                 print(x) { process.stdout.write(x); },
             })
         ]);
-        expect(api.wasmAbiProvider.wasmAbis.get('token')).not.toBeUndefined();
+        expect(api.wasmAbiProvider.wasmAbis.get('eosio.token')).not.toBeUndefined();
     });
 
     describe('Api shorthand design (WasmAbi)', () => {
         beforeEach(async () => {
             await api.wasmAbiProvider.setWasmAbis([
                 new WasmAbi({
-                    account: 'token',
+                    account: 'eosio.token',
                     mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
                     memoryThreshold: 32000,
                     textEncoder: api.textEncoder,
@@ -319,16 +319,16 @@ describe('eosjs-api', () => {
         });
 
         it('generates a valid serialized action using api.with()', async () => {
-            const serializedAction = api.with('token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
-            expect(serializedAction.account).toEqual('token');
+            const serializedAction = api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
+            expect(serializedAction.account).toEqual('eosio.token');
             expect(serializedAction.authorization).toEqual([{ actor: 'bob', permission: 'active'}]);
             expect(serializedAction.name).toEqual('transfer');
         });
 
         it('generates a valid serialized action using tx.with()', async () => {
             const tx = api.buildTransaction();
-            const serializedAction = tx.with('token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
-            expect(serializedAction.account).toEqual('token');
+            const serializedAction = tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
+            expect(serializedAction.account).toEqual('eosio.token');
             expect(serializedAction.authorization).toEqual([{ actor: 'bob', permission: 'active'}]);
             expect(serializedAction.name).toEqual('transfer');
         });
