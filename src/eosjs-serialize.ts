@@ -1193,6 +1193,16 @@ function addAdditionalTypes(): Map<string, Type> {
         serialize: serializeAnyArray,
         deserialize: deserializeAnyArray
     }));
+    initialTypes.set('any_object', createType({
+        name: 'any_object',
+        serialize: serializeAnyObject,
+        deserialize: deserializeAnyObject
+    }));
+    initialTypes.set('any_array', createType({
+        name: 'any_array',
+        serialize: serializeAnyArray,
+        deserialize: deserializeAnyArray
+    }));
     return initialTypes;
 }
 
@@ -1214,6 +1224,10 @@ const anyvarDefs = {
     string: { index: 12, useShortForm: true, type: additionalTypes.get('string') },
     any_object: { index: 13, useShortForm: true, type: additionalTypes.get('any_object') },
     any_array: { index: 14, useShortForm: true, type: additionalTypes.get('any_array') },
+    bytes: { index: 15, useShortForm: false, type: additionalTypes.get('bytes') },
+    symbol: { index: 16, useShortForm: false, type: additionalTypes.get('symbol') },
+    symbol_code: { index: 17, useShortForm: false, type: additionalTypes.get('symbol_code') },
+    asset: { index: 18, useShortForm: false, type: additionalTypes.get('asset') },
 };
 
 const anyvarDefsByIndex = [
@@ -1232,6 +1246,10 @@ const anyvarDefsByIndex = [
     anyvarDefs.string,
     anyvarDefs.any_object,
     anyvarDefs.any_array,
+    anyvarDefs.bytes,
+    anyvarDefs.symbol,
+    anyvarDefs.symbol_code,
+    anyvarDefs.asset,
 ];
 
 export function serializeAnyvar(buffer: SerialBuffer, anyvar: Anyvar) {
@@ -1243,6 +1261,8 @@ export function serializeAnyvar(buffer: SerialBuffer, anyvar: Anyvar) {
         [def, value] = [anyvarDefs.string, anyvar];
     } else if (typeof anyvar === 'number') {
         [def, value] = [anyvarDefs.int32, anyvar];
+    } else if (anyvar instanceof Uint8Array) {
+        [def, value] = [anyvarDefs.bytes, anyvar];
     } else if (Array.isArray(anyvar)) {
         [def, value] = [anyvarDefs.any_array, anyvar];
     } else if (Object.keys(anyvar).length === 2 && anyvar.hasOwnProperty('type') && anyvar.hasOwnProperty('value')) {

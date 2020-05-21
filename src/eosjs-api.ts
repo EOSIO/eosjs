@@ -332,9 +332,6 @@ export class Api {
         let pushTransactionArgs: PushTransactionArgs = {
             serializedTransaction, serializedContextFreeData, signatures: []
         };
-        if (compression) {
-            pushTransactionArgs.compression = 1;
-        }
 
         if (sign) {
             if (!requiredKeys) {
@@ -351,7 +348,12 @@ export class Api {
             });
         }
         if (broadcast) {
-            const result = await this.rpc.send_transaction(pushTransactionArgs);
+            let result;
+            if (compression) {
+                result = await this.pushCompressedSignedTransaction(pushTransactionArgs);
+            } else {
+                result = await this.pushSignedTransaction(pushTransactionArgs);
+            }
             if (this.wasmAbiProvider && result.processed && result.processed.action_traces) {
                 for (const at of result.processed.action_traces) {
                     if (at.act && this.wasmAbiProvider.wasmAbis.get(at.act.account)) {
