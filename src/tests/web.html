@@ -5,6 +5,7 @@
         <script src='../../dist-web/eosjs-api.min.js'></script>
         <script src='../../dist-web/eosjs-jsonrpc.min.js'></script>
         <script src='../../dist-web/eosjs-jssig.min.js'></script>
+        <script src='../../dist-web/eosjs-wasmabi.min.js'></script>
         <script>
             const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
             /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
@@ -16,27 +17,52 @@
         
             const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
             const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
-            const api = new eosjs_api.Api({ rpc, signatureProvider });
+            const wasmAbiProvider = new eosjs_wasmabi.WasmAbiProvider();
+            const api = new eosjs_api.Api({ rpc, signatureProvider, wasmAbiProvider });
+            let module;
+
+            const setWasmAbi = async () => {
+              if (!module) {
+                const response = await fetch('token_abi.wasm');
+                const buffer = await response.arrayBuffer();
+                module = await WebAssembly.compile(buffer);
+              }
+
+              wasmAbiProvider.setWasmAbis([
+                new eosjs_wasmabi.WasmAbi({
+                  account: 'eosio.token',
+                  mod: module,
+                  memoryThreshold: 32000,
+                  textEncoder: new TextEncoder(),
+                  textDecoder: new TextDecoder('utf-8', { fatal: true }),
+                  print: (x) => console.info(x),
+                })
+              ]);
+              await new Promise(resolve => setTimeout(resolve, 250))
+            };
         
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
 
-            const transactWithConfig = async (config, memo) => await api.transact({
+            const transactWithConfig = async (config, memo) => {
+              wasmAbiProvider.wasmAbis.clear();
+              return api.transact({
                 actions: [{
-                    account: 'eosio.token',
-                    name: 'transfer',
-                    authorization: [{
-                        actor: 'bob',
-                        permission: 'active',
-                    }],
-                    data: {
-                        from: 'bob',
-                        to: 'alice',
-                        quantity: '0.0001 SYS',
-                        memo,
-                    },
+                  account: 'eosio.token',
+                  name: 'transfer',
+                  authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                  }],
+                  data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo,
+                  },
                 }]
-            }, config);
+              }, config);
+            }
         
             const testTransactWithConfigBlocksBehind = async (e) => {
                 resultsLabel = e.target;
@@ -209,7 +235,155 @@
                 resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
-            } 
+            }
+
+            const shorthandWithApiJson = async () => {
+              wasmAbiProvider.wasmAbis.clear();
+              await api.getAbi('eosio.token');
+              return api.transact({
+                actions: [
+                  api.with('eosio.token').as('bob').transfer({
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: 'transactWithShorthandApiJson'
+                  })
+                ]
+              }, {
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testShorthandWithApiJson = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithApiJson();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Api and Json Abi Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
+
+            const shorthandWithTxJson = async () => {
+              wasmAbiProvider.wasmAbis.clear();
+              await api.getAbi('eosio.token');
+              const tx = api.buildTransaction();
+              tx.with('eosio.token').as('bob').transfer({
+                from: 'bob',
+                to: 'alice',
+                quantity: '0.0001 SYS',
+                memo: 'transactWithShorthandTxJson'
+              });
+              return tx.send({
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testShorthandWithTxJson = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithTxJson();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Tx and Json Abi Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
+
+            const shorthandWithApiWasm = async () => {
+              await setWasmAbi();
+              return api.transact({
+                actions: [
+                  api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiWasm')
+                ]
+              }, {
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testShorthandWithApiWasm = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithApiWasm();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Api and Wasm Abi Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
+
+            const shorthandWithTxWasm = async () => {
+              await setWasmAbi();
+              const tx = api.buildTransaction();
+              tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxWasm');
+              return tx.send({
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testShorthandWithTxWasm = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithTxWasm();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Tx and Wasm Abi Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{
@@ -292,6 +466,10 @@
             <div><h2>Transact with Compression</h2><button onClick='testTransactWithCompression(event);'>Test</button></div>
             <div><h2>Transact without Broadcasting</h2><button onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
             <div><h2>Broadcast Transaction</h2><button onClick='testBroadcastResult(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Api and Json Abi</h2><button onClick='testShorthandWithApiJson(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Json Abi</h2><button onClick='testShorthandWithTxJson(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Api and Wasm Abi</h2><button onClick='testShorthandWithApiWasm(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Wasm Abi</h2><button onClick='testShorthandWithTxWasm(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>

@@ -55,6 +55,30 @@ describe('Node JS environment', () => {
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
+    describe('Json Abi with Shorthand Design', () => {
+        it('transacts with shorthand structure using api', async () => {
+            transactionResponse = await tests.transactWithShorthandApiJson();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
+
+        it('transacts with shorthand structure using tx', async () => {
+            transactionResponse = await tests.transactWithShorthandTxJson();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
+    });
+
+    describe('Wasm Abi with Shorthand Design', () => {
+        it('transacts with shorthand structure using api', async () => {
+            transactionResponse = await tests.transactWithShorthandApiWasm();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
+
+        it('transacts with shorthand structure using tx', async () => {
+            transactionResponse = await tests.transactWithShorthandTxWasm();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
+    });
+
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
         try {
             failedAsPlanned = true;

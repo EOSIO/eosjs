@@ -5,6 +5,7 @@
 
 import * as numeric from './eosjs-numeric';
 import { Abi, BlockTaposInfo, BlockHeaderStateTaposInfo } from './eosjs-rpc-interfaces';
+import { Query } from './eosjs-api-interfaces';
 
 /** A field in an abi */
 export interface Field {
@@ -33,6 +34,37 @@ export class SerializerState {
     constructor(options: SerializerOptions = {}) {
         this.options = options;
     }
+}
+
+/**
+ * An Anyvar (non-short form) may be any of the following:
+ *  * null
+ *  * string
+ *  * number
+ *    * Caution: assumes number is int32. Use {type, value} form for other numeric types
+ *  * an array of anyvar
+ *  * {type, value}
+ *      * type is a string matching one of the predefined types in anyvarDefs
+ *      * value:
+ *          * If type === 'any_object', then value is an object. The values within the object are anyvar.
+ *          * If type === 'any_array', then value is an array of anyvar.
+ *          * Else, value must be eosjs-compatible with the specified type (e.g. uint64 should be a string
+ *            containing the value in decimal).
+ *  * Other object. The values within the object are anyvar.
+ *
+ * The short form is more convenient, but it can't be converted back to binary (serialized).
+ * Wherever the anyvar would have {type, value}, it has just the value instead.
+ */
+export type Anyvar = null | string | number | Anyvar[] | { type: string, value: any } | {};
+
+interface AnyvarDef {
+    index: number;
+    useShortForm: boolean;
+    type: {
+        name: string,
+        serialize(buffer: SerialBuffer, value: any): void,
+        deserialize(buffer: SerialBuffer, state?: SerializerState): any,
+    };
 }
 
 /** A type in an abi */
@@ -1142,4 +1174,184 @@ export function deserializeAction(contract: Contract, account: string, name: str
         authorization,
         data: deserializeActionData(contract, account, name, data, textEncoder, textDecoder),
     };
+}
+
+function addAdditionalTypes(): Map<string, Type> {
+    const initialTypes = createInitialTypes();
+    initialTypes.set('null_t', createType({
+        name: 'null_t',
+        serialize(buffer: SerialBuffer, anyvar: Anyvar) {}, // tslint:disable-line no-empty
+        deserialize(buffer: SerialBuffer, state?: SerializerState) {} // tslint:disable-line no-empty
+    }));
+    initialTypes.set('any_object', createType({
+        name: 'any_object',
+        serialize: serializeAnyObject,
+        deserialize: deserializeAnyObject
+    }));
+    initialTypes.set('any_array', createType({
+        name: 'any_array',
+        serialize: serializeAnyArray,
+        deserialize: deserializeAnyArray
+    }));
+    return initialTypes;
+}
+
+const additionalTypes = addAdditionalTypes();
+
+const anyvarDefs = {
+    null_t: { index: 0, useShortForm: true, type: additionalTypes.get('null_t') },
+    int64: { index: 1, useShortForm: false, type: additionalTypes.get('int64') },
+    uint64: { index: 2, useShortForm: false, type: additionalTypes.get('uint64') },
+    int32: { index: 3, useShortForm: true, type: additionalTypes.get('int32') },
+    uint32: { index: 4, useShortForm: false, type: additionalTypes.get('uint32') },
+    int16: { index: 5, useShortForm: false, type: additionalTypes.get('int16') },
+    uint16: { index: 6, useShortForm: false, type: additionalTypes.get('uint16') },
+    int8: { index: 7, useShortForm: false, type: additionalTypes.get('int8') },
+    uint8: { index: 8, useShortForm: false, type: additionalTypes.get('uint8') },
+    time_point: { index: 9, useShortForm: false, type: additionalTypes.get('time_point') },
+    checksum256: { index: 10, useShortForm: false, type: additionalTypes.get('checksum256') },
+    float64: { index: 11, useShortForm: false, type: additionalTypes.get('float64') },
+    string: { index: 12, useShortForm: true, type: additionalTypes.get('string') },
+    any_object: { index: 13, useShortForm: true, type: additionalTypes.get('any_object') },
+    any_array: { index: 14, useShortForm: true, type: additionalTypes.get('any_array') },
+    bytes: { index: 15, useShortForm: false, type: additionalTypes.get('bytes') },
+    symbol: { index: 16, useShortForm: false, type: additionalTypes.get('symbol') },
+    symbol_code: { index: 17, useShortForm: false, type: additionalTypes.get('symbol_code') },
+    asset: { index: 18, useShortForm: false, type: additionalTypes.get('asset') },
+};
+
+const anyvarDefsByIndex = [
+    anyvarDefs.null_t,
+    anyvarDefs.int64,
+    anyvarDefs.uint64,
+    anyvarDefs.int32,
+    anyvarDefs.uint32,
+    anyvarDefs.int16,
+    anyvarDefs.uint16,
+    anyvarDefs.int8,
+    anyvarDefs.uint8,
+    anyvarDefs.time_point,
+    anyvarDefs.checksum256,
+    anyvarDefs.float64,
+    anyvarDefs.string,
+    anyvarDefs.any_object,
+    anyvarDefs.any_array,
+    anyvarDefs.bytes,
+    anyvarDefs.symbol,
+    anyvarDefs.symbol_code,
+    anyvarDefs.asset,
+];
+
+export function serializeAnyvar(buffer: SerialBuffer, anyvar: Anyvar) {
+    let def: AnyvarDef;
+    let value: any;
+    if (anyvar === null) {
+        [def, value] = [anyvarDefs.null_t, anyvar];
+    } else if (typeof anyvar === 'string') {
+        [def, value] = [anyvarDefs.string, anyvar];
+    } else if (typeof anyvar === 'number') {
+        [def, value] = [anyvarDefs.int32, anyvar];
+    } else if (anyvar instanceof Uint8Array) {
+        [def, value] = [anyvarDefs.bytes, anyvar];
+    } else if (Array.isArray(anyvar)) {
+        [def, value] = [anyvarDefs.any_array, anyvar];
+    } else if (Object.keys(anyvar).length === 2 && anyvar.hasOwnProperty('type') && anyvar.hasOwnProperty('value')) {
+        [def, value] = [(anyvarDefs as any)[(anyvar as any).type] as AnyvarDef, (anyvar as any).value];
+    } else {
+        [def, value] = [anyvarDefs.any_object, anyvar];
+    }
+    buffer.pushVaruint32(def.index);
+    def.type.serialize(buffer, value);
+}
+
+export function deserializeAnyvar(buffer: SerialBuffer, state?: SerializerState) {
+    const defIndex = buffer.getVaruint32();
+    if (defIndex >= anyvarDefsByIndex.length) {
+        throw new Error('Tried to deserialize unknown anyvar type');
+    }
+    const def = anyvarDefsByIndex[defIndex];
+    const value = def.type.deserialize(buffer, state);
+    if (state && (state.options as any).useShortForm || def.useShortForm) {
+        return value;
+    } else {
+        return { type: def.type.name, value };
+    }
+}
+
+export function deserializeAnyvarShort(buffer: SerialBuffer) {
+    return deserializeAnyvar(buffer, new SerializerState({ useShortForm: true } as any));
+}
+
+export function serializeAnyObject(buffer: SerialBuffer, obj: any) {
+    const entries = Object.entries(obj);
+    buffer.pushVaruint32(entries.length);
+    for (const [key, value] of entries) {
+        buffer.pushString(key);
+        serializeAnyvar(buffer, value as Anyvar);
+    }
+}
+
+export function deserializeAnyObject(buffer: SerialBuffer, state?: SerializerState) {
+    const len = buffer.getVaruint32();
+    const result = {};
+    for (let i = 0; i < len; ++i) {
+        let key = buffer.getString();
+        if (key in result) {
+            let j = 1;
+            while (key + '_' + j in result) {
+                ++j;
+            }
+            key = key + '_' + j;
+        }
+        (result as any)[key] = deserializeAnyvar(buffer, state);
+    }
+    return result;
+}
+
+export function serializeAnyArray(buffer: SerialBuffer, arr: Anyvar[]) {
+    buffer.pushVaruint32(arr.length);
+    for (const x of arr) {
+        serializeAnyvar(buffer, x);
+    }
+}
+
+export function deserializeAnyArray(buffer: SerialBuffer, state?: SerializerState) {
+    const len = buffer.getVaruint32();
+    const result = [];
+    for (let i = 0; i < len; ++i) {
+        result.push(deserializeAnyvar(buffer, state));
+    }
+    return result;
+}
+
+export function serializeQuery(buffer: SerialBuffer, query: Query) {
+    let method: string;
+    let arg: Anyvar;
+    let filter: Query[];
+    if (typeof query === 'string') {
+        method = query;
+    } else if (Array.isArray(query) && query.length === 2) {
+        [method, filter] = query;
+    } else if (Array.isArray(query) && query.length === 3) {
+        [method, arg, filter] = query;
+    } else {
+        [method, arg, filter] = [query.method, query.arg, query.filter];
+    }
+    buffer.pushString(method);
+
+    if (arg === undefined) {
+        buffer.push(0);
+    } else {
+        buffer.push(1);
+        serializeAnyvar(buffer, arg);
+    }
+
+    if (filter === undefined) {
+        buffer.push(0);
+    } else {
+        buffer.pushVaruint32(filter.length);
+        for (const q of filter) {
+            serializeQuery(buffer, q);
+        }
+    }
 }
