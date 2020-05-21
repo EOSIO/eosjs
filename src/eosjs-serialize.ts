@@ -1193,16 +1193,6 @@ function addAdditionalTypes(): Map<string, Type> {
         serialize: serializeAnyArray,
         deserialize: deserializeAnyArray
     }));
-    initialTypes.set('any_object', createType({
-        name: 'any_object',
-        serialize: serializeAnyObject,
-        deserialize: deserializeAnyObject
-    }));
-    initialTypes.set('any_array', createType({
-        name: 'any_array',
-        serialize: serializeAnyArray,
-        deserialize: deserializeAnyArray
-    }));
     return initialTypes;
 }
 
