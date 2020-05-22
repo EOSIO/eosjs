@@ -234,12 +234,8 @@ describe('eosjs-api', () => {
     describe('Api shorthand design (JsonAbi)', () => {
         it('errors if abi is not cached', () => {
             const abiCheck = () => {
-                api.with('testeostoken').as('bob').transfer({
-                    from: 'thegazelle',
-                    to: 'remasteryoda',
-                    quantity: '1.0000 EOS',
-                    memo: 'For a secure future.',
-                });
+                api.with('testeostoken').as('bob')
+                    .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
             };
             expect(abiCheck).toThrowError('ABI must be cached before using ActionBuilder, run api.getAbi()');
         });
@@ -247,12 +243,8 @@ describe('eosjs-api', () => {
         it('generates a valid serialized action using api.with()', async () => {
             await api.getAbi('testeostoken');
 
-            const serializedAction = api.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '1.0000 EOS',
-                memo: 'For a secure future.',
-            });
+            const serializedAction = api.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
             expect(serializedAction).toEqual(serializedActions[0]);
         });
 
@@ -260,33 +252,34 @@ describe('eosjs-api', () => {
             await api.getAbi('testeostoken');
 
             const tx = api.buildTransaction();
-            const serializedAction = tx.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '2.0000 EOS',
-                memo: 'For a second secure future (multiverse?)',
-            });
+            const serializedAction = tx.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '2.0000 EOS', 'For a second secure future (multiverse?)');
             expect(serializedAction).toEqual(serializedActions[1]);
         });
 
         it('confirms serializeActions and ActionBuilder return same serialized data', async () => {
             const response = await api.serializeActions(transaction.actions);
 
-            const firstAction = api.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '1.0000 EOS',
-                memo: 'For a secure future.',
-            });
+            const firstAction = api.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
 
-            const secondAction = api.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '2.0000 EOS',
-                memo: 'For a second secure future (multiverse?)',
-            });
+            const secondAction = api.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '2.0000 EOS', 'For a second secure future (multiverse?)');
 
             expect([firstAction, secondAction]).toEqual(response);
+        });
+
+        it('generates the same serialized data using the longer authorization', async () => {
+            await api.getAbi('testeostoken');
+
+            const firstSerializedAction =
+                api.with('testeostoken').as('thegazelle')
+                    .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
+            const secondSerializedAction =
+                api.with('testeostoken').as([{ actor: 'thegazelle', permission: 'active'}])
+                    .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
+
+            expect(firstSerializedAction).toEqual(secondSerializedAction);
         });
     });
 
@@ -331,6 +324,16 @@ describe('eosjs-api', () => {
             expect(serializedAction.account).toEqual('eosio.token');
             expect(serializedAction.authorization).toEqual([{ actor: 'bob', permission: 'active'}]);
             expect(serializedAction.name).toEqual('transfer');
+        });
+
+        it('generates the same serialized data using the longer authorization', async () => {
+            const firstSerializedAction =
+                api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
+            const secondSerializedAction =
+                api.with('eosio.token').as([{ actor: 'bob', permission: 'active' }])
+                    .transfer('bob', 'alice', '0.0001 SYS', 'memo');
+
+            expect(firstSerializedAction).toEqual(secondSerializedAction);
         });
     });
 });

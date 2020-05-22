@@ -28,7 +28,7 @@
                 module = await WebAssembly.compile(buffer);
               }
 
-              wasmAbiProvider.setWasmAbis([
+              await api.wasmAbiProvider.setWasmAbis([
                 new eosjs_wasmabi.WasmAbi({
                   account: 'eosio.token',
                   mod: module,
@@ -38,7 +38,6 @@
                   print: (x) => console.info(x),
                 })
               ]);
-              await new Promise(resolve => setTimeout(resolve, 250))
             };
         
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
@@ -242,12 +241,7 @@
               await api.getAbi('eosio.token');
               return api.transact({
                 actions: [
-                  api.with('eosio.token').as('bob').transfer({
-                    from: 'bob',
-                    to: 'alice',
-                    quantity: '0.0001 SYS',
-                    memo: 'transactWithShorthandApiJson'
-                  })
+                  api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')
                 ]
               }, {
                 blocksBehind: 3,
@@ -282,12 +276,7 @@
               wasmAbiProvider.wasmAbis.clear();
               await api.getAbi('eosio.token');
               const tx = api.buildTransaction();
-              tx.with('eosio.token').as('bob').transfer({
-                from: 'bob',
-                to: 'alice',
-                quantity: '0.0001 SYS',
-                memo: 'transactWithShorthandTxJson'
-              });
+              tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxJson');
               return tx.send({
                 blocksBehind: 3,
                 expireSeconds: 30

@@ -587,6 +587,8 @@ export class ActionBuilder { // tslint:disable-line max-classes-per-file
         let authorization: any[] = [];
         if (actorName && typeof actorName === 'string') {
             authorization = [{ actor: actorName, permission: 'active'}];
+        } else {
+            authorization = actorName as ser.Authorization[];
         }
 
         const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
@@ -625,7 +627,12 @@ class ActionSerializer { // tslint:disable-line max-classes-per-file
             }
             actions.forEach((type, name) => {
                 Object.assign(this, {
-                    [name]: (data: any) => {
+                    [name]: (...args: any[]) => {
+                        const data: { [key: string]: any } = {};
+                        args.forEach((arg, index) => {
+                            const field = type.fields[index];
+                            data[field.name] = arg;
+                        });
                         const serializedData = ser.serializeAction(
                             { types, actions },
                             accountName,
