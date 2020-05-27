@@ -87,6 +87,54 @@ describe('Serialize', () => {
         });
     });
 
+    describe('name', () => {
+        let serialBuffer: SerialBuffer;
+        const invalidNameErrorMessage = 'Name should be less than 13 characters, not end with a period, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'; //tslint:disable-line
+
+        beforeEach(() => {
+            serialBuffer = new SerialBuffer({
+                textEncoder: new TextEncoder(),
+                textDecoder: new TextDecoder()
+            });
+        });
+
+        it('should be able to push name with a valid account name', () => {
+            const name = '.12345abcdefg';
+
+            serialBuffer.pushName(name);
+
+            expect(serialBuffer.getName()).toEqual(name);
+        });
+
+        it('should not be able to push name with an account name too short', () => {
+            const name = '';
+
+            const shouldFail = () => serialBuffer.pushName(name);
+            expect(shouldFail).toThrowError(invalidNameErrorMessage);
+        });
+
+        it('should not be able to push name with an account name too long', () => {
+            const name = 'abcdabcdabcdab';
+
+            const shouldFail = () => serialBuffer.pushName(name);
+            expect(shouldFail).toThrowError(invalidNameErrorMessage);
+        });
+
+        it('should not be able to push name with an account name with invalid characters', () => {
+            const name = '6789$/,';
+
+            const shouldFail = () => serialBuffer.pushName(name);
+            expect(shouldFail).toThrowError(invalidNameErrorMessage);
+        });
+
+        it('should not be able to push name with an account name ending with .', () => {
+            const name = 'abcd.';
+
+            const shouldFail = () => serialBuffer.pushName(name);
+            expect(shouldFail).toThrowError(invalidNameErrorMessage);
+        });
+    });
+
     describe('bool', () => {
         let boolType: Type;
         let mockedBuffer: SerialBuffer;
