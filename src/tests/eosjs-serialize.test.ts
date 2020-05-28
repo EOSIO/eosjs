@@ -87,6 +87,55 @@ describe('Serialize', () => {
         });
     });
 
+    describe('name', () => {
+        let serialBuffer: SerialBuffer;
+        const invalidNameErrorMessage = 'Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'; //tslint:disable-line
+
+        beforeEach(() => {
+            serialBuffer = new SerialBuffer({
+                textEncoder: new TextEncoder(),
+                textDecoder: new TextDecoder()
+            });
+        });
+
+        it('should be able to push name with a valid account name', () => {
+            const name = '.12345abcdefg';
+
+            serialBuffer.pushName(name);
+
+            expect(serialBuffer.getName()).toEqual(name);
+        });
+
+        it('should remove the `.` character from the end of the account name', () => {
+            const name = 'abcd......';
+            const expectedName = 'abcd';
+
+            serialBuffer.pushName(name);
+            expect(serialBuffer.getName()).toEqual(expectedName);
+        });
+
+        it('should not be able to push name with an account name too short', () => {
+            const name = '';
+
+            const shouldFail = () => serialBuffer.pushName(name);
+            expect(shouldFail).toThrowError(invalidNameErrorMessage);
+        });
+
+        it('should not be able to push name with an account name too long', () => {
+            const name = 'abcdabcdabcdab';
+
+            const shouldFail = () => serialBuffer.pushName(name);
+            expect(shouldFail).toThrowError(invalidNameErrorMessage);
+        });
+
+        it('should not be able to push name with an account name with invalid characters', () => {
+            const name = '6789$/,';
+
+            const shouldFail = () => serialBuffer.pushName(name);
+            expect(shouldFail).toThrowError(invalidNameErrorMessage);
+        });
+    });
+
     describe('bool', () => {
         let boolType: Type;
         let mockedBuffer: SerialBuffer;
