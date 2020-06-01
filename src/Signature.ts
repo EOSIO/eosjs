@@ -58,12 +58,12 @@ export class Signature {
         const s = new BN(this.signature.data.slice(lengthOfR + 1, lengthOfR + lengthOfS + 1));
 
         let ellipticRecoveryBitField;
-        if (this.signature.type === KeyType.k1) {
+        if (this.signature.type === KeyType.k1 || this.signature.type === KeyType.r1) {
             ellipticRecoveryBitField = this.signature.data[0] - 27;
             if (ellipticRecoveryBitField > 3) {
                 ellipticRecoveryBitField -= 4;
             }
-        } else if (this.signature.type === KeyType.r1 || this.signature.type === KeyType.wa) {
+        } else if (this.signature.type === KeyType.wa) {
             ellipticRecoveryBitField = this.signature.data[0];
         }
         const recoveryParam = ellipticRecoveryBitField & 3;
