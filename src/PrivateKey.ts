@@ -73,7 +73,7 @@ export class PrivateKey {
             return Signature.fromElliptic(ellipticSignature, this.getType(), this.ec);
         };
 
-        if (this.key.type === KeyType.k1) {
+        if (this.key.type === KeyType.k1 || this.key.type === KeyType.r1) {
             do {
                 signature = constructSignature({canonical: true, pers: [++tries]});
             } while (!isCanonical(signature.toBinary()));
