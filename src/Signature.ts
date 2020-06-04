@@ -85,18 +85,24 @@ export class Signature {
         return this.signature.type;
     }
 
-    /** Verify a signature with a message digest and public key */
-    public verify(digest: BNInput, publicKey: PublicKey, encoding?: string): boolean {
+    /** Verify a signature with a message or hashed message digest and public key */
+    public verify(data: BNInput, publicKey: PublicKey, shouldHash: boolean = true, encoding: string = 'utf8'): boolean {
+        if (shouldHash) {
+            data = this.ec.hash().update(data, encoding).digest();
+        }
         const ellipticSignature = this.toElliptic();
         const ellipticPublicKey = publicKey.toElliptic();
-        return this.ec.verify(digest, ellipticSignature, ellipticPublicKey, encoding);
+        return this.ec.verify(data, ellipticSignature, ellipticPublicKey, encoding);
     }
 
-    /** Recover a public key from a message digest and signature */
-    public recoverPublicKey(digest: BNInput, encoding?: string): PublicKey {
+    /** Recover a public key from a message or hashed message digest and signature */
+    public recover(data: BNInput, shouldHash: boolean = true, encoding: string = 'utf8'): PublicKey {
+        if (shouldHash) {
+            data = this.ec.hash().update(data, encoding).digest();
+        }
         const ellipticSignature = this.toElliptic();
         const recoveredPublicKey = this.ec.recoverPubKey(
-            digest,
+            data,
             ellipticSignature,
             ellipticSignature.recoveryParam,
             encoding

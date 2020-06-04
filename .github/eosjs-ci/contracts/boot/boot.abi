@@ -1,0 +1,60 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "boot",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "onblock",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "setcode",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "vmtype",
+                    "type": "uint8"
+                },
+                {
+                    "name": "vmversion",
+                    "type": "uint8"
+                },
+                {
+                    "name": "code",
+                    "type": "bytes"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "boot",
+            "type": "boot",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "onblock",
+            "type": "onblock",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setcode",
+            "type": "setcode",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}

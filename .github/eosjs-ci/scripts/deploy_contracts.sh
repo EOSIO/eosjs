@@ -55,7 +55,7 @@ function setcode {
   retry_count="4"
 
   while [ $retry_count -gt 0 ]; do
-    cleos set contract $1 $2 $3 $4 -p $1@active
+    cleos set code $1 $2 -p $1@active
     if [ $? -eq 0 ]; then
       break
     fi
@@ -71,40 +71,27 @@ function setcode {
   fi
 }
 
-# $1 - parent folder where smart contract directory is located
-# $2 - smart contract name
-# $3 - account name
-function deploy_system_contract {
-  # Unlock the wallet, ignore error if already unlocked
-  cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
+# $1 account name
+# $2 contract directory
+# $3 abi file name
+function setabi {
+  retry_count="4"
 
-  echo "Deploying the $2 contract in path: $CONTRACTS_DIR/$1/$2/src"
+  while [ $retry_count -gt 0 ]; do
+    cleos set abi $1 $2 -p $1@active
+    if [ $? -eq 0 ]; then
+      break
+    fi
 
-  # Move into contracts /src directory
-  cd "$CONTRACTS_DIR/$1/$2/src"
+    echo "setcode failed retrying..."
+    sleep 1s
+    retry_count=$[$retry_count-1]
+  done
 
-  # Compile the smart contract to wasm and abi files using the EOSIO.CDT (Contract Development Toolkit)
-  # https://github.com/EOSIO/eosio.cdt
-  sudo eosio-cpp -abigen "$2.cpp" -o "$2.wasm" -I ../include
-
-  # Move back into the executable directory
-  cd $CONTRACTS_DIR
-
-  # Set (deploy) the compiled contract to the blockchain
-  setcode $3 "$CONTRACTS_DIR/$1/$2/src" "$2.wasm" "$2.abi"
-}
-
-function deploy_1.8.x_bios {
-  # Unlock the wallet, ignore error if already unlocked
-  cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
-
-  echo "Deploying the v1.8.3 eosio.bios contract in path: $CONTRACTS_DIR/$1"
-
-  # Move back into the executable directory
-  cd $CONTRACTS_DIR
-
-  # Set (deploy) the compiled contract to the blockchain
-  setcode $3 "$CONTRACTS_DIR/$1" "$2.wasm" "$2.abi"
+  if [ $retry_count -eq 0 ]; then
+    echo "setcode failed too many times, bailing."
+    exit 1
+  fi
 }
 
 # $1 - account name
@@ -113,17 +100,6 @@ function deploy_1.8.x_bios {
 function create_account {
   cleos wallet import --private-key $3
   cleos create account eosio $1 $2
-}
-
-function issue_sys_tokens {
-  echo "Issuing SYS tokens"
-  cleos push action eosio.token create '["eosio", "10000000000.0000 SYS"]' -p eosio.token
-  cleos push action eosio.token issue '["eosio", "5000000000.0000 SYS", "Half of available supply"]' -p eosio
-}
-
-# $1 - account name
-function transfer_sys_tokens {
-  cleos transfer eosio $1 "1000000.0000 SYS"
 }
 
 # Move into the executable directory
@@ -168,25 +144,34 @@ start_wallet
 # preactivate concensus upgrades
 post_preactivate
 
-# eosio.bios
+sleep 1s
+cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
+setabi eosio $CONTRACTS_DIR/boot/boot.abi
+setcode eosio $CONTRACTS_DIR/boot/boot.wasm
+sleep 2s
+cleos push action eosio boot "[]" -p eosio@active
 
-deploy_1.8.x_bios eosio.bios-v1.8.3 eosio.bios eosio
+sleep 1s
+cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
+setcode eosio $CONTRACTS_DIR/system/system.wasm
+setabi eosio $CONTRACTS_DIR/system/system.abi
 
-activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
-
-deploy_system_contract eosio.contracts/contracts eosio.bios eosio
-
-# eosio.token
+# token
+sleep 1s
+cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
 create_account eosio.token $SYSTEM_ACCOUNT_PUBLIC_KEY $SYSTEM_ACCOUNT_PRIVATE_KEY
-deploy_system_contract eosio.contracts/contracts eosio.token eosio.token
-issue_sys_tokens
-
-# example
 create_account bob $EXAMPLE_ACCOUNT_PUBLIC_KEY $EXAMPLE_ACCOUNT_PRIVATE_KEY
-transfer_sys_tokens bob
-
 create_account alice $EXAMPLE_ACCOUNT_PUBLIC_KEY $EXAMPLE_ACCOUNT_PRIVATE_KEY
-transfer_sys_tokens alice
+
+sleep 1s
+cleos set abi eosio.token $CONTRACTS_DIR/token/token.abi -p eosio.token@active -p eosio@active
+cleos set code eosio.token $CONTRACTS_DIR/token/token.wasm -p eosio.token@active -p eosio@active
+
+cleos push action eosio.token create '["bob", "10000000000.0000 SYS"]' -p eosio.token
+cleos push action eosio.token issue '["bob", "5000000000.0000 SYS", "Half of available supply"]' -p bob
+cleos push action eosio.token transfer '["bob", "alice", "1000000.0000 SYS", "memo"]' -p bob
+
+cleos push action eosio init "[]" -p eosio@active
 
 echo "All done initializing the blockchain"
 
