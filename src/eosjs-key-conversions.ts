@@ -18,7 +18,8 @@ export const constructElliptic = (type: KeyType): EC => {
 
 export const generateKeyPair = (type: KeyType, options?: EC.GenKeyPairOptions):
     {publicKey: PublicKey, privateKey: PrivateKey} => {
-    if (process.env.EOSJS_KEYGEN_ALLOWED !== 'true') {
+    // @ts-ignore
+    if (process.env.EOSJS_KEYGEN_ALLOWED !== 'true' && window.EOSJS_KEYGEN_ALLOWED !== 'true') {
         throw new Error('Key generation is completely INSECURE in production environments in the browser. ' +
             'If you are absolutely certain this does NOT describe your environment, add an environment variable ' +
             '`EOSJS_KEYGEN_ALLOWED` set to \'true\'.  If this does describe your environment and you add the ' +
