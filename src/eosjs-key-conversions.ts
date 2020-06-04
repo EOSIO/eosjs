@@ -22,8 +22,8 @@ export const generateKeyPair = (type: KeyType, options?: EC.GenKeyPairOptions):
     if (process.env.EOSJS_KEYGEN_ALLOWED !== 'true' && window.EOSJS_KEYGEN_ALLOWED !== 'true') {
         throw new Error('Key generation is completely INSECURE in production environments in the browser. ' +
             'If you are absolutely certain this does NOT describe your environment, add an environment variable ' +
-            '`EOSJS_KEYGEN_ALLOWED` set to \'true\'.  If this does describe your environment and you add the ' +
-            'environment variable, YOU DO SO AT YOUR OWN RISK AND THE RISK OF YOUR USERS.');
+            'or window variable `EOSJS_KEYGEN_ALLOWED` set to \'true\'.  If this does describe your environment ' +
+            'and you add the environment/window variable, YOU DO SO AT YOUR OWN RISK AND THE RISK OF YOUR USERS.');
     }
     let ec;
     if (type === KeyType.k1) {
