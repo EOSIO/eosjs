@@ -48,16 +48,14 @@ describe('JsSignatureProvider', () => {
     // These are simplified tests simply to verify a refactor didn't mess with existing code
     describe('secp256k1 elliptic', () => {
         it('generates a private and public key pair', () => {
-            process.env.EOSJS_KEYGEN_ALLOWED = 'true';
-            const {privateKey, publicKey} = generateKeyPair(KeyType.k1);
+            const {privateKey, publicKey} = generateKeyPair(KeyType.k1, { secureEnv: true });
             expect(privateKey).toBeInstanceOf(PrivateKey);
             expect(privateKey.isValid()).toBeTruthy();
             expect(publicKey).toBeInstanceOf(PublicKey);
             expect(publicKey.isValid()).toBeTruthy();
         });
 
-        it('throws error with no EOSJS_KEYGEN_ALLOWED environment variable', () => {
-            process.env.EOSJS_KEYGEN_ALLOWED = null;
+        it('throws error with no options.secureEnv variable', () => {
             expect(() => generateKeyPair(KeyType.k1)).toThrowError();
         });
 
@@ -202,16 +200,14 @@ describe('JsSignatureProvider', () => {
 
     describe('p256 elliptic', () => {
         it('generates a private and public key pair', () => {
-            process.env.EOSJS_KEYGEN_ALLOWED = 'true';
-            const {privateKey, publicKey} = generateKeyPair(KeyType.r1);
+            const {privateKey, publicKey} = generateKeyPair(KeyType.r1, { secureEnv: true });
             expect(privateKey).toBeInstanceOf(PrivateKey);
             expect(privateKey.isValid()).toBeTruthy();
             expect(publicKey).toBeInstanceOf(PublicKey);
             expect(publicKey.isValid()).toBeTruthy();
         });
 
-        it('throws error with no EOSJS_KEYGEN_ALLOWED environment variable', () => {
-            process.env.EOSJS_KEYGEN_ALLOWED = null;
+        it('throws error with no options.secureEnv variable', () => {
             expect(() => generateKeyPair(KeyType.r1)).toThrowError();
         });
 
