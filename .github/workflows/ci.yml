@@ -22,7 +22,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Update
         run: |
-          yarn upgrade && npx syncyarnlock@1.0.19 -s -k && rm -rf yarn.lock && yarn install
+          yarn install && yarn upgrade && npx syncyarnlock@1.0.19 -s -k && rm -rf yarn.lock && yarn install
       - name: Install
         run: |
           yarn --frozen-lockfile
