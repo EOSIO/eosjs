@@ -28,9 +28,8 @@ describe('ecc Migration', () => {
     });
 
     it('verifies `randomKey` calls generateKeyPair', async () => {
-        process.env.EOSJS_KEYGEN_ALLOWED = 'true';
         console.warn = jest.fn();
-        const privateKey = await eccMigration.randomKey(0);
+        const privateKey = await eccMigration.randomKey(0, { secureEnv: true });
         expect(console.warn).toHaveBeenCalledWith('Argument `cpuEntropyBits` is deprecated, ' +
             'use the options argument instead');
         expect(typeof privateKey).toEqual('string');
