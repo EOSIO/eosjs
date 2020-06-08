@@ -69,7 +69,7 @@ class JsSignatureProvider implements SignatureProvider {
             const publicKey = PublicKey.fromString(key);
             const ellipticPrivateKey = this.keys.get(convertLegacyPublicKey(key));
             const privateKey = PrivateKey.fromElliptic(ellipticPrivateKey, publicKey.getType());
-            const signature = privateKey.sign(digest);
+            const signature = privateKey.sign(digest, false);
             signatures.push(signature.toString());
         }
 

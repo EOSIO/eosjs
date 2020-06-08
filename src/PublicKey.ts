@@ -1,11 +1,12 @@
-import { BNInput, ec as EC } from 'elliptic';
+import { ec as EC } from 'elliptic';
 import {
     Key,
     KeyType,
+    publicKeyToLegacyString,
     publicKeyToString,
     stringToPublicKey,
 } from './eosjs-numeric';
-import { constructElliptic, PrivateKey, Signature } from './eosjs-key-conversions';
+import { constructElliptic } from './eosjs-key-conversions';
 
 /** Represents/stores a public key and provides easy conversion for use with `elliptic` lib */
 export class PublicKey {
@@ -38,6 +39,11 @@ export class PublicKey {
         return publicKeyToString(this.key);
     }
 
+    /** Export public key as Legacy EOSIO-format public key */
+    public toLegacyString(): string {
+        return publicKeyToLegacyString(this.key);
+    }
+
     /** Export public key as `elliptic`-format public key */
     public toElliptic(): EC.KeyPair {
         return this.ec.keyPair({
@@ -51,9 +57,13 @@ export class PublicKey {
     }
 
     /** Validate a public key */
-    public validate(): boolean {
-        const ellipticPublicKey = this.toElliptic();
-        const validationObj = ellipticPublicKey.validate();
-        return validationObj.result;
+    public isValid(): boolean {
+        try {
+            const ellipticPublicKey = this.toElliptic();
+            const validationObj = ellipticPublicKey.validate();
+            return validationObj.result;
+        } catch {
+            return false;
+        }
     }
 }
