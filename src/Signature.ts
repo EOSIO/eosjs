@@ -27,12 +27,12 @@ export class Signature {
         const r = ellipticSig.r.toArray('be', 32);
         const s = ellipticSig.s.toArray('be', 32);
         let eosioRecoveryParam;
-        if (keyType === KeyType.k1) {
+        if (keyType === KeyType.k1 || keyType === KeyType.r1) {
             eosioRecoveryParam = ellipticSig.recoveryParam + 27;
             if (ellipticSig.recoveryParam <= 3) {
                 eosioRecoveryParam += 4;
             }
-        } else if (keyType === KeyType.r1 || keyType === KeyType.wa) {
+        } else if (keyType === KeyType.wa) {
             eosioRecoveryParam = ellipticSig.recoveryParam;
         }
         const sigData = new Uint8Array([eosioRecoveryParam].concat(r, s));
@@ -58,12 +58,12 @@ export class Signature {
         const s = new BN(this.signature.data.slice(lengthOfR + 1, lengthOfR + lengthOfS + 1));
 
         let ellipticRecoveryBitField;
-        if (this.signature.type === KeyType.k1) {
+        if (this.signature.type === KeyType.k1 || this.signature.type === KeyType.r1) {
             ellipticRecoveryBitField = this.signature.data[0] - 27;
             if (ellipticRecoveryBitField > 3) {
                 ellipticRecoveryBitField -= 4;
             }
-        } else if (this.signature.type === KeyType.r1 || this.signature.type === KeyType.wa) {
+        } else if (this.signature.type === KeyType.wa) {
             ellipticRecoveryBitField = this.signature.data[0];
         }
         const recoveryParam = ellipticRecoveryBitField & 3;

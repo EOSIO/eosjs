@@ -1,0 +1,65 @@
+name: Publish Edge
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  publish-edge:
+    name: Publish Edge
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+      - name: Setup Node.js
+        uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
+        with:
+          node-version: '12.14.1'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@70655ec8323daeeaa7ef06d7c56e1b9191396cbe
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Lint
+        run: |
+          yarn lint
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@8aac1d019734a107e4eaaefe2e26beb3149e5540
+        with:
+          spec: cypress/integration/index.spec.js
+      - name: Publish Edge
+        run: |
+          . ./scripts/publish-utils.sh
+          setup_git
+          COMMIT=${GITHUB_SHA:0:7}
+          sed -i "s/  \"version\": \"\([0-9]\+\).\([0-9]\+\).\([0-9]\+\)/&-$GITHUB_RUN_NUMBER-$COMMIT/" package.json
+          git commit -a -m "Updating version [skip ci]" --allow-empty
+          npm publish --access public --tag edge
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:v0.2.1
+
+        ports:
+          - 8888:8888
+          - 9876:9876

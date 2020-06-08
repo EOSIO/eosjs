@@ -8,6 +8,7 @@
         <script src='../../dist-web/eosjs-wasmabi.min.js'></script>
         <script>
             const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
+            const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT'
             /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
             * 1) cleos create key --to-console (copy this privateKey & publicKey)
             * 2) cleos wallet import 
@@ -16,7 +17,7 @@
             */
         
             const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
-            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
+            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey, r1PrivateKey]);
             const wasmAbiProvider = new eosjs_wasmabi.WasmAbiProvider();
             const api = new eosjs_api.Api({ rpc, signatureProvider, wasmAbiProvider });
             let module;
@@ -43,19 +44,19 @@
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
 
-            const transactWithConfig = async (config, memo) => {
+            const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
               wasmAbiProvider.wasmAbis.clear();
               return api.transact({
                 actions: [{
                   account: 'eosio.token',
                   name: 'transfer',
                   authorization: [{
-                    actor: 'bob',
+                    actor: from,
                     permission: 'active',
                   }],
                   data: {
-                    from: 'bob',
-                    to: 'alice',
+                    from,
+                    to,
                     quantity: '0.0001 SYS',
                     memo,
                   },
@@ -373,6 +374,29 @@
               resultsLabel.innerText = FAILED;
               return false;
             };
+
+            const testWithP256EllipticCurve = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithR1KeySignature', 'bobr1', 'alicer1');
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact elliptic p256/KeyType.r1 Keys and Signatures Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{
@@ -459,6 +483,7 @@
             <div><h2>Transact with .with() Using Tx and Json Abi</h2><button onClick='testShorthandWithTxJson(event);'>Test</button></div>
             <div><h2>Transact with .with() Using Api and Wasm Abi</h2><button onClick='testShorthandWithApiWasm(event);'>Test</button></div>
             <div><h2>Transact with .with() Using Tx and Wasm Abi</h2><button onClick='testShorthandWithTxWasm(event);'>Test</button></div>
+            <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button onClick='testWithP256EllipticCurve(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>

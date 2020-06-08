@@ -7,6 +7,7 @@ const fetch = require('node-fetch');
 const { TextEncoder, TextDecoder } = require('util');
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
+const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT'
 /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
  * 1) cleos create key --to-console (copy this privateKey & publicKey)
  * 2) cleos wallet import 
@@ -15,7 +16,7 @@ const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // rep
  */
 
 const rpc = new JsonRpc('http://localhost:8888', { fetch });
-const signatureProvider = new JsSignatureProvider([privateKey]);
+const signatureProvider = new JsSignatureProvider([privateKey, r1PrivateKey]);
 const wasmAbiProvider = new WasmAbiProvider();
 const api = new Api({ rpc, signatureProvider, wasmAbiProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
@@ -32,22 +33,25 @@ const setWasmAbi = async () => {
     ]);
 };
 
-const transactWithConfig = async (config, memo) => await api.transact({
-    actions: [{
-        account: 'eosio.token',
-        name: 'transfer',
-        authorization: [{
-            actor: 'bob',
-            permission: 'active',
-        }],
-        data: {
-            from: 'bob',
-            to: 'alice',
-            quantity: '0.0001 SYS',
-            memo,
-        },
-    }]
-}, config);
+const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
+    wasmAbiProvider.wasmAbis.clear();
+    return await api.transact({
+        actions: [{
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: from,
+                permission: 'active',
+            }],
+            data: {
+                from,
+                to,
+                quantity: '0.0001 SYS',
+                memo,
+            },
+        }]
+    }, config);
+};
 
 const transactWithoutConfig = async () => {
     const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30}, 'transactWithoutConfig');
