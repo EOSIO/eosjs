@@ -41,7 +41,7 @@
     "@babel/preset-stage-1": "^7.8.3",
     "@blockone/tslint-config-blockone": "^3.1.0",
     "@types/jest": "^24.9.1",
-    "@types/node": "^11.15.14",
+    "@types/node": "^11.15.15",
     "@types/pako": "^1.0.1",
     "cypress": "^3.8.3",
     "eosjs-ecc": "^4.0.7",
