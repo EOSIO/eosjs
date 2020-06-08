@@ -86,12 +86,7 @@ const transactWithShorthandApiJson = async () => {
     await api.getAbi('eosio.token');
     return await api.transact({
         actions: [
-          api.with('eosio.token').as('bob').transfer({
-            from: 'bob',
-            to: 'alice',
-            quantity: '0.0001 SYS',
-            memo: 'transactWithShorthandApiJson'
-          })
+          api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')
         ]
     }, {
         blocksBehind: 3,
@@ -102,12 +97,7 @@ const transactWithShorthandApiJson = async () => {
 const transactWithShorthandTxJson = async () => {
     await api.getAbi('eosio.token');
     const tx = api.buildTransaction();
-    tx.with('eosio.token').as('bob').transfer({
-        from: 'bob',
-        to: 'alice',
-        quantity: '0.0001 SYS',
-        memo: 'transactWithShorthandTxJson'
-    });
+    tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxJson');
     return await tx.send({
         blocksBehind: 3,
         expireSeconds: 30
