@@ -79,6 +79,14 @@ describe('Node JS environment', () => {
         });
     });
 
+    it('transacts with elliptic p256/KeyType.R1 keys and signatures', async () => {
+        transactionResponse = await tests.transactWithConfig({
+            blocksBehind: 3,
+            expireSeconds: 30
+        }, 'transactWithR1KeySignature', 'bobr1', 'alicer1');
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
         try {
             failedAsPlanned = true;
