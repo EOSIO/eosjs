@@ -26,6 +26,11 @@ describe('Node JS environment', () => {
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     }, 10000);
 
+    it('transacts with compressed transaction', async () => {
+        transactionResponse = await tests.transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true });
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
     it('transacts without broadcasting, returning signatures and packed transaction', async () => {
         transactionSignatures = await tests.transactWithConfig({
             broadcast: false,

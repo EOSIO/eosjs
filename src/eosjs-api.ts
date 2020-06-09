@@ -3,6 +3,8 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
+import { inflate, deflate } from 'pako';
+
 import {
     AbiProvider,
     AuthorityProvider,
@@ -243,12 +245,23 @@ export class Api {
         };
     }
 
+    /** Deflate a serialized object */
+    public deflateSerializedArray(serializedArray: Uint8Array): Uint8Array {
+        return deflate(serializedArray, { level: 9 });
+    }
+
+    /** Inflate a compressed serialized object */
+    public inflateSerializedArray(compressedSerializedArray: Uint8Array): Uint8Array {
+        return inflate(compressedSerializedArray);
+    }
+
     /**
      * Create and optionally broadcast a transaction.
      *
      * Named Parameters:
      *    * `broadcast`: broadcast this transaction?
      *    * `sign`: sign this transaction?
+     *    * `compression`: compress this transaction?
      *    * If both `blocksBehind` and `expireSeconds` are present,
      *      then fetch the block which is `blocksBehind` behind head block,
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
@@ -259,8 +272,8 @@ export class Api {
      */
     public async transact(
         transaction: any,
-        { broadcast = true, sign = true, blocksBehind, useLastIrreversible, expireSeconds }: TransactConfig = {}
-    ): Promise<any> {
+        { broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
+            TransactConfig = {}): Promise<any> {
         let info: GetInfoResult;
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
@@ -273,7 +286,7 @@ export class Api {
         }
 
         if ((typeof blocksBehind === 'number' || useLastIrreversible) && expireSeconds) {
-            transaction = this.generateTapos(info, transaction, blocksBehind, useLastIrreversible, expireSeconds);
+            transaction = await this.generateTapos(info, transaction, blocksBehind, useLastIrreversible, expireSeconds);
         }
 
         if (!this.hasRequiredTaposFields(transaction)) {
@@ -304,6 +317,9 @@ export class Api {
             });
         }
         if (broadcast) {
+            if (compression) {
+                return this.pushCompressedSignedTransaction(pushTransactionArgs);
+            }
             return this.pushSignedTransaction(pushTransactionArgs);
         }
         return pushTransactionArgs;
@@ -320,6 +336,21 @@ export class Api {
         });
     }
 
+    public async pushCompressedSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
+        const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
+        const compressedSerializedContextFreeData =
+            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
+
+        return this.rpc.push_transaction({
+            signatures,
+            compression: 1,
+            serializedTransaction: compressedSerializedTransaction,
+            serializedContextFreeData: compressedSerializedContextFreeData
+        });
+    }
+
     private async generateTapos(
         info: GetInfoResult | undefined,
         transaction: any,
@@ -331,19 +362,13 @@ export class Api {
             info = await this.rpc.get_info();
         }
 
-        let taposBlockNumber: number;
-        if (useLastIrreversible) {
-            taposBlockNumber = info.last_irreversible_block_num;
-        } else {
-            taposBlockNumber = info.head_block_num - blocksBehind;
-        }
+        const taposBlockNumber: number = useLastIrreversible
+          ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
 
-        let refBlock: GetBlockHeaderStateResult | GetBlockResult;
-        try {
-            refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
-        } catch (error) {
-            refBlock = await this.rpc.get_block(taposBlockNumber);
-        }
+        const refBlock: GetBlockHeaderStateResult | GetBlockResult =
+          taposBlockNumber <= info.last_irreversible_block_num
+          ? await this.rpc.get_block(taposBlockNumber)
+          : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
     }
@@ -353,4 +378,12 @@ export class Api {
         return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
+    private async tryGetBlockHeaderState(taposBlockNumber: number):
+        Promise<GetBlockHeaderStateResult | GetBlockResult> {
+        try {
+            return await this.rpc.get_block_header_state(taposBlockNumber);
+        } catch (error) {
+            return await this.rpc.get_block(taposBlockNumber);
+        }
+    }
 } // Api
