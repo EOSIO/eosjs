@@ -27,7 +27,8 @@
   "dependencies": {
     "@babel/runtime": "7.8.3",
     "@types/elliptic": "6.4.10",
-    "elliptic": "6.5.2"
+    "elliptic": "6.5.2",
+    "pako": "1.0.11"
   },
   "devDependencies": {
     "@babel/core": "7.8.3",
@@ -37,8 +38,9 @@
     "@blockone/tslint-config-blockone": "3.0.0",
     "@types/jest": "24.9.1",
     "@types/node": "11.9.4",
+    "@types/pako": "1.0.1",
     "cypress": "3.8.2",
-    "eosjs-ecc": "^4.0.7",
+    "eosjs-ecc": "4.0.7",
     "jest": "25.1.0",
     "jest-fetch-mock": "2.1.1",
     "json-loader": "0.5.7",
