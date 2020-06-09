@@ -3,6 +3,8 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
+import { inflate, deflate } from 'pako';
+
 import {
     AbiProvider,
     AuthorityProvider,
@@ -242,6 +244,16 @@ export class Api {
         };
     }
 
+    /** Deflate a serialized object */
+    public deflateSerializedArray(serializedArray: Uint8Array) {
+        return deflate(serializedArray, { level: 9 });
+    }
+
+    /** Inflate a compressed serialized object */
+    public inflateSerializedArray(compressedSerializedArray: Uint8Array): Uint8Array {
+        return inflate(compressedSerializedArray);
+    }
+
     /**
      * Create and optionally broadcast a transaction.
      *
@@ -319,6 +331,20 @@ export class Api {
             signatures,
             serializedTransaction,
             serializedContextFreeData
+        });
+    }
+
+    public async pushCompressedSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
+    ): Promise<any> {
+        const compressedSerializedTransaction = deflate(serializedTransaction);
+        const compressedSerializedContextFreeData = deflate(serializedContextFreeData);
+
+        return this.rpc.push_transaction({
+            signatures,
+            compression: 1,
+            serializedTransaction: compressedSerializedTransaction,
+            serializedContextFreeData: compressedSerializedContextFreeData
         });
     }
 
