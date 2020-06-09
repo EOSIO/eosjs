@@ -1,0 +1,72 @@
+name: CI
+on:
+  push:
+    branches-ignore:
+      - develop
+  pull_request:
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        node-version: [12.14.1]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+      - name: Update
+        run: |
+          yarn install && yarn upgrade && npx syncyarnlock@1.0.19 -s -k && rm -rf yarn.lock && yarn install
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Lint
+        run: |
+          yarn lint
+      - name: Audit
+        run: |
+          yarn audit
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@8aac1d019734a107e4eaaefe2e26beb3149e5540
+        with:
+          spec: cypress/integration/index.spec.js
+      - name: Commit
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit package.json yarn.lock -m "Updating package.json and yarn.lock" || echo "Nothing to commit"
+      - name: Get Branch Name
+        if: ${{ github.event_name == 'push' }}
+        id: branch_name
+        run: |
+          echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+      - name: Push
+        if: ${{ github.event_name == 'push' }}
+        uses: ad-m/github-push-action@68af9897f2b021035ca3952bf354bbb4675c1762
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.branch_name.outputs.short_ref }}
+
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:v0.2.1
+
+        ports:
+          - 8888:8888
+          - 9876:9876

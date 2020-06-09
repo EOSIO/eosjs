@@ -1,6 +1,8 @@
 /**
  * @module Numeric
  */
+import { sha256 } from 'hash.js';
+
 // copyright defined in eosjs/LICENSE.txt
 
 const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
@@ -8,47 +10,48 @@ const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => Array
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-function create_base58_map() {
+const create_base58_map = () => {
     const base58M = Array(256).fill(-1) as number[];
     for (let i = 0; i < base58Chars.length; ++i) {
         base58M[base58Chars.charCodeAt(i)] = i;
     }
     return base58M;
-}
+};
 
 const base58Map = create_base58_map();
 
-function create_base64_map() {
+const create_base64_map = () => {
     const base64M = Array(256).fill(-1) as number[];
     for (let i = 0; i < base64Chars.length; ++i) {
         base64M[base64Chars.charCodeAt(i)] = i;
     }
     base64M['='.charCodeAt(0)] = 0;
     return base64M;
-}
+};
 
 const base64Map = create_base64_map();
 
 /** Is `bignum` a negative number? */
-export function isNegative(bignum: Uint8Array) {
+export const isNegative = (bignum: Uint8Array) => {
     return (bignum[bignum.length - 1] & 0x80) !== 0;
-}
+};
 
 /** Negate `bignum` */
-export function negate(bignum: Uint8Array) {
+export const negate = (bignum: Uint8Array) => {
     let carry = 1;
     for (let i = 0; i < bignum.length; ++i) {
         const x = (~bignum[i] & 0xff) + carry;
         bignum[i] = x;
         carry = x >> 8;
     }
-}
+};
 
 /**
  * Convert an unsigned decimal number in `s` to a bignum
+ *
  * @param size bignum size (bytes)
  */
-export function decimalToBinary(size: number, s: string) {
+export const decimalToBinary = (size: number, s: string) => {
     const result = new Uint8Array(size);
     for (let i = 0; i < s.length; ++i) {
         const srcDigit = s.charCodeAt(i);
@@ -66,13 +69,14 @@ export function decimalToBinary(size: number, s: string) {
         }
     }
     return result;
-}
+};
 
 /**
  * Convert a signed decimal number in `s` to a bignum
+ *
  * @param size bignum size (bytes)
  */
-export function signedDecimalToBinary(size: number, s: string) {
+export const signedDecimalToBinary = (size: number, s: string) => {
     const negative = s[0] === '-';
     if (negative) {
         s = s.substr(1);
@@ -87,13 +91,14 @@ export function signedDecimalToBinary(size: number, s: string) {
         throw new Error('number is out of range');
     }
     return result;
-}
+};
 
 /**
  * Convert `bignum` to an unsigned decimal number
+ *
  * @param minDigits 0-pad result to this many digits
  */
-export function binaryToDecimal(bignum: Uint8Array, minDigits = 1) {
+export const binaryToDecimal = (bignum: Uint8Array, minDigits = 1) => {
     const result = Array(minDigits).fill('0'.charCodeAt(0)) as number[];
     for (let i = bignum.length - 1; i >= 0; --i) {
         let carry = bignum[i];
@@ -109,22 +114,23 @@ export function binaryToDecimal(bignum: Uint8Array, minDigits = 1) {
     }
     result.reverse();
     return String.fromCharCode(...result);
-}
+};
 
 /**
  * Convert `bignum` to a signed decimal number
+ *
  * @param minDigits 0-pad result to this many digits
  */
-export function signedBinaryToDecimal(bignum: Uint8Array, minDigits = 1) {
+export const signedBinaryToDecimal = (bignum: Uint8Array, minDigits = 1) => {
     if (isNegative(bignum)) {
         const x = bignum.slice();
         negate(x);
         return '-' + binaryToDecimal(x, minDigits);
     }
     return binaryToDecimal(bignum, minDigits);
-}
+};
 
-function base58ToBinaryVarSize(s: string) {
+const base58ToBinaryVarSize = (s: string) => {
     const result = [] as number[];
     for (let i = 0; i < s.length; ++i) {
         let carry = base58Map[s.charCodeAt(i)];
@@ -149,13 +155,14 @@ function base58ToBinaryVarSize(s: string) {
     }
     result.reverse();
     return new Uint8Array(result);
-}
+};
 
 /**
  * Convert an unsigned base-58 number in `s` to a bignum
+ *
  * @param size bignum size (bytes)
  */
-export function base58ToBinary(size: number, s: string) {
+export const base58ToBinary = (size: number, s: string) => {
     if (!size) {
         return base58ToBinaryVarSize(s);
     }
@@ -176,13 +183,14 @@ export function base58ToBinary(size: number, s: string) {
     }
     result.reverse();
     return result;
-}
+};
 
 /**
  * Convert `bignum` to a base-58 number
+ *
  * @param minDigits 0-pad result to this many digits
  */
-export function binaryToBase58(bignum: Uint8Array, minDigits = 1) {
+export const binaryToBase58 = (bignum: Uint8Array, minDigits = 1) => {
     const result = [] as number[];
     for (const byte of bignum) {
         let carry = byte;
@@ -205,10 +213,10 @@ export function binaryToBase58(bignum: Uint8Array, minDigits = 1) {
     }
     result.reverse();
     return String.fromCharCode(...result);
-}
+};
 
 /** Convert an unsigned base-64 number in `s` to a bignum */
-export function base64ToBinary(s: string) {
+export const base64ToBinary = (s: string) => {
     let len = s.length;
     if ((len & 3) === 1 && s[len - 1] === '=') {
         len -= 1;
@@ -241,7 +249,7 @@ export function base64ToBinary(s: string) {
         }
     }
     return result;
-}
+};
 
 /** Key types this library supports */
 export enum KeyType {
@@ -265,7 +273,7 @@ export interface Key {
     data: Uint8Array;
 }
 
-function digestSuffixRipemd160(data: Uint8Array, suffix: string) {
+const digestSuffixRipemd160 = (data: Uint8Array, suffix: string) => {
     const d = new Uint8Array(data.length + suffix.length);
     for (let i = 0; i < data.length; ++i) {
         d[i] = data[i];
@@ -274,9 +282,9 @@ function digestSuffixRipemd160(data: Uint8Array, suffix: string) {
         d[data.length + i] = suffix.charCodeAt(i);
     }
     return ripemd160(d);
-}
+};
 
-function stringToKey(s: string, type: KeyType, size: number, suffix: string): Key {
+const stringToKey = (s: string, type: KeyType, size: number, suffix: string): Key => {
     const whole = base58ToBinary(size ? size + 4 : 0, s);
     const result = { type, data: new Uint8Array(whole.buffer, 0, whole.length - 4) };
     const digest = new Uint8Array(digestSuffixRipemd160(result.data, suffix));
@@ -285,9 +293,9 @@ function stringToKey(s: string, type: KeyType, size: number, suffix: string): Ke
         throw new Error('checksum doesn\'t match');
     }
     return result;
-}
+};
 
-function keyToString(key: Key, suffix: string, prefix: string) {
+const keyToString = (key: Key, suffix: string, prefix: string) => {
     const digest = new Uint8Array(digestSuffixRipemd160(key.data, suffix));
     const whole = new Uint8Array(key.data.length + 4);
     for (let i = 0; i < key.data.length; ++i) {
@@ -297,10 +305,10 @@ function keyToString(key: Key, suffix: string, prefix: string) {
         whole[i + key.data.length] = digest[i];
     }
     return prefix + binaryToBase58(whole);
-}
+};
 
 /** Convert key in `s` to binary form */
-export function stringToPublicKey(s: string): Key {
+export const stringToPublicKey = (s: string): Key => {
     if (typeof s !== 'string') {
         throw new Error('expected string containing public key');
     }
@@ -325,10 +333,21 @@ export function stringToPublicKey(s: string): Key {
     } else {
         throw new Error('unrecognized public key format');
     }
-}
+};
+
+/** Convert public `key` to legacy string (base-58) form */
+export const publicKeyToLegacyString = (key: Key) => {
+    if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
+        return keyToString(key, '', 'EOS');
+    } else if (key.type === KeyType.r1 || key.type === KeyType.wa) {
+        throw new Error('Key format not supported in legacy conversion');
+    } else {
+        throw new Error('unrecognized public key format');
+    }
+};
 
 /** Convert `key` to string (base-58) form */
-export function publicKeyToString(key: Key) {
+export const publicKeyToString = (key: Key) => {
     if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
         return keyToString(key, 'K1', 'PUB_K1_');
     } else if (key.type === KeyType.r1 && key.data.length === publicKeyDataSize) {
@@ -338,27 +357,27 @@ export function publicKeyToString(key: Key) {
     } else {
         throw new Error('unrecognized public key format');
     }
-}
+};
 
 /** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
  * Leaves other formats untouched
  */
-export function convertLegacyPublicKey(s: string) {
+export const convertLegacyPublicKey = (s: string) => {
     if (s.substr(0, 3) === 'EOS') {
         return publicKeyToString(stringToPublicKey(s));
     }
     return s;
-}
+};
 
 /** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
  * Leaves other formats untouched
  */
-export function convertLegacyPublicKeys(keys: string[]) {
+export const convertLegacyPublicKeys = (keys: string[]) => {
     return keys.map(convertLegacyPublicKey);
-}
+};
 
 /** Convert key in `s` to binary form */
-export function stringToPrivateKey(s: string): Key {
+export const stringToPrivateKey = (s: string): Key => {
     if (typeof s !== 'string') {
         throw new Error('expected string containing private key');
     }
@@ -380,10 +399,37 @@ export function stringToPrivateKey(s: string): Key {
         }
         return key;
     }
-}
+};
+
+/** Convert private `key` to legacy string (base-58) form */
+export const privateKeyToLegacyString = (key: Key) => {
+    if (key.type === KeyType.k1 && key.data.length === privateKeyDataSize) {
+        const whole = [] as number[];
+        whole.push(128);
+        key.data.forEach((byte) => whole.push(byte));
+        const digest = new Uint8Array(
+            sha256().update(
+                sha256().update(whole).digest()
+            ).digest()
+        );
+
+        const result = new Uint8Array(privateKeyDataSize + 5);
+        for (let i = 0; i < whole.length; i++) {
+            result[i] = whole[i];
+        }
+        for (let i = 0; i < 4; i++) {
+            result[i + whole.length] = digest[i];
+        }
+        return binaryToBase58(result);
+    } else if (key.type === KeyType.r1 || key.type === KeyType.wa) {
+        throw new Error('Key format not supported in legacy conversion');
+    } else {
+        throw new Error('unrecognized public key format');
+    }
+};
 
 /** Convert `key` to string (base-58) form */
-export function privateKeyToString(key: Key) {
+export const privateKeyToString = (key: Key) => {
     if (key.type === KeyType.r1) {
         return keyToString(key, 'R1', 'PVT_R1_');
     } else if (key.type === KeyType.k1) {
@@ -391,10 +437,10 @@ export function privateKeyToString(key: Key) {
     } else {
         throw new Error('unrecognized private key format');
     }
-}
+};
 
 /** Convert key in `s` to binary form */
-export function stringToSignature(s: string): Key {
+export const stringToSignature = (s: string): Key => {
     if (typeof s !== 'string') {
         throw new Error('expected string containing signature');
     }
@@ -407,10 +453,10 @@ export function stringToSignature(s: string): Key {
     } else {
         throw new Error('unrecognized signature format');
     }
-}
+};
 
 /** Convert `signature` to string (base-58) form */
-export function signatureToString(signature: Key) {
+export const signatureToString = (signature: Key) => {
     if (signature.type === KeyType.k1) {
         return keyToString(signature, 'K1', 'SIG_K1_');
     } else if (signature.type === KeyType.r1) {
@@ -420,4 +466,4 @@ export function signatureToString(signature: Key) {
     } else {
         throw new Error('unrecognized signature format');
     }
-}
+};

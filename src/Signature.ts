@@ -27,12 +27,12 @@ export class Signature {
         const r = ellipticSig.r.toArray('be', 32);
         const s = ellipticSig.s.toArray('be', 32);
         let eosioRecoveryParam;
-        if (keyType === KeyType.k1) {
+        if (keyType === KeyType.k1 || keyType === KeyType.r1) {
             eosioRecoveryParam = ellipticSig.recoveryParam + 27;
             if (ellipticSig.recoveryParam <= 3) {
                 eosioRecoveryParam += 4;
             }
-        } else if (keyType === KeyType.r1 || keyType === KeyType.wa) {
+        } else if (keyType === KeyType.wa) {
             eosioRecoveryParam = ellipticSig.recoveryParam;
         }
         const sigData = new Uint8Array([eosioRecoveryParam].concat(r, s));
@@ -46,10 +46,10 @@ export class Signature {
     }
 
     /** Export Signature as `elliptic`-format Signature
-     *  NOTE: This isn't an actual elliptic-format Signature, as ec.Signature is not exported by the library.
-     *  That's also why the return type is `any`.  We're *actually* returning an object with the 3 params
-     *  not an ec.Signature.
-     *  Further NOTE: @types/elliptic shows ec.Signature as exported; it is *not*.  Hence the `any`.
+     * NOTE: This isn't an actual elliptic-format Signature, as ec.Signature is not exported by the library.
+     * That's also why the return type is `any`.  We're *actually* returning an object with the 3 params
+     * not an ec.Signature.
+     * Further NOTE: @types/elliptic shows ec.Signature as exported; it is *not*.  Hence the `any`.
      */
     public toElliptic(): any {
         const lengthOfR = 32;
@@ -58,12 +58,12 @@ export class Signature {
         const s = new BN(this.signature.data.slice(lengthOfR + 1, lengthOfR + lengthOfS + 1));
 
         let ellipticRecoveryBitField;
-        if (this.signature.type === KeyType.k1) {
+        if (this.signature.type === KeyType.k1 || this.signature.type === KeyType.r1) {
             ellipticRecoveryBitField = this.signature.data[0] - 27;
             if (ellipticRecoveryBitField > 3) {
                 ellipticRecoveryBitField -= 4;
             }
-        } else if (this.signature.type === KeyType.r1 || this.signature.type === KeyType.wa) {
+        } else if (this.signature.type === KeyType.wa) {
             ellipticRecoveryBitField = this.signature.data[0];
         }
         const recoveryParam = ellipticRecoveryBitField & 3;
@@ -85,18 +85,24 @@ export class Signature {
         return this.signature.type;
     }
 
-    /** Verify a signature with a message digest and public key */
-    public verify(digest: BNInput, publicKey: PublicKey, encoding?: string): boolean {
+    /** Verify a signature with a message or hashed message digest and public key */
+    public verify(data: BNInput, publicKey: PublicKey, shouldHash: boolean = true, encoding: string = 'utf8'): boolean {
+        if (shouldHash) {
+            data = this.ec.hash().update(data, encoding).digest();
+        }
         const ellipticSignature = this.toElliptic();
         const ellipticPublicKey = publicKey.toElliptic();
-        return this.ec.verify(digest, ellipticSignature, ellipticPublicKey, encoding);
+        return this.ec.verify(data, ellipticSignature, ellipticPublicKey, encoding);
     }
 
-    /** Recover a public key from a message digest and signature */
-    public recoverPublicKey(digest: BNInput, encoding?: string): PublicKey {
+    /** Recover a public key from a message or hashed message digest and signature */
+    public recover(data: BNInput, shouldHash: boolean = true, encoding: string = 'utf8'): PublicKey {
+        if (shouldHash) {
+            data = this.ec.hash().update(data, encoding).digest();
+        }
         const ellipticSignature = this.toElliptic();
         const recoveredPublicKey = this.ec.recoverPubKey(
-            digest,
+            data,
             ellipticSignature,
             ellipticSignature.recoveryParam,
             encoding

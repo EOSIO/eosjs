@@ -17,11 +17,11 @@ import { convertLegacyPublicKey } from './eosjs-numeric';
 const defaultEc = new ec('secp256k1') as any;
 
 /** Construct the digest from transaction details */
-function digestFromSerializedData(
+const digestFromSerializedData = (
     chainId: string,
     serializedTransaction: Uint8Array,
     serializedContextFreeData?: Uint8Array,
-    e = defaultEc) {
+    e = defaultEc) => {
     const signBuf = Buffer.concat([
         Buffer.from(chainId, 'hex'),
         Buffer.from(serializedTransaction),
@@ -32,7 +32,7 @@ function digestFromSerializedData(
         ),
     ]);
     return e.hash().update(signBuf).digest();
-}
+};
 
 /** Signs transactions using in-process private keys */
 class JsSignatureProvider implements SignatureProvider {
@@ -69,7 +69,7 @@ class JsSignatureProvider implements SignatureProvider {
             const publicKey = PublicKey.fromString(key);
             const ellipticPrivateKey = this.keys.get(convertLegacyPublicKey(key));
             const privateKey = PrivateKey.fromElliptic(ellipticPrivateKey, publicKey.getType());
-            const signature = privateKey.sign(digest);
+            const signature = privateKey.sign(digest, false);
             signatures.push(signature.toString());
         }
 
