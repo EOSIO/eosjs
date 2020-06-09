@@ -362,19 +362,13 @@ export class Api {
             info = await this.rpc.get_info();
         }
 
-        let taposBlockNumber: number;
-        if (useLastIrreversible) {
-            taposBlockNumber = info.last_irreversible_block_num;
-        } else {
-            taposBlockNumber = info.head_block_num - blocksBehind;
-        }
+        const taposBlockNumber: number = useLastIrreversible
+          ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
 
-        let refBlock: GetBlockHeaderStateResult | GetBlockResult;
-        try {
-            refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
-        } catch (error) {
-            refBlock = await this.rpc.get_block(taposBlockNumber);
-        }
+        const refBlock: GetBlockHeaderStateResult | GetBlockResult =
+          taposBlockNumber <= info.last_irreversible_block_num
+          ? await this.rpc.get_block(taposBlockNumber)
+          : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
     }
@@ -384,4 +378,12 @@ export class Api {
         return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
+    private async tryGetBlockHeaderState(taposBlockNumber: number):
+        Promise<GetBlockHeaderStateResult | GetBlockResult> {
+        try {
+            return await this.rpc.get_block_header_state(taposBlockNumber);
+        } catch (error) {
+            return await this.rpc.get_block(taposBlockNumber);
+        }
+    }
 } // Api
