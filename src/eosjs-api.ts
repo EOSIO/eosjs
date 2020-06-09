@@ -260,13 +260,15 @@ export class Api {
      * Named Parameters:
      *    * `broadcast`: broadcast this transaction?
      *    * `sign`: sign this transaction?
+     *    * `compression`: compress this transaction?
      *    * If both `blocksBehind` and `expireSeconds` are present,
      *      then fetch the block which is `blocksBehind` behind head block,
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
+    public async transact(transaction: any, { broadcast = true, sign = true, compression, blocksBehind, expireSeconds }:
+        { broadcast?: boolean; sign?: boolean; compression?: boolean; blocksBehind?: number; expireSeconds?: number; }
+        = {}): Promise<any> {
         let info: GetInfoResult;
 
         if (!this.chainId) {
@@ -318,6 +320,9 @@ export class Api {
             });
         }
         if (broadcast) {
+            if (compression) {
+                return this.pushCompressedSignedTransaction(pushTransactionArgs);
+            }
             return this.pushSignedTransaction(pushTransactionArgs);
         }
         return pushTransactionArgs;
@@ -338,7 +343,8 @@ export class Api {
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
     ): Promise<any> {
         const compressedSerializedTransaction = deflate(serializedTransaction);
-        const compressedSerializedContextFreeData = deflate(serializedContextFreeData);
+        const compressedSerializedContextFreeData =
+            deflate(serializedContextFreeData || new Uint8Array(0));
 
         return this.rpc.push_transaction({
             signatures,
