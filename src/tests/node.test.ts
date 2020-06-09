@@ -9,7 +9,15 @@ describe('Node JS environment', () => {
         transactionResponse = await tests.transactWithConfig({
             blocksBehind: 3,
             expireSeconds: 30
-        }, 'transactWithConfig');
+        }, 'transactWithBlocksBehind');
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
+    it('transacts with configuration object containing useLastIrreversible', async () => {
+        transactionResponse = await tests.transactWithConfig({
+            useLastIrreversible: 3,
+            expireSeconds: 30
+        }, 'transactWithUseLastIrreversible');
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
