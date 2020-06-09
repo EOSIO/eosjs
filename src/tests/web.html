@@ -7,6 +7,7 @@
         <script src='../../dist-web/eosjs-jssig.min.js'></script>
         <script>
             const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
+            const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT'
             /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
             * 1) cleos create key --to-console (copy this privateKey & publicKey)
             * 2) cleos wallet import 
@@ -15,26 +16,27 @@
             */
         
             const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
-            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey]);
+            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey, r1PrivateKey]);
             const api = new eosjs_api.Api({ rpc, signatureProvider });
         
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
 
-            const transactWithConfig = async (config, memo) => await api.transact({
+            const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
+              return api.transact({
                 actions: [{
-                    account: 'eosio.token',
-                    name: 'transfer',
-                    authorization: [{
-                        actor: 'bob',
-                        permission: 'active',
-                    }],
-                    data: {
-                        from: 'bob',
-                        to: 'alice',
-                        quantity: '0.0001 SYS',
-                        memo,
-                    },
+                  account: 'eosio.token',
+                  name: 'transfer',
+                  authorization: [{
+                    actor: from,
+                    permission: 'active',
+                  }],
+                  data: {
+                    from,
+                    to,
+                    quantity: '0.0001 SYS',
+                    memo,
+                  },
                 }]
             }, config);
         
@@ -209,7 +211,30 @@
                 resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
                 return false;
-            } 
+            }
+
+            const testWithP256EllipticCurve = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithR1KeySignature', 'bobr1', 'alicer1');
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact elliptic p256/KeyType.r1 Keys and Signatures Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{
@@ -292,6 +317,7 @@
             <div><h2>Transact with Compression</h2><button onClick='testTransactWithCompression(event);'>Test</button></div>
             <div><h2>Transact without Broadcasting</h2><button onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
             <div><h2>Broadcast Transaction</h2><button onClick='testBroadcastResult(event);'>Test</button></div>
+            <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button onClick='testWithP256EllipticCurve(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>
