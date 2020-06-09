@@ -1,17 +1,20 @@
 import {PrivateKey, PublicKey, Signature} from './eosjs-jssig';
 import {generateKeyPair} from './eosjs-key-conversions';
 import {KeyType} from './eosjs-numeric';
+import {ec as EC} from 'elliptic';
 
 export const ecc = {
     initialize: () => console.error('Method deprecated'),
     unsafeRandomKey: () => console.error('Method deprecated'),
-    randomKey: (cpuEntropyBits?: number): Promise<string> => {
+    randomKey: (
+        cpuEntropyBits?: number, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
+        ): Promise<string> => {
         if (cpuEntropyBits !== undefined) {
             console.warn('Argument `cpuEntropyBits` is deprecated, ' +
                 'use the options argument instead');
         }
 
-        const { privateKey } = generateKeyPair(KeyType.k1);
+        const { privateKey } = generateKeyPair(KeyType.k1, options);
         return Promise.resolve(privateKey.toLegacyString());
     },
     seedPrivate: () => console.error('Method deprecated'),
