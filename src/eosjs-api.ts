@@ -2,6 +2,7 @@
  * @module API
  */
 // copyright defined in eosjs/LICENSE.txt
+/* eslint-disable max-classes-per-file */
 
 import { inflate, deflate } from 'pako';
 
@@ -68,14 +69,14 @@ export class Api {
 
     /**
      * @param args
-     *    * `rpc`: Issues RPC calls
-     *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
-     *    * `abiProvider`: Supplies ABIs in raw form (binary)
-     *    * `signatureProvider`: Signs transactions
-     *    * `wasmAbiProvider`: Manages WASM Abis
-     *    * `chainId`: Identifies chain
-     *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-     *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
+     * * `rpc`: Issues RPC calls
+     * * `authorityProvider`: Get public keys needed to meet authorities in a transaction
+     * * `abiProvider`: Supplies ABIs in raw form (binary)
+     * * `signatureProvider`: Signs transactions
+     * * `wasmAbiProvider`: Manages WASM Abis
+     * * `chainId`: Identifies chain
+     * * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
+     * * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
      */
     constructor(args: {
         rpc: JsonRpc,
@@ -158,7 +159,7 @@ export class Api {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts]
+        const actionPromises: Promise<BinaryAbi>[] = [...uniqueAccounts]
             .filter((account: string) => !this.wasmAbiProvider || !this.wasmAbiProvider.wasmAbis.get(account))
             .map(async (account: string): Promise<BinaryAbi> => ({
                 accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
@@ -304,7 +305,8 @@ export class Api {
     public async transact(
         transaction: any,
         { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-            TransactConfig = {}): Promise<any> {
+        TransactConfig = {}): Promise<any>
+    {
         let info: GetInfoResult;
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
@@ -367,14 +369,14 @@ export class Api {
                                 const j = abi.action_args_bin_to_json(name, ser.hexToUint8Array(at.act.data));
                                 at.act.name = j.long_name;
                                 at.act.data = j.args;
-                            } catch (e) { } // tslint:disable-line no-empty
+                            } catch (e) { } // eslint-disable-line no-empty
                         }
                         if (at.hasOwnProperty('return_value')) {
                             try {
                                 const j = abi.action_ret_bin_to_json(name, ser.hexToUint8Array(at.return_value));
                                 at.act.name = j.long_name;
                                 at.return_value = j.return_value;
-                            } catch (e) { } // tslint:disable-line no-empty
+                            } catch (e) { } // eslint-disable-line no-empty
                         }
                     }
                 }
@@ -385,9 +387,9 @@ export class Api {
     }
 
     public async query(
-            account: string, short: boolean, query: Query,
-            { sign, requiredKeys, authorization = [] }: QueryConfig
-        ): Promise<any> {
+        account: string, short: boolean, query: Query,
+        { sign, requiredKeys, authorization = [] }: QueryConfig
+    ): Promise<any> {
         const info = await this.rpc.get_info();
         // TODO: replace get_block; needs rodeos changes
         const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);
@@ -489,12 +491,12 @@ export class Api {
         }
 
         const taposBlockNumber: number = useLastIrreversible
-          ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
+            ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
 
         const refBlock: GetBlockHeaderStateResult | GetBlockResult =
-          taposBlockNumber <= info.last_irreversible_block_num
-          ? await this.rpc.get_block(taposBlockNumber)
-          : await this.tryGetBlockHeaderState(taposBlockNumber);
+            taposBlockNumber <= info.last_irreversible_block_num
+                ? await this.rpc.get_block(taposBlockNumber)
+                : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
     }
@@ -504,8 +506,8 @@ export class Api {
         return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
-    private async tryGetBlockHeaderState(taposBlockNumber: number):
-        Promise<GetBlockHeaderStateResult | GetBlockResult> {
+    private async tryGetBlockHeaderState(taposBlockNumber: number): Promise<GetBlockHeaderStateResult | GetBlockResult>
+    {
         try {
             return await this.rpc.get_block_header_state(taposBlockNumber);
         } catch (error) {
@@ -526,7 +528,7 @@ export class Api {
     }
 } // Api
 
-export class TransactionBuilder { // tslint:disable-line max-classes-per-file
+export class TransactionBuilder {
     private api: Api;
     private actions: ActionBuilder[] = [];
     private contextFreeGroups: any[] = [];
@@ -576,7 +578,7 @@ export class TransactionBuilder { // tslint:disable-line max-classes-per-file
     }
 }
 
-export class ActionBuilder { // tslint:disable-line max-classes-per-file
+export class ActionBuilder {
     private api: Api;
     private readonly accountName: string;
     public serializedData: any;
@@ -599,7 +601,7 @@ export class ActionBuilder { // tslint:disable-line max-classes-per-file
     }
 }
 
-class ActionSerializer { // tslint:disable-line max-classes-per-file
+class ActionSerializer {
     constructor(
         parent: ActionBuilder,
         api: Api,

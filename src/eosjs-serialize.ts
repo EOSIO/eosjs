@@ -3,6 +3,7 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 /* eslint-disable max-classes-per-file */
+/* eslint-disable jsdoc/check-indentation */
 
 import * as numeric from './eosjs-numeric';
 import { Abi, BlockTaposInfo, BlockHeaderStateTaposInfo } from './eosjs-rpc-interfaces';
@@ -353,9 +354,9 @@ export class SerialBuffer {
         }
         const regex = new RegExp(/^[.1-5a-z]{1,12}[.1-5a-j]?$/);
         if (!regex.test(s)) {
-            throw new Error('Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'); // tslint:disable-line
+            throw new Error('Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'); // eslint-disable-line
         }
-        function charToSymbol(c: number) {
+        const charToSymbol = (c: number) => {
             if (c >= 'a'.charCodeAt(0) && c <= 'z'.charCodeAt(0)) {
                 return (c - 'a'.charCodeAt(0)) + 6;
             }
@@ -1191,12 +1192,12 @@ export const deserializeAction = (
     };
 };
 
-function addAdditionalTypes(): Map<string, Type> {
+const addAdditionalTypes = (): Map<string, Type> => {
     const initialTypes = createInitialTypes();
     initialTypes.set('null_t', createType({
         name: 'null_t',
-        serialize(buffer: SerialBuffer, anyvar: Anyvar) {}, // tslint:disable-line no-empty
-        deserialize(buffer: SerialBuffer, state?: SerializerState) {} // tslint:disable-line no-empty
+        serialize: (buffer: SerialBuffer, anyvar: Anyvar) => {},
+        deserialize: (buffer: SerialBuffer, state?: SerializerState) => {}
     }));
     initialTypes.set('any_object', createType({
         name: 'any_object',
@@ -1209,7 +1210,7 @@ function addAdditionalTypes(): Map<string, Type> {
         deserialize: deserializeAnyArray
     }));
     return initialTypes;
-}
+};
 
 const additionalTypes = addAdditionalTypes();
 
@@ -1257,7 +1258,7 @@ const anyvarDefsByIndex = [
     anyvarDefs.asset,
 ];
 
-export function serializeAnyvar(buffer: SerialBuffer, anyvar: Anyvar) {
+export const serializeAnyvar = (buffer: SerialBuffer, anyvar: Anyvar) => {
     let def: AnyvarDef;
     let value: any;
     if (anyvar === null) {
@@ -1277,9 +1278,9 @@ export function serializeAnyvar(buffer: SerialBuffer, anyvar: Anyvar) {
     }
     buffer.pushVaruint32(def.index);
     def.type.serialize(buffer, value);
-}
+};
 
-export function deserializeAnyvar(buffer: SerialBuffer, state?: SerializerState) {
+export const deserializeAnyvar = (buffer: SerialBuffer, state?: SerializerState) => {
     const defIndex = buffer.getVaruint32();
     if (defIndex >= anyvarDefsByIndex.length) {
         throw new Error('Tried to deserialize unknown anyvar type');
@@ -1291,22 +1292,22 @@ export function deserializeAnyvar(buffer: SerialBuffer, state?: SerializerState)
     } else {
         return { type: def.type.name, value };
     }
-}
+};
 
-export function deserializeAnyvarShort(buffer: SerialBuffer) {
+export const deserializeAnyvarShort = (buffer: SerialBuffer) => {
     return deserializeAnyvar(buffer, new SerializerState({ useShortForm: true } as any));
-}
+};
 
-export function serializeAnyObject(buffer: SerialBuffer, obj: any) {
+export const serializeAnyObject = (buffer: SerialBuffer, obj: any) => {
     const entries = Object.entries(obj);
     buffer.pushVaruint32(entries.length);
     for (const [key, value] of entries) {
         buffer.pushString(key);
         serializeAnyvar(buffer, value as Anyvar);
     }
-}
+};
 
-export function deserializeAnyObject(buffer: SerialBuffer, state?: SerializerState) {
+export const deserializeAnyObject = (buffer: SerialBuffer, state?: SerializerState) => {
     const len = buffer.getVaruint32();
     const result = {};
     for (let i = 0; i < len; ++i) {
@@ -1321,25 +1322,25 @@ export function deserializeAnyObject(buffer: SerialBuffer, state?: SerializerSta
         (result as any)[key] = deserializeAnyvar(buffer, state);
     }
     return result;
-}
+};
 
-export function serializeAnyArray(buffer: SerialBuffer, arr: Anyvar[]) {
+export const serializeAnyArray = (buffer: SerialBuffer, arr: Anyvar[]) => {
     buffer.pushVaruint32(arr.length);
     for (const x of arr) {
         serializeAnyvar(buffer, x);
     }
-}
+};
 
-export function deserializeAnyArray(buffer: SerialBuffer, state?: SerializerState) {
+export const deserializeAnyArray = (buffer: SerialBuffer, state?: SerializerState) => {
     const len = buffer.getVaruint32();
     const result = [];
     for (let i = 0; i < len; ++i) {
         result.push(deserializeAnyvar(buffer, state));
     }
     return result;
-}
+};
 
-export function serializeQuery(buffer: SerialBuffer, query: Query) {
+export const serializeQuery = (buffer: SerialBuffer, query: Query) => {
     let method: string;
     let arg: Anyvar;
     let filter: Query[];
@@ -1369,4 +1370,4 @@ export function serializeQuery(buffer: SerialBuffer, query: Query) {
             serializeQuery(buffer, q);
         }
     }
-}
+};

@@ -16,8 +16,9 @@ export const constructElliptic = (type: KeyType): EC => {
     return new EC('p256') as any;
 };
 
-export const generateKeyPair = (type: KeyType, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}):
-    {publicKey: PublicKey, privateKey: PrivateKey} => {
+export const generateKeyPair = (
+    type: KeyType, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
+): { publicKey: PublicKey, privateKey: PrivateKey } => {
     if (!options.secureEnv) {
         throw new Error('Key generation is completely INSECURE in production environments in the browser. ' +
             'If you are absolutely certain this does NOT describe your environment, set `secureEnv` in your ' +

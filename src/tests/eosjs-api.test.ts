@@ -287,11 +287,11 @@ describe('eosjs-api', () => {
         await api.wasmAbiProvider.setWasmAbis([
             new WasmAbi({
                 account: 'eosio.token',
-                mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+                mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))),
                 memoryThreshold: 32000,
                 textEncoder: api.textEncoder,
                 textDecoder: api.textDecoder,
-                print(x) { process.stdout.write(x); },
+                print: (x) => { process.stdout.write(x); },
             })
         ]);
         expect(api.wasmAbiProvider.wasmAbis.get('eosio.token')).not.toBeUndefined();
@@ -302,11 +302,11 @@ describe('eosjs-api', () => {
             await api.wasmAbiProvider.setWasmAbis([
                 new WasmAbi({
                     account: 'eosio.token',
-                    mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+                    mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))),
                     memoryThreshold: 32000,
                     textEncoder: api.textEncoder,
                     textDecoder: api.textDecoder,
-                    print(x) { process.stdout.write(x); },
+                    print: (x) => { process.stdout.write(x); },
                 })
             ]);
         });

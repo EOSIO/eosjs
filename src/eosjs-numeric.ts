@@ -336,7 +336,7 @@ export const stringToPublicKey = (s: string): Key => {
 };
 
 /** Convert public `key` to legacy string (base-58) form */
-export function publicKeyToLegacyString(key: Key) {
+export const publicKeyToLegacyString = (key: Key) => {
     if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
         return keyToString(key, '', 'EOS');
     } else if (key.type === KeyType.r1 || key.type === KeyType.wa) {
@@ -344,7 +344,7 @@ export function publicKeyToLegacyString(key: Key) {
     } else {
         throw new Error('unrecognized public key format');
     }
-}
+};
 
 /** Convert `key` to string (base-58) form */
 export const publicKeyToString = (key: Key) => {
@@ -402,7 +402,7 @@ export const stringToPrivateKey = (s: string): Key => {
 };
 
 /** Convert private `key` to legacy string (base-58) form */
-export function privateKeyToLegacyString(key: Key) {
+export const privateKeyToLegacyString = (key: Key) => {
     if (key.type === KeyType.k1 && key.data.length === privateKeyDataSize) {
         const whole = [] as number[];
         whole.push(128);
@@ -426,7 +426,7 @@ export function privateKeyToLegacyString(key: Key) {
     } else {
         throw new Error('unrecognized public key format');
     }
-}
+};
 
 /** Convert `key` to string (base-58) form */
 export const privateKeyToString = (key: Key) => {

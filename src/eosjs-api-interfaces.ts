@@ -103,14 +103,17 @@ export interface QueryConfig {
 
 /**
  * A Query may be any of the following:
- *  * string:                                           method
- *  * [string, Query[]]:                                [method, filter]
- *  * [string, Anyvar, Query[]]:                        [method, arg, filter]
- *  * {method: string, arg?: Anyvar, filter?: Query[]}  explicit form
+ * * string:                                           method
+ * * [string, Query[]]:                                [method, filter]
+ * * [string, Anyvar, Query[]]:                        [method, arg, filter]
+ * * {method: string, arg?: Anyvar, filter?: Query[]}  explicit form
  */
 export type Query =
    string | [string, Query[]] | [string, Anyvar, Query[]] | { method: string, arg?: Anyvar, filter?: Query[] };
 
 export type ContextFreeGroupCallback =
-    (index: {cfa: number, cfd: number}) =>
-        { action?: ActionBuilder; contextFreeAction?: ActionBuilder; contextFreeData?: any; };
+    (index: {cfa: number, cfd: number}) => {
+        action?: ActionBuilder;
+        contextFreeAction?: ActionBuilder;
+        contextFreeData?: any;
+    };

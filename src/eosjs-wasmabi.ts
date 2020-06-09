@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import * as ser from './eosjs-serialize';
 
 export class WasmAbiProvider implements WasmAbiProvider {
@@ -22,7 +23,7 @@ interface WasmAbiOptions {
     print?: (s: string) => void;
 }
 
-export class WasmAbi { // tslint:disable-line max-classes-per-file
+export class WasmAbi {
     public account: string;
     public mod: any;
     public textEncoder: any;
@@ -48,10 +49,10 @@ export class WasmAbi { // tslint:disable-line max-classes-per-file
 
         const self = this;
         this.primitives = {
-            abort() {
+            abort: () => {
                 throw new Error('called abort');
             },
-            eosio_assert_message(test: number, begin: number, len: number) {
+            eosio_assert_message: (test: number, begin: number, len: number) => {
                 if (!test) {
                     let e;
                     try {
@@ -65,29 +66,29 @@ export class WasmAbi { // tslint:disable-line max-classes-per-file
                     throw e;
                 }
             },
-            eosio_assert_code(test: number, error_code: number) { // tslint:disable-line variable-name
+            eosio_assert_code: (test: number, error_code: number) => {
                 if (!test) {
                     throw new Error('assert failed with code: ' + error_code);
                 }
             },
-            prints_l(begin: number, len: number) {
+            prints_l: (begin: number, len: number) => {
                 if (len && self.print) {
                     self.print(textDecoder.decode(new Uint8Array(self.inst.exports.memory.buffer, begin, len)));
                 }
             },
-            get_input_data(ptr: number, size: number) {
-                const input_data = self.inputData; // tslint:disable-line variable-name
+            get_input_data: (ptr: number, size: number) => {
+                const input_data = self.inputData;
                 if (!size) {
                     return input_data.length;
                 }
-                const copy_size = Math.min(input_data.length, size); // tslint:disable-line variable-name
+                const copy_size = Math.min(input_data.length, size);
                 const dest = new Uint8Array(self.inst.exports.memory.buffer, ptr, copy_size);
                 for (let i = 0; i < copy_size; ++i) {
                     dest[i] = input_data[i];
                 }
                 return copy_size;
             },
-            set_output_data(ptr: number, size: number) {
+            set_output_data: (ptr: number, size: number) => {
                 self.outputData1 = self.outputData0;
                 self.outputData0 = Uint8Array.from(new Uint8Array(self.inst.exports.memory.buffer, ptr, size));
             },
