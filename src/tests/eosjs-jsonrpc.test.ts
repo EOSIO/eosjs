@@ -68,7 +68,7 @@ describe('JSON RPC', () => {
         };
 
         const mockResp = {
-            json() {
+            json: () => {
                 return expReturn;
             },
             ok: true,

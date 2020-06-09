@@ -7,10 +7,10 @@ const fetch = require('node-fetch');
 const { TextEncoder, TextDecoder } = require('util');
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
-const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT'
-/* new accounts for testing can be created by unlocking a cleos wallet then calling: 
+const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT';
+/* new accounts for testing can be created by unlocking a cleos wallet then calling:
  * 1) cleos create key --to-console (copy this privateKey & publicKey)
- * 2) cleos wallet import 
+ * 2) cleos wallet import
  * 3) cleos create account bob publicKey
  * 4) cleos create account alice publicKey
  */
@@ -24,11 +24,11 @@ const setWasmAbi = async () => {
     await wasmAbiProvider.setWasmAbis([
         new WasmAbi({
             account: 'eosio.token',
-            mod: new global.WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+            mod: new global.WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))),
             memoryThreshold: 32000,
             textEncoder: api.textEncoder,
             textDecoder: api.textDecoder,
-            print(x) { process.stdout.write(x); },
+            print: (x) => { process.stdout.write(x); },
         })
     ]);
 };
@@ -86,7 +86,7 @@ const transactWithShorthandApiJson = async () => {
     await api.getAbi('eosio.token');
     return await api.transact({
         actions: [
-          api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')
+            api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')
         ]
     }, {
         blocksBehind: 3,
@@ -144,7 +144,7 @@ const transactShouldFail = async () => await api.transact({
         },
     }]
 });
-  
+
 const rpcShouldFail = async () => await rpc.get_block(-1);
 
 module.exports = {
