@@ -318,6 +318,10 @@ export class SerialBuffer { // tslint:disable-line max-classes-per-file
         if (typeof s !== 'string') {
             throw new Error('Expected string containing name');
         }
+        const regex = new RegExp(/^[.1-5a-z]{1,12}[1-5a-j]?(?<!\.)$/);
+        if (!regex.test(s)) {
+            throw new Error('Name should be less than 13 characters, not end with a period, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'); // tslint:disable-line
+        }
         function charToSymbol(c: number) {
             if (c >= 'a'.charCodeAt(0) && c <= 'z'.charCodeAt(0)) {
                 return (c - 'a'.charCodeAt(0)) + 6;
