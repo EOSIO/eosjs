@@ -1,0 +1,20 @@
+{
+  "extends": "@blockone/blockone",
+  "rules": {
+    "no-bitwise": "off",
+    "semi": ["error", "always"],
+    "indent": ["error", 4]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules":{
+        "indent": "off",
+        "@typescript-eslint/indent": ["error", 4],
+        "@typescript-eslint/no-var-requires": "off",
+        "semi": "off",
+        "@typescript-eslint/semi": ["error", "always"]
+      }
+    }
+  ]
+}
