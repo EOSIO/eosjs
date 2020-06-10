@@ -4,8 +4,8 @@
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
-    "cypress": "./scripts/run-cypress.sh",
-    "cypress-ui": "./scripts/run-cypress.sh ui",
+    "cypress": "cypress run --spec 'cypress/integration/index.spec.js'",
+    "cypress-ui": "cypress open",
     "prepare": "npm run build",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "lint-fix": "tslint -c tslint.json -p tsconfig.json --fix",
@@ -25,17 +25,12 @@
     "url": "https://github.com/EOSIO/eosjs.git"
   },
   "dependencies": {
-    "@babel/runtime": "7.8.3",
-    "@types/elliptic": "6.4.10",
     "elliptic": "6.5.2",
     "pako": "1.0.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.2",
-    "@babel/plugin-transform-runtime": "^7.10.1",
-    "@babel/preset-env": "^7.10.2",
-    "@babel/preset-stage-1": "^7.8.3",
     "@blockone/tslint-config-blockone": "^3.1.0",
+    "@types/elliptic": "6.4.12",
     "@types/jest": "^24.9.1",
     "@types/node": "^11.15.16",
     "@types/pako": "^1.0.1",
@@ -43,9 +38,6 @@
     "eosjs-ecc": "^4.0.7",
     "jest": "^25.5.4",
     "jest-fetch-mock": "^2.1.2",
-    "json-loader": "^0.5.7",
-    "mocha": "^5.2.0",
-    "mochawesome": "^4.1.0",
     "ts-jest": "^25.5.1",
     "ts-loader": "^5.4.5",
     "tslint": "^5.20.1",
