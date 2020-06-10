@@ -48,6 +48,7 @@ export function negate(bignum: Uint8Array) {
 
 /**
  * Convert an unsigned decimal number in `s` to a bignum
+ *
  * @param size bignum size (bytes)
  */
 export function decimalToBinary(size: number, s: string) {
@@ -72,6 +73,7 @@ export function decimalToBinary(size: number, s: string) {
 
 /**
  * Convert a signed decimal number in `s` to a bignum
+ *
  * @param size bignum size (bytes)
  */
 export function signedDecimalToBinary(size: number, s: string) {
@@ -93,6 +95,7 @@ export function signedDecimalToBinary(size: number, s: string) {
 
 /**
  * Convert `bignum` to an unsigned decimal number
+ *
  * @param minDigits 0-pad result to this many digits
  */
 export function binaryToDecimal(bignum: Uint8Array, minDigits = 1) {
@@ -115,6 +118,7 @@ export function binaryToDecimal(bignum: Uint8Array, minDigits = 1) {
 
 /**
  * Convert `bignum` to a signed decimal number
+ *
  * @param minDigits 0-pad result to this many digits
  */
 export function signedBinaryToDecimal(bignum: Uint8Array, minDigits = 1) {
@@ -155,6 +159,7 @@ function base58ToBinaryVarSize(s: string) {
 
 /**
  * Convert an unsigned base-58 number in `s` to a bignum
+ *
  * @param size bignum size (bytes)
  */
 export function base58ToBinary(size: number, s: string) {
@@ -182,6 +187,7 @@ export function base58ToBinary(size: number, s: string) {
 
 /**
  * Convert `bignum` to a base-58 number
+ *
  * @param minDigits 0-pad result to this many digits
  */
 export function binaryToBase58(bignum: Uint8Array, minDigits = 1) {

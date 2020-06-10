@@ -146,7 +146,7 @@ export class Api {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
+        const actionPromises: Promise<BinaryAbi>[] = [...uniqueAccounts].map(
             async (account: string): Promise<BinaryAbi> => ({
                 accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
@@ -268,12 +268,13 @@ export class Api {
      *    * If both `useLastIrreversible` and `expireSeconds` are present,
      *      then fetch the last irreversible block, use it as a reference for TAPoS,
      *      and expire the transaction `expireSeconds` after that block's time.
+     *
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
     public async transact(
         transaction: any,
         { broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-            TransactConfig = {}): Promise<any> {
+        TransactConfig = {}): Promise<any> {
         let info: GetInfoResult;
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
