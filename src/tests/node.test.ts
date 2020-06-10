@@ -5,7 +5,7 @@ describe('Node JS environment', () => {
     let transactionSignatures: any;
     let failedAsPlanned: boolean;
 
-    it('transacts with configuration object', async () => {
+    it('transacts with configuration object containing blocksBehind', async () => {
         transactionResponse = await tests.transactWithConfig({
             blocksBehind: 3,
             expireSeconds: 30
@@ -15,7 +15,7 @@ describe('Node JS environment', () => {
 
     it('transacts with configuration object containing useLastIrreversible', async () => {
         transactionResponse = await tests.transactWithConfig({
-            useLastIrreversible: 3,
+            useLastIrreversible: true,
             expireSeconds: 30
         }, 'transactWithUseLastIrreversible');
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
@@ -27,7 +27,11 @@ describe('Node JS environment', () => {
     }, 10000);
 
     it('transacts with compressed transaction', async () => {
-        transactionResponse = await tests.transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true });
+        transactionResponse = await tests.transactWithConfig({
+            blocksBehind: 3,
+            expireSeconds: 30,
+            compression: true
+        }, 'transactWithCompression');
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
