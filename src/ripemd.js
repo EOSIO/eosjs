@@ -407,7 +407,7 @@ Method #2
             for(let j = 0; j < 80; ++j)
             {
                 // Left rounds
-                let T = RIPEMD160.add_modulo32(
+                let T = RIPEMD160.add_modulo32( // eslint-disable-line no-shadow
                     RIPEMD160.rol32(
                         RIPEMD160.add_modulo32(
                             A,
