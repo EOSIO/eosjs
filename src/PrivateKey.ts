@@ -78,7 +78,7 @@ export class PrivateKey {
                 signature = constructSignature({canonical: true, pers: [++tries]});
             } while (!isCanonical(signature.toBinary()));
         } else {
-            signature = constructSignature({});
+            signature = constructSignature({canonical: true});
         }
         return signature;
     }
