@@ -5,16 +5,24 @@
 
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
-import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs, GetBlockHeaderStateResult } from "./eosjs-rpc-interfaces" // tslint:disable-line
+import {
+    GetAbiResult,
+    GetBlockResult,
+    GetCodeResult,
+    GetInfoResult,
+    GetRawCodeAndAbiResult,
+    PushTransactionArgs,
+    GetBlockHeaderStateResult
+} from './eosjs-rpc-interfaces';
 import { RpcError } from './eosjs-rpcerror';
 
-function arrayToHex(data: Uint8Array) {
+const arrayToHex = (data: Uint8Array) => {
     let result = '';
     for (const x of data) {
         result += ('00' + x.toString(16)).slice(-2);
     }
     return result;
-}
+};
 
 /** Make RPC calls */
 export class JsonRpc implements AuthorityProvider, AbiProvider {
@@ -23,12 +31,15 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
 
     /**
      * @param args
-     *    * `fetch`:
-     *    * browsers: leave `null` or `undefined`
-     *    * node: provide an implementation
+     * `fetch`:
+     * browsers: leave `null` or `undefined`
+     * node: provide an implementation
      */
-    constructor(endpoint: string, args:
-        { fetch?: (input?: any, init?: any) => Promise<any> } = {},
+    constructor(
+        endpoint: string,
+        args: {
+            fetch?: (input?: any, init?: any) => Promise<any>
+        } = {}
     ) {
         this.endpoint = endpoint.replace(/\/$/, '');
         if (args.fetch) {
@@ -146,7 +157,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         limit = 10,
         reverse = false,
         show_payer = false,
-     }: any): Promise<any> {
+    }: any): Promise<any> {
         return await this.fetch(
             '/v1/chain/get_table_rows', {
                 json,

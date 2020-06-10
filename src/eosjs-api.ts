@@ -2,6 +2,7 @@
  * @module API
  */
 // copyright defined in eosjs/LICENSE.txt
+/* eslint-disable max-classes-per-file */
 
 import { inflate, deflate } from 'pako';
 
@@ -59,13 +60,13 @@ export class Api {
 
     /**
      * @param args
-     *    * `rpc`: Issues RPC calls
-     *    * `authorityProvider`: Get public keys needed to meet authorities in a transaction
-     *    * `abiProvider`: Supplies ABIs in raw form (binary)
-     *    * `signatureProvider`: Signs transactions
-     *    * `chainId`: Identifies chain
-     *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-     *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
+     * * `rpc`: Issues RPC calls
+     * * `authorityProvider`: Get public keys needed to meet authorities in a transaction
+     * * `abiProvider`: Supplies ABIs in raw form (binary)
+     * * `signatureProvider`: Signs transactions
+     * * `chainId`: Identifies chain
+     * * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
+     * * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
      */
     constructor(args: {
         rpc: JsonRpc,
@@ -146,7 +147,7 @@ export class Api {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Array<Promise<BinaryAbi>> = [...uniqueAccounts].map(
+        const actionPromises: Promise<BinaryAbi>[] = [...uniqueAccounts].map(
             async (account: string): Promise<BinaryAbi> => ({
                 accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
@@ -259,21 +260,26 @@ export class Api {
      * Create and optionally broadcast a transaction.
      *
      * Named Parameters:
-     *    * `broadcast`: broadcast this transaction?
-     *    * `sign`: sign this transaction?
-     *    * `compression`: compress this transaction?
-     *    * If both `blocksBehind` and `expireSeconds` are present,
-     *      then fetch the block which is `blocksBehind` behind head block,
-     *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
-     *    * If both `useLastIrreversible` and `expireSeconds` are present,
-     *      then fetch the last irreversible block, use it as a reference for TAPoS,
-     *      and expire the transaction `expireSeconds` after that block's time.
+     * `broadcast`: broadcast this transaction?
+     * `sign`: sign this transaction?
+     * `compression`: compress this transaction?
+     *
+     * If both `blocksBehind` and `expireSeconds` are present,
+     * then fetch the block which is `blocksBehind` behind head block,
+     * use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
+     *
+     * If both `useLastIrreversible` and `expireSeconds` are present,
+     * then fetch the last irreversible block, use it as a reference for TAPoS,
+     * and expire the transaction `expireSeconds` after that block's time.
+     *
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
     public async transact(
         transaction: any,
-        { broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-            TransactConfig = {}): Promise<any> {
+        {
+            broadcast = true, sign = true, compression, blocksBehind, useLastIrreversible, expireSeconds
+        }: TransactConfig = {}
+    ): Promise<any> {
         let info: GetInfoResult;
 
         if (typeof blocksBehind === 'number' && useLastIrreversible) {
@@ -363,12 +369,12 @@ export class Api {
         }
 
         const taposBlockNumber: number = useLastIrreversible
-          ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
+            ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
 
         const refBlock: GetBlockHeaderStateResult | GetBlockResult =
-          taposBlockNumber <= info.last_irreversible_block_num
-          ? await this.rpc.get_block(taposBlockNumber)
-          : await this.tryGetBlockHeaderState(taposBlockNumber);
+            taposBlockNumber <= info.last_irreversible_block_num
+                ? await this.rpc.get_block(taposBlockNumber)
+                : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
     }
@@ -378,8 +384,8 @@ export class Api {
         return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
-    private async tryGetBlockHeaderState(taposBlockNumber: number):
-        Promise<GetBlockHeaderStateResult | GetBlockResult> {
+    private async tryGetBlockHeaderState(taposBlockNumber: number): Promise<GetBlockHeaderStateResult | GetBlockResult>
+    {
         try {
             return await this.rpc.get_block_header_state(taposBlockNumber);
         } catch (error) {

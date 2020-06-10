@@ -89,7 +89,7 @@ describe('Serialize', () => {
 
     describe('name', () => {
         let serialBuffer: SerialBuffer;
-        const invalidNameErrorMessage = 'Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'; //tslint:disable-line
+        const invalidNameErrorMessage = 'Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz';
 
         beforeEach(() => {
             serialBuffer = new SerialBuffer({
