@@ -145,7 +145,7 @@
 
               try {
                 transactionResponse =
-                  await transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true });
+                  await transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true }, 'transactWithCompression');
               } catch (error) {
                 resultsLabel.className = 'failed';
                 resultsLabel.innerText = FAILED;
