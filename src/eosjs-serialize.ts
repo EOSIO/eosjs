@@ -3,6 +3,7 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 /* eslint-disable max-classes-per-file */
+/* eslint-disable jsdoc/check-indentation */
 
 import * as numeric from './eosjs-numeric';
 import { Abi, BlockTaposInfo, BlockHeaderStateTaposInfo } from './eosjs-rpc-interfaces';
@@ -321,7 +322,7 @@ export class SerialBuffer {
         }
         const regex = new RegExp(/^[.1-5a-z]{1,12}[.1-5a-j]?$/);
         if (!regex.test(s)) {
-            throw new Error('Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'); // tslint:disable-line
+            throw new Error('Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'); // eslint-disable-line
         }
         const charToSymbol = (c: number) => {
             if (c >= 'a'.charCodeAt(0) && c <= 'z'.charCodeAt(0)) {

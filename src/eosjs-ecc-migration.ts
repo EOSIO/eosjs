@@ -8,7 +8,7 @@ export const ecc = {
     unsafeRandomKey: () => console.error('Method deprecated'),
     randomKey: (
         cpuEntropyBits?: number, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
-        ): Promise<string> => {
+    ): Promise<string> => {
         if (cpuEntropyBits !== undefined) {
             console.warn('Argument `cpuEntropyBits` is deprecated, ' +
                 'use the options argument instead');
@@ -18,7 +18,7 @@ export const ecc = {
         return Promise.resolve(privateKey.toLegacyString());
     },
     seedPrivate: () => console.error('Method deprecated'),
-    privateToPublic: (key: string, pubkey_prefix?: string): string => { // tslint:disable-line
+    privateToPublic: (key: string, pubkey_prefix?: string): string => {
         if (pubkey_prefix !== undefined) {
             console.warn('Argument `pubkey_prefix` is deprecated, ' +
                 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
@@ -28,7 +28,7 @@ export const ecc = {
         const publicKey = privateKey.getPublicKey();
         return publicKey.toLegacyString();
     },
-    isValidPublic: (pubkey: string, pubkey_prefix?: string): boolean => { // tslint:disable-line
+    isValidPublic: (pubkey: string, pubkey_prefix?: string): boolean => {
         if (pubkey_prefix !== undefined) {
             console.warn('Argument `pubkey_prefix` is deprecated, ' +
                 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');

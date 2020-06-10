@@ -2,6 +2,7 @@
  * @module API
  */
 // copyright defined in eosjs/LICENSE.txt
+/* eslint-disable max-classes-per-file */
 
 import { inflate, deflate } from 'pako';
 
@@ -59,13 +60,13 @@ export class Api {
 
     /**
      * @param args
-     * `rpc`: Issues RPC calls
-     * `authorityProvider`: Get public keys needed to meet authorities in a transaction
-     * `abiProvider`: Supplies ABIs in raw form (binary)
-     * `signatureProvider`: Signs transactions
-     * `chainId`: Identifies chain
-     * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-     * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
+     * * `rpc`: Issues RPC calls
+     * * `authorityProvider`: Get public keys needed to meet authorities in a transaction
+     * * `abiProvider`: Supplies ABIs in raw form (binary)
+     * * `signatureProvider`: Signs transactions
+     * * `chainId`: Identifies chain
+     * * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
+     * * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
      */
     constructor(args: {
         rpc: JsonRpc,
@@ -368,12 +369,12 @@ export class Api {
         }
 
         const taposBlockNumber: number = useLastIrreversible
-          ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
+            ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
 
         const refBlock: GetBlockHeaderStateResult | GetBlockResult =
-          taposBlockNumber <= info.last_irreversible_block_num
-          ? await this.rpc.get_block(taposBlockNumber)
-          : await this.tryGetBlockHeaderState(taposBlockNumber);
+            taposBlockNumber <= info.last_irreversible_block_num
+                ? await this.rpc.get_block(taposBlockNumber)
+                : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
     }
@@ -383,8 +384,8 @@ export class Api {
         return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
-    private async tryGetBlockHeaderState(taposBlockNumber: number):
-        Promise<GetBlockHeaderStateResult | GetBlockResult> {
+    private async tryGetBlockHeaderState(taposBlockNumber: number): Promise<GetBlockHeaderStateResult | GetBlockResult>
+    {
         try {
             return await this.rpc.get_block_header_state(taposBlockNumber);
         } catch (error) {
