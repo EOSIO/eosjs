@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+        with:
+          token: ${{ secrets.GIT_API_TOKEN }}
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
         with:
@@ -57,7 +59,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit package.json yarn.lock -m "Updating package.json and yarn.lock" || echo "Nothing to commit"
-          git remote set-url origin https://x-access-token:${{ secrets.GIT_API_KEY }}@github.com/${{ github.repository }}
           git push origin ${GITHUB_REF#refs/*/}
     services:
       nodeos:
