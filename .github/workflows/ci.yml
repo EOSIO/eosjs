@@ -45,24 +45,20 @@ jobs:
         uses: cypress-io/github-action@8aac1d019734a107e4eaaefe2e26beb3149e5540
         with:
           spec: cypress/integration/index.spec.js
-      - name: Commit
+      - name: Get Protected Status
         if: ${{ github.event_name == 'push' }}
+        id: protected_step
+        run: |
+          PROTECTED=$(curl "https://api.github.com/repos/bradlhart/eosjs/branches/${GITHUB_REF#refs/*/}" 2>/dev/null | jq -r '.protected')
+          echo ::set-output name=protected::$PROTECTED
+      - name: Commit/Push
+        if: ${{ github.event_name == 'push' && steps.protected_step.outputs.protected == 'false' }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit package.json yarn.lock -m "Updating package.json and yarn.lock" || echo "Nothing to commit"
-      - name: Get Branch Name
-        if: ${{ github.event_name == 'push' }}
-        id: branch_name
-        run: |
-          echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      - name: Push
-        if: ${{ github.event_name == 'push' }}
-        uses: ad-m/github-push-action@68af9897f2b021035ca3952bf354bbb4675c1762
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ steps.branch_name.outputs.short_ref }}
-
+          git remote set-url origin https://x-access-token:${{ secrets.GIT_API_KEY }}@github.com/${{ github.repository }}
+          git push origin ${GITHUB_REF#refs/*/}
     services:
       nodeos:
         image: eosio/eosjs-ci:v0.2.1
