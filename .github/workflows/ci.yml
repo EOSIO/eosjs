@@ -19,12 +19,12 @@ jobs:
         env:
           HAS_SECRET: ${{ secrets.GIT_API_KEY != null }}
       - name: Checkout (with GIT_API_KEY)
-        if: ${{ github.event_name == 'push' && steps.check_token.outputs.token_exists == 'true' }}
+        if: ${{ steps.check_token.outputs.token_exists == 'true' }}
         uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
         with:
           token: ${{ secrets.GIT_API_KEY }}
       - name: Checkout (with GitHub Token)
-        if: ${{ github.event_name == 'push' && steps.check_token.outputs.token_exists == 'false' }}
+        if: ${{ steps.check_token.outputs.token_exists == 'false' }}
         uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
         with:
           token: ${{ github.token }}
