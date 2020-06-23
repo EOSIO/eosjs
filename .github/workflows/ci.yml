@@ -3,17 +3,31 @@ on:
   push:
     branches-ignore:
       - develop
+  pull_request:
 
 jobs:
   ci:
     name: CI
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         node-version: [12.14.1]
     steps:
-      - name: Checkout
+      - name: Check for GIT_API_KEY
+        id: check_token
+        run: echo ::set-output name=token_exists::${HAS_SECRET}
+        env:
+          HAS_SECRET: ${{ secrets.GIT_API_KEY != null }}
+      - name: Checkout (with GIT_API_KEY)
+        if: ${{ steps.check_token.outputs.token_exists == 'true' }}
         uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+        with:
+          token: ${{ secrets.GIT_API_KEY }}
+      - name: Checkout (with GitHub Token)
+        if: ${{ steps.check_token.outputs.token_exists == 'false' }}
+        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+        with:
+          token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
         with:
@@ -21,7 +35,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Update
         run: |
-          yarn upgrade && npx syncyarnlock@1.0.19 -s -k && rm -rf yarn.lock && yarn install
+          yarn install && yarn upgrade && npx syncyarnlock@1.0.19 -s -k && rm -rf yarn.lock && yarn install
       - name: Install
         run: |
           yarn --frozen-lockfile
@@ -44,24 +58,22 @@ jobs:
         uses: cypress-io/github-action@8aac1d019734a107e4eaaefe2e26beb3149e5540
         with:
           spec: cypress/integration/index.spec.js
-      - name: Commit
+      - name: Get Protected Status
+        if: github.event_name == 'push'
+        id: protected_step
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          PROTECTED=$(curl "https://api.github.com/repos/${{ github.repository }}/branches/${GITHUB_REF#refs/*/}" 2>/dev/null | jq -r '.protected')
+          echo ::set-output name=protected::$PROTECTED
+      - name: Commit/Push
+        if: github.event_name == 'push' && steps.protected_step.outputs.protected == 'false'
+        run: |
+          git config --global user.name 'Block.one DevOps'
+          git config --global user.email 'blockone-devops@users.noreply.github.com'
           git commit package.json yarn.lock -m "Updating package.json and yarn.lock" || echo "Nothing to commit"
-      - name: Get Branch Name
-        id: branch_name
-        run: |
-          echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      - name: Push
-        uses: ad-m/github-push-action@68af9897f2b021035ca3952bf354bbb4675c1762
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ steps.branch_name.outputs.short_ref }}
-
+          git push origin ${GITHUB_REF#refs/*/}
     services:
       nodeos:
-        image: eosio/eosjs-ci:0.2.0
+        image: eosio/eosjs-ci:v0.2.1
 
         ports:
           - 8888:8888

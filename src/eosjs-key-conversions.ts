@@ -16,13 +16,14 @@ export const constructElliptic = (type: KeyType): EC => {
     return new EC('p256') as any;
 };
 
-export const generateKeyPair = (type: KeyType, options?: EC.GenKeyPairOptions):
-    {publicKey: PublicKey, privateKey: PrivateKey} => {
-    if (process.env.EOSJS_KEYGEN_ALLOWED !== 'true') {
+export const generateKeyPair = (
+    type: KeyType, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
+): { publicKey: PublicKey, privateKey: PrivateKey } => {
+    if (!options.secureEnv) {
         throw new Error('Key generation is completely INSECURE in production environments in the browser. ' +
-            'If you are absolutely certain this does NOT describe your environment, add an environment variable ' +
-            '`EOSJS_KEYGEN_ALLOWED` set to \'true\'.  If this does describe your environment and you add the ' +
-            'environment variable, YOU DO SO AT YOUR OWN RISK AND THE RISK OF YOUR USERS.');
+            'If you are absolutely certain this does NOT describe your environment, set `secureEnv` in your ' +
+            'options to `true`.  If this does describe your environment and you set `secureEnv` to `true`, ' +
+            'YOU DO SO AT YOUR OWN RISK AND THE RISK OF YOUR USERS.');
     }
     let ec;
     if (type === KeyType.k1) {
@@ -30,7 +31,7 @@ export const generateKeyPair = (type: KeyType, options?: EC.GenKeyPairOptions):
     } else {
         ec = new EC('p256') as any;
     }
-    const ellipticKeyPair = ec.genKeyPair(options);
+    const ellipticKeyPair = ec.genKeyPair(options.ecOptions);
     const publicKey = PublicKey.fromElliptic(ellipticKeyPair, type, ec);
     const privateKey = PrivateKey.fromElliptic(ellipticKeyPair, type, ec);
     return {publicKey, privateKey};

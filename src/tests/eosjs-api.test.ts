@@ -93,13 +93,13 @@ const serializedActions = [
     {
         account: 'testeostoken',
         authorization: [{ actor: 'thegazelle', permission: 'active' }],
-        data: "00808A517DC354CB6012F557656CA4BA102700000000000004454F530000000014466F72206120736563757265206675747572652E", // tslint:disable-line
+        data: '00808A517DC354CB6012F557656CA4BA102700000000000004454F530000000014466F72206120736563757265206675747572652E', // eslint-disable-line
         name: 'transfer',
     },
     {
         account: 'testeostoken',
         authorization: [{ actor: 'thegazelle', permission: 'active' }],
-        data: "00808A517DC354CB6012F557656CA4BA204E00000000000004454F530000000028466F722061207365636F6E64207365637572652066757475726520286D756C746976657273653F29", // tslint:disable-line
+        data: '00808A517DC354CB6012F557656CA4BA204E00000000000004454F530000000028466F722061207365636F6E64207365637572652066757475726520286D756C746976657273653F29', // eslint-disable-line
         name: 'transfer',
     },
 ];
@@ -138,7 +138,7 @@ describe('eosjs-api', () => {
             if (input === '/v1/chain/get_raw_code_and_abi') {
                 return {
                     account_name: 'testeostoken',
-                    abi: "DmVvc2lvOjphYmkvMS4wAQxhY2NvdW50X25hbWUEbmFtZQUIdHJhbnNmZXIABARmcm9tDGFjY291bnRfbmFtZQJ0bwxhY2NvdW50X25hbWUIcXVhbnRpdHkFYXNzZXQEbWVtbwZzdHJpbmcGY3JlYXRlAAIGaXNzdWVyDGFjY291bnRfbmFtZQ5tYXhpbXVtX3N1cHBseQVhc3NldAVpc3N1ZQADAnRvDGFjY291bnRfbmFtZQhxdWFudGl0eQVhc3NldARtZW1vBnN0cmluZwdhY2NvdW50AAEHYmFsYW5jZQVhc3NldA5jdXJyZW5jeV9zdGF0cwADBnN1cHBseQVhc3NldAptYXhfc3VwcGx5BWFzc2V0Bmlzc3VlcgxhY2NvdW50X25hbWUDAAAAVy08zc0IdHJhbnNmZXLnBSMjIFRyYW5zZmVyIFRlcm1zICYgQ29uZGl0aW9ucwoKSSwge3tmcm9tfX0sIGNlcnRpZnkgdGhlIGZvbGxvd2luZyB0byBiZSB0cnVlIHRvIHRoZSBiZXN0IG9mIG15IGtub3dsZWRnZToKCjEuIEkgY2VydGlmeSB0aGF0IHt7cXVhbnRpdHl9fSBpcyBub3QgdGhlIHByb2NlZWRzIG9mIGZyYXVkdWxlbnQgb3IgdmlvbGVudCBhY3Rpdml0aWVzLgoyLiBJIGNlcnRpZnkgdGhhdCwgdG8gdGhlIGJlc3Qgb2YgbXkga25vd2xlZGdlLCB7e3RvfX0gaXMgbm90IHN1cHBvcnRpbmcgaW5pdGlhdGlvbiBvZiB2aW9sZW5jZSBhZ2FpbnN0IG90aGVycy4KMy4gSSBoYXZlIGRpc2Nsb3NlZCBhbnkgY29udHJhY3R1YWwgdGVybXMgJiBjb25kaXRpb25zIHdpdGggcmVzcGVjdCB0byB7e3F1YW50aXR5fX0gdG8ge3t0b319LgoKSSB1bmRlcnN0YW5kIHRoYXQgZnVuZHMgdHJhbnNmZXJzIGFyZSBub3QgcmV2ZXJzaWJsZSBhZnRlciB0aGUge3t0cmFuc2FjdGlvbi5kZWxheX19IHNlY29uZHMgb3Igb3RoZXIgZGVsYXkgYXMgY29uZmlndXJlZCBieSB7e2Zyb219fSdzIHBlcm1pc3Npb25zLgoKSWYgdGhpcyBhY3Rpb24gZmFpbHMgdG8gYmUgaXJyZXZlcnNpYmx5IGNvbmZpcm1lZCBhZnRlciByZWNlaXZpbmcgZ29vZHMgb3Igc2VydmljZXMgZnJvbSAne3t0b319JywgSSBhZ3JlZSB0byBlaXRoZXIgcmV0dXJuIHRoZSBnb29kcyBvciBzZXJ2aWNlcyBvciByZXNlbmQge3txdWFudGl0eX19IGluIGEgdGltZWx5IG1hbm5lci4KAAAAAAClMXYFaXNzdWUAAAAAAKhs1EUGY3JlYXRlAAIAAAA4T00RMgNpNjQBCGN1cnJlbmN5AQZ1aW50NjQHYWNjb3VudAAAAAAAkE3GA2k2NAEIY3VycmVuY3kBBnVpbnQ2NA5jdXJyZW5jeV9zdGF0cwAAAA===", // tslint:disable-line
+                    abi: 'DmVvc2lvOjphYmkvMS4wAQxhY2NvdW50X25hbWUEbmFtZQUIdHJhbnNmZXIABARmcm9tDGFjY291bnRfbmFtZQJ0bwxhY2NvdW50X25hbWUIcXVhbnRpdHkFYXNzZXQEbWVtbwZzdHJpbmcGY3JlYXRlAAIGaXNzdWVyDGFjY291bnRfbmFtZQ5tYXhpbXVtX3N1cHBseQVhc3NldAVpc3N1ZQADAnRvDGFjY291bnRfbmFtZQhxdWFudGl0eQVhc3NldARtZW1vBnN0cmluZwdhY2NvdW50AAEHYmFsYW5jZQVhc3NldA5jdXJyZW5jeV9zdGF0cwADBnN1cHBseQVhc3NldAptYXhfc3VwcGx5BWFzc2V0Bmlzc3VlcgxhY2NvdW50X25hbWUDAAAAVy08zc0IdHJhbnNmZXLnBSMjIFRyYW5zZmVyIFRlcm1zICYgQ29uZGl0aW9ucwoKSSwge3tmcm9tfX0sIGNlcnRpZnkgdGhlIGZvbGxvd2luZyB0byBiZSB0cnVlIHRvIHRoZSBiZXN0IG9mIG15IGtub3dsZWRnZToKCjEuIEkgY2VydGlmeSB0aGF0IHt7cXVhbnRpdHl9fSBpcyBub3QgdGhlIHByb2NlZWRzIG9mIGZyYXVkdWxlbnQgb3IgdmlvbGVudCBhY3Rpdml0aWVzLgoyLiBJIGNlcnRpZnkgdGhhdCwgdG8gdGhlIGJlc3Qgb2YgbXkga25vd2xlZGdlLCB7e3RvfX0gaXMgbm90IHN1cHBvcnRpbmcgaW5pdGlhdGlvbiBvZiB2aW9sZW5jZSBhZ2FpbnN0IG90aGVycy4KMy4gSSBoYXZlIGRpc2Nsb3NlZCBhbnkgY29udHJhY3R1YWwgdGVybXMgJiBjb25kaXRpb25zIHdpdGggcmVzcGVjdCB0byB7e3F1YW50aXR5fX0gdG8ge3t0b319LgoKSSB1bmRlcnN0YW5kIHRoYXQgZnVuZHMgdHJhbnNmZXJzIGFyZSBub3QgcmV2ZXJzaWJsZSBhZnRlciB0aGUge3t0cmFuc2FjdGlvbi5kZWxheX19IHNlY29uZHMgb3Igb3RoZXIgZGVsYXkgYXMgY29uZmlndXJlZCBieSB7e2Zyb219fSdzIHBlcm1pc3Npb25zLgoKSWYgdGhpcyBhY3Rpb24gZmFpbHMgdG8gYmUgaXJyZXZlcnNpYmx5IGNvbmZpcm1lZCBhZnRlciByZWNlaXZpbmcgZ29vZHMgb3Igc2VydmljZXMgZnJvbSAne3t0b319JywgSSBhZ3JlZSB0byBlaXRoZXIgcmV0dXJuIHRoZSBnb29kcyBvciBzZXJ2aWNlcyBvciByZXNlbmQge3txdWFudGl0eX19IGluIGEgdGltZWx5IG1hbm5lci4KAAAAAAClMXYFaXNzdWUAAAAAAKhs1EUGY3JlYXRlAAIAAAA4T00RMgNpNjQBCGN1cnJlbmN5AQZ1aW50NjQHYWNjb3VudAAAAAAAkE3GA2k2NAEIY3VycmVuY3kBBnVpbnQ2NA5jdXJyZW5jeV9zdGF0cwAAAA===', // eslint-disable-line
                 };
             }
 
@@ -234,12 +234,8 @@ describe('eosjs-api', () => {
     describe('Api shorthand design (JsonAbi)', () => {
         it('errors if abi is not cached', () => {
             const abiCheck = () => {
-                api.with('testeostoken').as('bob').transfer({
-                    from: 'thegazelle',
-                    to: 'remasteryoda',
-                    quantity: '1.0000 EOS',
-                    memo: 'For a secure future.',
-                });
+                api.with('testeostoken').as('bob')
+                    .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
             };
             expect(abiCheck).toThrowError('ABI must be cached before using ActionBuilder, run api.getAbi()');
         });
@@ -247,12 +243,8 @@ describe('eosjs-api', () => {
         it('generates a valid serialized action using api.with()', async () => {
             await api.getAbi('testeostoken');
 
-            const serializedAction = api.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '1.0000 EOS',
-                memo: 'For a secure future.',
-            });
+            const serializedAction = api.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
             expect(serializedAction).toEqual(serializedActions[0]);
         });
 
@@ -260,33 +252,34 @@ describe('eosjs-api', () => {
             await api.getAbi('testeostoken');
 
             const tx = api.buildTransaction();
-            const serializedAction = tx.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '2.0000 EOS',
-                memo: 'For a second secure future (multiverse?)',
-            });
+            const serializedAction = tx.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '2.0000 EOS', 'For a second secure future (multiverse?)');
             expect(serializedAction).toEqual(serializedActions[1]);
         });
 
         it('confirms serializeActions and ActionBuilder return same serialized data', async () => {
             const response = await api.serializeActions(transaction.actions);
 
-            const firstAction = api.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '1.0000 EOS',
-                memo: 'For a secure future.',
-            });
+            const firstAction = api.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
 
-            const secondAction = api.with('testeostoken').as('thegazelle').transfer({
-                from: 'thegazelle',
-                to: 'remasteryoda',
-                quantity: '2.0000 EOS',
-                memo: 'For a second secure future (multiverse?)',
-            });
+            const secondAction = api.with('testeostoken').as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '2.0000 EOS', 'For a second secure future (multiverse?)');
 
             expect([firstAction, secondAction]).toEqual(response);
+        });
+
+        it('generates the same serialized data using the longer authorization', async () => {
+            await api.getAbi('testeostoken');
+
+            const firstSerializedAction =
+                api.with('testeostoken').as('thegazelle')
+                    .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
+            const secondSerializedAction =
+                api.with('testeostoken').as([{ actor: 'thegazelle', permission: 'active'}])
+                    .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
+
+            expect(firstSerializedAction).toEqual(secondSerializedAction);
         });
     });
 
@@ -294,11 +287,11 @@ describe('eosjs-api', () => {
         await api.wasmAbiProvider.setWasmAbis([
             new WasmAbi({
                 account: 'eosio.token',
-                mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+                mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))),
                 memoryThreshold: 32000,
                 textEncoder: api.textEncoder,
                 textDecoder: api.textDecoder,
-                print(x) { process.stdout.write(x); },
+                print: (x) => { process.stdout.write(x); },
             })
         ]);
         expect(api.wasmAbiProvider.wasmAbis.get('eosio.token')).not.toBeUndefined();
@@ -309,11 +302,11 @@ describe('eosjs-api', () => {
             await api.wasmAbiProvider.setWasmAbis([
                 new WasmAbi({
                     account: 'eosio.token',
-                    mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+                    mod: new (global as any).WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))),
                     memoryThreshold: 32000,
                     textEncoder: api.textEncoder,
                     textDecoder: api.textDecoder,
-                    print(x) { process.stdout.write(x); },
+                    print: (x) => { process.stdout.write(x); },
                 })
             ]);
         });
@@ -331,6 +324,16 @@ describe('eosjs-api', () => {
             expect(serializedAction.account).toEqual('eosio.token');
             expect(serializedAction.authorization).toEqual([{ actor: 'bob', permission: 'active'}]);
             expect(serializedAction.name).toEqual('transfer');
+        });
+
+        it('generates the same serialized data using the longer authorization', async () => {
+            const firstSerializedAction =
+                api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'memo');
+            const secondSerializedAction =
+                api.with('eosio.token').as([{ actor: 'bob', permission: 'active' }])
+                    .transfer('bob', 'alice', '0.0001 SYS', 'memo');
+
+            expect(firstSerializedAction).toEqual(secondSerializedAction);
         });
     });
 });

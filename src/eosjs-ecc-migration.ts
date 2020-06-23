@@ -1,21 +1,24 @@
 import {PrivateKey, PublicKey, Signature} from './eosjs-jssig';
 import {generateKeyPair} from './eosjs-key-conversions';
 import {KeyType} from './eosjs-numeric';
+import {ec as EC} from 'elliptic';
 
 export const ecc = {
     initialize: () => console.error('Method deprecated'),
     unsafeRandomKey: () => console.error('Method deprecated'),
-    randomKey: (cpuEntropyBits?: number): Promise<string> => {
+    randomKey: (
+        cpuEntropyBits?: number, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
+    ): Promise<string> => {
         if (cpuEntropyBits !== undefined) {
             console.warn('Argument `cpuEntropyBits` is deprecated, ' +
                 'use the options argument instead');
         }
 
-        const { privateKey } = generateKeyPair(KeyType.k1);
+        const { privateKey } = generateKeyPair(KeyType.k1, options);
         return Promise.resolve(privateKey.toLegacyString());
     },
     seedPrivate: () => console.error('Method deprecated'),
-    privateToPublic: (key: string, pubkey_prefix?: string): string => { // tslint:disable-line
+    privateToPublic: (key: string, pubkey_prefix?: string): string => {
         if (pubkey_prefix !== undefined) {
             console.warn('Argument `pubkey_prefix` is deprecated, ' +
                 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
@@ -25,7 +28,7 @@ export const ecc = {
         const publicKey = privateKey.getPublicKey();
         return publicKey.toLegacyString();
     },
-    isValidPublic: (pubkey: string, pubkey_prefix?: string): boolean => { // tslint:disable-line
+    isValidPublic: (pubkey: string, pubkey_prefix?: string): boolean => {
         if (pubkey_prefix !== undefined) {
             console.warn('Argument `pubkey_prefix` is deprecated, ' +
                 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');

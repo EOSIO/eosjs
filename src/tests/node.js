@@ -7,15 +7,16 @@ const fetch = require('node-fetch');
 const { TextEncoder, TextDecoder } = require('util');
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
-/* new accounts for testing can be created by unlocking a cleos wallet then calling: 
+const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT';
+/* new accounts for testing can be created by unlocking a cleos wallet then calling:
  * 1) cleos create key --to-console (copy this privateKey & publicKey)
- * 2) cleos wallet import 
+ * 2) cleos wallet import
  * 3) cleos create account bob publicKey
  * 4) cleos create account alice publicKey
  */
 
 const rpc = new JsonRpc('http://localhost:8888', { fetch });
-const signatureProvider = new JsSignatureProvider([privateKey]);
+const signatureProvider = new JsSignatureProvider([privateKey, r1PrivateKey]);
 const wasmAbiProvider = new WasmAbiProvider();
 const api = new Api({ rpc, signatureProvider, wasmAbiProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
@@ -23,31 +24,34 @@ const setWasmAbi = async () => {
     await wasmAbiProvider.setWasmAbis([
         new WasmAbi({
             account: 'eosio.token',
-            mod: new global.WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))), // tslint:disable-line
+            mod: new global.WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))),
             memoryThreshold: 32000,
             textEncoder: api.textEncoder,
             textDecoder: api.textDecoder,
-            print(x) { process.stdout.write(x); },
+            print: (x) => { process.stdout.write(x); },
         })
     ]);
 };
 
-const transactWithConfig = async (config, memo) => await api.transact({
-    actions: [{
-        account: 'eosio.token',
-        name: 'transfer',
-        authorization: [{
-            actor: 'bob',
-            permission: 'active',
-        }],
-        data: {
-            from: 'bob',
-            to: 'alice',
-            quantity: '0.0001 SYS',
-            memo,
-        },
-    }]
-}, config);
+const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
+    wasmAbiProvider.wasmAbis.clear();
+    return await api.transact({
+        actions: [{
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: from,
+                permission: 'active',
+            }],
+            data: {
+                from,
+                to,
+                quantity: '0.0001 SYS',
+                memo,
+            },
+        }]
+    }, config);
+};
 
 const transactWithoutConfig = async () => {
     const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30}, 'transactWithoutConfig');
@@ -82,12 +86,7 @@ const transactWithShorthandApiJson = async () => {
     await api.getAbi('eosio.token');
     return await api.transact({
         actions: [
-          api.with('eosio.token').as('bob').transfer({
-            from: 'bob',
-            to: 'alice',
-            quantity: '0.0001 SYS',
-            memo: 'transactWithShorthandApiJson'
-          })
+            api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')
         ]
     }, {
         blocksBehind: 3,
@@ -98,12 +97,7 @@ const transactWithShorthandApiJson = async () => {
 const transactWithShorthandTxJson = async () => {
     await api.getAbi('eosio.token');
     const tx = api.buildTransaction();
-    tx.with('eosio.token').as('bob').transfer({
-        from: 'bob',
-        to: 'alice',
-        quantity: '0.0001 SYS',
-        memo: 'transactWithShorthandTxJson'
-    });
+    tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxJson');
     return await tx.send({
         blocksBehind: 3,
         expireSeconds: 30
@@ -150,7 +144,7 @@ const transactShouldFail = async () => await api.transact({
         },
     }]
 });
-  
+
 const rpcShouldFail = async () => await rpc.get_block(-1);
 
 module.exports = {
