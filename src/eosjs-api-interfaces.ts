@@ -117,3 +117,7 @@ export type ContextFreeGroupCallback =
         contextFreeAction?: ActionBuilder;
         contextFreeData?: any;
     };
+
+export interface ActionSerializerType {
+    [actionName: string]: any
+};
