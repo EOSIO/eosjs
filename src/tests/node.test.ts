@@ -5,8 +5,19 @@ describe('Node JS environment', () => {
     let transactionSignatures: any;
     let failedAsPlanned: boolean;
 
-    it('transacts with configuration object', async () => {
-        transactionResponse = await tests.transactWithConfig();
+    it('transacts with configuration object containing blocksBehind', async () => {
+        transactionResponse = await tests.transactWithConfig({
+            blocksBehind: 3,
+            expireSeconds: 30
+        }, 'transactWithBlocksBehind');
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
+    it('transacts with configuration object containing useLastIrreversible', async () => {
+        transactionResponse = await tests.transactWithConfig({
+            useLastIrreversible: true,
+            expireSeconds: 30
+        }, 'transactWithUseLastIrreversible');
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
@@ -15,15 +26,40 @@ describe('Node JS environment', () => {
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     }, 10000);
 
+    it('transacts with compressed transaction', async () => {
+        transactionResponse = await tests.transactWithConfig({
+            blocksBehind: 3,
+            expireSeconds: 30,
+            compression: true
+        }, 'transactWithCompression');
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
     it('transacts without broadcasting, returning signatures and packed transaction', async () => {
-        transactionSignatures = await tests.transactWithoutBroadcast();
+        transactionSignatures = await tests.transactWithConfig({
+            broadcast: false,
+            blocksBehind: 3,
+            expireSeconds: 30
+        }, 'transactWithoutBroadcast');
         expect(Object.keys(transactionSignatures)).toContain('signatures');
         expect(Object.keys(transactionSignatures)).toContain('serializedTransaction');
     });
 
     it('broadcasts packed transaction, given valid signatures', async () => {
-        transactionSignatures = await tests.transactWithoutBroadcast();
+        transactionSignatures = await tests.transactWithConfig({
+            broadcast: false,
+            blocksBehind: 3,
+            expireSeconds: 30
+        }, 'transactWithoutBroadcast2');
         transactionResponse = await tests.broadcastResult(transactionSignatures);
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
+    it('transacts with elliptic p256/KeyType.R1 keys and signatures', async () => {
+        transactionResponse = await tests.transactWithConfig({
+            blocksBehind: 3,
+            expireSeconds: 30
+        }, 'transactWithR1KeySignature', 'bobr1', 'alicer1');
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
