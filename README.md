@@ -11,7 +11,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 The official distribution package can be found at [npm](https://www.npmjs.com/package/eosjs).
 
-### NodeJS Dependency
+### Add dependency to your project
 
 `yarn add eosjs`
 
@@ -38,7 +38,7 @@ Clone this repository locally then run `yarn build-web`.  The browser distributi
 
 ### ES Modules
 
-Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
+Importing using ESM syntax is supported using TypeScript, [webpack](https://webpack.js.org/api/module-methods), or  [Node.js with `--experimental-modules` flag](https://nodejs.org/api/esm.html)
 ```js
 import { Api, JsonRpc, RpcError } from 'eosjs';
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // development only
@@ -46,7 +46,7 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // devel
 
 ### CommonJS
 
-Importing using commonJS syntax is supported by NodeJS out of the box.
+Importing using commonJS syntax is supported by Node.js out of the box.
 ```js
 const { Api, JsonRpc, RpcError } = require('eosjs');
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
@@ -69,7 +69,7 @@ const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
 ### JSON-RPC
 
-Open a connection to JSON-RPC, include `fetch` when on NodeJS.
+Open a connection to JSON-RPC, include `fetch` when on Node.js.
 ```js
 const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 ```
