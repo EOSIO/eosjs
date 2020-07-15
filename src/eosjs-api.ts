@@ -8,6 +8,7 @@ import { inflate, deflate } from 'pako';
 
 import {
     AbiProvider,
+    ActionSerializerType,
     AuthorityProvider,
     BinaryAbi,
     CachedAbi,
@@ -427,15 +428,12 @@ export class Api {
             signatures = signResponse.signatures;
         }
 
-        const response = await this.rpc.fetchBuiltin(this.rpc.endpoint + '/v1/chain/send_transaction', {
-            body: JSON.stringify({
-                signatures,
-                compression: 0,
-                packed_context_free_data: '',
-                packed_trx: ser.arrayToHex(serializedTransaction),
-            }),
-            method: 'POST',
+        const response = await this.rpc.send_transaction({
+            signatures,
+            compression: 0,
+            serializedTransaction
         });
+
         const json = await response.json();
         if (json.code) {
             throw new RpcError(json);
@@ -601,7 +599,7 @@ export class ActionBuilder {
     }
 }
 
-class ActionSerializer {
+class ActionSerializer implements ActionSerializerType {
     constructor(
         parent: ActionBuilder,
         api: Api,

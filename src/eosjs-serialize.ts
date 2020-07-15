@@ -1192,72 +1192,6 @@ export const deserializeAction = (
     };
 };
 
-const addAdditionalTypes = (): Map<string, Type> => {
-    const initialTypes = createInitialTypes();
-    initialTypes.set('null_t', createType({
-        name: 'null_t',
-        serialize: (buffer: SerialBuffer, anyvar: Anyvar) => {},
-        deserialize: (buffer: SerialBuffer, state?: SerializerState) => {}
-    }));
-    initialTypes.set('any_object', createType({
-        name: 'any_object',
-        serialize: serializeAnyObject,
-        deserialize: deserializeAnyObject
-    }));
-    initialTypes.set('any_array', createType({
-        name: 'any_array',
-        serialize: serializeAnyArray,
-        deserialize: deserializeAnyArray
-    }));
-    return initialTypes;
-};
-
-const additionalTypes = addAdditionalTypes();
-
-const anyvarDefs = {
-    null_t: { index: 0, useShortForm: true, type: additionalTypes.get('null_t') },
-    int64: { index: 1, useShortForm: false, type: additionalTypes.get('int64') },
-    uint64: { index: 2, useShortForm: false, type: additionalTypes.get('uint64') },
-    int32: { index: 3, useShortForm: true, type: additionalTypes.get('int32') },
-    uint32: { index: 4, useShortForm: false, type: additionalTypes.get('uint32') },
-    int16: { index: 5, useShortForm: false, type: additionalTypes.get('int16') },
-    uint16: { index: 6, useShortForm: false, type: additionalTypes.get('uint16') },
-    int8: { index: 7, useShortForm: false, type: additionalTypes.get('int8') },
-    uint8: { index: 8, useShortForm: false, type: additionalTypes.get('uint8') },
-    time_point: { index: 9, useShortForm: false, type: additionalTypes.get('time_point') },
-    checksum256: { index: 10, useShortForm: false, type: additionalTypes.get('checksum256') },
-    float64: { index: 11, useShortForm: false, type: additionalTypes.get('float64') },
-    string: { index: 12, useShortForm: true, type: additionalTypes.get('string') },
-    any_object: { index: 13, useShortForm: true, type: additionalTypes.get('any_object') },
-    any_array: { index: 14, useShortForm: true, type: additionalTypes.get('any_array') },
-    bytes: { index: 15, useShortForm: false, type: additionalTypes.get('bytes') },
-    symbol: { index: 16, useShortForm: false, type: additionalTypes.get('symbol') },
-    symbol_code: { index: 17, useShortForm: false, type: additionalTypes.get('symbol_code') },
-    asset: { index: 18, useShortForm: false, type: additionalTypes.get('asset') },
-};
-
-const anyvarDefsByIndex = [
-    anyvarDefs.null_t,
-    anyvarDefs.int64,
-    anyvarDefs.uint64,
-    anyvarDefs.int32,
-    anyvarDefs.uint32,
-    anyvarDefs.int16,
-    anyvarDefs.uint16,
-    anyvarDefs.int8,
-    anyvarDefs.uint8,
-    anyvarDefs.time_point,
-    anyvarDefs.checksum256,
-    anyvarDefs.float64,
-    anyvarDefs.string,
-    anyvarDefs.any_object,
-    anyvarDefs.any_array,
-    anyvarDefs.bytes,
-    anyvarDefs.symbol,
-    anyvarDefs.symbol_code,
-    anyvarDefs.asset,
-];
-
 export const serializeAnyvar = (buffer: SerialBuffer, anyvar: Anyvar) => {
     let def: AnyvarDef;
     let value: any;
@@ -1339,6 +1273,72 @@ export const deserializeAnyArray = (buffer: SerialBuffer, state?: SerializerStat
     }
     return result;
 };
+
+const addAdditionalTypes = (): Map<string, Type> => {
+    const initialTypes = createInitialTypes();
+    initialTypes.set('null_t', createType({
+        name: 'null_t',
+        serialize: (buffer: SerialBuffer, anyvar: Anyvar) => {},
+        deserialize: (buffer: SerialBuffer, state?: SerializerState) => {}
+    }));
+    initialTypes.set('any_object', createType({
+        name: 'any_object',
+        serialize: serializeAnyObject,
+        deserialize: deserializeAnyObject
+    }));
+    initialTypes.set('any_array', createType({
+        name: 'any_array',
+        serialize: serializeAnyArray,
+        deserialize: deserializeAnyArray
+    }));
+    return initialTypes;
+};
+
+const additionalTypes = addAdditionalTypes();
+
+const anyvarDefs = {
+    null_t: { index: 0, useShortForm: true, type: additionalTypes.get('null_t') },
+    int64: { index: 1, useShortForm: false, type: additionalTypes.get('int64') },
+    uint64: { index: 2, useShortForm: false, type: additionalTypes.get('uint64') },
+    int32: { index: 3, useShortForm: true, type: additionalTypes.get('int32') },
+    uint32: { index: 4, useShortForm: false, type: additionalTypes.get('uint32') },
+    int16: { index: 5, useShortForm: false, type: additionalTypes.get('int16') },
+    uint16: { index: 6, useShortForm: false, type: additionalTypes.get('uint16') },
+    int8: { index: 7, useShortForm: false, type: additionalTypes.get('int8') },
+    uint8: { index: 8, useShortForm: false, type: additionalTypes.get('uint8') },
+    time_point: { index: 9, useShortForm: false, type: additionalTypes.get('time_point') },
+    checksum256: { index: 10, useShortForm: false, type: additionalTypes.get('checksum256') },
+    float64: { index: 11, useShortForm: false, type: additionalTypes.get('float64') },
+    string: { index: 12, useShortForm: true, type: additionalTypes.get('string') },
+    any_object: { index: 13, useShortForm: true, type: additionalTypes.get('any_object') },
+    any_array: { index: 14, useShortForm: true, type: additionalTypes.get('any_array') },
+    bytes: { index: 15, useShortForm: false, type: additionalTypes.get('bytes') },
+    symbol: { index: 16, useShortForm: false, type: additionalTypes.get('symbol') },
+    symbol_code: { index: 17, useShortForm: false, type: additionalTypes.get('symbol_code') },
+    asset: { index: 18, useShortForm: false, type: additionalTypes.get('asset') },
+};
+
+const anyvarDefsByIndex = [
+    anyvarDefs.null_t,
+    anyvarDefs.int64,
+    anyvarDefs.uint64,
+    anyvarDefs.int32,
+    anyvarDefs.uint32,
+    anyvarDefs.int16,
+    anyvarDefs.uint16,
+    anyvarDefs.int8,
+    anyvarDefs.uint8,
+    anyvarDefs.time_point,
+    anyvarDefs.checksum256,
+    anyvarDefs.float64,
+    anyvarDefs.string,
+    anyvarDefs.any_object,
+    anyvarDefs.any_array,
+    anyvarDefs.bytes,
+    anyvarDefs.symbol,
+    anyvarDefs.symbol_code,
+    anyvarDefs.asset,
+];
 
 export const serializeQuery = (buffer: SerialBuffer, query: Query) => {
     let method: string;
