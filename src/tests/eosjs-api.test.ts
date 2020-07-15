@@ -1,4 +1,3 @@
-
 const { TextEncoder, TextDecoder } = require('util');
 import { Api, TransactionBuilder, ActionBuilder } from '../eosjs-api';
 import { JsonRpc } from '../eosjs-jsonrpc';
