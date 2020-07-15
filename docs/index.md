@@ -1,3 +1,7 @@
+---
+content_title: eosjs
+---
+
 `eosjs` is a Javascript library which provides an API for integrating with EOSIO-based blockchains using the [EOSIO Nodeos RPC API](https://developers.eos.io/eosio-nodeos/reference).  The documentation for `eosjs` is structured in the following way:
 
 * [Installation](02_installation.md) explains how to install `eosjs` using `npm` or `yarn`.
