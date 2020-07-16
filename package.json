@@ -26,7 +26,7 @@
     "url": "https://github.com/EOSIO/eosjs.git"
   },
   "dependencies": {
-    "bn.js": "^5.1.2",
+    "bn.js": "5.1.2",
     "elliptic": "6.5.3",
     "hash.js": "1.1.7",
     "pako": "1.0.11"
