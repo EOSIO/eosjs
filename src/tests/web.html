@@ -20,21 +20,38 @@
             const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey, r1PrivateKey]);
             const wasmAbiProvider = new eosjs_wasmabi.WasmAbiProvider();
             const api = new eosjs_api.Api({ rpc, signatureProvider, wasmAbiProvider });
-            let module;
+            let tokenModule;
+            let rvModule;
 
             const setWasmAbi = async () => {
-              if (!module) {
-                const response = await fetch('token_abi.wasm');
-                const buffer = await response.arrayBuffer();
-                module = await WebAssembly.compile(buffer);
+              let response;
+              let buffer;
+              if (!tokenModule) {
+                response = await fetch('token_abi.wasm');
+                buffer = await response.arrayBuffer();
+                tokenModule = await WebAssembly.compile(buffer);
+              }
+
+              if (!rvModule) {
+                response = await fetch('action_results_abi.wasm');
+                buffer = await response.arrayBuffer();
+                rvModule = await WebAssembly.compile(buffer);
               }
 
               await api.wasmAbiProvider.setWasmAbis([
                 new eosjs_wasmabi.WasmAbi({
                   account: 'eosio.token',
-                  mod: module,
+                  mod: tokenModule,
                   memoryThreshold: 32000,
                   textEncoder: new TextEncoder(),
+                  textDecoder: new TextDecoder('utf-8', { fatal: true }),
+                  print: (x) => console.info(x),
+                }),
+                new eosjs_wasmabi.WasmAbi({
+                  account: 'returnvalue',
+                  mod: rvModule,
+                  memoryThreshold: 32000,
+                  textEncoder: new TextEncoder,
                   textDecoder: new TextDecoder('utf-8', { fatal: true }),
                   print: (x) => console.info(x),
                 })
@@ -397,6 +414,40 @@
               resultsLabel.innerText = FAILED;
               return false;
             };
+
+            const returnValueTx = async () => {
+              await setWasmAbi();
+              const tx = api.buildTransaction();
+              tx.with('returnvalue').as('bob').actionresret();
+              return tx.send({
+                  blocksBehind: 3,
+                  expireSeconds: 30
+              });
+            }
+
+            const testWithReturnValueTx = async (e) => {
+              const expectedValue = 10;
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await returnValueTx();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Return Values Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.processed.action_traces[0].return_value === expectedValue) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{
@@ -484,6 +535,7 @@
             <div><h2>Transact with .with() Using Api and Wasm Abi</h2><button onClick='testShorthandWithApiWasm(event);'>Test</button></div>
             <div><h2>Transact with .with() Using Tx and Wasm Abi</h2><button onClick='testShorthandWithTxWasm(event);'>Test</button></div>
             <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button onClick='testWithP256EllipticCurve(event);'>Test</button></div>
+            <div><h2>Transact Return Values</h2><button onClick='testWithReturnValueTx(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>

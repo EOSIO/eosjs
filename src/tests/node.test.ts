@@ -87,6 +87,12 @@ describe('Node JS environment', () => {
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
+    it('confirms an action\'s return value can be verified', async () => {
+        const expectedValue = 10;
+        transactionResponse = await tests.transactWithReturnValue();
+        expect(transactionResponse.processed.action_traces[0].return_value).toEqual(expectedValue);
+    });
+
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
         try {
             failedAsPlanned = true;
