@@ -5,6 +5,8 @@ dist-web/
 node_modules/
 docs-build/
 *.tgz
+.github/**/*.wasm
+.github/**/*.abi
 
 #cypress artifacts
 cypress/screenshots/
