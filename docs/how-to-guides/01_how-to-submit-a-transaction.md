@@ -29,7 +29,7 @@ Below is a complete example transaction to call the `buyrambytes` action with `u
 The transaction will reference the block 3 blocks behind the head block, and will automatically expire the transaction 30 seconds after the time present in this referenced block.
 ```javascript
 (async () => {
-  await api.transact({
+  const transaction = await api.transact({
    actions: [{
      account: 'eosio',
      name: 'buyrambytes',
@@ -53,7 +53,7 @@ The transaction will reference the block 3 blocks behind the head block, and wil
 Alternatively, the transaction could be submitted without the optional configuration object by specifying the TAPOS fields `expiration`, `ref_block_num`, and `ref_block_prefix` explicity in the action.
 ```javascript
 (async () => {
-  await api.transact({
+  const transaction = await api.transact({
    expiration: '2019-09-19T16:39:15',
    ref_block_num: '50477227',
    ref_block_prefix: '1022379673',
@@ -73,3 +73,6 @@ Alternatively, the transaction could be submitted without the optional configura
   });
 })();
 ```
+
+#### Return Values
+From nodeos version 2.1, the ability to receive return values from smart contracts to eosjs has been introduced.  In the above examples, the `transaction` object will include the values `transaction_id` and the `processed` object.  If your smart contract returns values, you will be able to find the values within the `transaction.processed.action_traces` array.  The order of the `action_traces` array matches the order of actions in your transaction and within those `action_trace` objects, you can find your deserialized return value for your action in the `return_value` field.
