@@ -203,7 +203,7 @@
                 },
                 {
                     "name": "action_results",
-                    "type": "action_result[]"
+                    "type": "action_result[]$"
                 }
             ]
         }
