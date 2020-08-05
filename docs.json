@@ -1,20 +1,20 @@
 {
 	"name": "eosjs",
 	"generators": [
-    {
+		{
 			"name": "collate_markdown",
-			"options": {
-				"docs_dir": "docs"
+			"options": { 
+				"docs_dir": "docs" 
 			}
 		},
 		{
 			"name": "typedoc",
 			"options": {
-				"disable_filters": true
-			},
-			"filters": [
-				{ "name":  "remove_extension" }
-			]
+				"disable_default_filters": true,
+				"filters": [
+					{ "name":  "remove_extension" }
+				]
+			}
 		}
 	]
 }
