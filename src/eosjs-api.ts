@@ -17,6 +17,7 @@ import {
     QueryConfig,
     SignatureProvider,
     TransactConfig,
+    TransactResult,
     WasmAbiProvider
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
@@ -306,7 +307,7 @@ export class Api {
     public async transact(
         transaction: any,
         { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-        TransactConfig = {}): Promise<any>
+        TransactConfig = {}): Promise<TransactResult|any>
     {
         let info: GetInfoResult;
 
@@ -454,7 +455,7 @@ export class Api {
     /** Broadcast a signed transaction */
     public async pushSignedTransaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<any> {
+    ): Promise<TransactResult> {
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
@@ -464,7 +465,7 @@ export class Api {
 
     public async pushCompressedSignedTransaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<any> {
+    ): Promise<TransactResult> {
         const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
         const compressedSerializedContextFreeData =
             this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
@@ -595,7 +596,7 @@ export class ActionBuilder {
         }
 
         const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
-        return new ActionSerializer(this, this.api, this.accountName, authorization, wasmAbi);
+        return new ActionSerializer(this, this.api, this.accountName, authorization, wasmAbi) as ActionSerializerType;
     }
 }
 

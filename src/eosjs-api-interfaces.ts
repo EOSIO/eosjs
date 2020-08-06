@@ -94,6 +94,64 @@ export interface TransactConfig {
     expireSeconds?: number;
 }
 
+export interface ActionTrace {
+    action_ordinal: number,
+    creator_action_ordinal: number,
+    closest_unnotified_ancestor_action_ordinal: number,
+    receipt: {
+        receiver: string,
+        act_digest: string,
+        global_sequence: number,
+        recv_sequence: number,
+        auth_sequence: any[],
+        code_sequence: number,
+        abi_sequence: number
+    },
+    receiver: string,
+    act: {
+        account: string,
+        name: string,
+        authorization: any[],
+        data: any,
+        hex_data: string
+    },
+    context_free: boolean,
+    elapsed: number,
+    console: string,
+    trx_id: string,
+    block_num: number,
+    block_time: string,
+    producer_block_id: string|null,
+    account_ram_deltas: any[],
+    account_disk_deltas: any[],
+    except: any,
+    error_code: number|null,
+    return_value: any,
+    inline_traces: ActionTrace[]
+}
+
+export interface TransactResult {
+    transaction_id: string,
+    processed: {
+        id: string,
+        block_num: number,
+        block_time: string,
+        producer_block_id: string|null,
+        receipt: {
+            status: string,
+            cpu_usage_us: number,
+            net_usage_words: number
+        },
+        elapsed: number,
+        net_usage: number,
+        scheduled: boolean,
+        action_traces: ActionTrace[],
+        account_ram_delta: any,
+        except: string|null,
+        error_code: number|null
+    }
+}
+
 /** Optional query configuration object */
 export interface QueryConfig {
     sign?: boolean;
