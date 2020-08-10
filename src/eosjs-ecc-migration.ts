@@ -76,11 +76,14 @@ export const ecc = {
         const publicKey = sig.recover(dataSha256, false, encoding);
         return publicKey.toLegacyString();
     },
-    sha256: (data: string|Buffer, resultEncoding: string = 'hex'): string|Buffer => {
-        if (resultEncoding !== 'hex') {
-            console.warn('`resultEncoding` must be \'hex\' or undeclared');
+    sha256: (data: string|Buffer, resultEncoding?: string, encoding?: string): string|Buffer => {
+        if (encoding !== undefined) {
+            console.warn('Argument `encoding` is deprecated');
+        }
+        if (resultEncoding !== undefined) {
+            console.warn('Argument `resultEncoding` is deprecated');
         }
 
-        return require('./eosjs-key-conversions').sha256(data, resultEncoding);
+        return require('./eosjs-key-conversions').sha256(data);
     }
 };

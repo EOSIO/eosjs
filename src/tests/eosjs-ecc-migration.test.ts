@@ -106,11 +106,10 @@ describe('ecc Migration', () => {
         console.warn = jest.fn();
         const dataAsString = 'some string';
 
-        eccMigration.sha256(dataAsString, 'utf8');
-        expect(console.warn).toBeCalledWith('`resultEncoding` must be \'hex\' or undeclared');
-
         const eccHash = Buffer.from(ecc.sha256(dataAsString), 'hex');
-        const eccMigrationHash = Buffer.from(eccMigration.sha256(dataAsString) as string, 'hex');
+        const eccMigrationHash = Buffer.from(eccMigration.sha256(dataAsString, 'hex', 'utf8') as string, 'hex');
+        expect(console.warn).toBeCalledWith('Argument `encoding` is deprecated');
+        expect(console.warn).toBeCalledWith('Argument `resultEncoding` is deprecated');
         expect(eccHash).toEqual(eccMigrationHash);
 
         const eccSig = ecc.signHash(eccHash, privateKeys[0], 'utf8');
