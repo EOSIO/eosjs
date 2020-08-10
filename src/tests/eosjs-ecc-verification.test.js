@@ -3,7 +3,7 @@ const ecc = require('eosjs-ecc');
 
 const { ec } = require('elliptic');
 
-const { Signature, PrivateKey, PublicKey } = require('../eosjs-key-conversions');
+const { Signature, PrivateKey, PublicKey, sha256 } = require('../eosjs-key-conversions');
 const {
     JsSignatureProvider,
 } = require('../eosjs-jssig');
@@ -140,6 +140,53 @@ describe('JsSignatureProvider', () => {
             expect(PublicKey.fromElliptic(ellipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[idx]);
 
             const eccValid = ecc.verify(ellipticSigAsString, dataAsString, recoveredKPub, 'utf8');
+            expect(eccValid).toEqual(true);
+        }
+    });
+
+    it('ensure eosjs verifies eosjs-ecc\'s Sigs', () => {
+        for (let idx=0; idx<privateKeys.length; idx++) {
+            const KPriv = privateKeys[idx];
+            const privateKey = PrivateKey.fromString(KPriv);
+
+            const dataAsString = 'some string';
+
+            const eccHashedString = Buffer.from(ecc.sha256(dataAsString), 'hex');
+            const eosjsHashedStringAsBuffer = Buffer.from(sha256(dataAsString), 'hex');
+            expect(eccHashedString).toEqual(eosjsHashedStringAsBuffer);
+
+            const eccSig = ecc.sign(dataAsString, KPriv, 'utf8');
+
+            const eosjsSig = Signature.fromString(eccSig);
+            const recoveredKPub = ecc.recover(eccSig, dataAsString, 'utf8');
+            const eosjsRecoveredKPub = eosjsSig.recover(dataAsString, true, 'utf8');
+
+            expect(eosjsRecoveredKPub.toLegacyString()).toEqual(recoveredKPub);
+            expect(eosjsRecoveredKPub.toString()).toEqual(k1FormatPublicKeys[idx]);
+
+            const eosjsValid = eosjsSig.verify(dataAsString, eosjsRecoveredKPub, true, 'utf8');
+            expect(eosjsValid).toEqual(true);
+        }
+    });
+
+    it('ensure ecc verifies eosjs\'s Sigs', () => {
+        for (let idx=0; idx<privateKeys.length; idx++) {
+            const KPriv = privateKeys[idx];
+            const privateKey = PrivateKey.fromString(KPriv);
+
+            const dataAsString = 'some string';
+
+            const eosjsHashedStringAsBuffer = Buffer.from(sha256(dataAsString), 'hex');
+
+            const eosjsSig = privateKey.sign(eosjsHashedStringAsBuffer, false, 'utf8');
+            const eosjsSigAsString = eosjsSig.toString();
+
+            const recoveredKPub = ecc.recover(eosjsSigAsString, dataAsString, 'utf8');
+            const eosjsRecoveredKPub = eosjsSig.recover(dataAsString, true, 'utf8');
+            expect(eosjsRecoveredKPub.toLegacyString()).toEqual(recoveredKPub);
+            expect(eosjsRecoveredKPub.toString()).toEqual(k1FormatPublicKeys[idx]);
+
+            const eccValid = ecc.verify(eosjsSigAsString, dataAsString, recoveredKPub, 'utf8');
             expect(eccValid).toEqual(true);
         }
     });
