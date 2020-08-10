@@ -37,9 +37,6 @@ export const generateKeyPair = (
     return {publicKey, privateKey};
 };
 
-export const sha256 = (data: string|Buffer, resultEncoding?: 'hex', encoding?: BufferEncoding) => {
-    if (typeof data === 'string' && encoding) {
-        data = Buffer.from(data, encoding);
-    }
-    return hash.sha256().update(data).digest(resultEncoding);
+export const sha256 = (data: string|Buffer) => {
+    return hash.sha256().update(data).digest();
 };
