@@ -196,6 +196,19 @@ describe('JsSignatureProvider', () => {
             const valid = sig.verify(dataAsString, KPub, true);
             expect(valid).toEqual(true);
         });
+
+        it('Ensure elliptic sign, recover, verify flow works with shouldHash and encoding', () => {
+            const KPrivStr = privateKeys[0];
+            const KPriv = PrivateKey.fromString(KPrivStr);
+
+            const dataAsString = 'some string';
+            const sig = KPriv.sign(dataAsString, true, 'utf8');
+            const KPub = sig.recover(dataAsString, true, 'utf8');
+
+            expect(KPub.toString()).toEqual(k1FormatPublicKeys[0]);
+            const valid = sig.verify(dataAsString, KPub, true, 'utf8');
+            expect(valid).toEqual(true);
+        });
     });
 
     describe('p256 elliptic', () => {
@@ -336,6 +349,19 @@ describe('JsSignatureProvider', () => {
 
             expect(KPub.toString()).toEqual(r1FormatPublicKeys[0]);
             const valid = sig.verify(dataAsString, KPub, true);
+            expect(valid).toEqual(true);
+        });
+
+        it('Ensure elliptic sign, recover, verify flow works with shouldHash and encoding', () => {
+            const KPrivStr = privateKeysR1[0];
+            const KPriv = PrivateKey.fromString(KPrivStr);
+
+            const dataAsString = 'some string';
+            const sig = KPriv.sign(dataAsString, true, 'utf8');
+            const KPub = sig.recover(dataAsString, true, 'utf8');
+
+            expect(KPub.toString()).toEqual(r1FormatPublicKeys[0]);
+            const valid = sig.verify(dataAsString, KPub, true, 'utf8');
             expect(valid).toEqual(true);
         });
     });

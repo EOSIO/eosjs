@@ -52,23 +52,25 @@ describe('JsSignatureProvider', () => {
             const ellipticHashedStringAsBuffer = Buffer.from(ellipticEc.hash().update(dataAsString).digest(), 'hex');
             expect(eccHashedString).toEqual(ellipticHashedStringAsBuffer);
 
-            const eccSig = ecc.sign(dataAsString, KPriv);
-            const ellipticSig = KPrivElliptic.sign(ellipticHashedStringAsBuffer);
+            const eccSig = ecc.sign(dataAsString, KPriv, 'utf8');
+            const ellipticSig = KPrivElliptic.sign(ellipticHashedStringAsBuffer, 'utf8');
 
-            const eccKPub = ecc.recover(eccSig, dataAsString);
+            const eccKPub = ecc.recover(eccSig, dataAsString, 'utf8');
             const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
                 ellipticHashedStringAsBuffer,
                 ellipticSig,
-                ellipticSig.recoveryParam
+                ellipticSig.recoveryParam,
+                'utf8'
             );
             const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
             expect(PublicKey.fromElliptic(ellipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[idx]);
 
-            const eccValid = ecc.verify(eccSig, dataAsString, eccKPub);
+            const eccValid = ecc.verify(eccSig, dataAsString, eccKPub, 'utf8');
             const ellipticValid = ellipticEc.verify(
                 ellipticHashedStringAsBuffer,
                 ellipticSig,
-                ellipticEc.keyFromPublic(ellipticKPub)
+                ellipticEc.keyFromPublic(ellipticKPub),
+                'utf8'
             );
             expect(eccValid).toEqual(true);
             expect(ellipticValid).toEqual(true);
@@ -88,14 +90,15 @@ describe('JsSignatureProvider', () => {
             const ellipticHashedStringAsBuffer = Buffer.from(ellipticEc.hash().update(dataAsString).digest(), 'hex');
             expect(eccHashedString).toEqual(ellipticHashedStringAsBuffer);
 
-            const eccSig = ecc.sign(dataAsString, KPriv);
+            const eccSig = ecc.sign(dataAsString, KPriv, 'utf8');
 
             const ellipticSig = Signature.fromString(eccSig).toElliptic();
-            const recoveredKPub = ecc.recover(eccSig, dataAsString);
+            const recoveredKPub = ecc.recover(eccSig, dataAsString, 'utf8');
             const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
                 ellipticHashedStringAsBuffer,
                 ellipticSig,
-                ellipticSig.recoveryParam
+                ellipticSig.recoveryParam,
+                'utf8'
             );
 
             const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
@@ -105,7 +108,8 @@ describe('JsSignatureProvider', () => {
             const ellipticValid = ellipticEc.verify(
                 ellipticHashedStringAsBuffer,
                 ellipticSig,
-                ellipticEc.keyFromPublic(ellipticKPub)
+                ellipticEc.keyFromPublic(ellipticKPub),
+                'utf8'
             );
             expect(ellipticValid).toEqual(true);
         }
@@ -122,19 +126,20 @@ describe('JsSignatureProvider', () => {
 
             const ellipticHashedStringAsBuffer = Buffer.from(ellipticEc.hash().update(dataAsString).digest(), 'hex');
 
-            const ellipticSig = KPrivElliptic.sign(ellipticHashedStringAsBuffer);
+            const ellipticSig = KPrivElliptic.sign(ellipticHashedStringAsBuffer, 'utf8');
             const ellipticSigAsString = Signature.fromElliptic(ellipticSig, KeyType.k1).toString();
 
-            const recoveredKPub = ecc.recover(ellipticSigAsString, dataAsString);
+            const recoveredKPub = ecc.recover(ellipticSigAsString, dataAsString, 'utf8');
             const ellipticRecoveredKPub = ellipticEc.recoverPubKey(
                 ellipticHashedStringAsBuffer,
                 ellipticSig,
-                ellipticSig.recoveryParam
+                ellipticSig.recoveryParam,
+                'utf8'
             );
             const ellipticKPub = ellipticEc.keyFromPublic(ellipticRecoveredKPub);
             expect(PublicKey.fromElliptic(ellipticKPub, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[idx]);
 
-            const eccValid = ecc.verify(ellipticSigAsString, dataAsString, recoveredKPub);
+            const eccValid = ecc.verify(ellipticSigAsString, dataAsString, recoveredKPub, 'utf8');
             expect(eccValid).toEqual(true);
         }
     });
