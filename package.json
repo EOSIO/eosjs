@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "21.0.2",
+  "version": "21.0.3",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -41,7 +41,7 @@
     "eslint": "^6.8.0",
     "jest": "^26.3.0",
     "jest-fetch-mock": "^3.0.3",
-    "ts-jest": "^26.1.4",
+    "ts-jest": "^26.2.0",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
