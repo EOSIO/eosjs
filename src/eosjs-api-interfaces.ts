@@ -94,17 +94,17 @@ export interface TransactConfig {
     expireSeconds?: number;
 }
 
-interface AccountDelta {
+export interface AccountDelta {
     account: string,
     delta: number
 }
 
-interface AuthSequence {
+export interface AuthSequence {
     account: string,
     sequence: number
 }
 
-interface ActionReceipt {
+export interface ActionReceipt {
     receiver: string,
     act_digest: string,
     global_sequence: number,
@@ -114,7 +114,7 @@ interface ActionReceipt {
     abi_sequence: number
 }
 
-interface ActionTrace {
+export interface ActionTrace {
     action_ordinal: number,
     creator_action_ordinal: number,
     closest_unnotified_ancestor_action_ordinal: number,
@@ -142,13 +142,13 @@ interface ActionTrace {
     inline_traces: ActionTrace[]
 }
 
-interface TransactionReceiptHeader {
+export interface TransactionReceiptHeader {
     status: string,
     cpu_usage_us: number,
     net_usage_words: number
 }
 
-interface TransactionTrace {
+export interface TransactionTrace {
     id: string,
     block_num: number,
     block_time: string,
