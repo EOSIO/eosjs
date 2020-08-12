@@ -91,14 +91,14 @@ describe('ecc Migration', () => {
 
     it('verifies `sign`, `recover`, and `verify` functions are consistent between ecc objects', () => {
         const dataAsString = 'some string';
-        const eccSig = ecc.sign(dataAsString, privateKeys[0]);
-        const eccMigrationSig = eccMigration.sign(dataAsString, privateKeys[0]);
+        const eccSig = ecc.sign(dataAsString, privateKeys[0], 'utf8');
+        const eccMigrationSig = eccMigration.sign(dataAsString, privateKeys[0], 'utf8');
 
         // signatures are different
         expect(eccSig).not.toEqual(eccMigrationSig);
 
-        const eccKPub = ecc.recover(eccSig, dataAsString);
-        const eccMigrationKPub = eccMigration.recover(eccMigrationSig, dataAsString);
+        const eccKPub = ecc.recover(eccSig, dataAsString, 'utf8');
+        const eccMigrationKPub = eccMigration.recover(eccMigrationSig, dataAsString, 'utf8');
         expect(eccKPub).toEqual(eccMigrationKPub);
     });
 
@@ -106,20 +106,20 @@ describe('ecc Migration', () => {
         console.warn = jest.fn();
         const dataAsString = 'some string';
 
-        const eccHash = Buffer.from(ecc.sha256(dataAsString, 'hex', 'utf8'), 'hex');
-        const eccMigrationHash = Buffer.from(eccMigration.sha256(dataAsString, 'hex', 'utf8') as Buffer);
+        const eccHash = Buffer.from(ecc.sha256(dataAsString), 'hex');
+        const eccMigrationHash = Buffer.from(eccMigration.sha256(dataAsString, 'hex', 'utf8') as string, 'hex');
         expect(console.warn).toBeCalledWith('Argument `encoding` is deprecated');
         expect(console.warn).toBeCalledWith('Argument `resultEncoding` is deprecated');
         expect(eccHash).toEqual(eccMigrationHash);
 
-        const eccSig = ecc.signHash(eccHash, privateKeys[0]);
-        const eccMigrationSig = eccMigration.signHash(eccMigrationHash, privateKeys[0]);
+        const eccSig = ecc.signHash(eccHash, privateKeys[0], 'utf8');
+        const eccMigrationSig = eccMigration.signHash(eccMigrationHash, privateKeys[0], 'utf8');
 
         // signatures are different
         expect(eccSig).not.toEqual(eccMigrationSig);
 
-        const eccKPub = ecc.recoverHash(eccSig, eccHash);
-        const eccMigrationKPub = eccMigration.recoverHash(eccSig, eccMigrationHash);
+        const eccKPub = ecc.recoverHash(eccSig, eccHash, 'utf8');
+        const eccMigrationKPub = eccMigration.recoverHash(eccSig, eccMigrationHash, 'utf8');
         expect(eccKPub).toEqual(eccMigrationKPub);
     });
 });

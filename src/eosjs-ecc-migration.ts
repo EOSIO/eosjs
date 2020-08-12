@@ -49,29 +49,29 @@ export const ecc = {
             return false;
         }
     },
-    sign: (data: string|Buffer, privateKey: string|PrivateKey, encoding: string = 'utf8'): string => {
+    sign: (data: string|Buffer, privateKey: string|PrivateKey, encoding: BufferEncoding = 'utf8'): string => {
         const privKey = typeof privateKey === 'string' ? PrivateKey.fromString(privateKey) : privateKey;
         const signature = privKey.sign(data, true, encoding);
         return signature.toString();
     },
-    signHash: (dataSha256: string|Buffer, privateKey: string|PrivateKey, encoding: string = 'hex') => {
+    signHash: (dataSha256: string|Buffer, privateKey: string|PrivateKey, encoding: BufferEncoding = 'hex') => {
         const privKey = typeof privateKey === 'string' ? PrivateKey.fromString(privateKey) : privateKey;
         const signature = privKey.sign(dataSha256, false, encoding);
         return signature.toString();
     },
     verify: (
-        signature: string, data: string, pubKey: string|PublicKey, encoding: string = 'utf8', hashData: boolean = true
+        signature: string, data: string, pubKey: string|PublicKey, encoding: BufferEncoding = 'utf8', hashData: boolean = true
     ): boolean => {
         const publicKey = typeof pubKey === 'string' ? PublicKey.fromString(pubKey) : pubKey;
         const sig = Signature.fromString(signature);
         return sig.verify(data, publicKey, hashData, encoding);
     },
-    recover: (signature: string, data: string, encoding: string = 'utf8'): string => {
+    recover: (signature: string, data: string, encoding: BufferEncoding = 'utf8'): string => {
         const sig = Signature.fromString(signature);
         const publicKey = sig.recover(data, true, encoding);
         return publicKey.toLegacyString();
     },
-    recoverHash: (signature: string, dataSha256: string|Buffer, encoding: string = 'hex'): string => {
+    recoverHash: (signature: string, dataSha256: string|Buffer, encoding: BufferEncoding = 'hex'): string => {
         const sig = Signature.fromString(signature);
         const publicKey = sig.recover(dataSha256, false, encoding);
         return publicKey.toLegacyString();

@@ -58,9 +58,12 @@ export class PrivateKey {
     }
 
     /** Sign a message or hashed message digest with private key */
-    public sign(data: BNInput, shouldHash: boolean = true, encoding: string = 'utf8'): Signature {
+    public sign(data: BNInput, shouldHash: boolean = true, encoding: BufferEncoding = 'utf8'): Signature {
         if (shouldHash) {
-            data = this.ec.hash().update(data, encoding).digest();
+            if (typeof data === 'string') {
+                data = Buffer.from(data, encoding);
+            }
+            data = this.ec.hash().update(data).digest();
         }
         let tries = 0;
         let signature: Signature;
