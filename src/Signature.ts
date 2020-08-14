@@ -46,10 +46,12 @@ export class Signature {
     }
 
     /** Export Signature as `elliptic`-format Signature
-     * NOTE: This isn't an actual elliptic-format Signature, we're *actually* returning an object with the 3 params
-     * not an ec.Signature that also includes `toDER()`.
+     * NOTE: This isn't an actual elliptic-format Signature, as ec.Signature is not exported by the library.
+     * That's also why the return type is `any`.  We're *actually* returning an object with the 3 params
+     * not an ec.Signature.
+     * Further NOTE: @types/elliptic shows ec.Signature as exported; it is *not*.  Hence the `any`.
      */
-    public toElliptic(): { r: BN, s: BN, recoveryParam: number|null } {
+    public toElliptic(): any {
         const lengthOfR = 32;
         const lengthOfS = 32;
         const r = new BN(this.signature.data.slice(1, lengthOfR + 1));
