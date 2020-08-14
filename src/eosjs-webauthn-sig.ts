@@ -45,7 +45,7 @@ export class WebAuthnSignatureProvider implements SignatureProvider {
                     challenge: digest.buffer,
                 },
             });
-            const e = new ec('p256') as any;
+            const e = new ec('p256');
             const pubKey = e.keyFromPublic(numeric.stringToPublicKey(key).data.subarray(0, 33)).getPublic();
 
             const fixup = (x: Uint8Array) => {

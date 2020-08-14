@@ -127,6 +127,7 @@ export interface Action {
     name: string;
     authorization: Authorization[];
     data: any;
+    hex_data?: string;
 }
 
 /** Action with data in serialized hex form */

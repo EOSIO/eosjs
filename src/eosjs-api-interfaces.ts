@@ -4,7 +4,7 @@
  */
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
-import { Anyvar, Authorization } from './eosjs-serialize';
+import { Anyvar, Authorization, Action } from './eosjs-serialize';
 import { WasmAbi } from './eosjs-wasmabi';
 import { ActionBuilder } from './eosjs-api';
 
@@ -83,6 +83,24 @@ export interface SignatureProvider {
     sign: (args: SignatureProviderArgs) => Promise<PushTransactionArgs>;
 }
 
+export interface Extension {
+    type: number
+    data: string
+}
+
+export interface Transaction {
+    expiration?: string
+    ref_block_num?: number,
+    ref_block_prefix?: number,
+    max_net_usage_words?: number,
+    max_cpu_usage_ms?: number
+    delay_sec?: number,
+    context_free_actions?: Action[],
+    context_free_data?: Uint8Array[],
+    actions: Action[],
+    transaction_extensions?: Extension[]
+}
+
 /** Optional transact configuration object */
 export interface TransactConfig {
     broadcast?: boolean;
@@ -120,13 +138,7 @@ export interface ActionTrace {
     closest_unnotified_ancestor_action_ordinal: number,
     receipt: ActionReceipt,
     receiver: string,
-    act: {
-        account: string,
-        name: string,
-        authorization: any[],
-        data: any,
-        hex_data: string
-    },
+    act: Action,
     context_free: boolean,
     elapsed: number,
     console: string,
@@ -189,7 +201,7 @@ export type ContextFreeGroupCallback =
     (index: {cfa: number, cfd: number}) => {
         action?: ActionBuilder;
         contextFreeAction?: ActionBuilder;
-        contextFreeData?: any;
+        contextFreeData?: Uint8Array;
     };
 
 export interface ActionSerializerType {
