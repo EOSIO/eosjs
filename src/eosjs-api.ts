@@ -17,6 +17,8 @@ import {
     QueryConfig,
     SignatureProvider,
     TransactConfig,
+    Transaction,
+    TransactResult,
     WasmAbiProvider
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
@@ -156,7 +158,7 @@ export class Api {
     }
 
     /** Get abis needed by a transaction */
-    public async getTransactionAbis(transaction: any, reload = false): Promise<BinaryAbi[]> {
+    public async getTransactionAbis(transaction: Transaction, reload = false): Promise<BinaryAbi[]> {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
@@ -195,7 +197,7 @@ export class Api {
     }
 
     /** Convert a transaction to binary */
-    public serializeTransaction(transaction: any): Uint8Array {
+    public serializeTransaction(transaction: Transaction): Uint8Array {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         this.serialize(buffer, 'transaction', {
             max_net_usage_words: 0,
@@ -223,7 +225,7 @@ export class Api {
     }
 
     /** Convert a transaction from binary. Leaves actions in hex. */
-    public deserializeTransaction(transaction: Uint8Array): any {
+    public deserializeTransaction(transaction: Uint8Array): Transaction {
         const buffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         buffer.pushArray(transaction);
         return this.deserialize(buffer, 'transaction');
@@ -263,7 +265,7 @@ export class Api {
     }
 
     /** Convert a transaction from binary. Also deserializes actions. */
-    public async deserializeTransactionWithActions(transaction: Uint8Array | string): Promise<any> {
+    public async deserializeTransactionWithActions(transaction: Uint8Array | string): Promise<Transaction> {
         if (typeof transaction === 'string') {
             transaction = ser.hexToUint8Array(transaction);
         }
@@ -304,9 +306,9 @@ export class Api {
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
     public async transact(
-        transaction: any,
+        transaction: Transaction,
         { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-        TransactConfig = {}): Promise<any>
+        TransactConfig = {}): Promise<TransactResult|PushTransactionArgs>
     {
         let info: GetInfoResult;
 
@@ -399,7 +401,7 @@ export class Api {
 
         const transaction = {
             ...ser.transactionHeader(refBlock, 60 * 30),
-            context_free_actions: [] as any[],
+            context_free_actions: [] as ser.Action[],
             actions: [{
                 account,
                 name: 'queryit',
@@ -454,7 +456,7 @@ export class Api {
     /** Broadcast a signed transaction */
     public async pushSignedTransaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<any> {
+    ): Promise<TransactResult> {
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
@@ -464,7 +466,7 @@ export class Api {
 
     public async pushCompressedSignedTransaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<any> {
+    ): Promise<TransactResult> {
         const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
         const compressedSerializedContextFreeData =
             this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
@@ -479,7 +481,7 @@ export class Api {
 
     private async generateTapos(
         info: GetInfoResult | undefined,
-        transaction: any,
+        transaction: Transaction,
         blocksBehind: number | undefined,
         useLastIrreversible: boolean | undefined,
         expireSeconds: number
@@ -545,10 +547,10 @@ export class TransactionBuilder {
         return this;
     }
 
-    public async send(config?: TransactConfig): Promise<any> {
-        const contextFreeDataSet: any[] = [];
-        const contextFreeActions: ActionBuilder[] = [];
-        const actions: any[] = this.actions.map((actionBuilder) => actionBuilder.serializedData);
+    public async send(config?: TransactConfig): Promise<PushTransactionArgs|TransactResult> {
+        const contextFreeDataSet: Uint8Array[] = [];
+        const contextFreeActions: ser.SerializedAction[] = [];
+        const actions: ser.SerializedAction[] = this.actions.map((actionBuilder) => actionBuilder.serializedData as ser.SerializedAction);
         await Promise.all(this.contextFreeGroups.map(
             async (contextFreeCallback: ContextFreeGroupCallback) => {
                 const { action, contextFreeAction, contextFreeData } = contextFreeCallback({
@@ -556,10 +558,10 @@ export class TransactionBuilder {
                     cfa: contextFreeActions.length
                 });
                 if (action) {
-                    actions.push(action);
+                    actions.push(action.serializedData);
                 }
                 if (contextFreeAction) {
-                    contextFreeActions.push(contextFreeAction);
+                    contextFreeActions.push(contextFreeAction.serializedData);
                 }
                 if (contextFreeData) {
                     contextFreeDataSet.push(contextFreeData);
@@ -569,8 +571,8 @@ export class TransactionBuilder {
         this.contextFreeGroups = [];
         this.actions = [];
         return await this.api.transact({
-            contextFreeData: contextFreeDataSet,
-            contextFreeActions,
+            context_free_data: contextFreeDataSet,
+            context_free_actions: contextFreeActions,
             actions
         }, config);
     }
@@ -579,7 +581,7 @@ export class TransactionBuilder {
 export class ActionBuilder {
     private api: Api;
     private readonly accountName: string;
-    public serializedData: any;
+    public serializedData: ser.SerializedAction;
 
     constructor(api: Api, accountName: string) {
         this.api = api;
@@ -587,7 +589,7 @@ export class ActionBuilder {
     }
 
     public as(actorName?: string | ser.Authorization[]) {
-        let authorization: any[] = [];
+        let authorization: ser.Authorization[] = [];
         if (actorName && typeof actorName === 'string') {
             authorization = [{ actor: actorName, permission: 'active'}];
         } else {
@@ -595,7 +597,7 @@ export class ActionBuilder {
         }
 
         const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
-        return new ActionSerializer(this, this.api, this.accountName, authorization, wasmAbi);
+        return new ActionSerializer(this, this.api, this.accountName, authorization, wasmAbi) as ActionSerializerType;
     }
 }
 

@@ -5,6 +5,7 @@ import { JsSignatureProvider } from '../eosjs-jssig';
 import { WasmAbiProvider, WasmAbi } from '../eosjs-wasmabi';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Action } from '../eosjs-serialize';
 
 const transaction = {
     expiration: '2018-09-04T18:42:49',
@@ -13,7 +14,7 @@ const transaction = {
     max_net_usage_words: 0,
     max_cpu_usage_ms: 0,
     delay_sec: 0,
-    context_free_actions: [] as any,
+    context_free_actions: [] as Action[],
     actions: [
         {
             account: 'testeostoken',

@@ -4,7 +4,7 @@
  */
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
-import { Anyvar, Authorization } from './eosjs-serialize';
+import { Anyvar, Authorization, Action } from './eosjs-serialize';
 import { WasmAbi } from './eosjs-wasmabi';
 import { ActionBuilder } from './eosjs-api';
 
@@ -83,6 +83,24 @@ export interface SignatureProvider {
     sign: (args: SignatureProviderArgs) => Promise<PushTransactionArgs>;
 }
 
+export interface Extension {
+    type: number;
+    data: string;
+}
+
+export interface Transaction {
+    expiration?: string;
+    ref_block_num?: number;
+    ref_block_prefix?: number;
+    max_net_usage_words?: number;
+    max_cpu_usage_ms?: number;
+    delay_sec?: number;
+    context_free_actions?: Action[];
+    context_free_data?: Uint8Array[];
+    actions: Action[];
+    transaction_extensions?: Extension[];
+}
+
 /** Optional transact configuration object */
 export interface TransactConfig {
     broadcast?: boolean;
@@ -92,6 +110,74 @@ export interface TransactConfig {
     blocksBehind?: number;
     useLastIrreversible?: boolean;
     expireSeconds?: number;
+}
+
+export interface AccountDelta {
+    account: string;
+    delta: number;
+}
+
+export interface AuthSequence {
+    account: string;
+    sequence: number;
+}
+
+export interface ActionReceipt {
+    receiver: string;
+    act_digest: string;
+    global_sequence: number;
+    recv_sequence: number;
+    auth_sequence: AuthSequence[];
+    code_sequence: number;
+    abi_sequence: number;
+}
+
+export interface ActionTrace {
+    action_ordinal: number;
+    creator_action_ordinal: number;
+    closest_unnotified_ancestor_action_ordinal: number;
+    receipt: ActionReceipt;
+    receiver: string;
+    act: Action;
+    context_free: boolean;
+    elapsed: number;
+    console: string;
+    trx_id: string;
+    block_num: number;
+    block_time: string;
+    producer_block_id: string|null;
+    account_ram_deltas: AccountDelta[];
+    account_disk_deltas: AccountDelta[];
+    except: any;
+    error_code: number|null;
+    return_value: any;
+    inline_traces: ActionTrace[];
+}
+
+export interface TransactionReceiptHeader {
+    status: string;
+    cpu_usage_us: number;
+    net_usage_words: number;
+}
+
+export interface TransactionTrace {
+    id: string;
+    block_num: number;
+    block_time: string;
+    producer_block_id: string|null;
+    receipt: TransactionReceiptHeader|null;
+    elapsed: number;
+    net_usage: number;
+    scheduled: boolean;
+    action_traces: ActionTrace[];
+    account_ram_delta: AccountDelta|null;
+    except: string|null;
+    error_code: number|null;
+}
+
+export interface TransactResult {
+    transaction_id: string;
+    processed: TransactionTrace;
 }
 
 /** Optional query configuration object */
@@ -115,9 +201,9 @@ export type ContextFreeGroupCallback =
     (index: {cfa: number, cfd: number}) => {
         action?: ActionBuilder;
         contextFreeAction?: ActionBuilder;
-        contextFreeData?: any;
+        contextFreeData?: Uint8Array;
     };
 
 export interface ActionSerializerType {
-    [actionName: string]: any
+    [actionName: string]: any;
 };

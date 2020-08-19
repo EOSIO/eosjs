@@ -14,7 +14,7 @@ import {
 import { convertLegacyPublicKey } from './eosjs-numeric';
 
 /** expensive to construct; so we do it once and reuse it */
-const defaultEc = new ec('secp256k1') as any;
+const defaultEc = new ec('secp256k1');
 
 /** Construct the digest from transaction details */
 const digestFromSerializedData = (
