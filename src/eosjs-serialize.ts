@@ -353,7 +353,7 @@ export class SerialBuffer {
         if (typeof s !== 'string') {
             throw new Error('Expected string containing name');
         }
-        const regex = new RegExp(/^[.1-5a-z]{1,12}[.1-5a-j]?$/);
+        const regex = new RegExp(/^[.1-5a-z]{0,12}[.1-5a-j]?$/);
         if (!regex.test(s)) {
             throw new Error('Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'); // eslint-disable-line
         }
