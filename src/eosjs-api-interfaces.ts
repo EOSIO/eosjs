@@ -4,7 +4,7 @@
  */
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
-import { Anyvar, Authorization, Action } from './eosjs-serialize';
+import { Anyvar, Authorization, Action, SerializedAction } from './eosjs-serialize';
 import { WasmAbi } from './eosjs-wasmabi';
 import { ActionBuilder } from './eosjs-api';
 
@@ -151,6 +151,8 @@ export interface ActionTrace {
     except: any;
     error_code: number|null;
     return_value: any;
+    return_value_hex?: string;
+    return_value_data?: any;
     inline_traces: ActionTrace[];
 }
 
@@ -199,8 +201,8 @@ export type Query =
 
 export type ContextFreeGroupCallback =
     (index: {cfa: number, cfd: number}) => {
-        action?: ActionBuilder;
-        contextFreeAction?: ActionBuilder;
+        action?: SerializedAction;
+        contextFreeAction?: SerializedAction;
         contextFreeData?: Uint8Array;
     };
 
