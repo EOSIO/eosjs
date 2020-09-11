@@ -384,9 +384,9 @@ export class Api {
                     }
                 }
             }
-            return result;
+            return result as TransactResult;
         }
-        return pushTransactionArgs;
+        return pushTransactionArgs as PushTransactionArgs;
     }
 
     public async query(
@@ -524,7 +524,7 @@ export class Api {
         if (cb) {
             return cb(tx);
         }
-        return tx;
+        return tx as TransactionBuilder;
     }
 } // Api
 
@@ -558,10 +558,10 @@ export class TransactionBuilder {
                     cfa: contextFreeActions.length
                 });
                 if (action) {
-                    actions.push(action.serializedData);
+                    actions.push(action);
                 }
                 if (contextFreeAction) {
-                    contextFreeActions.push(contextFreeAction.serializedData);
+                    contextFreeActions.push(contextFreeAction);
                 }
                 if (contextFreeData) {
                     contextFreeDataSet.push(contextFreeData);
@@ -588,7 +588,7 @@ export class ActionBuilder {
         this.accountName = accountName;
     }
 
-    public as(actorName?: string | ser.Authorization[]) {
+    public as(actorName: string | ser.Authorization[] = []) {
         let authorization: ser.Authorization[] = [];
         if (actorName && typeof actorName === 'string') {
             authorization = [{ actor: actorName, permission: 'active'}];
