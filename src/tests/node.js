@@ -8,6 +8,7 @@ const { TextEncoder, TextDecoder } = require('util');
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
 const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT';
+const cfactorPrivateKey = '5K8Sm2bB2b7ZC8tJMefrk1GFa4jgtHxxHRcjX49maMk9AEwq8hN';
 /* new accounts for testing can be created by unlocking a cleos wallet then calling:
  * 1) cleos create key --to-console (copy this privateKey & publicKey)
  * 2) cleos wallet import
@@ -16,7 +17,7 @@ const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT';
  */
 
 const rpc = new JsonRpc('http://localhost:8888', { fetch });
-const signatureProvider = new JsSignatureProvider([privateKey, r1PrivateKey]);
+const signatureProvider = new JsSignatureProvider([privateKey, r1PrivateKey, cfactorPrivateKey]);
 const wasmAbiProvider = new WasmAbiProvider();
 const api = new Api({ rpc, signatureProvider, wasmAbiProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
@@ -90,6 +91,57 @@ const transactWithoutConfig = async () => {
     });
 };
 
+const transactWithContextFreeAction = async () => {
+    return await api.transact({
+        actions: [{
+            account: 'cfhello',
+            name: 'normal',
+            authorization: [{
+                actor: 'cfactor',
+                permission: 'active'
+            }],
+            data: {
+                user: 'test'
+            }
+        }],
+        context_free_actions: [{
+            account: 'cfhello',
+            name: 'contextfree',
+            authorization: [],
+            data: {}
+        }]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30
+    });
+};
+
+const transactWithContextFreeData = async () => {
+    return await api.transact({
+        actions:[{
+            account: 'cfhello',
+            name: 'normal',
+            authorization: [{
+                actor: 'cfactor',
+                permission: 'active'
+            }],
+            data: {
+                user: 'test2'
+            }
+        }],
+        context_free_actions: [{
+            account: 'cfhello',
+            name: 'contextfree',
+            authorization: [],
+            data: {}
+        }],
+        context_free_data: [[ '74657374', '7465737464617461' ]]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30
+    });
+};
+
 const transactWithShorthandApiJson = async () => {
     await api.getAbi('eosio.token');
     return await api.transact({
@@ -106,6 +158,33 @@ const transactWithShorthandTxJson = async () => {
     await api.getAbi('eosio.token');
     const tx = api.buildTransaction();
     tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxJson');
+    return await tx.send({
+        blocksBehind: 3,
+        expireSeconds: 30
+    });
+};
+
+const transactWithShorthandTxJsonContextFreeAction = async () => {
+    await api.getAbi('cfhello');
+    const tx = api.buildTransaction();
+    tx.associateContextFree(() => ({
+        contextFreeAction: tx.with('cfhello').as().contextfree(),
+        action: tx.with('cfhello').as('cfactor').normal('test')
+    }));
+    return await tx.send({
+        blocksBehind: 3,
+        expireSeconds: 30
+    });
+};
+
+const transactWithShorthandTxJsonContextFreeData = async () => {
+    await api.getAbi('cfhello');
+    const tx = api.buildTransaction();
+    tx.associateContextFree(() => ({
+        contextFreeData: [ '74657374', '7465737464617461' ],
+        contextFreeAction: tx.with('cfhello').as().contextfree(),
+        action: tx.with('cfhello').as('cfactor').normal('test2')
+    }));
     return await tx.send({
         blocksBehind: 3,
         expireSeconds: 30
@@ -168,12 +247,16 @@ const rpcShouldFail = async () => await rpc.get_block(-1);
 module.exports = {
     transactWithConfig,
     transactWithoutConfig,
+    transactWithContextFreeAction,
+    transactWithContextFreeData,
     broadcastResult,
     transactShouldFail,
     transactWithShorthandApiJson,
     transactWithShorthandApiWasm,
     transactWithShorthandTxJson,
     transactWithShorthandTxWasm,
+    transactWithShorthandTxJsonContextFreeAction,
+    transactWithShorthandTxJsonContextFreeData,
     transactWithReturnValue,
     rpcShouldFail
 };

@@ -35,6 +35,16 @@ describe('Node JS environment', () => {
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     });
 
+    it('transacts with context free action', async () => {
+        transactionResponse = await tests.transactWithContextFreeAction();
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
+    it('transacts with context free data', async () => {
+        transactionResponse = await tests.transactWithContextFreeData();
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
     it('transacts without broadcasting, returning signatures and packed transaction', async () => {
         transactionSignatures = await tests.transactWithConfig({
             broadcast: false,
@@ -65,6 +75,16 @@ describe('Node JS environment', () => {
             transactionResponse = await tests.transactWithShorthandTxJson();
             expect(Object.keys(transactionResponse)).toContain('transaction_id');
         });
+
+        it('transacts with shorthand structure using tx and context free action', async () => {
+            transactionResponse = await tests.transactWithShorthandTxJsonContextFreeAction();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
+
+        it('transacts with shorthand structure using tx and context free data', async () => {
+            transactionResponse = await tests.transactWithShorthandTxJsonContextFreeData();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
     });
 
     describe('Wasm Abi with Shorthand Design', () => {
@@ -90,7 +110,7 @@ describe('Node JS environment', () => {
     it('confirms an action\'s return value can be verified', async () => {
         const expectedValue = 10;
         transactionResponse = await tests.transactWithReturnValue();
-        expect(transactionResponse.processed.action_traces[0].return_value).toEqual(expectedValue);
+        expect(transactionResponse.processed.action_traces[0].return_value_data).toEqual(expectedValue);
     });
 
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
