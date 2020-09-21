@@ -159,6 +159,7 @@ create_account alice $EXAMPLE_ACCOUNT_PUBLIC_KEY $EXAMPLE_ACCOUNT_PRIVATE_KEY
 create_account bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY $R1_EXAMPLE_ACCOUNT_PRIVATE_KEY
 create_account alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY $R1_EXAMPLE_ACCOUNT_PRIVATE_KEY
 create_account cfhello $CFHELLO_PUBLIC_KEY $CFHELLO_PRIVATE_KEY
+create_account todo $EXAMPLE_ACCOUNT_PUBLIC_KEY $EXAMPLE_ACCOUNT_PRIVATE_KEY
 
 cleos wallet import --private-key $CFACTOR_PRIVATE_KEY
 cleos create account cfhello cfactor $CFACTOR_PUBLIC_KEY
@@ -183,6 +184,10 @@ cleos set abi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi -p cfhello@active -p eo
 cleos set code cfhello $CONTRACTS_DIR/cfhello/cfhello.wasm -p cfhello@active -p eosio@active
 
 sleep 1s
+cleos set abi todo $CONTRACTS_DIR/kv_todo/kv_todo.abi -p todo@active -p eosio@active
+cleos set code todo $CONTRACTS_DIR/kv_todo/kv_todo.wasm -p todo@active -p eosio@active
+
+sleep 1s
 cleos set abi returnvalue $CONTRACTS_DIR/action_results/action_results.abi -p returnvalue@active -p eosio@active
 cleos set code returnvalue $CONTRACTS_DIR/action_results/action_results.wasm -p returnvalue@active -p eosio@active
 
@@ -195,8 +200,6 @@ cleos push action eosio.token issue '["bob", "5000000000.0000 SYS", "Half of ava
 cleos push action eosio.token transfer '["bob", "alice", "1000000.0000 SYS", "memo"]' -p bob
 cleos push action eosio.token transfer '["bob", "bobr1", "1000000.0000 SYS", "memo"]' -p bob
 cleos push action eosio.token transfer '["bob", "alicer1", "1000000.0000 SYS", "memo"]' -p bob
-
-cleos push action eosio init "[]" -p eosio@active
 
 echo "All done initializing the blockchain"
 
