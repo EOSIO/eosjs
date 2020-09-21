@@ -436,15 +436,10 @@ export class Api {
             serializedTransaction
         });
 
-        const json = await response.json();
-        if (json.code) {
-            throw new RpcError(json);
-        }
-
         const returnBuffer = new ser.SerialBuffer({
             textEncoder: this.textEncoder,
             textDecoder: this.textDecoder,
-            array: ser.hexToUint8Array(json.processed.action_traces[0][1].return_value)
+            array: ser.hexToUint8Array(response.processed.action_traces[0][1].return_value)
         });
         if (short) {
             return ser.deserializeAnyvarShort(returnBuffer);
