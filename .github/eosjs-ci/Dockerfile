@@ -6,7 +6,7 @@
 #### docker build --tag eosio/eosjs-ci:v0.2.3 ./.github/eosjs-ci
 #### docker push eosio/eosjs-ci:v0.2.3
 
-FROM ubuntu:18.04
+FROM ubuntu:18.10
 ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--verbose-http-errors", "--max-transaction-time=100"]
 
 ### base
@@ -75,7 +75,7 @@ RUN git clone https://github.com/EOSIO/eosio.cdt.git \
  && mkdir build \
  && cd build \
  && cmake -GNinja .. \
- && ninja -j8
+ && ninja -j5
 
 ### eos
 RUN git clone https://github.com/EOSIO/eos.git \
@@ -85,7 +85,7 @@ RUN git clone https://github.com/EOSIO/eos.git \
  && mkdir build \
  && cd build \
  && CC=clang-8 CXX=clang++-8 cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_AR=/usr/bin/llvm-ar-8 -DCMAKE_RANLIB=/usr/bin/llvm-ranlib-8 -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld .. \
- && CC=clang-8 CXX=clang++-8 ninja -j8
+ && CC=clang-8 CXX=clang++-8 ninja -j5
 
 ENV PATH="/root/eos/build/bin/:/root/eosio.cdt/build/bin/:${PATH}"
 
