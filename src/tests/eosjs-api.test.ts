@@ -239,13 +239,13 @@ describe('eosjs-api', () => {
             '1.2': 'DmVvc2lvOjphYmkvMS4yAAcDZGVsAAEEdXVpZAZzdHJpbmcMZ2V0YnlhY2NuYW1lAAEMYWNjb3VudF9uYW1lBG5hbWUKdG9kb19lbnRyeQAEBHV1aWQGc3RyaW5nDGFjY291bnRfbmFtZRF0dXBsZV9zdHJpbmdfbmFtZQR0YXNrE3R1cGxlX3N0cmluZ19zdHJpbmcHY2hlY2tlZBF0dXBsZV9zdHJpbmdfYm9vbBF0dXBsZV9zdHJpbmdfYm9vbAACB2ZpZWxkXzAGc3RyaW5nB2ZpZWxkXzEEYm9vbBF0dXBsZV9zdHJpbmdfbmFtZQACB2ZpZWxkXzAGc3RyaW5nB2ZpZWxkXzEEbmFtZRN0dXBsZV9zdHJpbmdfc3RyaW5nAAIHZmllbGRfMAZzdHJpbmcHZmllbGRfMQZzdHJpbmcGdXBzZXJ0AAQEdXVpZAZzdHJpbmcMYWNjb3VudF9uYW1lBG5hbWUEdGFzawZzdHJpbmcHY2hlY2tlZARib29sAwAAAAAAAKJKA2RlbACgpJkIGX+yYgxnZXRieWFjY25hbWUAAAAAAOSrcNUGdXBzZXJ0AAAAAAAAAqCkmQgZf7JiDHRvZG9fZW50cnlbXQAAAADkq3DVCnRvZG9fZW50cnkBAAAAANBE84YKdG9kb19lbnRyeQAAAAAAkJzWBnN0cmluZwMAAABASTMRMhF0dXBsZV9zdHJpbmdfbmFtZQAAACApiFRDEXR1cGxlX3N0cmluZ19ib29sAAAAAAAAsckTdHVwbGVfc3RyaW5nX3N0cmluZw===',
         };
 
-      it('deserializes/serializes the 1.0 abi', () => {
+        it('deserializes/serializes the 1.0 abi', () => {
             const raw = base64ToBinary(serializedAbis['1.0']);
             const deserializedAbi = api.rawAbiToJson(raw);
             const serializedAbi = api.jsonToRawAbi(deserializedAbi);
             expect(serializedAbi).toEqual(raw);
         });
-        
+
         it('deserializes/serializes the 1.1 abi', () => {
             const raw = base64ToBinary(serializedAbis['1.1']);
             const deserializedAbi = api.rawAbiToJson(raw);
