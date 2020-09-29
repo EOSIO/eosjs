@@ -100,7 +100,7 @@ export class Api {
         this.textDecoder = args.textDecoder;
 
         this.abiTypes = ser.getTypesFromAbi(ser.createAbiTypes());
-        this.transactionTypes = ser.getTypesFromAbi(ser.createAbiTypes(), transactionAbi);
+        this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
     }
 
     /** Decodes an abi as Uint8Array into json. */
