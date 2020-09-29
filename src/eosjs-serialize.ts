@@ -802,6 +802,31 @@ function deserializeExtension(this: Type, buffer: SerialBuffer, state?: Serializ
     return this.extensionOf.deserialize(buffer, state, allowExtensions);
 }
 
+function serializeObject(
+    this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
+) {
+    const entries = Object.entries(data);
+    buffer.pushVaruint32(entries.length);
+    for (const [key, value] of entries) {
+        const keyType = this.fields[0].type;
+        const dataType = this.fields[1].type;
+        keyType.serialize(buffer, key, state, allowExtensions);
+        dataType.serialize(buffer, value, state, allowExtensions);
+    }
+}
+
+function deserializeObject(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+    const len = buffer.getVaruint32();
+    const result = {} as any;
+    for (let i = 0; i < len; ++i) {
+        const keyType = this.fields[0].type;
+        const dataType = this.fields[1].type;
+        const key = keyType.deserialize(buffer, state, allowExtensions);
+        (result as any)[key] = dataType.deserialize(buffer, state, allowExtensions);
+    }
+    return result;
+}
+
 interface CreateTypeArgs {
     name?: string;
     aliasOfName?: string;
@@ -1039,6 +1064,185 @@ export const createInitialTypes = (): Map<string, Type> => {
     return result;
 }; // createInitialTypes()
 
+export const createAbiTypes = (): Map<string, Type> => {
+    const initialTypes = createInitialTypes();
+    initialTypes.set('extensions_entry', createType({
+        name: 'extensions_entry',
+        baseName: '',
+        fields: [
+            { name: 'tag', typeName: 'uint16', type: null },
+            { name: 'value', typeName: 'bytes', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('type_def', createType({
+        name: 'type_def',
+        baseName: '',
+        fields: [
+            { name: 'new_type_name', typeName: 'string', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('field_def', createType({
+        name: 'field_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'string', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('struct_def', createType({
+        name: 'struct_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'string', type: null },
+            { name: 'base', typeName: 'string', type: null },
+            { name: 'fields', typeName: 'field_def[]', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('action_def', createType({
+        name: 'action_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'type', typeName: 'string', type: null },
+            { name: 'ricardian_contract', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('table_def', createType({
+        name: 'table_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'index_type', typeName: 'string', type: null },
+            { name: 'key_names', typeName: 'string[]', type: null },
+            { name: 'key_types', typeName: 'string[]', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('clause_pair', createType({
+        name: 'clause_pair',
+        baseName: '',
+        fields: [
+            { name: 'id', typeName: 'string', type: null },
+            { name: 'body', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('error_message', createType({
+        name: 'error_message',
+        baseName: '',
+        fields: [
+            { name: 'error_code', typeName: 'uint64', type: null },
+            { name: 'error_msg', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('variant_def', createType({
+        name: 'variant_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'string', type: null },
+            { name: 'types', typeName: 'string[]', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('action_result', createType({
+        name: 'action_result',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'result_type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('primary_key_index_def', createType({
+        name: 'primary_key_index_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('secondary_index_def', createType({
+        name: 'secondary_index_def',
+        baseName: '',
+        fields: [
+            { name: 'type', typeName: 'string', type: null },
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('secondary_indices', createType({
+        name: 'secondary_indices',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'secondary_index_def', typeName: 'secondary_index_def', type: null }
+        ],
+        serialize: serializeObject,
+        deserialize: deserializeObject,
+    }));
+    initialTypes.set('kv_table_entry_def', createType({
+        name: 'kv_table_entry_def',
+        baseName: '',
+        fields: [
+            { name: 'type', typeName: 'string', type: null },
+            { name: 'primary_index', typeName: 'primary_key_index_def', type: null },
+            { name: 'secondary_indices', typeName: 'secondary_indices', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('kv_table', createType({
+        name: 'kv_table',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'kv_table_entry_def', typeName: 'kv_table_entry_def', type: null }
+        ],
+        serialize: serializeObject,
+        deserialize: deserializeObject
+    }));
+    initialTypes.set('abi_def', createType({
+        name: 'abi_def',
+        baseName: '',
+        fields: [
+            { name: 'version', typeName: 'string', type: null },
+            { name: 'types', typeName: 'type_def[]', type: null },
+            { name: 'structs', typeName: 'struct_def[]', type: null },
+            { name: 'actions', typeName: 'action_def[]', type: null },
+            { name: 'tables', typeName: 'table_def[]', type: null },
+            { name: 'ricardian_clauses', typeName: 'clause_pair[]', type: null },
+            { name: 'error_messages', typeName: 'error_message[]', type: null },
+            { name: 'abi_extensions', typeName: 'extensions_entry[]', type: null },
+            { name: 'variants', typeName: 'variant_def[]$', type: null },
+            { name: 'action_results', typeName: 'action_result[]$', type: null },
+            { name: 'kv_tables', typeName: 'kv_table$', type: null },
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    return initialTypes;
+};
+
 /** Get type from `types` */
 export const getType = (types: Map<string, Type>, name: string): Type => {
     const type = types.get(name);
@@ -1081,15 +1285,15 @@ export const getType = (types: Map<string, Type>, name: string): Type => {
  * @param initialTypes Set of types to build on.
  * In most cases, it's best to fill this from a fresh call to `getTypesFromAbi()`.
  */
-export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi: Abi) => {
+export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi?: Abi) => {
     const types = new Map(initialTypes);
-    if (abi.types) {
+    if (abi && abi.types) {
         for (const { new_type_name, type } of abi.types) {
             types.set(new_type_name,
                 createType({ name: new_type_name, aliasOfName: type }));
         }
     }
-    if (abi.structs) {
+    if (abi && abi.structs) {
         for (const { name, base, fields } of abi.structs) {
             types.set(name, createType({
                 name,
@@ -1100,7 +1304,7 @@ export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi: Abi) => {
             }));
         }
     }
-    if (abi.variants) {
+    if (abi && abi.variants) {
         for (const { name, types: t } of abi.variants) {
             types.set(name, createType({
                 name,

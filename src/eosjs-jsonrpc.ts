@@ -174,6 +174,36 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             });
     }
 
+    /** Raw call to `/v1/chain/get_kv_table_rows` */
+    public async get_kv_table_rows({
+        json = true,
+        code,
+        table,
+        index_name,
+        encode_type = 'bytes',
+        index_value = '',
+        lower_bound = '',
+        upper_bound = '',
+        limit = 10,
+        reverse = false,
+        show_payer = false,
+    }: any): Promise<any> {
+        return await this.fetch(
+            '/v1/chain/get_kv_table_rows', {
+                json,
+                code,
+                table,
+                index_name,
+                encode_type,
+                index_value,
+                lower_bound,
+                upper_bound,
+                limit,
+                reverse,
+                show_payer,
+            });
+    }
+
     /** Raw call to `/v1/chain/get_table_by_scope` */
     public async get_table_by_scope({
         code,

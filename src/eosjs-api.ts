@@ -33,7 +33,6 @@ import * as ser from './eosjs-serialize';
 import { RpcError } from './eosjs-rpcerror';
 import { WasmAbi } from './eosjs-wasmabi';
 
-const abiAbi = require('../src/abi.abi.json');
 const transactionAbi = require('../src/transaction.abi.json');
 
 export class Api {
@@ -100,7 +99,7 @@ export class Api {
         this.textEncoder = args.textEncoder;
         this.textDecoder = args.textDecoder;
 
-        this.abiTypes = ser.getTypesFromAbi(ser.createInitialTypes(), abiAbi);
+        this.abiTypes = ser.getTypesFromAbi(ser.createAbiTypes());
         this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
     }
 
