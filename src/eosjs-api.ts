@@ -175,7 +175,7 @@ export class Api {
             return this.contracts.get(accountName);
         }
         const abi = await this.getAbi(accountName, reload);
-        const types = ser.getTypesFromAbi(ser.createAbiTypes(), abi);
+        const types = ser.getTypesFromAbi(ser.createInitialTypes(), abi);
         const actions = new Map<string, ser.Type>();
         for (const { name, type } of abi.actions) {
             actions.set(name, ser.getType(types, type));
@@ -619,7 +619,7 @@ class ActionSerializer implements ActionSerializerType {
             if (!jsonAbi) {
                 throw new Error('ABI must be cached before using ActionBuilder, run api.getAbi()');
             }
-            const types = ser.getTypesFromAbi(ser.createAbiTypes(), jsonAbi.abi);
+            const types = ser.getTypesFromAbi(ser.createInitialTypes(), jsonAbi.abi);
             const actions = new Map<string, ser.Type>();
             for (const { name, type } of jsonAbi.abi.actions) {
                 actions.set(name, ser.getType(types, type));
