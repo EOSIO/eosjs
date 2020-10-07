@@ -1,10 +1,10 @@
-### Current Version: v0.2.5
+### Current Version: v0.2.6
 ### Test:
 #### docker build --tag eosjs-ci:test ./.github/eosjs-ci
 #### docker run --publish 8888:8888 eosjs-ci:test
 ### Deploy:
-#### docker build --tag eosio/eosjs-ci:v0.2.5 ./.github/eosjs-ci
-#### docker push eosio/eosjs-ci:v0.2.5
+#### docker build --tag eosio/eosjs-ci:v0.2.6 ./.github/eosjs-ci
+#### docker push eosio/eosjs-ci:v0.2.6
 
 FROM ubuntu:18.04 AS builder
 
