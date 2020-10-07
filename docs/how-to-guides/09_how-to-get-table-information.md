@@ -90,7 +90,7 @@ In the example shown below, the `contract` smart contract's table `profiles` is 
 ```
 
 ## Query Data using the Key-Value API (KV API) 
-The KV API is a new api which allows smart contract developers to create datastore key value tables on-chain. KV tables can have muliple indexes, unique index and non-unique indexes. The table must have at least one unique index. If the smart contract uses KV tables use the get_kv_table_rows RPC call to query data.
+The KV API is a new api which allows smart contract developers to create datastore key value tables on-chain. KV tables can have muliple indices, unique indices and non-unique indices. The table must have at least one unique index. If the smart contract uses KV tables use the get_kv_table_rows RPC call to query data.
 
 In the example shown below, the `contract` smart contract's kv table `profiles` is queried via the index named `users` for the row with primary key `testacc`.  The `limit` is **1** which implies that only 1 row with value `testacc` will be returned.
 ```javascript
