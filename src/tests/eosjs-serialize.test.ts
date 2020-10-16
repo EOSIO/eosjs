@@ -1,7 +1,8 @@
 const { TextEncoder, TextDecoder } = require('util');
 import { ec } from 'elliptic';
 
-import { createInitialTypes, Type, SerialBuffer } from '../eosjs-serialize';
+import { createInitialTypes, getType, getTypesFromAbi, Type, SerialBuffer } from '../eosjs-serialize';
+import { Abi } from '../eosjs-rpc-interfaces';
 
 describe('Serialize', () => {
     let types: Map<string, Type>;
@@ -193,6 +194,54 @@ describe('Serialize', () => {
             const dataValue = 1;
 
             shouldNotThrowErrorForValue(dataValue);
+        });
+    });
+
+    describe('struct', () => {
+        let serialBuffer: SerialBuffer;
+
+        beforeEach(() => {
+            serialBuffer = new SerialBuffer({
+                textEncoder: new TextEncoder(),
+                textDecoder: new TextDecoder()
+            });
+        });
+
+        beforeAll(() => {
+            const mockStructAbi = {
+                version: 'eosio::abi/1.1',
+                structs: [{
+                    name: 'extension',
+                    base: '',
+                    fields: [{
+                        name: 'type',
+                        type: 'uint16'
+                    }, {
+                        name: 'data',
+                        type: 'bytes'
+                    }]
+                }]
+            } as Abi;
+            types = getTypesFromAbi(types, mockStructAbi);
+        });
+
+        it('should serialize corresponding object', () => {
+            const mockType: Type = getType(types, 'extension');
+            const expectedBuffer = Buffer.from([1, 1, 1, 1]);
+            mockType.serialize(serialBuffer, {
+                type: 257,
+                data: new Uint8Array([1])
+            });
+
+            expect(expectedBuffer.equals(serialBuffer.asUint8Array())).toEqual(true);
+        });
+
+        it('should serialize array input', () => {
+            const mockType: Type = getType(types, 'extension');
+            const expectedBuffer = Buffer.from([1, 1, 1, 1]);
+            mockType.serialize(serialBuffer, [257, [1]]);
+
+            expect(expectedBuffer.equals(serialBuffer.asUint8Array())).toEqual(true);
         });
     });
 });
