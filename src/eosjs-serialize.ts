@@ -695,16 +695,20 @@ function serializeStruct(
     if (typeof data !== 'object') {
         throw new Error('expected object containing data: ' + JSON.stringify(data));
     }
+    const inputIsArray = Array.isArray(data);
     if (this.base) {
+        if (inputIsArray) {
+            throw new Error('input arrays are currently only allowed for structs without a base (type=' + this.name + ', base=' + this.baseName + ')');
+        }
         this.base.serialize(buffer, data, state, allowExtensions);
     }
-    for (const field of this.fields) {
-        if (field.name in data) {
+    for (const [i, field] of this.fields.entries()) {
+        if (field.name in data || (inputIsArray && i < data.length)) {
             if (state.skippedBinaryExtension) {
                 throw new Error('unexpected ' + this.name + '.' + field.name);
             }
             field.type.serialize(
-                buffer, data[field.name], state, allowExtensions && field === this.fields[this.fields.length - 1]);
+                buffer, data[inputIsArray ? i : field.name], state, allowExtensions && field === this.fields[this.fields.length - 1]);
         } else {
             if (allowExtensions && field.type.extensionOf) {
                 state.skippedBinaryExtension = true;
