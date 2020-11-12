@@ -1,12 +1,13 @@
-### Current Version: v0.2.6
+### Current Version: v0.2.7
 ### Test:
 #### docker build --tag eosjs-ci:test ./.github/eosjs-ci
 #### docker run --publish 8888:8888 eosjs-ci:test
 ### Deploy:
-#### docker build --tag eosio/eosjs-ci:v0.2.6 ./.github/eosjs-ci
-#### docker push eosio/eosjs-ci:v0.2.6
+#### docker build --tag eosio/eosjs-ci:v0.2.7 ./.github/eosjs-ci
+#### docker push eosio/eosjs-ci:v0.2.7
 
-FROM ubuntu:18.04 AS builder
+FROM ubuntu:18.04
+ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--verbose-http-errors", "--max-transaction-time=100"]
 
 ### base
 RUN yes | unminimize \
@@ -74,30 +75,10 @@ RUN git clone https://github.com/EOSIO/eos.git \
  && mkdir build \
  && cd build \
  && CC=clang-8 CXX=clang++-8 cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_AR=/usr/bin/llvm-ar-8 -DCMAKE_RANLIB=/usr/bin/llvm-ranlib-8 -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld .. \
- && CC=clang-8 CXX=clang++-8 ninja -j5
-
-
-FROM ubuntu:18.04
-ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--verbose-http-errors", "--max-transaction-time=100"]
-
-RUN yes | unminimize \
- && apt-get update \
- && apt-get install -yq \
-     curl \
-     git \
-     python \
-     wget \
- && curl -sL https://deb.nodesource.com/setup_10.x | bash -
-
- ENV LANG=en_US.UTF-8
-
-WORKDIR /root/
-RUN mkdir -p /root/eos/build/bin
-
-WORKDIR /root/eos/build/bin
-COPY --from=builder /root/eos/build/bin/* ./
-
-ENV PATH="/root/eos/build/bin/:${PATH}"
+ && CC=clang-8 CXX=clang++-8 ninja -j5 \
+ && sudo ninja install \
+ && sudo ln -s /usr/lib/x86_64-linux-gnu/cmake/eosio/ /usr/lib/cmake/eosio \
+ && rm -rf /root/eos
 
 RUN mkdir -p "/opt/eosio/bin/contracts"
 
