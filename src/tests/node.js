@@ -1,8 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { JsonRpc, RpcError, Api, WasmAbi } = require('../../dist');
+const { JsonRpc, RpcError, Api } = require('../../dist');
 const { JsSignatureProvider } = require('../../dist/eosjs-jssig');
-const { WasmAbiProvider } = require('../../dist/eosjs-wasmabi');
 const fetch = require('node-fetch');
 const { TextEncoder, TextDecoder } = require('util');
 
@@ -18,32 +17,9 @@ const cfactorPrivateKey = '5K8Sm2bB2b7ZC8tJMefrk1GFa4jgtHxxHRcjX49maMk9AEwq8hN';
 
 const rpc = new JsonRpc('http://localhost:8888', { fetch });
 const signatureProvider = new JsSignatureProvider([privateKey, r1PrivateKey, cfactorPrivateKey]);
-const wasmAbiProvider = new WasmAbiProvider();
-const api = new Api({ rpc, signatureProvider, wasmAbiProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
-
-const setWasmAbi = async () => {
-    await wasmAbiProvider.setWasmAbis([
-        new WasmAbi({
-            account: 'eosio.token',
-            mod: new global.WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/token_abi.wasm'))),
-            memoryThreshold: 32000,
-            textEncoder: api.textEncoder,
-            textDecoder: api.textDecoder,
-            print: (x) => { process.stdout.write(x); },
-        }),
-        new WasmAbi({
-            account: 'returnvalue',
-            mod: new global.WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/action_results_abi.wasm'))),
-            memoryThreshold: 32000,
-            textEncoder: api.textEncoder,
-            textDecoder: api.textDecoder,
-            print: (x) => { process.stdout.write(x); },
-        })
-    ]);
-};
+const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
 const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
-    wasmAbiProvider.wasmAbis.clear();
     return await api.transact({
         actions: [{
             account: 'eosio.token',
@@ -191,32 +167,10 @@ const transactWithShorthandTxJsonContextFreeData = async () => {
     });
 };
 
-const transactWithShorthandApiWasm = async () => {
-    await setWasmAbi();
-    return await api.transact({
-        actions: [
-            api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiWasm')
-        ]
-    }, {
-        blocksBehind: 3,
-        expireSeconds: 30
-    });
-};
-
-const transactWithShorthandTxWasm = async () => {
-    await setWasmAbi();
-    const tx = api.buildTransaction();
-    tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxWasm');
-    return await tx.send({
-        blocksBehind: 3,
-        expireSeconds: 30
-    });
-};
-
 const transactWithReturnValue = async () => {
-    await setWasmAbi();
+    await api.getAbi('returnvalue');
     const tx = api.buildTransaction();
-    tx.with('returnvalue').as('bob').actionresret();
+    tx.with('returnvalue').as('bob').sum(5, 5);
     return await tx.send({
         blocksBehind: 3,
         expireSeconds: 30
