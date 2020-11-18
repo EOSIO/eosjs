@@ -214,8 +214,8 @@ cleos set abi returnvalue $CONTRACTS_DIR/action_results/action_results.abi -p re
 cleos set code returnvalue $CONTRACTS_DIR/action_results/action_results.wasm -p returnvalue@active -p eosio@active
 
 sleep 1s
-cleos set abi eosio.token $CONTRACTS_DIR/token/token.abi -p eosio.token@active -p eosio@active
-cleos set code eosio.token $CONTRACTS_DIR/token/token.wasm -p eosio.token@active -p eosio@active
+cleos set abi eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.abi -p eosio.token@active -p eosio@active
+cleos set code eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.wasm -p eosio.token@active -p eosio@active
 
 sleep 1s
 cleos push action eosio.token create '["bob", "10000000000.0000 SYS"]' -p eosio.token
