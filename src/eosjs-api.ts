@@ -153,9 +153,10 @@ export class Api {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Promise<BinaryAbi>[] = [...uniqueAccounts].map(async (account: string): Promise<BinaryAbi> => ({
-            accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
-        }));
+        const actionPromises: Promise<BinaryAbi>[] = [...uniqueAccounts].map(
+            async (account: string): Promise<BinaryAbi> => ({
+                accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
+            }));
         return Promise.all(actionPromises);
     }
 
@@ -222,12 +223,8 @@ export class Api {
 
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
-        return await Promise.all(actions.map(async (action) => {
-            const { account, name, authorization, data } = action;
+        return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
             const contract = await this.getContract(account);
-            if (typeof data !== 'object') {
-                return action;
-            }
             return ser.serializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
         }));
@@ -235,8 +232,7 @@ export class Api {
 
     /** Convert actions from hex */
     public async deserializeActions(actions: ser.Action[]): Promise<ser.Action[]> {
-        return await Promise.all(actions.map(async (action) => {
-            const { account, name, authorization, data } = action;
+        return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
             const contract = await this.getContract(account);
             return ser.deserializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
@@ -337,11 +333,9 @@ export class Api {
         if (broadcast) {
             let result;
             if (compression) {
-                result = await this.pushCompressedSignedTransaction(pushTransactionArgs);
-            } else {
-                result = await this.pushSignedTransaction(pushTransactionArgs);
+                return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
             }
-            return result as TransactResult;
+            return this.pushSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
         }
         return pushTransactionArgs as PushTransactionArgs;
     }
