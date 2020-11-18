@@ -140,6 +140,25 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls get_block_info', async () => {
+        const expPath = '/v1/chain/get_block_info';
+        const blockNum = 1234;
+        const expReturn = { data: '12345' };
+        const expParams = {
+            body: JSON.stringify({
+                block_num: blockNum,
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_block_info(blockNum);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls get_block', async () => {
         const expPath = '/v1/chain/get_block';
         const blockNumOrId = 1234;

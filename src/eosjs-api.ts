@@ -393,8 +393,11 @@ export class Api {
         { sign, requiredKeys, authorization = [] }: QueryConfig
     ): Promise<any> {
         const info = await this.rpc.get_info();
-        // TODO: replace get_block; needs rodeos changes
-        const refBlock = await this.rpc.get_block(info.last_irreversible_block_num);
+        const refBlock = {
+            block_num: info.last_irreversible_block_num,
+            id: info.last_irreversible_block_id,
+            timestamp: info.last_irreversible_block_time,
+        };
         const queryBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         ser.serializeQuery(queryBuffer, query);
 
@@ -483,13 +486,19 @@ export class Api {
         if (!info) {
             info = await this.rpc.get_info();
         }
+        if (useLastIrreversible) {
+            return { ...ser.transactionHeader({
+                block_num: info.last_irreversible_block_num,
+                id: info.last_irreversible_block_id,
+                timestamp: info.last_irreversible_block_time,
+            }, expireSeconds), ...transaction };
+        }
 
-        const taposBlockNumber: number = useLastIrreversible
-            ? info.last_irreversible_block_num : info.head_block_num - blocksBehind;
+        const taposBlockNumber: number = info.head_block_num - blocksBehind;
 
         const refBlock: GetBlockHeaderStateResult | GetBlockResult =
             taposBlockNumber <= info.last_irreversible_block_num
-                ? await this.rpc.get_block(taposBlockNumber)
+                ? await this.rpc.get_block_info(taposBlockNumber)
                 : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
@@ -505,7 +514,7 @@ export class Api {
         try {
             return await this.rpc.get_block_header_state(taposBlockNumber);
         } catch (error) {
-            return await this.rpc.get_block(taposBlockNumber);
+            return await this.rpc.get_block_info(taposBlockNumber);
         }
     }
 
