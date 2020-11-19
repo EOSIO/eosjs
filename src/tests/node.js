@@ -31,14 +31,6 @@ const setWasmAbi = async () => {
             textDecoder: api.textDecoder,
             print: (x) => { process.stdout.write(x); },
         }),
-        new WasmAbi({
-            account: 'returnvalue',
-            mod: new global.WebAssembly.Module(fs.readFileSync(path.join(__dirname + '/action_results_abi.wasm'))),
-            memoryThreshold: 32000,
-            textEncoder: api.textEncoder,
-            textDecoder: api.textDecoder,
-            print: (x) => { process.stdout.write(x); },
-        })
     ]);
 };
 
@@ -214,9 +206,9 @@ const transactWithShorthandTxWasm = async () => {
 };
 
 const transactWithReturnValue = async () => {
-    await setWasmAbi();
+    await api.getAbi('returnvalue');
     const tx = api.buildTransaction();
-    tx.with('returnvalue').as('bob').actionresret();
+    tx.with('returnvalue').as('bob').sum(5, 5);
     return await tx.send({
         blocksBehind: 3,
         expireSeconds: 30
