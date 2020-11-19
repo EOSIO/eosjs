@@ -33,12 +33,6 @@
                 tokenModule = await WebAssembly.compile(buffer);
               }
 
-              if (!rvModule) {
-                response = await fetch('action_results_abi.wasm');
-                buffer = await response.arrayBuffer();
-                rvModule = await WebAssembly.compile(buffer);
-              }
-
               await api.wasmAbiProvider.setWasmAbis([
                 new eosjs_wasmabi.WasmAbi({
                   account: 'eosio.token',
@@ -48,14 +42,6 @@
                   textDecoder: new TextDecoder('utf-8', { fatal: true }),
                   print: (x) => console.info(x),
                 }),
-                new eosjs_wasmabi.WasmAbi({
-                  account: 'returnvalue',
-                  mod: rvModule,
-                  memoryThreshold: 32000,
-                  textEncoder: new TextEncoder,
-                  textDecoder: new TextDecoder('utf-8', { fatal: true }),
-                  print: (x) => console.info(x),
-                })
               ]);
             };
         
@@ -552,9 +538,9 @@
             };
 
             const returnValueTx = async () => {
-              await setWasmAbi();
+              await api.getAbi('returnvalue');
               const tx = api.buildTransaction();
-              tx.with('returnvalue').as('bob').actionresret();
+              tx.with('returnvalue').as('bob').sum(5, 5);
               return tx.send({
                   blocksBehind: 3,
                   expireSeconds: 30
