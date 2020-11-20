@@ -23,9 +23,11 @@ import {
 import { JsonRpc } from './eosjs-jsonrpc';
 import {
     Abi,
+    BlockTaposInfo,
     GetInfoResult,
     PushTransactionArgs,
     GetBlockHeaderStateResult,
+    GetBlockInfoResult,
     GetBlockResult
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
@@ -349,11 +351,7 @@ export class Api {
         { sign, requiredKeys, authorization = [] }: QueryConfig
     ): Promise<any> {
         const info = await this.rpc.get_info();
-        const refBlock = {
-            block_num: info.last_irreversible_block_num,
-            id: info.last_irreversible_block_id,
-            timestamp: info.last_irreversible_block_time,
-        };
+        const refBlock = await this.tryRefBlockFromGetInfo(info);
         const queryBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
         ser.serializeQuery(queryBuffer, query);
 
@@ -443,18 +441,15 @@ export class Api {
             info = await this.rpc.get_info();
         }
         if (useLastIrreversible) {
-            return { ...ser.transactionHeader({
-                block_num: info.last_irreversible_block_num,
-                id: info.last_irreversible_block_id,
-                timestamp: info.last_irreversible_block_time,
-            }, expireSeconds), ...transaction };
+            const block = await this.tryRefBlockFromGetInfo(info);
+            return { ...ser.transactionHeader(block, expireSeconds), ...transaction };
         }
 
         const taposBlockNumber: number = info.head_block_num - blocksBehind;
 
         const refBlock: GetBlockHeaderStateResult | GetBlockResult =
             taposBlockNumber <= info.last_irreversible_block_num
-                ? await this.rpc.get_block_info(taposBlockNumber)
+                ? await this.tryGetBlockInfo(taposBlockNumber)
                 : await this.tryGetBlockHeaderState(taposBlockNumber);
 
         return { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
@@ -470,7 +465,36 @@ export class Api {
         try {
             return await this.rpc.get_block_header_state(taposBlockNumber);
         } catch (error) {
-            return await this.rpc.get_block_info(taposBlockNumber);
+            return await this.tryGetBlockInfo(taposBlockNumber);
+        }
+    }
+
+    private async tryGetBlockInfo(blockNumber: number): Promise<GetBlockInfoResult | GetBlockResult> {
+        try {
+            return await this.rpc.get_block_info(blockNumber);
+        } catch (error) {
+            return await this.rpc.get_block(blockNumber);
+        }
+    }
+
+    private async tryRefBlockFromGetInfo(info: GetInfoResult): Promise<BlockTaposInfo | GetBlockInfoResult | GetBlockResult> {
+        if (
+            info.hasOwnProperty('last_irreversible_block_id') &&
+            info.hasOwnProperty('last_irreversible_block_num') &&
+            info.hasOwnProperty('last_irreversible_block_time')
+        ) {
+            return {
+                block_num: info.last_irreversible_block_num,
+                id: info.last_irreversible_block_id,
+                timestamp: info.last_irreversible_block_time,
+            };
+        } else {
+            const block = await this.tryGetBlockInfo(info.last_irreversible_block_num);
+            return {
+                block_num: block.block_num,
+                id: block.id,
+                timestamp: block.timestamp,
+            };
         }
     }
 
