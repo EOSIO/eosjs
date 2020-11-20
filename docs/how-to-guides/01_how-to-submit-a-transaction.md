@@ -74,5 +74,62 @@ Alternatively, the transaction could be submitted without the optional configura
 })();
 ```
 
+#### Concise Actions
+To construct transactions and actions in a more concise way, you can also utilize this format instead:
+```javascript
+(async () => {
+  await api.transact({ 
+   actions: [
+     api.with('eosio').as('useraaaaaaaa').buyrambytes('useraaaaaaaa', 'useraaaaaaaa', 8192)
+   ]
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  });
+})();
+```
+With this concise format of an action, the `with()` function has the account, `as()` contains the actor, and the name of the action is the third function.  The arguments within the action function are listed in the same order as the arguments from the smart contract.  You can also send a longer authentication within the `as()` function, such as `[{ actor: ‘useraaaaaaaa’, permission: ‘active’}]`.
+
+Before using this structure, you need to cache the JSON Abi:
+```javascript
+(async () => {
+  await api.getAbi('eosio');
+  ...
+})();
+```
+
+Additionally, utilizing this structure, a stateful transaction object can be created and passed through your application before sending when ready.  The transaction object can also be created as a callback method.
+
+```javascript
+(async () => {
+  const tx = api.buildTransaction();
+  tx.with('eosio').as('useraaaaaaaa').buyrambytes('useraaaaaaaa', 'useraaaaaaaa', 8192)
+  await tx.send({ blocksBehind: 3, expireSeconds: 30 });
+
+  // ...or...
+
+  api.buildTransaction(async (tx) => {
+    tx.with('eosio').as('useraaaaaaaa').buyrambytes('useraaaaaaaa', 'useraaaaaaaa', 8192)
+    await tx.send({ blocksBehind: 3, expireSeconds: 30 });
+  });
+})();
+```
+
+By using this object and passing it around your application, it might be more difficult for your application to keep the correct references and indexes for context free actions. The transaction object has a function for mapping actions, context free actions, and context free data together.
+
+```javascript
+(async () => {
+  const tx = api.buildTransaction();
+  tx.associateContextFree((index) => ({
+    contextFreeData: cfdata,
+    contextFreeAction: tx.with('account').as().cfaName(index.cfd, 'context free example'),
+    action: tx.with('account').as('actor').actionName('example', index.cfa)
+  }));
+  await tx.send({ blocksBehind: 3, expireSeconds: 30 });
+})();
+```
+
+By providing that function inside `tx.associateContextFree()`, the transaction object will provide the correct indexes for the context free action and context free data.  You can input the `index.cfa` or `index.cfd` arguments where your smart contract requires that index in the list of arguments.  Additionally, all three object keys are not necessary in the function, in case for example, the action is not necessary for your context free action.
+
 #### Return Values
 From nodeos version 2.1, the ability to receive return values from smart contracts to eosjs has been introduced.  In the above examples, the `transaction` object will include the values `transaction_id` and the `processed` object.  If your smart contract returns values, you will be able to find the values within the `transaction.processed.action_traces` array.  The order of the `action_traces` array matches the order of actions in your transaction and within those `action_trace` objects, you can find your deserialized return value for your action in the `return_value` field.
