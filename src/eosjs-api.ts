@@ -223,8 +223,12 @@ export class Api {
 
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
-        return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
+        return await Promise.all(actions.map(async (action) => {
+            const { account, name, authorization, data } = action;
             const contract = await this.getContract(account);
+            if (typeof data !== 'object') {
+                return action;
+            }
             return ser.serializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
         }));
