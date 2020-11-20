@@ -7,10 +7,12 @@ import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
 import {
     GetAbiResult,
+    GetBlockInfoResult,
     GetBlockResult,
     GetCodeResult,
     GetInfoResult,
     GetRawCodeAndAbiResult,
+    GetRawAbiResult,
     PushTransactionArgs,
     GetBlockHeaderStateResult
 } from './eosjs-rpc-interfaces';
@@ -88,6 +90,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         return await this.fetch('/v1/chain/get_block_header_state', { block_num_or_id: blockNumOrId });
     }
 
+    /** Raw call to `/v1/chain/get_block_info` */
+    public async get_block_info(blockNum: number): Promise<GetBlockInfoResult> {
+        return await this.fetch('/v1/chain/get_block_info', { block_num: blockNum });
+    }
+
     /** Raw call to `/v1/chain/get_block` */
     public async get_block(blockNumOrId: number | string): Promise<GetBlockResult> {
         return await this.fetch('/v1/chain/get_block', { block_num_or_id: blockNumOrId });
@@ -132,11 +139,15 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** calls `/v1/chain/get_raw_code_and_abi` and pulls out unneeded raw wasm code */
-    // TODO: use `/v1/chain/get_raw_abi` directly when it becomes available
     public async getRawAbi(accountName: string): Promise<BinaryAbi> {
-        const rawCodeAndAbi = await this.get_raw_code_and_abi(accountName);
-        const abi = base64ToBinary(rawCodeAndAbi.abi);
-        return { accountName: rawCodeAndAbi.account_name, abi };
+        const rawAbi = await this.get_raw_abi(accountName);
+        const abi = base64ToBinary(rawAbi.abi);
+        return { accountName: rawAbi.account_name, abi };
+    }
+
+    /** Raw call to `/v1/chain/get_raw_abi` */
+    public async get_raw_abi(accountName: string): Promise<GetRawAbiResult> {
+        return await this.fetch('/v1/chain/get_raw_abi', { account_name: accountName });
     }
 
     /** Raw call to `/v1/chain/get_scheduled_transactions` */
