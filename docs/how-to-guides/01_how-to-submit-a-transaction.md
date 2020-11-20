@@ -90,7 +90,7 @@ To construct transactions and actions in a more concise way, you can also utiliz
 ```
 With this concise format of an action, the `with()` function has the account, `as()` contains the actor, and the name of the action is the third function.  The arguments within the action function are listed in the same order as the arguments from the smart contract.  You can also send a longer authentication within the `as()` function, such as `[{ actor: ‘useraaaaaaaa’, permission: ‘active’}]`.
 
-Before using this structure, you need to cache the JSON Abi:
+Before using this structure, you need to either cache the JSON Abi or add the WASM Abi to the `WasmAbiProvider`.  Adding a WASM Abi is more detailed in [How To Set A Wasm Abi](20_how-to-set-a-wasm-abi.md) but caching a JSON Abi can be seen below:
 ```javascript
 (async () => {
   await api.getAbi('eosio');
