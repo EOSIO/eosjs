@@ -5,5 +5,6 @@ import * as Numeric from './eosjs-numeric';
 import * as RpcInterfaces from './eosjs-rpc-interfaces';
 import { RpcError } from './eosjs-rpcerror';
 import * as Serialize from './eosjs-serialize';
+import { WasmAbi } from './eosjs-wasmabi';
 
-export { Api, ApiInterfaces, JsonRpc, Numeric, RpcInterfaces, RpcError, Serialize };
+export { Api, ApiInterfaces, JsonRpc, Numeric, RpcInterfaces, RpcError, Serialize, WasmAbi };

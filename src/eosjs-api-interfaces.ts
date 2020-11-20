@@ -5,6 +5,7 @@
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
 import { Anyvar, Authorization, Action, SerializedAction } from './eosjs-serialize';
+import { WasmAbi } from './eosjs-wasmabi';
 import { ActionBuilder } from './eosjs-api';
 
 /** Arguments to `getRequiredKeys` */
@@ -26,6 +27,15 @@ export interface AuthorityProvider {
 export interface AbiProvider {
     /** Retrieve the BinaryAbi */
     getRawAbi: (accountName: string) => Promise<BinaryAbi>;
+}
+
+/** Stores and retrieves WASM Abis */
+export interface WasmAbiProvider {
+    /** WasmAbi objects associated with account name */
+    wasmAbis: Map<string, WasmAbi>;
+
+    /** Set an array of WasmAbis */
+    setWasmAbis: (wasmAbis: WasmAbi[]) => void;
 }
 
 /** Structure for the raw form of ABIs */

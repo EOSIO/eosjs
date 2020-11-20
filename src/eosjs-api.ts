@@ -19,6 +19,7 @@ import {
     TransactConfig,
     Transaction,
     TransactResult,
+    WasmAbiProvider
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
 import {
@@ -32,6 +33,7 @@ import {
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 import { RpcError } from './eosjs-rpcerror';
+import { WasmAbi } from './eosjs-wasmabi';
 
 const transactionAbi = require('../src/transaction.abi.json');
 
@@ -47,6 +49,9 @@ export class Api {
 
     /** Signs transactions */
     public signatureProvider: SignatureProvider;
+
+    /** Manages WASM Abis */
+    public wasmAbiProvider: WasmAbiProvider;
 
     /** Identifies chain */
     public chainId: string;
@@ -72,6 +77,7 @@ export class Api {
      * * `authorityProvider`: Get public keys needed to meet authorities in a transaction
      * * `abiProvider`: Supplies ABIs in raw form (binary)
      * * `signatureProvider`: Signs transactions
+     * * `wasmAbiProvider`: Manages WASM Abis
      * * `chainId`: Identifies chain
      * * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
      * * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
@@ -81,6 +87,7 @@ export class Api {
         authorityProvider?: AuthorityProvider,
         abiProvider?: AbiProvider,
         signatureProvider: SignatureProvider,
+        wasmAbiProvider?: WasmAbiProvider,
         chainId?: string,
         textEncoder?: TextEncoder,
         textDecoder?: TextDecoder,
@@ -89,6 +96,7 @@ export class Api {
         this.authorityProvider = args.authorityProvider || args.rpc;
         this.abiProvider = args.abiProvider || args.rpc;
         this.signatureProvider = args.signatureProvider;
+        this.wasmAbiProvider = args.wasmAbiProvider;
         this.chainId = args.chainId;
         this.textEncoder = args.textEncoder;
         this.textDecoder = args.textDecoder;
@@ -155,8 +163,9 @@ export class Api {
         const actions = (transaction.context_free_actions || []).concat(transaction.actions);
         const accounts: string[] = actions.map((action: ser.Action): string => action.account);
         const uniqueAccounts: Set<string> = new Set(accounts);
-        const actionPromises: Promise<BinaryAbi>[] = [...uniqueAccounts].map(
-            async (account: string): Promise<BinaryAbi> => ({
+        const actionPromises: Promise<BinaryAbi>[] = [...uniqueAccounts]
+            .filter((account: string) => !this.wasmAbiProvider || !this.wasmAbiProvider.wasmAbis.get(account))
+            .map(async (account: string): Promise<BinaryAbi> => ({
                 accountName: account, abi: (await this.getCachedAbi(account, reload)).rawAbi,
             }));
         return Promise.all(actionPromises);
@@ -227,6 +236,13 @@ export class Api {
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
         return await Promise.all(actions.map(async (action) => {
             const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
+                const wasmAbi = this.wasmAbiProvider.wasmAbis.get(account);
+                if (wasmAbi.inst.exports.memory.buffer.length > wasmAbi.memoryThreshold) {
+                    await wasmAbi.reset();
+                }
+                return action;
+            }
             const contract = await this.getContract(account);
             if (typeof data !== 'object') {
                 return action;
@@ -238,7 +254,11 @@ export class Api {
 
     /** Convert actions from hex */
     public async deserializeActions(actions: ser.Action[]): Promise<ser.Action[]> {
-        return await Promise.all(actions.map(async ({ account, name, authorization, data }) => {
+        return await Promise.all(actions.map(async (action) => {
+            const { account, name, authorization, data } = action;
+            if (this.wasmAbiProvider && this.wasmAbiProvider.wasmAbis.get(account)) {
+                return action;
+            }
             const contract = await this.getContract(account);
             return ser.deserializeAction(
                 contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
@@ -339,9 +359,33 @@ export class Api {
         if (broadcast) {
             let result;
             if (compression) {
-                return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
+                result = await this.pushCompressedSignedTransaction(pushTransactionArgs);
+            } else {
+                result = await this.pushSignedTransaction(pushTransactionArgs);
             }
-            return this.pushSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
+            if (this.wasmAbiProvider && result.processed && result.processed.action_traces) {
+                for (const at of result.processed.action_traces) {
+                    if (at.act && this.wasmAbiProvider.wasmAbis.get(at.act.account)) {
+                        const abi = this.wasmAbiProvider.wasmAbis.get(at.act.account);
+                        const name = at.act.name;
+                        if (at.act.hasOwnProperty('data')) {
+                            try {
+                                const j = abi.action_args_bin_to_json(name, ser.hexToUint8Array(at.act.data));
+                                at.act.name = j.long_name;
+                                at.act.data = j.args;
+                            } catch (e) { } // eslint-disable-line no-empty
+                        }
+                        if (at.hasOwnProperty('return_value')) {
+                            try {
+                                const j = abi.action_ret_bin_to_json(name, ser.hexToUint8Array(at.return_value));
+                                at.act.name = j.long_name;
+                                at.return_value = j.return_value;
+                            } catch (e) { } // eslint-disable-line no-empty
+                        }
+                    }
+                }
+            }
+            return result as TransactResult;
         }
         return pushTransactionArgs as PushTransactionArgs;
     }
@@ -579,7 +623,8 @@ export class ActionBuilder {
             authorization = actorName as ser.Authorization[];
         }
 
-        return new ActionSerializer(this, this.api, this.accountName, authorization) as ActionSerializerType;
+        const wasmAbi = this.api.wasmAbiProvider.wasmAbis.get(this.accountName);
+        return new ActionSerializer(this, this.api, this.accountName, authorization, wasmAbi) as ActionSerializerType;
     }
 }
 
@@ -589,37 +634,51 @@ class ActionSerializer implements ActionSerializerType {
         api: Api,
         accountName: string,
         authorization: ser.Authorization[],
+        wasmAbi: WasmAbi
     ) {
-        const jsonAbi = api.cachedAbis.get(accountName);
-        if (!jsonAbi) {
-            throw new Error('ABI must be cached before using ActionBuilder, run api.getAbi()');
-        }
-        const types = ser.getTypesFromAbi(ser.createInitialTypes(), jsonAbi.abi);
-        const actions = new Map<string, ser.Type>();
-        for (const { name, type } of jsonAbi.abi.actions) {
-            actions.set(name, ser.getType(types, type));
-        }
-        actions.forEach((type, name) => {
-            Object.assign(this, {
-                [name]: (...args: any[]) => {
-                    const data: { [key: string]: any } = {};
-                    args.forEach((arg, index) => {
-                        const field = type.fields[index];
-                        data[field.name] = arg;
-                    });
-                    const serializedData = ser.serializeAction(
-                        { types, actions },
-                        accountName,
-                        name,
-                        authorization,
-                        data,
-                        api.textEncoder,
-                        api.textDecoder
-                    );
-                    parent.serializedData = serializedData;
-                    return serializedData;
-                }
+        if (wasmAbi) {
+            Object.keys(wasmAbi.actions).forEach((action) => {
+                Object.assign(this, {
+                    [action]: (...args: any[]) => {
+                        const serializedData = wasmAbi.actions[action](authorization, ...args);
+                        serializedData.data = ser.arrayToHex(serializedData.data);
+                        parent.serializedData = serializedData;
+                        return serializedData;
+                    }
+                });
             });
-        });
+        } else {
+            const jsonAbi = api.cachedAbis.get(accountName);
+            if (!jsonAbi) {
+                throw new Error('ABI must be cached before using ActionBuilder, run api.getAbi()');
+            }
+            const types = ser.getTypesFromAbi(ser.createInitialTypes(), jsonAbi.abi);
+            const actions = new Map<string, ser.Type>();
+            for (const { name, type } of jsonAbi.abi.actions) {
+                actions.set(name, ser.getType(types, type));
+            }
+            actions.forEach((type, name) => {
+                Object.assign(this, {
+                    [name]: (...args: any[]) => {
+                        const data: { [key: string]: any } = {};
+                        args.forEach((arg, index) => {
+                            const field = type.fields[index];
+                            data[field.name] = arg;
+                        });
+                        const serializedData = ser.serializeAction(
+                            { types, actions },
+                            accountName,
+                            name,
+                            authorization,
+                            data,
+                            api.textEncoder,
+                            api.textDecoder
+                        );
+                        parent.serializedData = serializedData;
+                        return serializedData;
+                    }
+                });
+            });
+        }
     }
 }

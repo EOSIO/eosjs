@@ -87,6 +87,18 @@ describe('Node JS environment', () => {
         });
     });
 
+    describe('Wasm Abi with Shorthand Design', () => {
+        it('transacts with shorthand structure using api', async () => {
+            transactionResponse = await tests.transactWithShorthandApiWasm();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
+
+        it('transacts with shorthand structure using tx', async () => {
+            transactionResponse = await tests.transactWithShorthandTxWasm();
+            expect(Object.keys(transactionResponse)).toContain('transaction_id');
+        });
+    });
+
     it('transacts with elliptic p256/KeyType.R1 keys and signatures', async () => {
         transactionResponse = await tests.transactWithConfig({
             blocksBehind: 3,

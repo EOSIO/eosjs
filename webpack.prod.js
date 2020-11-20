@@ -6,6 +6,7 @@ module.exports = {
         eosjs_jsonrpc: './src/rpc-web.ts',
         eosjs_jssig: './src/eosjs-jssig.ts',
         eosjs_numeric: './src/eosjs-numeric.ts',
+        eosjs_wasmabi: './src/eosjs-wasmabi.ts',
     },
     mode: 'production',
     module: {
