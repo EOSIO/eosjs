@@ -40,7 +40,7 @@ const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
 
 const transactWithoutConfig = async () => {
     const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30}, 'transactWithoutConfig');
-    const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
+    const blockInfo = await rpc.get_block_info(transactionResponse.processed.block_num - 3);
     const currentDate = new Date();
     const timePlusTen = currentDate.getTime() + 10000;
     const timeInISOString = (new Date(timePlusTen)).toISOString();
@@ -196,7 +196,7 @@ const transactShouldFail = async () => await api.transact({
     }]
 });
 
-const rpcShouldFail = async () => await rpc.get_block(-1);
+const rpcShouldFail = async () => await rpc.get_block_info(-1);
 
 module.exports = {
     transactWithConfig,
