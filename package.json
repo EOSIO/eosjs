@@ -34,8 +34,8 @@
   "devDependencies": {
     "@blockone/eslint-config-blockone": "^3.0.0",
     "@types/elliptic": "^6.4.12",
-    "@types/jest": "^26.0.15",
-    "@types/node": "^14.14.9",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.13",
     "@types/pako": "^1.0.1",
     "cypress": "^4.12.1",
     "eosjs-ecc": "^4.0.7",
