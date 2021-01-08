@@ -31,7 +31,6 @@ import {
     GetBlockResult
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
-import { RpcError } from './eosjs-rpcerror';
 
 const transactionAbi = require('../src/transaction.abi.json');
 
@@ -436,7 +435,7 @@ export class Api {
         blocksBehind: number | undefined,
         useLastIrreversible: boolean | undefined,
         expireSeconds: number
-    ) {
+    ): Promise<Transaction> {
         if (!info) {
             info = await this.rpc.get_info();
         }
@@ -456,7 +455,7 @@ export class Api {
     }
 
     // eventually break out into TransactionValidator class
-    private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix }: any): boolean {
+    private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix }: Transaction): boolean {
         return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
@@ -502,7 +501,7 @@ export class Api {
         return new ActionBuilder(this, accountName);
     }
 
-    public buildTransaction(cb?: (tx: TransactionBuilder) => void) {
+    public buildTransaction(cb?: (tx: TransactionBuilder) => void): TransactionBuilder|void {
         const tx = new TransactionBuilder(this);
         if (cb) {
             return cb(tx);
@@ -514,7 +513,7 @@ export class Api {
 export class TransactionBuilder {
     private api: Api;
     private actions: ActionBuilder[] = [];
-    private contextFreeGroups: any[] = [];
+    private contextFreeGroups: ContextFreeGroupCallback[] = [];
     constructor(api: Api) {
         this.api = api;
     }
@@ -525,7 +524,7 @@ export class TransactionBuilder {
         return actionBuilder;
     }
 
-    public associateContextFree(contextFreeGroup: ContextFreeGroupCallback) {
+    public associateContextFree(contextFreeGroup: ContextFreeGroupCallback): TransactionBuilder {
         this.contextFreeGroups.push(contextFreeGroup);
         return this;
     }
@@ -571,7 +570,7 @@ export class ActionBuilder {
         this.accountName = accountName;
     }
 
-    public as(actorName: string | ser.Authorization[] = []) {
+    public as(actorName: string | ser.Authorization[] = []): ActionSerializerType {
         let authorization: ser.Authorization[] = [];
         if (actorName && typeof actorName === 'string') {
             authorization = [{ actor: actorName, permission: 'active'}];

@@ -5,7 +5,6 @@
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
 import { Anyvar, Authorization, Action, SerializedAction } from './eosjs-serialize';
-import { ActionBuilder } from './eosjs-api';
 
 /** Arguments to `getRequiredKeys` */
 export interface AuthorityProviderArgs {
@@ -100,6 +99,12 @@ export interface TransactConfig {
     blocksBehind?: number;
     useLastIrreversible?: boolean;
     expireSeconds?: number;
+}
+
+export interface TransactionHeader {
+    expiration: string;
+    ref_block_num: number;
+    ref_block_prefix: number;
 }
 
 export interface AccountDelta {

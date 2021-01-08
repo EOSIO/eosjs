@@ -14,6 +14,8 @@ export interface Abi {
     error_messages: { error_code: string, error_msg: string }[];
     abi_extensions: { tag: number, value: string }[];
     variants?: { name: string, types: string[] }[];
+    action_results?: { name: string, result_type: string }[],
+    kv_tables?: { [key: string]: { type: string, primary_index: { name: string, type: string }, secondary_indices: { [key: string]: { type: string }}[] } }[],
 }
 
 export interface BlockHeader {
@@ -32,10 +34,79 @@ export interface SignedBlockHeader extends BlockHeader {
     producer_signature: string;
 }
 
+export interface AccountResourceInfo {
+    used: number;
+    available: number;
+    max: number;
+    last_usage_update_time?: string;
+    current_used?: number;
+}
+
+export interface Asset {
+    amount: number;
+    symbol: string;
+}
+
+export interface Authority {
+    threshold: number;
+    keys: KeyWeight[];
+    accounts: PermissionLevelWeight[];
+    waits: WaitWeight[];
+}
+
+export interface KeyWeight {
+    key: string;
+    weight: number;
+}
+
+export interface Permission {
+    perm_name: string;
+    parent: string;
+    required_auth: Authority;
+}
+
+export interface PermissionLevel {
+    actor: string;
+    permission: string;
+}
+
+export interface PermissionLevelWeight {
+    permission: PermissionLevel;
+    weight: number;
+}
+
+export interface WaitWeight {
+    wait_sec: number;
+    weight: number;
+}
+
 /** Return value of `/v1/chain/get_abi` */
 export interface GetAbiResult {
     account_name: string;
     abi: Abi;
+}
+
+/** Return value of `/v1/chain/get_account` */
+export interface GetAccountResult {
+    account_name: string;
+    head_block_num: number;
+    head_block_time: string;
+    privileged: boolean;
+    last_code_update: string;
+    created: string;
+    core_liquid_balance?: Asset;
+    ram_quota: number;
+    net_weight: number;
+    cpu_weight: number;
+    net_limit: AccountResourceInfo;
+    cpu_limit: AccountResourceInfo;
+    ram_usage: number;
+    permissions: Permission[];
+    total_resources: any;
+    self_delegated_bandwidth: any;
+    refund_request: any;
+    voter_info: any;
+    rex_info: any;
 }
 
 /** Return value of `/v1/chain/get_block_info` */
@@ -76,7 +147,7 @@ export interface BlockTaposInfo {
     header?: BlockHeader;
 }
 
-/** Return value of `v1/chain/get_block_header_state */
+/** Return value of `/v1/chain/get_block_header_state` */
 export interface GetBlockHeaderStateResult {
     id: string;
     header: SignedBlockHeader;
@@ -109,6 +180,13 @@ export interface GetCodeResult {
     abi: Abi;
 }
 
+/** Return value of `/v1/chain/get_currency_stats` */
+export interface GetCurrencyStatsResult {
+    supply: Asset;
+    max_supply: Asset;
+    issuer: string;
+}
+
 /** Return value of `/v1/chain/get_info` */
 export interface GetInfoResult {
     server_version: string;
@@ -126,6 +204,20 @@ export interface GetInfoResult {
     block_net_limit: number;
 }
 
+/** Return value of /v1/chain/get_producer_schedule */
+export interface GetProducerScheduleResult {
+    active: any;
+    pending: any;
+    proposed: any;
+}
+
+/** Return value of `/v1/chain/get_producers` */
+export interface GetProducersResult {
+    rows: string[]|object[];
+    total_producer_vote_weight: number;
+    more: string;
+}
+
 /** Return value of `/v1/chain/get_raw_code_and_abi` */
 export interface GetRawCodeAndAbiResult {
     account_name: string;
@@ -133,11 +225,40 @@ export interface GetRawCodeAndAbiResult {
     abi: string;
 }
 
+/** Return value of `/v1/chain/get_raw_abi` */
 export interface GetRawAbiResult {
     account_name: string;
     code_hash: string;
     abi_hash: string;
     abi: string;
+}
+
+/** Return value of `/v1/chain/get_scheduled_transactions` */
+export interface GetScheduledTransactionsResult {
+    transactions: any[];
+    more: string;
+}
+
+/** Return value of `/v1/chain/get_table_rows` and `/v1/chain/get_kv_table_rows` */
+export interface GetTableRowsResult {
+    rows: any[];
+    more: boolean;
+    next_key: string;
+    next_key_bytes: string;
+}
+
+export interface GetTableByScopeResultRow {
+    code: string;
+    scope: string;
+    table: string;
+    payer: string;
+    count: number;
+}
+
+/** Return value of `/v1/chain/get_table_by_scope` */
+export interface GetTableByScopeResult {
+    rows: GetTableByScopeResultRow[];
+    more: string;
 }
 
 /** Arguments for `push_transaction` */
@@ -146,4 +267,57 @@ export interface PushTransactionArgs {
     compression?: number;
     serializedTransaction: Uint8Array;
     serializedContextFreeData?: Uint8Array;
+}
+
+/** Return value of `/v1/chain/push_transaction` */
+export interface PushTransactionResult {
+
+}
+
+export interface DBSizeIndexCount {
+    index: string;
+    row_count: number;
+}
+
+/** Return value of `/v1/db_size/get` */
+export interface DBSizeGetResult {
+    free_bytes: number;
+    used_bytes: number;
+    size: number;
+    indices: DBSizeIndexCount[];
+}
+
+export interface OrderedActionResult {
+    global_action_seq: number;
+    account_action_seq: number;
+    block_num: number;
+    block_time: string;
+    action_trace: any;
+}
+
+/** Return value of `/v1/history/get_actions` */
+export interface GetActionsResult {
+    actions: OrderedActionResult[];
+    last_irreversible_block: number;
+    time_limit_exceeded_error?: boolean;
+}
+
+/** Return value of `/v1/history/get_transaction` */
+export interface GetTransactionResult {
+    id: string;
+    trx: any;
+    block_time: string;
+    block_num: number;
+    last_irreversible_block: number;
+    traces: any[];
+}
+
+/** Return value of `/v1/history/get_key_accounts` */
+export interface GetKeyAccountsResult {
+    account_names: string[];
+}
+
+/** Return value of `/v1/history/get_controlled_accounts` */
+export interface GetControlledAccountsResult {
+    controlled_accounts: string[];
 }

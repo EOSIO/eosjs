@@ -33,7 +33,7 @@ export class PrivateKey {
     }
 
     /** Export private key as `elliptic`-format private key */
-    public toElliptic() {
+    public toElliptic(): EC.KeyPair {
         return this.ec.keyFromPrivate(this.key.data);
     }
 
@@ -67,10 +67,10 @@ export class PrivateKey {
         }
         let tries = 0;
         let signature: Signature;
-        const isCanonical = (sigData: Uint8Array) =>
+        const isCanonical = (sigData: Uint8Array): boolean =>
             !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
             && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
-        const constructSignature = (options: EC.SignOptions) => {
+        const constructSignature = (options: EC.SignOptions): Signature => {
             const ellipticPrivateKey = this.toElliptic();
             const ellipticSignature = ellipticPrivateKey.sign(data, options);
             return Signature.fromElliptic(ellipticSignature, this.getType(), this.ec);

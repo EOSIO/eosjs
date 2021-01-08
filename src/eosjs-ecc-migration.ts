@@ -4,8 +4,8 @@ import {KeyType} from './eosjs-numeric';
 import {ec as EC} from 'elliptic';
 
 export const ecc = {
-    initialize: () => console.error('Method deprecated'),
-    unsafeRandomKey: () => console.error('Method deprecated'),
+    initialize: (): void => console.error('Method deprecated'),
+    unsafeRandomKey: (): void => console.error('Method deprecated'),
     randomKey: (
         cpuEntropyBits?: number, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
     ): Promise<string> => {
@@ -17,7 +17,7 @@ export const ecc = {
         const { privateKey } = generateKeyPair(KeyType.k1, options);
         return Promise.resolve(privateKey.toLegacyString());
     },
-    seedPrivate: () => console.error('Method deprecated'),
+    seedPrivate: (): void => console.error('Method deprecated'),
     privateToPublic: (key: string, pubkey_prefix?: string): string => {
         if (pubkey_prefix !== undefined) {
             console.warn('Argument `pubkey_prefix` is deprecated, ' +
@@ -54,7 +54,7 @@ export const ecc = {
         const signature = privKey.sign(data, true, encoding);
         return signature.toString();
     },
-    signHash: (dataSha256: string|Buffer, privateKey: string|PrivateKey, encoding: BufferEncoding = 'hex') => {
+    signHash: (dataSha256: string|Buffer, privateKey: string|PrivateKey, encoding: BufferEncoding = 'hex'): string => {
         const privKey = typeof privateKey === 'string' ? PrivateKey.fromString(privateKey) : privateKey;
         const signature = privKey.sign(dataSha256, false, encoding);
         return signature.toString();
