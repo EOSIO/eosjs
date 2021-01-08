@@ -10,7 +10,7 @@ const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => Array
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-const create_base58_map = () => {
+const create_base58_map = (): number[] => {
     const base58M = Array(256).fill(-1) as number[];
     for (let i = 0; i < base58Chars.length; ++i) {
         base58M[base58Chars.charCodeAt(i)] = i;
@@ -20,7 +20,7 @@ const create_base58_map = () => {
 
 const base58Map = create_base58_map();
 
-const create_base64_map = () => {
+const create_base64_map = (): number[] => {
     const base64M = Array(256).fill(-1) as number[];
     for (let i = 0; i < base64Chars.length; ++i) {
         base64M[base64Chars.charCodeAt(i)] = i;
@@ -32,12 +32,12 @@ const create_base64_map = () => {
 const base64Map = create_base64_map();
 
 /** Is `bignum` a negative number? */
-export const isNegative = (bignum: Uint8Array) => {
+export const isNegative = (bignum: Uint8Array): boolean => {
     return (bignum[bignum.length - 1] & 0x80) !== 0;
 };
 
 /** Negate `bignum` */
-export const negate = (bignum: Uint8Array) => {
+export const negate = (bignum: Uint8Array): void => {
     let carry = 1;
     for (let i = 0; i < bignum.length; ++i) {
         const x = (~bignum[i] & 0xff) + carry;
@@ -51,7 +51,7 @@ export const negate = (bignum: Uint8Array) => {
  *
  * @param size bignum size (bytes)
  */
-export const decimalToBinary = (size: number, s: string) => {
+export const decimalToBinary = (size: number, s: string): Uint8Array => {
     const result = new Uint8Array(size);
     for (let i = 0; i < s.length; ++i) {
         const srcDigit = s.charCodeAt(i);
@@ -76,7 +76,7 @@ export const decimalToBinary = (size: number, s: string) => {
  *
  * @param size bignum size (bytes)
  */
-export const signedDecimalToBinary = (size: number, s: string) => {
+export const signedDecimalToBinary = (size: number, s: string): Uint8Array => {
     const negative = s[0] === '-';
     if (negative) {
         s = s.substr(1);
@@ -98,7 +98,7 @@ export const signedDecimalToBinary = (size: number, s: string) => {
  *
  * @param minDigits 0-pad result to this many digits
  */
-export const binaryToDecimal = (bignum: Uint8Array, minDigits = 1) => {
+export const binaryToDecimal = (bignum: Uint8Array, minDigits = 1): string => {
     const result = Array(minDigits).fill('0'.charCodeAt(0)) as number[];
     for (let i = bignum.length - 1; i >= 0; --i) {
         let carry = bignum[i];
@@ -121,7 +121,7 @@ export const binaryToDecimal = (bignum: Uint8Array, minDigits = 1) => {
  *
  * @param minDigits 0-pad result to this many digits
  */
-export const signedBinaryToDecimal = (bignum: Uint8Array, minDigits = 1) => {
+export const signedBinaryToDecimal = (bignum: Uint8Array, minDigits = 1): string => {
     if (isNegative(bignum)) {
         const x = bignum.slice();
         negate(x);
@@ -130,7 +130,7 @@ export const signedBinaryToDecimal = (bignum: Uint8Array, minDigits = 1) => {
     return binaryToDecimal(bignum, minDigits);
 };
 
-const base58ToBinaryVarSize = (s: string) => {
+const base58ToBinaryVarSize = (s: string): Uint8Array => {
     const result = [] as number[];
     for (let i = 0; i < s.length; ++i) {
         let carry = base58Map[s.charCodeAt(i)];
@@ -162,7 +162,7 @@ const base58ToBinaryVarSize = (s: string) => {
  *
  * @param size bignum size (bytes)
  */
-export const base58ToBinary = (size: number, s: string) => {
+export const base58ToBinary = (size: number, s: string): Uint8Array => {
     if (!size) {
         return base58ToBinaryVarSize(s);
     }
@@ -190,7 +190,7 @@ export const base58ToBinary = (size: number, s: string) => {
  *
  * @param minDigits 0-pad result to this many digits
  */
-export const binaryToBase58 = (bignum: Uint8Array, minDigits = 1) => {
+export const binaryToBase58 = (bignum: Uint8Array, minDigits = 1): string => {
     const result = [] as number[];
     for (const byte of bignum) {
         let carry = byte;
@@ -216,7 +216,7 @@ export const binaryToBase58 = (bignum: Uint8Array, minDigits = 1) => {
 };
 
 /** Convert an unsigned base-64 number in `s` to a bignum */
-export const base64ToBinary = (s: string) => {
+export const base64ToBinary = (s: string): Uint8Array => {
     let len = s.length;
     if ((len & 3) === 1 && s[len - 1] === '=') {
         len -= 1;
@@ -273,7 +273,7 @@ export interface Key {
     data: Uint8Array;
 }
 
-const digestSuffixRipemd160 = (data: Uint8Array, suffix: string) => {
+const digestSuffixRipemd160 = (data: Uint8Array, suffix: string): ArrayBuffer => {
     const d = new Uint8Array(data.length + suffix.length);
     for (let i = 0; i < data.length; ++i) {
         d[i] = data[i];
@@ -295,7 +295,7 @@ const stringToKey = (s: string, type: KeyType, size: number, suffix: string): Ke
     return result;
 };
 
-const keyToString = (key: Key, suffix: string, prefix: string) => {
+const keyToString = (key: Key, suffix: string, prefix: string): string => {
     const digest = new Uint8Array(digestSuffixRipemd160(key.data, suffix));
     const whole = new Uint8Array(key.data.length + 4);
     for (let i = 0; i < key.data.length; ++i) {
@@ -336,7 +336,7 @@ export const stringToPublicKey = (s: string): Key => {
 };
 
 /** Convert public `key` to legacy string (base-58) form */
-export const publicKeyToLegacyString = (key: Key) => {
+export const publicKeyToLegacyString = (key: Key): string => {
     if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
         return keyToString(key, '', 'EOS');
     } else if (key.type === KeyType.r1 || key.type === KeyType.wa) {
@@ -347,7 +347,7 @@ export const publicKeyToLegacyString = (key: Key) => {
 };
 
 /** Convert `key` to string (base-58) form */
-export const publicKeyToString = (key: Key) => {
+export const publicKeyToString = (key: Key): string => {
     if (key.type === KeyType.k1 && key.data.length === publicKeyDataSize) {
         return keyToString(key, 'K1', 'PUB_K1_');
     } else if (key.type === KeyType.r1 && key.data.length === publicKeyDataSize) {
@@ -362,7 +362,7 @@ export const publicKeyToString = (key: Key) => {
 /** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
  * Leaves other formats untouched
  */
-export const convertLegacyPublicKey = (s: string) => {
+export const convertLegacyPublicKey = (s: string): string => {
     if (s.substr(0, 3) === 'EOS') {
         return publicKeyToString(stringToPublicKey(s));
     }
@@ -372,7 +372,7 @@ export const convertLegacyPublicKey = (s: string) => {
 /** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
  * Leaves other formats untouched
  */
-export const convertLegacyPublicKeys = (keys: string[]) => {
+export const convertLegacyPublicKeys = (keys: string[]): string[] => {
     return keys.map(convertLegacyPublicKey);
 };
 
@@ -402,7 +402,7 @@ export const stringToPrivateKey = (s: string): Key => {
 };
 
 /** Convert private `key` to legacy string (base-58) form */
-export const privateKeyToLegacyString = (key: Key) => {
+export const privateKeyToLegacyString = (key: Key): string => {
     if (key.type === KeyType.k1 && key.data.length === privateKeyDataSize) {
         const whole = [] as number[];
         whole.push(128);
@@ -429,7 +429,7 @@ export const privateKeyToLegacyString = (key: Key) => {
 };
 
 /** Convert `key` to string (base-58) form */
-export const privateKeyToString = (key: Key) => {
+export const privateKeyToString = (key: Key): string => {
     if (key.type === KeyType.r1) {
         return keyToString(key, 'R1', 'PVT_R1_');
     } else if (key.type === KeyType.k1) {
@@ -456,7 +456,7 @@ export const stringToSignature = (s: string): Key => {
 };
 
 /** Convert `signature` to string (base-58) form */
-export const signatureToString = (signature: Key) => {
+export const signatureToString = (signature: Key): string => {
     if (signature.type === KeyType.k1) {
         return keyToString(signature, 'K1', 'SIG_K1_');
     } else if (signature.type === KeyType.r1) {

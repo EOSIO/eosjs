@@ -37,6 +37,6 @@ export const generateKeyPair = (
     return {publicKey, privateKey};
 };
 
-export const sha256 = (data: string|Buffer) => {
+export const sha256 = (data: string|Buffer): number[]|string => {
     return hash.sha256().update(data).digest();
 };
