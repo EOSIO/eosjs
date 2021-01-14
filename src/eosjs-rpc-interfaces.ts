@@ -3,6 +3,8 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
+import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
+
 /** Structured format for abis */
 export interface Abi {
     version: string;
@@ -26,7 +28,7 @@ export interface BlockHeader {
     transaction_mroot: string;
     action_mroot: string;
     schedule_version: number;
-    new_producers: any;
+    new_producers?: ProducerScheduleType;
     header_extensions: any;
 }
 
@@ -121,7 +123,22 @@ export interface GetBlockInfoResult {
     producer_signature: string;
     id: string;
     block_num: number;
+    ref_block_num: number;
     ref_block_prefix: number;
+}
+
+export interface PackedTransaction {
+    id: string;
+    signatures: string[];
+    compression: number|string;
+    packed_context_free_data: string;
+    context_free_data: string[];
+    packed_trx: string;
+    transaction: Transaction;
+}
+
+export interface TransactionReceipt extends TransactionReceiptHeader {
+    trx: PackedTransaction;
 }
 
 /** Return value of `/v1/chain/get_block` */
@@ -133,7 +150,9 @@ export interface GetBlockResult {
     transaction_mroot: string;
     action_mroot: string;
     schedule_version: number;
+    new_producers?: ProducerScheduleType;
     producer_signature: string;
+    transactions: any;
     id: string;
     block_num: number;
     ref_block_prefix: number;
@@ -147,21 +166,64 @@ export interface BlockTaposInfo {
     header?: BlockHeader;
 }
 
+export interface ProducerKey {
+    producer_name: string;
+    block_signing_key: string;
+}
+
+export interface BlockSigningAuthority {
+    threshold: number;
+    keys: KeyWeight[];
+}
+
+export interface ProducerAuthority {
+    producer_name: string;
+    // authority: BlockSigningAuthority;
+    authority: any;
+};
+
+export interface ProducerAuthoritySchedule {
+    version: number;
+    producers: ProducerAuthority[];
+}
+
+export interface ProducerScheduleType {
+    version: number;
+    producers: ProducerKey[];
+}
+
+export interface ScheduleInfo {
+    schedule_lib_num: number;
+    schedule_hash: string;
+    schedule: ProducerScheduleType;
+}
+
+export interface IncrementalMerkle {
+    _active_nodes: string[];
+    _node_count: number;
+}
+
+export interface ProtocolFeatureActivationSet {
+    protocol_features: string[]
+}
+
 /** Return value of `/v1/chain/get_block_header_state` */
 export interface GetBlockHeaderStateResult {
     id: string;
     header: SignedBlockHeader;
-    pending_schedule: any;
-    activated_protocol_features: any;
+    pending_schedule: ScheduleInfo;
+    activated_protocol_features: ProtocolFeatureActivationSet;
+    additional_signatures: string[];
     block_num: number;
     dpos_proposed_irreversible_blocknum: number;
     dpos_irreversible_blocknum: number;
-    active_schedule: any;
-    blockroot_merkle: any;
-    producer_to_last_produced: any;
-    producer_to_last_implied_irb: any;
-    block_signing_key: string;
-    confirm_count: any;
+    active_schedule: ProducerAuthoritySchedule;
+    blockroot_merkle: IncrementalMerkle;
+    producer_to_last_produced: Map<string, number>;
+    producer_to_last_implied_irb: Map<string, number>;
+    // valid_block_signing_authority: BlockSigningAuthority;
+    valid_block_signing_authority: any;
+    confirm_count: number[];
 }
 
 /** Subset of `GetBlockHeaderStateResult` used to calculate TAPoS fields in transactions */
@@ -182,9 +244,11 @@ export interface GetCodeResult {
 
 /** Return value of `/v1/chain/get_currency_stats` */
 export interface GetCurrencyStatsResult {
-    supply: Asset;
-    max_supply: Asset;
-    issuer: string;
+    [key: string]: {
+        supply: string;
+        max_supply: string;
+        issuer: string;
+    }
 }
 
 /** Return value of `/v1/chain/get_info` */
@@ -194,7 +258,7 @@ export interface GetInfoResult {
     head_block_num: number;
     last_irreversible_block_num: number;
     last_irreversible_block_id: string;
-    last_irreversible_block_time: string;
+    last_irreversible_block_time?: string;
     head_block_id: string;
     head_block_time: string;
     head_block_producer: string;
@@ -202,6 +266,10 @@ export interface GetInfoResult {
     virtual_block_net_limit: number;
     block_cpu_limit: number;
     block_net_limit: number;
+    server_version_string?: string;
+    fork_db_head_block_num?: number;
+    fork_db_head_block_id?: string;
+    server_full_version_string?: string;
 }
 
 /** Return value of /v1/chain/get_producer_schedule */
@@ -235,7 +303,7 @@ export interface GetRawAbiResult {
 
 /** Return value of `/v1/chain/get_scheduled_transactions` */
 export interface GetScheduledTransactionsResult {
-    transactions: any[];
+    transactions: Transaction[];
     more: string;
 }
 

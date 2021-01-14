@@ -122,7 +122,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/chain/get_currency_balance` */
-    public async get_currency_balance(code: string, account: string, symbol: string = null): Promise<Asset[]> {
+    public async get_currency_balance(code: string, account: string, symbol: string = null): Promise<string[]> {
         return await this.fetch('/v1/chain/get_currency_balance', { code, account, symbol });
     }
 
