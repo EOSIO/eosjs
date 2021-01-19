@@ -34,8 +34,8 @@
   "devDependencies": {
     "@blockone/eslint-config-blockone": "^3.0.0",
     "@types/elliptic": "^6.4.12",
-    "@types/jest": "^26.0.15",
-    "@types/node": "^14.14.9",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^14.14.21",
     "@types/pako": "^1.0.1",
     "cypress": "^4.12.1",
     "eosjs-ecc": "^4.0.7",
@@ -45,7 +45,7 @@
     "ts-jest": "^26.4.4",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.7",
-    "webpack": "^4.44.2",
+    "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12"
   },
   "resolutions": {

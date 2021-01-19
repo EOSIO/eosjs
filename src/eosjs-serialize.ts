@@ -74,6 +74,9 @@ export interface Type {
     /** Type name */
     name: string;
 
+    /** Marks built-in type **/
+    builtIn: boolean;
+
     /** Type name this is an alias of, if any */
     aliasOfName: string;
 
@@ -829,6 +832,7 @@ function deserializeObject(this: Type, buffer: SerialBuffer, state?: SerializerS
 
 interface CreateTypeArgs {
     name?: string;
+    builtIn?: boolean;
     aliasOfName?: string;
     arrayOf?: Type;
     optionalOf?: Type;
@@ -843,6 +847,7 @@ interface CreateTypeArgs {
 const createType = (attrs: CreateTypeArgs): Type => {
     return {
         name: '<missing name>',
+        builtIn: false,
         aliasOfName: '',
         arrayOf: null,
         optionalOf: null,
@@ -871,6 +876,7 @@ export const createInitialTypes = (): Map<string, Type> => {
     const result: Map<string, Type> = new Map(Object.entries({
         bool: createType({
             name: 'bool',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: boolean) => {
                 if ( !(typeof data === 'boolean' || typeof data === 'number' && ( data === 1 || data === 0))) {
                     throw new Error('Expected boolean or number equal to 1 or 0');
@@ -881,31 +887,37 @@ export const createInitialTypes = (): Map<string, Type> => {
         }),
         uint8: createType({
             name: 'uint8',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.push(checkRange(data, data & 0xff)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.get(); },
         }),
         int8: createType({
             name: 'int8',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.push(checkRange(data, data << 24 >> 24)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.get() << 24 >> 24; },
         }),
         uint16: createType({
             name: 'uint16',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushUint16(checkRange(data, data & 0xffff)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getUint16(); },
         }),
         int16: createType({
             name: 'int16',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushUint16(checkRange(data, data << 16 >> 16)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getUint16() << 16 >> 16; },
         }),
         uint32: createType({
             name: 'uint32',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushUint32(checkRange(data, data >>> 0)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getUint32(); },
         }),
         uint64: createType({
             name: 'uint64',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string | number) => {
                 buffer.pushArray(numeric.decimalToBinary(8, '' + data));
             },
@@ -913,6 +925,7 @@ export const createInitialTypes = (): Map<string, Type> => {
         }),
         int64: createType({
             name: 'int64',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string | number) => {
                 buffer.pushArray(numeric.signedDecimalToBinary(8, '' + data));
             },
@@ -920,26 +933,31 @@ export const createInitialTypes = (): Map<string, Type> => {
         }),
         int32: createType({
             name: 'int32',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushUint32(checkRange(data, data | 0)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getUint32() | 0; },
         }),
         varuint32: createType({
             name: 'varuint32',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushVaruint32(checkRange(data, data >>> 0)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getVaruint32(); },
         }),
         varint32: createType({
             name: 'varint32',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushVarint32(checkRange(data, data | 0)); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getVarint32(); },
         }),
         uint128: createType({
             name: 'uint128',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushArray(numeric.decimalToBinary(16, '' + data)); },
             deserialize: (buffer: SerialBuffer) => { return numeric.binaryToDecimal(buffer.getUint8Array(16)); },
         }),
         int128: createType({
             name: 'int128',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => {
                 buffer.pushArray(numeric.signedDecimalToBinary(16, '' + data));
             },
@@ -947,22 +965,26 @@ export const createInitialTypes = (): Map<string, Type> => {
         }),
         float32: createType({
             name: 'float32',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushFloat32(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getFloat32(); },
         }),
         float64: createType({
             name: 'float64',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: number) => { buffer.pushFloat64(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getFloat64(); },
         }),
         float128: createType({
             name: 'float128',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 16); },
             deserialize: (buffer: SerialBuffer) => { return arrayToHex(buffer.getUint8Array(16)); },
         }),
 
         bytes: createType({
             name: 'bytes',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string | Uint8Array | number[]) => {
                 if (data instanceof Uint8Array || Array.isArray(data)) {
                     buffer.pushBytes(data);
@@ -980,71 +1002,85 @@ export const createInitialTypes = (): Map<string, Type> => {
         }),
         string: createType({
             name: 'string',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushString(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getString(); },
         }),
         name: createType({
             name: 'name',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushName(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getName(); },
         }),
         time_point: createType({
             name: 'time_point',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushNumberAsUint64(dateToTimePoint(data)); },
             deserialize: (buffer: SerialBuffer) => { return timePointToDate(buffer.getUint64AsNumber()); },
         }),
         time_point_sec: createType({
             name: 'time_point_sec',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushUint32(dateToTimePointSec(data)); },
             deserialize: (buffer: SerialBuffer) => { return timePointSecToDate(buffer.getUint32()); },
         }),
         block_timestamp_type: createType({
             name: 'block_timestamp_type',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushUint32(dateToBlockTimestamp(data)); },
             deserialize: (buffer: SerialBuffer) => { return blockTimestampToDate(buffer.getUint32()); },
         }),
         symbol_code: createType({
             name: 'symbol_code',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushSymbolCode(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getSymbolCode(); },
         }),
         symbol: createType({
             name: 'symbol',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushSymbol(stringToSymbol(data)); },
             deserialize: (buffer: SerialBuffer) => { return symbolToString(buffer.getSymbol()); },
         }),
         asset: createType({
             name: 'asset',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushAsset(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getAsset(); },
         }),
         checksum160: createType({
             name: 'checksum160',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 20); },
             deserialize: (buffer: SerialBuffer) => { return arrayToHex(buffer.getUint8Array(20)); },
         }),
         checksum256: createType({
             name: 'checksum256',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 32); },
             deserialize: (buffer: SerialBuffer) => { return arrayToHex(buffer.getUint8Array(32)); },
         }),
         checksum512: createType({
             name: 'checksum512',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushUint8ArrayChecked(hexToUint8Array(data), 64); },
             deserialize: (buffer: SerialBuffer) => { return arrayToHex(buffer.getUint8Array(64)); },
         }),
         public_key: createType({
             name: 'public_key',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushPublicKey(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getPublicKey(); },
         }),
         private_key: createType({
             name: 'private_key',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushPrivateKey(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getPrivateKey(); },
         }),
         signature: createType({
             name: 'signature',
+            builtIn: true,
             serialize: (buffer: SerialBuffer, data: string) => { buffer.pushSignature(data); },
             deserialize: (buffer: SerialBuffer) => { return buffer.getSignature(); },
         }),
@@ -1052,6 +1088,7 @@ export const createInitialTypes = (): Map<string, Type> => {
 
     result.set('extended_asset', createType({
         name: 'extended_asset',
+        builtIn: true,
         baseName: '',
         fields: [
             { name: 'quantity', typeName: 'asset', type: result.get('asset') },
@@ -1289,29 +1326,35 @@ export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi?: Abi) => {
     const types = new Map(initialTypes);
     if (abi && abi.types) {
         for (const { new_type_name, type } of abi.types) {
-            types.set(new_type_name,
-                createType({ name: new_type_name, aliasOfName: type }));
+            if (!types.has(new_type_name) || !types.get(new_type_name).builtIn) {
+                types.set(new_type_name,
+                    createType({ name: new_type_name, aliasOfName: type }));
+            }
         }
     }
     if (abi && abi.structs) {
         for (const { name, base, fields } of abi.structs) {
-            types.set(name, createType({
-                name,
-                baseName: base,
-                fields: fields.map(({ name: n, type }) => ({ name: n, typeName: type, type: null })),
-                serialize: serializeStruct,
-                deserialize: deserializeStruct,
-            }));
+            if (!types.has(name) || !types.get(name).builtIn) {
+                types.set(name, createType({
+                    name,
+                    baseName: base,
+                    fields: fields.map(({ name: n, type }) => ({ name: n, typeName: type, type: null })),
+                    serialize: serializeStruct,
+                    deserialize: deserializeStruct,
+                }));
+            }
         }
     }
     if (abi && abi.variants) {
         for (const { name, types: t } of abi.variants) {
-            types.set(name, createType({
-                name,
-                fields: t.map((s) => ({ name: s, typeName: s, type: null })),
-                serialize: serializeVariant,
-                deserialize: deserializeVariant,
-            }));
+            if (!types.has(name) || !types.get(name).builtIn) {
+                types.set(name, createType({
+                    name,
+                    fields: t.map((s) => ({ name: s, typeName: s, type: null })),
+                    serialize: serializeVariant,
+                    deserialize: deserializeVariant,
+                }));
+            }
         }
     }
     for (const [name, type] of types) {
