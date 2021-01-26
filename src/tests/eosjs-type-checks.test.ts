@@ -27,7 +27,7 @@ describe('Chain Plugin Endpoints', () => {
         const result: GetAbiResult = await rpc.get_abi('todo');
         const getAbiResult: any = {
             account_name: 'string',
-            abi: {
+            'abi?': {
                 version: 'string',
                 types: {
                     new_type_name: 'string',
@@ -58,7 +58,7 @@ describe('Chain Plugin Endpoints', () => {
                     body: 'string',
                 },
                 error_messages: {
-                    error_code: 'string',
+                    error_code: 'number',
                     error_msg: 'string',
                 },
                 abi_extensions: {
@@ -101,10 +101,7 @@ describe('Chain Plugin Endpoints', () => {
             privileged: 'boolean',
             last_code_update: 'string',
             created: 'string',
-            'core_liquid_balance?': {
-                amount: 'number',
-                symbol: 'string',
-            },
+            'core_liquid_balance?': 'string',
             ram_quota: 'number',
             net_weight: 'number',
             cpu_weight: 'number',
@@ -145,11 +142,44 @@ describe('Chain Plugin Endpoints', () => {
                     }
                 }
             },
-            total_resources: 'any',
-            self_delegated_bandwidth: 'any',
-            refund_request: 'any',
-            voter_info: 'any',
-            rex_info: 'any',
+            'total_resources&': {
+                owner: 'string',
+                ram_bytes: 'number',
+                net_weight: 'string',
+                cpu_weight: 'string',
+            },
+            'self_delegated_bandwidth&': {
+                from: 'string',
+                to: 'string',
+                net_weight: 'string',
+                cpu_weight: 'string',
+            },
+            'refund_request&': {
+                owner: 'string',
+                request_time: 'string',
+                net_amount: 'string',
+                cpu_amount: 'string',
+            },
+            'voter_info&': {
+                owner: 'string',
+                proxy: 'string',
+                producers: 'string',
+                staked: 'number',
+                last_vote_weight: 'string',
+                proxied_vote_weight: 'string',
+                is_proxy: 'number',
+                flags1: 'number',
+                reserved2: 'number',
+                reserved3: 'string',
+            },
+            'rex_info&': {
+                version: 'number',
+                owner: 'string',
+                vote_stake: 'string',
+                rex_balance: 'string',
+                matured_rex: 'number',
+                rex_maturities: 'any',
+            },
         };
         verifyType(result, getAccountResult);
     });
@@ -199,8 +229,13 @@ describe('Chain Plugin Endpoints', () => {
                 version: 'number',
                 producers: {
                     producer_name: 'string',
-                    // [ 0, { threshold: 1, keys: [ [Object] ] } ]
-                    authority: 'any',
+                    authority: [ 'number|string', {
+                        threshold: 'number',
+                        keys: {
+                            key: 'string',
+                            weight: 'number',
+                        },
+                    }],
                 },
             },
             blockroot_merkle: {
@@ -209,7 +244,13 @@ describe('Chain Plugin Endpoints', () => {
             },
             producer_to_last_produced: 'Map<string, number>',
             producer_to_last_implied_irb: 'Map<string, number>',
-            valid_block_signing_authority: 'any',
+            valid_block_signing_authority: [ 'number|string', {
+                threshold: 'number',
+                keys: {
+                    key: 'string',
+                    weight: 'number',
+                },
+            }],
             confirm_count: 'number'
         };
         verifyType(result, getBlockHeaderStateResult);
@@ -246,7 +287,13 @@ describe('Chain Plugin Endpoints', () => {
             transaction_mroot: 'string',
             action_mroot: 'string',
             schedule_version: 'number',
-            'new_producers?': 'any',
+            'new_producers&': {
+                version: 'number',
+                producers: {
+                    producer_name: 'string',
+                    block_signing_key: 'string'
+                }
+            },
             producer_signature: 'string',
             transactions: {
                 status: 'string',
@@ -308,7 +355,7 @@ describe('Chain Plugin Endpoints', () => {
             code_hash: 'string',
             wast: 'string',
             wasm: 'string',
-            abi: {
+            'abi?': {
                 version: 'string',
                 types: {
                     new_type_name: 'string',
@@ -339,7 +386,7 @@ describe('Chain Plugin Endpoints', () => {
                     body: 'string',
                 },
                 error_messages: {
-                    error_code: 'string',
+                    error_code: 'number',
                     error_msg: 'string',
                 },
                 abi_extensions: {
@@ -375,7 +422,6 @@ describe('Chain Plugin Endpoints', () => {
 
     it('validates return type of get_currency_balance', async () => {
         const result: string[] = await rpc.get_currency_balance('eosio.token', 'bob', 'SYS');
-        const getCurrencyBalanceResult: any = 'string';
         result.forEach((element: any) => {
             expect(typeof element).toEqual('string');
         });
@@ -420,21 +466,45 @@ describe('Chain Plugin Endpoints', () => {
     it('validates return type of get_producer_schedule', async () => {
         const result: GetProducerScheduleResult = await rpc.get_producer_schedule();
         const getProducerScheduleResult: any = {
-            // nodeos has them listed as variant
-            active: 'any',
-            pending: 'any',
-            proposed: 'any',
-        };
-        verifyType(result, getProducerScheduleResult);
-    });
-
-    it('validates return type of get_producer_schedule', async () => {
-        const result: GetProducerScheduleResult = await rpc.get_producer_schedule();
-        const getProducerScheduleResult: any = {
-            // nodeos has them listed as variant
-            active: 'any',
-            pending: 'any',
-            proposed: 'any',
+            'active&': {
+                version: 'number',
+                producers: {
+                    producer_name: 'string',
+                    authority: [ 'number|string', {
+                        threshold: 'number',
+                        keys: {
+                            key: 'string',
+                            weight: 'number',
+                        },
+                    }],
+                },
+            },
+            'pending&': {
+                version: 'number',
+                producers: {
+                    producer_name: 'string',
+                    authority: [ 'number|string', {
+                        threshold: 'number',
+                        keys: {
+                            key: 'string',
+                            weight: 'number',
+                        },
+                    }],
+                },
+            },
+            'proposed&': {
+                version: 'number',
+                producers: {
+                    producer_name: 'string',
+                    authority: [ 'number|string', {
+                        threshold: 'number',
+                        keys: {
+                            key: 'string',
+                            weight: 'number',
+                        },
+                    }],
+                },
+            },
         };
         verifyType(result, getProducerScheduleResult);
     });
@@ -443,7 +513,23 @@ describe('Chain Plugin Endpoints', () => {
         const result: GetProducersResult = await rpc.get_producers();
         const getProducersResult: any = {
             // nodeos has object listed as variant
-            rows: 'string|object',
+            rows: {
+                owner: 'string',
+                'producer_authority?': [ 'number|string', {
+                    threshold: 'number',
+                    keys: {
+                        key: 'string',
+                        weight: 'number',
+                    },
+                }],
+                url: 'string',
+                'is_active?': 'number',
+                total_votes: 'string',
+                producer_key: 'string',
+                'unpaid_blocks?': 'number',
+                'last_claim_time?': 'string',
+                'location?': 'number',
+            },
             total_producer_vote_weight: 'string',
             more: 'string',
         };
@@ -451,7 +537,7 @@ describe('Chain Plugin Endpoints', () => {
     });
 
     it('validates return type of get_raw_code_and_abi', async () => {
-        const result: GetRawCodeAndAbiResult = await rpc.get_raw_code_and_abi('todo');
+        const result: GetRawCodeAndAbiResult = await rpc.get_raw_code_and_abi('eosio');
         const getRawCodeAndAbiResult: any = {
             account_name: 'string',
             wasm: 'string',
@@ -461,7 +547,7 @@ describe('Chain Plugin Endpoints', () => {
     });
 
     it('validates return type of get_raw_abi', async () => {
-        const result: GetRawAbiResult = await rpc.get_raw_abi('todo');
+        const result: GetRawAbiResult = await rpc.get_raw_abi('eosio');
         const getRawAbiResult: any = {
             account_name: 'string',
             code_hash: 'string',
@@ -559,32 +645,42 @@ describe('Chain Plugin Endpoints', () => {
 
 const verifyType = (data: any, type: any): void => {
     const verifiedKeys: string[] = Object.keys(type).filter((key: string) => {
-        const formattedKey = key.replace('?', '');
+        const formattedKey = key.replace('?', '').replace('&', '');
         if (key.includes('?')) {
             if (!data.hasOwnProperty(formattedKey)) return false;
         }
         return true;
     }).map((key: string) => {
-        const formattedKey = key.replace('?', '');
+        const formattedKey = key.replace('?', '').replace('&', '');
         if (Array.isArray(data[formattedKey])) {
-            data[formattedKey].forEach((element: any) => {
-                complexOrPrimative(element, type[key]);
-            });
+            if (Array.isArray(type[key])) {
+                data[formattedKey].forEach((element: any, index: number) => {
+                    complexOrPrimitive(element, type[key][index], formattedKey);
+                });
+            } else {
+                data[formattedKey].forEach((element: any) => {
+                    complexOrPrimitive(element, type[key], formattedKey);
+                });
+            }
+        } else if (key.includes('&')) {
+            if (data[formattedKey] !== null) {
+                complexOrPrimitive(data[formattedKey], type[key], formattedKey);
+            }
         } else {
-            complexOrPrimative(data[formattedKey], type[key]);
+            complexOrPrimitive(data[formattedKey], type[key], formattedKey);
         }
         return formattedKey;
     });
     expect(data).toContainAllKeys(verifiedKeys);
 };
 
-const complexOrPrimative = (data: any, type: any): void => {
+const complexOrPrimitive = (data: any, type: any, formattedKey: any): void => {
     if (typeof type === 'object') {
         verifyType(data, type);
     } else if (type.includes('Map')) {
         const types = type.replace('Map<', '').replace('>', '').split(', ');
         data.forEach((value: any, index: number) => {
-            complexOrPrimative(value, types[index]);
+            complexOrPrimitive(value, types[index], formattedKey);
         });
     } else if (type.includes('|')) {
         const types = type.split('|');
