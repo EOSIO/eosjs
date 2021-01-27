@@ -8,6 +8,7 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "declaration": true,
     "downlevelIteration": true,
     "skipLibCheck": true,

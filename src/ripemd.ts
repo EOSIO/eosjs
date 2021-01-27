@@ -38,7 +38,7 @@
 
 "use strict";
 
-class RIPEMD160
+export default class RIPEMD160
 {
 	constructor()
 	{
@@ -46,7 +46,7 @@ class RIPEMD160
 		// http://shodhganga.inflibnet.ac.in/bitstream/10603/22978/13/13_appendix.pdf
 	}
 
-	static get_n_pad_bytes(message_size /* in bytes, 1 byte is 8 bits. */)
+	static get_n_pad_bytes(message_size: number /* in bytes, 1 byte is 8 bits. */)
 	{
 		//  Obtain the number of bytes needed to pad the message.
 		// It does not contain the size of the message size information.
@@ -154,14 +154,14 @@ class RIPEMD160
 		//      511 - [{(message size in bits) + 64} (mod 512)]
 		return 64 - ((message_size + 8) & 0b00111111 /* 63 */);
 	}
-	static pad(message /* An ArrayBuffer. */)
+	static pad(message: ArrayBuffer)
 	{
 		const message_size = message.byteLength;
 		const n_pad = RIPEMD160.get_n_pad_bytes(message_size);
 
 		//  `Number.MAX_SAFE_INTEGER` is ((2 ** 53) - 1) and
 		// bitwise operation in Javascript is done on 32-bits operands.
-		const divmod = (dividend, divisor) => [
+		const divmod = (dividend: number, divisor: number) => [
 			Math.floor(dividend / divisor),
 			dividend % divisor
 		];
@@ -233,7 +233,7 @@ Method #2
 		return padded.buffer;
 	}
 
-	static f(j, x, y, z)
+	static f(j: number, x: number, y: number, z: number)
 	{
 		if(0 <= j && j <= 15)
 		{ // Exclusive-OR
@@ -256,7 +256,7 @@ Method #2
 			return x ^ (y | ~z);
 		}
 	}
-	static K(j)
+	static K(j: number)
 	{
 		if(0 <= j && j <= 15)
 		{
@@ -283,7 +283,7 @@ Method #2
 			return 0xA953FD4E;
 		}
 	}
-	static KP(j) // K'
+	static KP(j: number) // K'
 	{
 		if(0 <= j && j <= 15)
 		{
@@ -310,22 +310,20 @@ Method #2
 			return 0x00000000;
 		}
 	}
-	static add_modulo32(/* ...... */)
+	static add_modulo32(...args: number[])
 	{
 		// 1.  Modulo addition (addition modulo) is associative.
 		//    https://proofwiki.org/wiki/Modulo_Addition_is_Associative
  		// 2.  Bitwise operation in Javascript
 		//    is done on 32-bits operands
 		//    and results in a 32-bits value.
-		return Array
-			.from(arguments)
-			.reduce((a, b) => (a + b), 0) | 0;
+		return args.reduce((a, b) => (a + b), 0) | 0;
 	}
-	static rol32(value, count)
+	static rol32(value: number, count: number)
 	{ // Cyclic left shift (rotate) on 32-bits value.
 		return (value << count) | (value >>> (32 - count));
 	}
-	static hash(message /* An ArrayBuffer. */)
+	static hash(message: ArrayBuffer)
 	{
 		//////////       Padding       //////////
 
@@ -379,7 +377,7 @@ Method #2
 		// are denoted with X_i[j], with 0≤i≤(t − 1) and 0≤j≤15.
 		const X = (new Array(t))
 			.fill(undefined)
-			.map((_, i) => j => (
+			.map((_, i) => (j: number) => (
 				new DataView(
 					padded, i * block_size, block_size
 				).getUint32(
@@ -465,8 +463,4 @@ Method #2
 		h.forEach((h_i, i) => data_view.setUint32(i * 4, h_i, true));
 		return result;
 	}
-}
-
-module.exports = {
-	RIPEMD160
 }

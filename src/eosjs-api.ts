@@ -28,8 +28,8 @@ import * as ser from './eosjs-serialize';
 import { RpcError } from './eosjs-rpcerror';
 import { WasmAbi } from './eosjs-wasmabi';
 
-const abiAbi = require('../src/abi.abi.json');
-const transactionAbi = require('../src/transaction.abi.json');
+import abiAbi from './abi.abi.json';
+import transactionAbi from './transaction.abi.json';
 
 export class Api {
     /** Issues RPC calls */
@@ -95,8 +95,8 @@ export class Api {
         this.textEncoder = args.textEncoder;
         this.textDecoder = args.textDecoder;
 
-        this.abiTypes = ser.getTypesFromAbi(ser.createInitialTypes(), abiAbi);
-        this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
+        this.abiTypes = ser.getTypesFromAbi(ser.createInitialTypes(), abiAbi as any);
+        this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi as any);
     }
 
     /** Decodes an abi as Uint8Array into json. */
