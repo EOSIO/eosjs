@@ -25,8 +25,6 @@ import {
     GetBlockResult
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
-import { RpcError } from './eosjs-rpcerror';
-import { WasmAbi } from './eosjs-wasmabi';
 
 import abiAbi from './abi.abi.json';
 import transactionAbi from './transaction.abi.json';
