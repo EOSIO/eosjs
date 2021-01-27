@@ -1,5 +1,5 @@
 import { BNInput, ec as EC } from 'elliptic';
-import BN = require('bn.js');
+import BN from 'bn.js';
 
 import {
     Key,

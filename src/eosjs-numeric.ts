@@ -5,7 +5,7 @@ import { sha256 } from 'hash.js';
 
 // copyright defined in eosjs/LICENSE.txt
 
-const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
+import RIPEMD160 from './ripemd'
 
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -275,7 +275,7 @@ function digestSuffixRipemd160(data: Uint8Array, suffix: string) {
     for (let i = 0; i < suffix.length; ++i) {
         d[data.length + i] = suffix.charCodeAt(i);
     }
-    return ripemd160(d);
+    return RIPEMD160.hash(d);
 }
 
 function stringToKey(s: string, type: KeyType, size: number, suffix: string): Key {
@@ -312,7 +312,7 @@ export function stringToPublicKey(s: string): Key {
         for (let i = 0; i < publicKeyDataSize; ++i) {
             key.data[i] = whole[i];
         }
-        const digest = new Uint8Array(ripemd160(key.data));
+        const digest = new Uint8Array(RIPEMD160.hash(key.data));
         if (digest[0] !== whole[publicKeyDataSize] || digest[1] !== whole[34]
             || digest[2] !== whole[35] || digest[3] !== whole[36]) {
             throw new Error('checksum doesn\'t match');
