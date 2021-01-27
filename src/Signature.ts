@@ -1,13 +1,8 @@
-import { BNInput, ec as EC } from "elliptic";
-import BN from "bn.js";
+import { BNInput, ec as EC } from 'elliptic';
+import BN from 'bn.js';
 
-import {
-  Key,
-  KeyType,
-  signatureToString,
-  stringToSignature,
-} from "./eosjs-numeric";
-import { constructElliptic, PublicKey } from "./eosjs-key-conversions";
+import { Key, KeyType, signatureToString, stringToSignature } from './eosjs-numeric';
+import { constructElliptic, PublicKey } from './eosjs-key-conversions';
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
@@ -23,13 +18,9 @@ export class Signature {
   }
 
   /** Instantiate Signature from an `elliptic`-format Signature */
-  public static fromElliptic(
-    ellipticSig: EC.Signature,
-    keyType: KeyType,
-    ec?: EC
-  ): Signature {
-    const r = ellipticSig.r.toArray("be", 32);
-    const s = ellipticSig.s.toArray("be", 32);
+  public static fromElliptic(ellipticSig: EC.Signature, keyType: KeyType, ec?: EC): Signature {
+    const r = ellipticSig.r.toArray('be', 32);
+    const s = ellipticSig.s.toArray('be', 32);
     let eosioRecoveryParam;
     if (keyType === KeyType.k1) {
       eosioRecoveryParam = ellipticSig.recoveryParam + 27;
@@ -62,9 +53,7 @@ export class Signature {
     const lengthOfR = 32;
     const lengthOfS = 32;
     const r = new BN(this.signature.data.slice(1, lengthOfR + 1));
-    const s = new BN(
-      this.signature.data.slice(lengthOfR + 1, lengthOfR + lengthOfS + 1)
-    );
+    const s = new BN(this.signature.data.slice(lengthOfR + 1, lengthOfR + lengthOfS + 1));
 
     let ellipticRecoveryBitField;
     if (this.signature.type === KeyType.k1) {
@@ -72,10 +61,7 @@ export class Signature {
       if (ellipticRecoveryBitField > 3) {
         ellipticRecoveryBitField -= 4;
       }
-    } else if (
-      this.signature.type === KeyType.r1 ||
-      this.signature.type === KeyType.wa
-    ) {
+    } else if (this.signature.type === KeyType.r1 || this.signature.type === KeyType.wa) {
       ellipticRecoveryBitField = this.signature.data[0];
     }
     const recoveryParam = ellipticRecoveryBitField & 3;
@@ -102,7 +88,7 @@ export class Signature {
     data: BNInput,
     publicKey: PublicKey,
     shouldHash: boolean = true,
-    encoding: string = "utf8"
+    encoding: string = 'utf8'
   ): boolean {
     if (shouldHash) {
       data = this.ec.hash().update(data, encoding).digest();
@@ -113,11 +99,7 @@ export class Signature {
   }
 
   /** Recover a public key from a message or hashed message digest and signature */
-  public recover(
-    data: BNInput,
-    shouldHash: boolean = true,
-    encoding: string = "utf8"
-  ): PublicKey {
+  public recover(data: BNInput, shouldHash: boolean = true, encoding: string = 'utf8'): PublicKey {
     if (shouldHash) {
       data = this.ec.hash().update(data, encoding).digest();
     }
