@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { TransactionReceiptHeader, Transaction, Extension } from './eosjs-api-interfaces';
+import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
 
 /** Structured format for abis */
 export interface Abi {
@@ -29,7 +29,7 @@ export interface BlockHeader {
     action_mroot: string;
     schedule_version: number;
     new_producers?: ProducerScheduleType;
-    header_extensions: any;
+    header_extensions: [number, string][];
 }
 
 export interface SignedBlockHeader extends BlockHeader {
@@ -350,9 +350,29 @@ export interface GetRawAbiResult {
     abi: string;
 }
 
+export interface DeferredTransaction extends Transaction {
+    deferred_transaction_generation?: {
+        sender_trx_id: string;
+        sender_id: string;
+        sender: string;
+    }
+}
+
+export interface GeneratedTransaction {
+    trx_id: string;
+    sender: string;
+    sender_id: string;
+    payer: string;
+    delay_until: string;
+    expiration: string;
+    published: string;
+    packed_trx?: string[];
+    transaction?: DeferredTransaction[]
+}
+
 /** Return value of `/v1/chain/get_scheduled_transactions` */
 export interface GetScheduledTransactionsResult {
-    transactions: Transaction[];
+    transactions: GeneratedTransaction[];
     more: string;
 }
 

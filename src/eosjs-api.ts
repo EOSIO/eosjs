@@ -446,7 +446,7 @@ export class Api {
 
         const taposBlockNumber: number = info.head_block_num - blocksBehind;
 
-        const refBlock: GetBlockHeaderStateResult | GetBlockResult =
+        const refBlock: GetBlockHeaderStateResult | GetBlockResult | GetBlockInfoResult =
             taposBlockNumber <= info.last_irreversible_block_num
                 ? await this.tryGetBlockInfo(taposBlockNumber)
                 : await this.tryGetBlockHeaderState(taposBlockNumber);
@@ -459,7 +459,7 @@ export class Api {
         return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
-    private async tryGetBlockHeaderState(taposBlockNumber: number): Promise<GetBlockHeaderStateResult | GetBlockResult>
+    private async tryGetBlockHeaderState(taposBlockNumber: number): Promise<GetBlockHeaderStateResult | GetBlockResult | GetBlockInfoResult>
     {
         try {
             return await this.rpc.get_block_header_state(taposBlockNumber);

@@ -1,6 +1,10 @@
 
 import { JsonRpc } from '../eosjs-jsonrpc';
+import { JsSignatureProvider } from '../eosjs-jssig';
+import { Api } from '../eosjs-api';
+import * as ser from '../eosjs-serialize';
 import fetch from 'node-fetch';
+const { TextEncoder, TextDecoder } = require('util');
 import {
     GetAbiResult,
     GetAccountResult,
@@ -17,10 +21,16 @@ import {
     GetScheduledTransactionsResult,
     GetTableRowsResult,
     GetTableByScopeResult,
+    PushTransactionArgs,
 } from '../eosjs-rpc-interfaces';
+import { TransactResult } from '../eosjs-api-interfaces';
 import 'jest-extended';
 
+const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z';
+
 const rpc = new JsonRpc('http://localhost:8888', { fetch });
+const signatureProvider = new JsSignatureProvider([privateKey]);
+const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
 describe('Chain Plugin Endpoints', () => {
     it('validates return type of get_abi', async () => {
@@ -561,9 +571,18 @@ describe('Chain Plugin Endpoints', () => {
         const result: GetScheduledTransactionsResult = await rpc.get_scheduled_transactions();
         const getScheduledTransactionsResult: any = {
             transactions: {
-                'expiration?': 'string',
-                'ref_block_num?': 'number',
-                'ref_block_prefix?': 'number',
+                trx_id: 'string',
+                sender: 'string',
+                sender_id: 'string',
+                payer: 'string',
+                delay_until: 'string',
+                expiration: 'string',
+                published: 'string',
+                'packed_trx?': 'string',
+                'transaction?': {
+                    'expiration?': 'string',
+                    'ref_block_num?': 'number',
+                    'ref_block_prefix?': 'number',
                 'max_net_usage_words?': 'number',
                 'max_cpu_usage_ms?': 'number',
                 'delay_sec?': 'number',
@@ -589,8 +608,14 @@ describe('Chain Plugin Endpoints', () => {
                     'hex_data?': 'string',
                 },
                 'transaction_extensions?': {
-                    type: 'number',
-                    data: 'string',
+                        type: 'number',
+                        data: 'string',
+                    },
+                    'deferred_transaction_generation?': {
+                        sender_trx_id: 'string',
+                        sender_id: 'string',
+                        sender: 'string',
+                    },
                 },
             },
             more: 'string',
@@ -641,6 +666,233 @@ describe('Chain Plugin Endpoints', () => {
         };
         verifyType(result, getTableByScopeResult);
     });
+
+    it('validates return type of get_required_keys', async () => {
+        const info = await rpc.get_info();
+        let transaction: any = {
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: '',
+                },
+            }],
+            context_free_actions: []
+        };
+        transaction = {
+            ...ser.transactionHeader({
+                block_num: info.last_irreversible_block_num,
+                id: info.last_irreversible_block_id,
+                timestamp: info.last_irreversible_block_time,
+            }, 30),
+            context_free_actions: await api.serializeActions(transaction.context_free_actions || []),
+            actions: await api.serializeActions(transaction.actions),
+            ...transaction,
+        };
+
+        const availableKeys = await signatureProvider.getAvailableKeys();
+        const result: string[] = await rpc.getRequiredKeys({ transaction, availableKeys });
+        result.forEach((element: any) => {
+            expect(typeof element).toEqual('string');
+        });
+    });
+
+    it('validates return of push_transaction', async () => {
+        const transaction: PushTransactionArgs = await api.transact({
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: '',
+                },
+            }],
+        }, {
+            sign: true,
+            broadcast: false,
+            useLastIrreversible: true,
+            expireSeconds: 30,
+        }) as PushTransactionArgs;
+        const result: TransactResult = await rpc.push_transaction(transaction);
+        const transactResult = {
+            transaction_id: 'string',
+            processed: {
+                id: 'string',
+                block_num: 'number',
+                block_time: 'string',
+                'producer_block_id&': 'string',
+                'receipt&': {
+                    status: 'string',
+                    cpu_usage_us: 'number',
+                    net_usage_words: 'number',
+                },
+                elapsed: 'number',
+                net_usage: 'number',
+                scheduled: 'boolean',
+                action_traces: {
+                    action_ordinal: 'number',
+                    creator_action_ordinal: 'number',
+                    closest_unnotified_ancestor_action_ordinal: 'number',
+                    receipt: {
+                        receiver: 'string',
+                        act_digest: 'string',
+                        global_sequence: 'number',
+                        recv_sequence: 'number',
+                        auth_sequence: [ 'string', 'number' ],
+                        code_sequence: 'number',
+                        abi_sequence: 'number',
+                    },
+                    receiver: 'string',
+                    act: {
+                        account: 'string',
+                        name: 'string',
+                        authorization: {
+                            actor: 'string',
+                            permission: 'string',
+                        },
+                        data: 'any',
+                        'hex_data?': 'string',
+                    },
+                    context_free: 'boolean',
+                    elapsed: 'number',
+                    console: 'string',
+                    trx_id: 'string',
+                    block_num: 'number',
+                    block_time: 'string',
+                    'producer_block_id&': 'string',
+                    account_ram_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    account_disk_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    except: 'any',
+                    'error_code&': 'number',
+                    'return_value?': 'any',
+                    'return_value_hex_data?': 'string',
+                    'return_value_data?': 'any',
+                    'inline_traces?': 'any', // ActionTrace, recursive?
+                },
+                'account_ram_delta&': {
+                    account: 'string',
+                    delta: 'number',
+                },
+                'except&': 'string',
+                'error_code&': 'number',
+            },
+        };
+        verifyType(result, transactResult);
+    });
+
+    it('validates return of send_transaction', async () => {
+        const transaction: PushTransactionArgs = await api.transact({
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'alice',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'alice',
+                    to: 'bob',
+                    quantity: '0.0001 SYS',
+                    memo: '',
+                },
+            }],
+        }, {
+            sign: true,
+            broadcast: false,
+            useLastIrreversible: true,
+            expireSeconds: 30,
+        }) as PushTransactionArgs;
+        const result: TransactResult = await rpc.send_transaction(transaction);
+        const transactResult = {
+            transaction_id: 'string',
+            processed: {
+                id: 'string',
+                block_num: 'number',
+                block_time: 'string',
+                'producer_block_id&': 'string',
+                'receipt&': {
+                    status: 'string',
+                    cpu_usage_us: 'number',
+                    net_usage_words: 'number',
+                },
+                elapsed: 'number',
+                net_usage: 'number',
+                scheduled: 'boolean',
+                action_traces: {
+                    action_ordinal: 'number',
+                    creator_action_ordinal: 'number',
+                    closest_unnotified_ancestor_action_ordinal: 'number',
+                    receipt: {
+                        receiver: 'string',
+                        act_digest: 'string',
+                        global_sequence: 'number',
+                        recv_sequence: 'number',
+                        auth_sequence: [ 'string', 'number' ],
+                        code_sequence: 'number',
+                        abi_sequence: 'number',
+                    },
+                    receiver: 'string',
+                    act: {
+                        account: 'string',
+                        name: 'string',
+                        authorization: {
+                            actor: 'string',
+                            permission: 'string',
+                        },
+                        data: 'any',
+                        'hex_data?': 'string',
+                    },
+                    context_free: 'boolean',
+                    elapsed: 'number',
+                    console: 'string',
+                    trx_id: 'string',
+                    block_num: 'number',
+                    block_time: 'string',
+                    'producer_block_id&': 'string',
+                    account_ram_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    account_disk_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    except: 'any',
+                    'error_code&': 'number',
+                    'return_value?': 'any',
+                    'return_value_hex_data?': 'string',
+                    'return_value_data?': 'any',
+                    'inline_traces?': 'any', // ActionTrace, recursive?
+                },
+                'account_ram_delta&': {
+                    account: 'string',
+                    delta: 'number',
+                },
+                'except&': 'string',
+                'error_code&': 'number',
+            },
+        };
+        verifyType(result, transactResult);
+    });
 });
 
 const verifyType = (data: any, type: any): void => {
@@ -655,7 +907,13 @@ const verifyType = (data: any, type: any): void => {
         if (Array.isArray(data[formattedKey])) {
             if (Array.isArray(type[key])) {
                 data[formattedKey].forEach((element: any, index: number) => {
-                    complexOrPrimitive(element, type[key][index], formattedKey);
+                    if (Array.isArray(element)) { // auth_sequence [ [ string, number ] ]
+                        element.forEach((secondElement: any, secondIndex: number) => {
+                            complexOrPrimitive(secondElement, type[key][secondIndex], formattedKey);
+                        });
+                    } else {
+                        complexOrPrimitive(element, type[key][index], formattedKey);
+                    }
                 });
             } else {
                 data[formattedKey].forEach((element: any) => {
