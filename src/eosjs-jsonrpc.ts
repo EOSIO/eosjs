@@ -6,7 +6,6 @@
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
 import {
-    Asset,
     GetAbiResult,
     GetAccountResult,
     GetBlockInfoResult,

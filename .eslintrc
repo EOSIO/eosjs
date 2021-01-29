@@ -13,8 +13,7 @@
         "@typescript-eslint/indent": ["error", 4],
         "@typescript-eslint/no-var-requires": "off",
         "semi": "off",
-        "@typescript-eslint/semi": ["error", "always"],
-        "@typescript-eslint/explicit-function-return-type": ["error"]
+        "@typescript-eslint/semi": ["error", "always"]
       }
     }
   ]
