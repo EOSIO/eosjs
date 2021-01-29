@@ -583,31 +583,31 @@ describe('Chain Plugin Endpoints', () => {
                     'expiration?': 'string',
                     'ref_block_num?': 'number',
                     'ref_block_prefix?': 'number',
-                'max_net_usage_words?': 'number',
-                'max_cpu_usage_ms?': 'number',
-                'delay_sec?': 'number',
-                'context_free_actions?': {
-                    account: 'string',
-                    name: 'string',
-                    authorization: {
-                        actor: 'string',
-                        permission: 'string',
+                    'max_net_usage_words?': 'number',
+                    'max_cpu_usage_ms?': 'number',
+                    'delay_sec?': 'number',
+                    'context_free_actions?': {
+                        account: 'string',
+                        name: 'string',
+                        authorization: {
+                            actor: 'string',
+                            permission: 'string',
+                        },
+                        data: 'any',
+                        'hex_data?': 'string',
                     },
-                    data: 'any',
-                    'hex_data?': 'string',
-                },
-                'context_free_data?': 'number',
-                'actions': {
-                    account: 'string',
-                    name: 'string',
-                    authorization: {
-                        actor: 'string',
-                        permission: 'string',
+                    'context_free_data?': 'number',
+                    'actions': {
+                        account: 'string',
+                        name: 'string',
+                        authorization: {
+                            actor: 'string',
+                            permission: 'string',
+                        },
+                        data: 'any',
+                        'hex_data?': 'string',
                     },
-                    data: 'any',
-                    'hex_data?': 'string',
-                },
-                'transaction_extensions?': {
+                    'transaction_extensions?': {
                         type: 'number',
                         data: 'string',
                     },
