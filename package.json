@@ -35,9 +35,9 @@
   "devDependencies": {
     "@blockone/eslint-config-blockone": "^3.0.0",
     "@types/elliptic": "^6.4.12",
-    "@types/jest": "^26.0.19",
-    "@types/node": "^14.14.14",
-    "@types/node-fetch": "^2.5.7",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^14.14.22",
+    "@types/node-fetch": "^2.5.8",
     "@types/pako": "^1.0.1",
     "cypress": "^4.12.1",
     "eosjs-ecc": "^4.0.7",
@@ -46,9 +46,9 @@
     "jest-extended": "^0.11.5",
     "jest-fetch-mock": "^3.0.3",
     "ts-jest": "^26.4.4",
-    "ts-loader": "^8.0.12",
+    "ts-loader": "^8.0.14",
     "typescript": "^3.9.7",
-    "webpack": "^4.44.2",
+    "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12"
   },
   "resolutions": {
@@ -59,7 +59,9 @@
     "setupFiles": [
       "./src/tests/setupJest.js"
     ],
-    "setupFilesAfterEnv": ["jest-extended"],
+    "setupFilesAfterEnv": [
+      "jest-extended"
+    ],
     "moduleFileExtensions": [
       "ts",
       "tsx",
