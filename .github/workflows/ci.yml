@@ -51,6 +51,9 @@ jobs:
       - name: Test Node
         run: |
           yarn test-node
+      - name: Test Types
+        run: |
+          yarn test-types
       - name: Build
         run: |
           yarn build-web
