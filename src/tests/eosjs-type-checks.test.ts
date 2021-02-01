@@ -32,6 +32,17 @@ const rpc = new JsonRpc('http://localhost:8888', { fetch });
 const signatureProvider = new JsSignatureProvider([privateKey]);
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
+/** Checking types with verifyType/complexOrPrimitive
+ * To ensure that the data structure coming from eos matches the declared types in eosjs for developers and documentation
+ * Since typescript is not a runtime language, it's required to test with javascript format
+ * Create an object matching the typescript type with some requirements:
+ * nullable: make the key a string and add a `&` character to the end
+ * optional: make the key a string and add a `?` character to the end (same as typescript)
+ * []: remove array symbols from simple/complex types, use arrays for std::pair
+ * Map<>: use Map<> in the value field
+ * |: operates the same as typescript but does not work for complex types
+ */
+
 describe('Chain Plugin Endpoints', () => {
     it('validates return type of get_abi', async () => {
         const result: GetAbiResult = await rpc.get_abi('todo');
@@ -522,7 +533,6 @@ describe('Chain Plugin Endpoints', () => {
     it('validates return type of get_producers', async () => {
         const result: GetProducersResult = await rpc.get_producers();
         const getProducersResult: any = {
-            // nodeos has object listed as variant
             rows: {
                 owner: 'string',
                 'producer_authority?': [ 'number|string', {
@@ -907,7 +917,7 @@ const verifyType = (data: any, type: any): void => {
         if (Array.isArray(data[formattedKey])) {
             if (Array.isArray(type[key])) {
                 data[formattedKey].forEach((element: any, index: number) => {
-                    if (Array.isArray(element)) { // auth_sequence [ [ string, number ] ]
+                    if (Array.isArray(element)) {
                         element.forEach((secondElement: any, secondIndex: number) => {
                             complexOrPrimitive(secondElement, type[key][secondIndex], formattedKey);
                         });
