@@ -38,6 +38,21 @@ export interface GetAbiResult {
     abi: Abi;
 }
 
+/** Return value of `/v1/chain/get_block_info` */
+export interface GetBlockInfoResult {
+    timestamp: string;
+    producer: string;
+    confirmed: number;
+    previous: string;
+    transaction_mroot: string;
+    action_mroot: string;
+    schedule_version: number;
+    producer_signature: string;
+    id: string;
+    block_num: number;
+    ref_block_prefix: number;
+}
+
 /** Return value of `/v1/chain/get_block` */
 export interface GetBlockResult {
     timestamp: string;
@@ -101,6 +116,7 @@ export interface GetInfoResult {
     head_block_num: number;
     last_irreversible_block_num: number;
     last_irreversible_block_id: string;
+    last_irreversible_block_time: string;
     head_block_id: string;
     head_block_time: string;
     head_block_producer: string;
@@ -114,6 +130,13 @@ export interface GetInfoResult {
 export interface GetRawCodeAndAbiResult {
     account_name: string;
     wasm: string;
+    abi: string;
+}
+
+export interface GetRawAbiResult {
+    account_name: string;
+    code_hash: string;
+    abi_hash: string;
     abi: string;
 }
 
