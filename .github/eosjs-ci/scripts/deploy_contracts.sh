@@ -121,6 +121,7 @@ if [ -z "$NODEOS_RUNNING" ]; then
   --http-server-address=0.0.0.0:8888 \
   --access-control-allow-origin=* \
   --contracts-console \
+  --enable-account-queries=true \
   --max-transaction-time=100000 \
   --verbose-http-errors &
 fi

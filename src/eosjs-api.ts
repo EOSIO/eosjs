@@ -389,7 +389,7 @@ export class Api {
             signatures,
             compression: 0,
             serializedTransaction
-        });
+        }) as any;
 
         const returnBuffer = new ser.SerialBuffer({
             textEncoder: this.textEncoder,

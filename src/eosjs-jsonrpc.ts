@@ -3,14 +3,20 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
+import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi, TransactResult } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
 import {
+    AbiBinToJsonResult,
+    AbiJsonToBinResult,
     GetAbiResult,
     GetAccountResult,
+    GetAccountsByAuthorizersResult,
+    GetActivatedProtocolFeaturesParams,
+    GetActivatedProtocolFeaturesResult,
     GetBlockInfoResult,
     GetBlockResult,
     GetCodeResult,
+    GetCodeHashResult,
     GetCurrencyStatsResult,
     GetInfoResult,
     GetProducerScheduleResult,
@@ -20,14 +26,17 @@ import {
     GetScheduledTransactionsResult,
     GetTableRowsResult,
     PushTransactionArgs,
+    PackedTrx,
     GetBlockHeaderStateResult,
     GetTableByScopeResult,
     DBSizeGetResult,
+    TraceApiGetBlockResult,
     GetActionsResult,
     GetTransactionResult,
     GetKeyAccountsResult,
-    GetControlledAccountsResult
+    GetControlledAccountsResult,
 } from './eosjs-rpc-interfaces';
+import { Authorization } from './eosjs-serialize';
 import { RpcError } from './eosjs-rpcerror';
 
 const arrayToHex = (data: Uint8Array): string => {
@@ -87,6 +96,22 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         return json;
     }
 
+    public async abi_bin_to_json(
+        code: string,
+        action: string,
+        binargs: string,
+    ): Promise<AbiBinToJsonResult> {
+        return await this.fetch('/v1/chain/abi_bin_to_json', { code, action, binargs });
+    }
+
+    public async abi_json_to_bin(
+        code: string,
+        action: string,
+        args: any[],
+    ): Promise<AbiJsonToBinResult> {
+        return await this.fetch('/v1/chain/abi_json_to_bin', { code, action, args });
+    }
+
     /** Raw call to `/v1/chain/get_abi` */
     public async get_abi(accountName: string): Promise<GetAbiResult> {
         return await this.fetch('/v1/chain/get_abi', { account_name: accountName });
@@ -95,6 +120,22 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     /** Raw call to `/v1/chain/get_account` */
     public async get_account(accountName: string): Promise<GetAccountResult> {
         return await this.fetch('/v1/chain/get_account', { account_name: accountName });
+    }
+
+    /** Raw call to `/v1/chain/get_accounts_by_authorizers` */
+    public async get_accounts_by_authorizers(accounts: Authorization[], keys: string[]): Promise<GetAccountsByAuthorizersResult> {
+        return await this.fetch('/v1/chain/get_accounts_by_authorizers', { accounts, keys });
+    }
+
+    /** Raw call to `get_activated_protocol_features` */
+    public async get_activated_protocol_features({
+        limit = 10,
+        search_by_block_num = false,
+        reverse = false,
+        lower_bound = null,
+        upper_bound = null,
+    }: GetActivatedProtocolFeaturesParams): Promise<GetActivatedProtocolFeaturesResult> {
+        return await this.fetch('/v1/chain/get_activated_protocol_features', { lower_bound, upper_bound, limit, search_by_block_num, reverse });
     }
 
     /** Raw call to `/v1/chain/get_block_header_state` */
@@ -118,6 +159,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             account_name: accountName,
             code_as_wasm: true
         });
+    }
+
+    /** Raw call to `/v1/chain/get_code_hash` */
+    public async get_code_hash(accountName: string): Promise<GetCodeHashResult> {
+        return await this.fetch('/v1/chain/get_code_hash', { account_name: accountName });
     }
 
     /** Raw call to `/v1/chain/get_currency_balance` */
@@ -204,9 +250,9 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         table,
         index_name,
         encode_type = 'bytes',
-        index_value = '',
-        lower_bound = '',
-        upper_bound = '',
+        index_value,
+        lower_bound,
+        upper_bound,
         limit = 10,
         reverse = false,
         show_payer = false,
@@ -256,7 +302,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     /** Push a serialized transaction (replaced by send_transaction, but returned format has changed) */
     public async push_transaction(
         { signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<any> {
+    ): Promise<TransactResult> {
         return await this.fetch('/v1/chain/push_transaction', {
             signatures,
             compression,
@@ -265,10 +311,22 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         });
     }
 
+    public async push_transactions(transactions: PushTransactionArgs[]): Promise<TransactResult[]> {
+        const packedTrxs: PackedTrx[] = transactions.map(({signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs) => {
+            return {
+                signatures,
+                compression,
+                packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
+                packed_trx: arrayToHex(serializedTransaction),
+            };
+        });
+        return await this.fetch('/v1/chain/push_transactions', packedTrxs );
+    }
+
     /** Send a serialized transaction */
     public async send_transaction(
         { signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<any> {
+    ): Promise<TransactResult> {
         return await this.fetch('/v1/chain/send_transaction', {
             signatures,
             compression,
@@ -279,6 +337,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
 
     /** Raw call to `/v1/db_size/get` */
     public async db_size_get(): Promise<DBSizeGetResult> { return await this.fetch('/v1/db_size/get', {}); }
+
+    /** Raw call to `/v1/trace_api/get_block` */
+    public async trace_get_block(block_num: number): Promise<TraceApiGetBlockResult> {
+        return await this.fetch('/v1/trace_api/get_block', { block_num });
+    }
 
     /** Raw call to `/v1/history/get_actions` */
     public async history_get_actions(accountName: string, pos: number = null, offset: number = null): Promise<GetActionsResult> {

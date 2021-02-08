@@ -6,12 +6,16 @@ import * as ser from '../eosjs-serialize';
 import fetch from 'node-fetch';
 const { TextEncoder, TextDecoder } = require('util');
 import {
+    AbiJsonToBinResult,
     GetAbiResult,
     GetAccountResult,
+    GetAccountsByAuthorizersResult,
+    GetActivatedProtocolFeaturesResult,
     GetBlockHeaderStateResult,
     GetBlockInfoResult,
     GetBlockResult,
     GetCodeResult,
+    GetCodeHashResult,
     GetCurrencyStatsResult,
     GetInfoResult,
     GetProducerScheduleResult,
@@ -22,6 +26,9 @@ import {
     GetTableRowsResult,
     GetTableByScopeResult,
     PushTransactionArgs,
+    AbiBinToJsonResult,
+    TraceApiGetBlockResult,
+    DBSizeGetResult,
 } from '../eosjs-rpc-interfaces';
 import { TransactResult } from '../eosjs-api-interfaces';
 import 'jest-extended';
@@ -43,7 +50,23 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
  * |: operates the same as typescript but does not work for complex types
  */
 
-describe('Chain Plugin Endpoints', () => {
+describe('Chain API Plugin Endpoints', () => {
+    it('validates return type of abi_bin_to_json', async () => {
+        const result: AbiBinToJsonResult = await rpc.abi_bin_to_json('returnvalue', 'sum', '0500000005000000');
+        const abiBinToJsonResult: any = {
+            args: 'any'
+        };
+        verifyType(result, abiBinToJsonResult);
+    });
+
+    it('validates return type of abi_json_to_bin', async () => {
+        const result: AbiJsonToBinResult = await rpc.abi_json_to_bin('returnvalue', 'sum', [5, 5]);
+        const abiJsonToBinResult: any = {
+            binargs: 'string'
+        };
+        verifyType(result, abiJsonToBinResult);
+    });
+
     it('validates return type of get_abi', async () => {
         const result: GetAbiResult = await rpc.get_abi('todo');
         const getAbiResult: any = {
@@ -203,6 +226,47 @@ describe('Chain Plugin Endpoints', () => {
             },
         };
         verifyType(result, getAccountResult);
+    });
+
+    it('validates return type of get_accounts_by_authorizers', async () => {
+        const result: GetAccountsByAuthorizersResult = await rpc.get_accounts_by_authorizers([
+            { actor: 'bob', permission: 'active' },
+            { actor: 'cfhello', permission: 'active' }
+        ], ['EOS7bxrQUTbQ4mqcoefhWPz1aFieN4fA9RQAiozRz7FrUChHZ7Rb8', 'EOS6nVrBASwwviMy3CntKsb1cD5Ai2gRZnyrxJDqypL3JLL7KCKrK']);
+        const getAccountsByAuthorizersResult: any = {
+            accounts: {
+                account_name: 'string',
+                permission_name: 'string',
+                'authorizing_key?': 'string',
+                'authorizing_account?': {
+                    actor: 'string',
+                    permission: 'string',
+                },
+                weight: 'number',
+                threshold: 'number',
+            }
+        };
+        verifyType(result, getAccountsByAuthorizersResult);
+    });
+
+    it('validates return type of get_activated_protocol_features', async () => {
+        const result: GetActivatedProtocolFeaturesResult = await rpc.get_activated_protocol_features({});
+        const getActivatedProtocolFeaturesResult: any = {
+            activated_protocol_features: {
+                feature_digest: 'string',
+                activation_ordinal: 'number',
+                activation_block_num: 'number',
+                description_digest: 'string',
+                dependencies: 'string',
+                protocol_feature_type: 'string',
+                specification: {
+                    name: 'string',
+                    value: 'string',
+                },
+            },
+            'more?': 'number',
+        };
+        verifyType(result, getActivatedProtocolFeaturesResult);
     });
 
     it('validates return type of get_block_header_state', async () => {
@@ -441,6 +505,15 @@ describe('Chain Plugin Endpoints', () => {
         verifyType(result, getCodeResult);
     });
 
+    it('validates return type of get_code_hash', async () => {
+        const result: GetCodeHashResult = await rpc.get_code_hash('todo');
+        const getCodeHashResult: any = {
+            account_name: 'string',
+            code_hash: 'string',
+        };
+        verifyType(result, getCodeHashResult);
+    });
+
     it('validates return type of get_currency_balance', async () => {
         const result: string[] = await rpc.get_currency_balance('eosio.token', 'bob', 'SYS');
         result.forEach((element: any) => {
@@ -654,7 +727,6 @@ describe('Chain Plugin Endpoints', () => {
             table: 'todo',
             index_name: 'map.index',
             encode_type: 'string',
-            lower_bound: 'ac8acfe7-cd4e-4d22-8400-218b697a4517',
         });
         const getTableRowsResult: any = {
             rows: 'any',
@@ -714,7 +786,7 @@ describe('Chain Plugin Endpoints', () => {
         });
     });
 
-    it('validates return of push_transaction', async () => {
+    it('validates return type of push_transaction', async () => {
         const transaction: PushTransactionArgs = await api.transact({
             actions: [{
                 account: 'eosio.token',
@@ -809,7 +881,125 @@ describe('Chain Plugin Endpoints', () => {
         verifyType(result, transactResult);
     });
 
-    it('validates return of send_transaction', async () => {
+    it('validates return type of push_transactions', async () => {
+        const transactionA: PushTransactionArgs = await api.transact({
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: 'A',
+                },
+            }],
+        }, {
+            sign: true,
+            broadcast: false,
+            useLastIrreversible: true,
+            expireSeconds: 30,
+        }) as PushTransactionArgs;
+        const transactionB: PushTransactionArgs = await api.transact({
+            actions: [{
+                account: 'eosio.token',
+                name: 'transfer',
+                authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                }],
+                data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: 'B',
+                },
+            }],
+        }, {
+            sign: true,
+            broadcast: false,
+            useLastIrreversible: true,
+            expireSeconds: 30,
+        }) as PushTransactionArgs;
+        const result: TransactResult[] = await rpc.push_transactions([ transactionA, transactionB ]);
+        const transactResult = {
+            transaction_id: 'string',
+            processed: {
+                id: 'string',
+                block_num: 'number',
+                block_time: 'string',
+                'producer_block_id&': 'string',
+                'receipt&': {
+                    status: 'string',
+                    cpu_usage_us: 'number',
+                    net_usage_words: 'number',
+                },
+                elapsed: 'number',
+                net_usage: 'number',
+                scheduled: 'boolean',
+                action_traces: {
+                    action_ordinal: 'number',
+                    creator_action_ordinal: 'number',
+                    closest_unnotified_ancestor_action_ordinal: 'number',
+                    receipt: {
+                        receiver: 'string',
+                        act_digest: 'string',
+                        global_sequence: 'number',
+                        recv_sequence: 'number',
+                        auth_sequence: [ 'string', 'number' ],
+                        code_sequence: 'number',
+                        abi_sequence: 'number',
+                    },
+                    receiver: 'string',
+                    act: {
+                        account: 'string',
+                        name: 'string',
+                        authorization: {
+                            actor: 'string',
+                            permission: 'string',
+                        },
+                        data: 'any',
+                        'hex_data?': 'string',
+                    },
+                    context_free: 'boolean',
+                    elapsed: 'number',
+                    console: 'string',
+                    trx_id: 'string',
+                    block_num: 'number',
+                    block_time: 'string',
+                    'producer_block_id&': 'string',
+                    account_ram_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    account_disk_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    except: 'any',
+                    'error_code&': 'number',
+                    'return_value?': 'any',
+                    'return_value_hex_data?': 'string',
+                    'return_value_data?': 'any',
+                    'inline_traces?': 'any', // ActionTrace, recursive?
+                },
+                'account_ram_delta&': {
+                    account: 'string',
+                    delta: 'number',
+                },
+                'except&': 'string',
+                'error_code&': 'number',
+            },
+        };
+        result.forEach((transaction: TransactResult) => {
+            verifyType(transaction, transactResult);
+        });
+    });
+
+    it('validates return type of send_transaction', async () => {
         const transaction: PushTransactionArgs = await api.transact({
             actions: [{
                 account: 'eosio.token',
@@ -904,6 +1094,62 @@ describe('Chain Plugin Endpoints', () => {
         verifyType(result, transactResult);
     });
 });
+
+describe('DB Size API Plugin Endpoints', () => {
+    it('validates return type of get', async () => {
+        const result: DBSizeGetResult = await rpc.db_size_get();
+        const dbSizeGetResult: any = {
+            free_bytes: 'number',
+            used_bytes: 'number',
+            size: 'number',
+            indices: {
+                index: 'string',
+                row_count: 'number',
+            },
+        };
+        verifyType(result, dbSizeGetResult);
+    });
+});
+
+describe('Trace API Plugin Endpoints', () => {
+    it('validates return type of get_block', async () => {
+        const info: GetInfoResult = await rpc.get_info();
+        const result: any = await rpc.trace_get_block(info.last_irreversible_block_num);
+        const traceApiGetBlockResult: any = {
+            id: 'string',
+            number: 'number',
+            previous_id: 'string',
+            status: 'string',
+            timestamp: 'string',
+            producer: 'string',
+            transaction_mroot: 'string',
+            action_mroot: 'string',
+            schedule_version: 'number',
+            transactions: {
+                id: 'string',
+                actions: {
+                    global_sequence: 'number',
+                    receiver: 'string',
+                    account: 'string',
+                    action: 'string',
+                    authorization: {
+                        account: 'string',
+                        permission: 'string'
+                    },
+                    data: 'string',
+                    return_value: 'string',
+                },
+                status: 'string',
+                cpu_usage_us: 'number',
+                net_usage_words: 'number',
+                signatures: 'string',
+                transaction_header: 'any'
+            },
+        };
+        verifyType(result, traceApiGetBlockResult);
+    });
+});
+
 
 const verifyType = (data: any, type: any): void => {
     const verifiedKeys: string[] = Object.keys(type).filter((key: string) => {
