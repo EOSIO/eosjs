@@ -4,6 +4,7 @@
  */
 
 import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
+import { Authorization } from './eosjs-serialize';
 
 /** Structured format for abis */
 export interface Abi {
@@ -120,6 +121,16 @@ export interface WaitWeight {
     weight: number;
 }
 
+/** Return value of `/v1/chain/abi_bin_to_json` */
+export interface AbiBinToJsonResult {
+    args: 'any'
+}
+
+/** Return value of `/v1/chain/abi_json_to_bin` */
+export interface AbiJsonToBinResult {
+    binargs: 'string'
+}
+
 /** Return value of `/v1/chain/get_abi` */
 export interface GetAbiResult {
     account_name: string;
@@ -149,6 +160,44 @@ export interface GetAccountResult {
     rex_info: any;
 }
 
+export interface AccountResult {
+    account_name: string;
+    permission_name: string;
+    authorizing_account?: Authorization;
+    authorizing_key?: string;
+    weight: number;
+    threshold: number;
+}
+
+/** Return value of `/v1/chain/get_accounts_by_authorizers` */
+export interface GetAccountsByAuthorizersResult {
+    accounts: AccountResult[];
+}
+
+export interface GetActivatedProtocolFeaturesParams {
+    limit?: number;
+    search_by_block_num?: boolean;
+    reverse?: boolean;
+    lower_bound?: number;
+    upper_bound?: number;
+}
+
+export interface ActivatedProtocolFeature {
+    feature_digest: string;
+    activation_ordinal: number;
+    activation_block_num: number;
+    description_digest: string;
+    dependencies: string[];
+    protocol_feature_type: string;
+    specification: { name: string, value: string, };
+}
+
+/** Return value of `/v1/chain/get_activated_protocol_features` */
+export interface GetActivatedProtocolFeaturesResult {
+    activated_protocol_features: ActivatedProtocolFeature[];
+    more?: number;
+}
+
 /** Return value of `/v1/chain/get_block_info` */
 export interface GetBlockInfoResult {
     timestamp: string;
@@ -173,6 +222,13 @@ export interface PackedTransaction {
     context_free_data: string[];
     packed_trx: string;
     transaction: Transaction;
+}
+
+export interface PackedTrx {
+    signatures: string[];
+    compression: number;
+    packed_trx: string;
+    packed_context_free_data: string;
 }
 
 export interface TransactionReceipt extends TransactionReceiptHeader {
@@ -277,6 +333,12 @@ export interface GetCodeResult {
     wast: string;
     wasm: string;
     abi?: Abi;
+}
+
+/** Return value of `/v1/chain/get_code_hash` */
+export interface GetCodeHashResult {
+    account_name: string;
+    code_hash: string;
 }
 
 /** Return value of `/v1/chain/get_currency_stats` */
@@ -406,11 +468,6 @@ export interface PushTransactionArgs {
     serializedContextFreeData?: Uint8Array;
 }
 
-/** Return value of `/v1/chain/push_transaction` */
-export interface PushTransactionResult {
-
-}
-
 export interface DBSizeIndexCount {
     index: string;
     row_count: number;
@@ -422,6 +479,49 @@ export interface DBSizeGetResult {
     used_bytes: number;
     size: number;
     indices: DBSizeIndexCount[];
+}
+
+export interface TraceApiAction {
+    global_sequence: number;
+    receiver: string;
+    account: string;
+    action: string;
+    authorization: Authorization[];
+    data: any;
+    return_value: any;
+}
+
+export interface TraceApiTransactionHeader {
+    expiration: string;
+    ref_block_num: number;
+    ref_block_prefix: number;
+    max_net_usage_words: number;
+    max_cpu_usage_ms: number;
+    delay_sec: number;
+}
+
+export interface TraceApiTransaction {
+    id: string;
+    actions: TraceApiAction[];
+    status?: string;
+    cpu_usage_us?: number;
+    net_usage_words?: number;
+    signatures?: string[];
+    transaction_header?: TraceApiTransactionHeader
+}
+
+/** Return value of `/v1/trace_api/get_block` */
+export interface TraceApiGetBlockResult {
+    id: string;
+    number: number;
+    previous_id: string;
+    status: string;
+    timestamp: string;
+    producer: string;
+    transaction_mroot?: string;
+    action_mroot?: string;
+    schedule_version: number;
+    transactions: TraceApiTransaction;
 }
 
 export interface OrderedActionResult {
