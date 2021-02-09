@@ -517,9 +517,6 @@ describe('JSON RPC', () => {
         const table = 'coffee';
         const indexName = 'type';
         const encodeType = 'bytes';
-        const indexValue = '';
-        const lowerBound = '';
-        const upperBound = '';
         const limit = 10;
         const reverse = false;
         const showPayer = false;
@@ -536,9 +533,6 @@ describe('JSON RPC', () => {
                 table,
                 index_name: indexName,
                 encode_type: encodeType,
-                index_value: indexValue,
-                lower_bound: lowerBound,
-                upper_bound: upperBound,
                 limit,
                 reverse,
                 show_payer: showPayer,

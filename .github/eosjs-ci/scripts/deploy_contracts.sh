@@ -117,6 +117,9 @@ if [ -z "$NODEOS_RUNNING" ]; then
   --http-validate-host=false \
   --plugin eosio::producer_api_plugin \
   --plugin eosio::chain_api_plugin \
+  --plugin eosio::trace_api_plugin \
+  --trace-no-abis \
+  --plugin eosio::db_size_api_plugin \
   --plugin eosio::http_plugin \
   --http-server-address=0.0.0.0:8888 \
   --access-control-allow-origin=* \
