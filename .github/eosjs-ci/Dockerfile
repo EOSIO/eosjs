@@ -1,10 +1,10 @@
-### Current Version: v0.2.7
+### Current Version: v0.2.8
 ### Test:
 #### docker build --tag eosjs-ci:test ./.github/eosjs-ci
 #### docker run --publish 8888:8888 eosjs-ci:test
 ### Deploy:
-#### docker build --tag eosio/eosjs-ci:v0.2.7 ./.github/eosjs-ci
-#### docker push eosio/eosjs-ci:v0.2.7
+#### docker build --tag eosio/eosjs-ci:v0.2.8 ./.github/eosjs-ci
+#### docker push eosio/eosjs-ci:v0.2.8
 
 FROM ubuntu:18.04
 ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--verbose-http-errors", "--max-transaction-time=100"]
@@ -66,6 +66,11 @@ RUN curl -LO https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.
  && ./b2 --with-iostreams --with-date_time --with-filesystem --with-system --with-program_options --with-chrono --with-test -j$(nproc) install \
  && cd /root \
  && rm -rf boost_1_72_0.tar.bz2 boost_1_72_0
+
+### libpq and libpqxx
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+ && curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+ && apt-get update && apt-get -y install libpq-dev
 
 ### eos
 RUN git clone https://github.com/EOSIO/eos.git \
