@@ -67,6 +67,11 @@ RUN curl -LO https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.
  && cd /root \
  && rm -rf boost_1_72_0.tar.bz2 boost_1_72_0
 
+### libpq and libpqxx
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+ && curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+ && apt-get update && apt-get -y install libpq-dev
+
 ### eos
 RUN git clone https://github.com/EOSIO/eos.git \
  && cd eos \
