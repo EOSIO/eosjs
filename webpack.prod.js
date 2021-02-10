@@ -1,4 +1,5 @@
 const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -22,6 +23,9 @@ module.exports = {
             }
         ]
     },
+    plugins: [
+        new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['**/*'] })
+    ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js']
     },
@@ -29,5 +33,17 @@ module.exports = {
         filename: x => x.chunk.name.replace('_', '-') + '.min.js',
         library: '[name]',
         path: path.resolve(__dirname, 'dist-web'),
+    },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'externals',
+                    filename: 'externals.min.js',
+                    chunks: 'all'
+                },
+            },
+        },
     }
 };
