@@ -117,10 +117,14 @@ if [ -z "$NODEOS_RUNNING" ]; then
   --http-validate-host=false \
   --plugin eosio::producer_api_plugin \
   --plugin eosio::chain_api_plugin \
+  --plugin eosio::trace_api_plugin \
+  --trace-no-abis \
+  --plugin eosio::db_size_api_plugin \
   --plugin eosio::http_plugin \
   --http-server-address=0.0.0.0:8888 \
   --access-control-allow-origin=* \
   --contracts-console \
+  --enable-account-queries=true \
   --max-transaction-time=100000 \
   --verbose-http-errors &
 fi
@@ -147,6 +151,15 @@ cleos wallet import --private-key $EXAMPLE_ACCOUNT_PRIVATE_KEY
 cleos wallet import --private-key $R1_EXAMPLE_ACCOUNT_PRIVATE_KEY
 cleos wallet import --private-key $CFHELLO_PRIVATE_KEY
 cleos wallet import --private-key $CFACTOR_PRIVATE_KEY
+cleos create account eosio eosio.bpay $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.msig $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.names $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.ram $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.ramfee $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.saving $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.stake $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.vpay $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.rex $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio eosio.token $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio returnvalue $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio todo $SYSTEM_ACCOUNT_PUBLIC_KEY
@@ -190,6 +203,14 @@ cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":409
 cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
 
 sleep 1s
+setabi eosio $CONTRACTS_DIR/eosio.system/eosio.system.abi
+setcode eosio $CONTRACTS_DIR/eosio.system/eosio.system.wasm
+
+sleep 1s
+setabi eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.abi
+setcode eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.wasm
+
+sleep 1s
 setabi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi
 setcode cfhello $CONTRACTS_DIR/cfhello/cfhello.wasm
 
@@ -215,6 +236,8 @@ cleos push action eosio.token transfer '["bob", "alicer1", "1000000.0000 SYS", "
 cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
 cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
 cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
+
+cleos push action eosio init '[0, "4,SYS"]' -p eosio@active
 
 echo "All done initializing the blockchain"
 
