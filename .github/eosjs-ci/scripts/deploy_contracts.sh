@@ -178,21 +178,21 @@ setabi eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.abi
 setcode eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.wasm
 
 sleep 1s
-cleos push action eosio activate '["299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"]' -p eosio@active
-cleos push action eosio activate '["825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"]' -p eosio@active
-cleos push action eosio activate '["c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"]' -p eosio@active
-cleos push action eosio activate '["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]' -p eosio@active
-cleos push action eosio activate '["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]' -p eosio@active
-cleos push action eosio activate '["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]' -p eosio@active
-cleos push action eosio activate '["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]' -p eosio@active
-cleos push action eosio activate '["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]' -p eosio@active
-cleos push action eosio activate '["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]' -p eosio@active
-cleos push action eosio activate '["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]' -p eosio@active
-cleos push action eosio activate '["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]' -p eosio@active
-cleos push action eosio activate '["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]' -p eosio@active
-cleos push action eosio activate '["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]' -p eosio@active
-cleos push action eosio activate '["bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"]' -p eosio@active
-cleos push action eosio activate '["5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"]' -p eosio@active
+activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
+activate_feature "825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"
+activate_feature "c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"
+activate_feature "4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"
+activate_feature "f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"
+activate_feature "2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"
+activate_feature "8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"
+activate_feature "ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"
+activate_feature "68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"
+activate_feature "e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"
+activate_feature "ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"
+activate_feature "4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"
+activate_feature "1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"
+activate_feature "bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"
+activate_feature "5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"
 
 sleep 1s
 setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
@@ -203,32 +203,28 @@ cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":409
 cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
 
 sleep 1s
-setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
-setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
-cleos set abi eosio $CONTRACTS_DIR/eosio.system/eosio.system.abi -p eosio@active
-cleos set code eosio $CONTRACTS_DIR/eosio.system/eosio.system.wasm -p eosio@active
+setabi eosio $CONTRACTS_DIR/eosio.system/eosio.system.abi
+setcode eosio $CONTRACTS_DIR/eosio.system/eosio.system.wasm
 
 sleep 1s
-cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":4096, "max_iterators":1024}]' -p eosio@active
-cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
-cleos set abi eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.abi -p eosio.msig@active
-cleos set code eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.wasm -p eosio.msig@active
+setabi eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.abi
+setcode eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.wasm
 
 sleep 1s
-cleos set abi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi -p cfhello@active -p eosio@active
-cleos set code cfhello $CONTRACTS_DIR/cfhello/cfhello.wasm -p cfhello@active -p eosio@active
+setabi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi
+setcode cfhello $CONTRACTS_DIR/cfhello/cfhello.wasm
+
+sleep 1s
+setabi todo $CONTRACTS_DIR/kv_todo/kv_todo.abi
+setcode todo $CONTRACTS_DIR/kv_todo/kv_todo.wasm
+
+sleep 1s
+setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
+setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
 
 sleep 1s
 setabi eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.abi
 setcode eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.wasm
-
-sleep 1s
-cleos set abi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi -p returnvalue@active
-cleos set code returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm -p returnvalue@active
-
-sleep 1s
-cleos set abi eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.abi -p eosio.token@active -p eosio@active
-cleos set code eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.wasm -p eosio.token@active -p eosio@active
 
 sleep 1s
 cleos push action eosio.token create '["bob", "10000000000.0000 SYS"]' -p eosio.token
