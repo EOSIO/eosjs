@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
+import { TransactionReceiptHeader, Transaction, Extension } from './eosjs-api-interfaces';
 
 /** Structured format for abis */
 export interface Abi {
@@ -13,7 +13,7 @@ export interface Abi {
     actions: { name: string, type: string, ricardian_contract: string }[];
     tables: { name: string, type: string, index_type: string, key_names: string[], key_types: string[] }[];
     ricardian_clauses: { id: string, body: string }[];
-    error_messages: { error_code: string, error_msg: string }[];
+    error_messages: { error_code: number, error_msg: string }[];
     abi_extensions: { tag: number, value: string }[];
     variants?: { name: string, types: string[] }[];
     action_results?: { name: string, result_type: string }[],
@@ -44,9 +44,47 @@ export interface AccountResourceInfo {
     current_used?: number;
 }
 
-export interface Asset {
-    amount: number;
-    symbol: string;
+export interface ResourceOverview {
+    owner: string;
+    ram_bytes: number;
+    net_weight: string;
+    cpu_weight: string;
+}
+
+export interface ResourceDelegation {
+    from: string;
+    to: string;
+    net_weight: string;
+    cpu_weight: string;
+}
+
+export interface RefundRequest {
+    owner: string;
+    request_time: string;
+    net_amount: string;
+    cpu_amount: string;
+}
+
+export interface VoterInfo {
+    owner: string;
+    proxy: string;
+    producers: string[];
+    staked: number;
+    last_vote_weight: string;
+    proxied_vote_weight: string;
+    is_proxy: number;
+    flags1: number;
+    reserved2: number;
+    reserved3: string;
+}
+
+export interface RexBalance {
+    version: number;
+    owner: string;
+    vote_stake: string;
+    rex_balance: string;
+    matured_rex: number;
+    rex_maturities: any;
 }
 
 export interface Authority {
@@ -85,7 +123,7 @@ export interface WaitWeight {
 /** Return value of `/v1/chain/get_abi` */
 export interface GetAbiResult {
     account_name: string;
-    abi: Abi;
+    abi?: Abi;
 }
 
 /** Return value of `/v1/chain/get_account` */
@@ -96,7 +134,7 @@ export interface GetAccountResult {
     privileged: boolean;
     last_code_update: string;
     created: string;
-    core_liquid_balance?: Asset;
+    core_liquid_balance?: string;
     ram_quota: number;
     net_weight: number;
     cpu_weight: number;
@@ -104,9 +142,9 @@ export interface GetAccountResult {
     cpu_limit: AccountResourceInfo;
     ram_usage: number;
     permissions: Permission[];
-    total_resources: any;
-    self_delegated_bandwidth: any;
-    refund_request: any;
+    total_resources: ResourceOverview|null;
+    self_delegated_bandwidth: ResourceDelegation|null;
+    refund_request: RefundRequest|null;
     voter_info: any;
     rex_info: any;
 }
@@ -150,7 +188,7 @@ export interface GetBlockResult {
     transaction_mroot: string;
     action_mroot: string;
     schedule_version: number;
-    new_producers?: ProducerScheduleType;
+    new_producers: ProducerScheduleType|null;
     producer_signature: string;
     transactions: any;
     id: string;
@@ -178,8 +216,7 @@ export interface BlockSigningAuthority {
 
 export interface ProducerAuthority {
     producer_name: string;
-    // authority: BlockSigningAuthority;
-    authority: any;
+    authority: [ number|string, BlockSigningAuthority];
 };
 
 export interface ProducerAuthoritySchedule {
@@ -239,7 +276,7 @@ export interface GetCodeResult {
     code_hash: string;
     wast: string;
     wasm: string;
-    abi: Abi;
+    abi?: Abi;
 }
 
 /** Return value of `/v1/chain/get_currency_stats` */
@@ -274,15 +311,27 @@ export interface GetInfoResult {
 
 /** Return value of /v1/chain/get_producer_schedule */
 export interface GetProducerScheduleResult {
-    active: any;
-    pending: any;
-    proposed: any;
+    active: ProducerAuthoritySchedule|null;
+    pending: ProducerAuthoritySchedule|null;
+    proposed: ProducerAuthoritySchedule|null;
+}
+
+export interface ProducerDetails {
+    owner: string;
+    producer_authority?: any[];
+    url: string;
+    is_active?: number;
+    total_votes: string;
+    producer_key: string;
+    unpaid_blocks?: number;
+    last_claim_time?: string;
+    location?: number;
 }
 
 /** Return value of `/v1/chain/get_producers` */
 export interface GetProducersResult {
-    rows: string[]|object[];
-    total_producer_vote_weight: number;
+    rows: ProducerDetails[];
+    total_producer_vote_weight: string;
     more: string;
 }
 
