@@ -1,10 +1,10 @@
-### Current Version: v0.2.8
+### Current Version: v0.2.9
 ### Test:
 #### docker build --tag eosjs-ci:test ./.github/eosjs-ci
 #### docker run --publish 8888:8888 eosjs-ci:test
 ### Deploy:
-#### docker build --tag eosio/eosjs-ci:v0.2.8 ./.github/eosjs-ci
-#### docker push eosio/eosjs-ci:v0.2.8
+#### docker build --tag eosio/eosjs-ci:v0.2.9 ./.github/eosjs-ci
+#### docker push eosio/eosjs-ci:v0.2.9
 
 FROM ubuntu:18.04
 ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--verbose-http-errors", "--max-transaction-time=100"]
