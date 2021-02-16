@@ -203,14 +203,6 @@ cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":409
 cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
 
 sleep 1s
-setabi eosio $CONTRACTS_DIR/eosio.system/eosio.system.abi
-setcode eosio $CONTRACTS_DIR/eosio.system/eosio.system.wasm
-
-sleep 1s
-setabi eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.abi
-setcode eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.wasm
-
-sleep 1s
 setabi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi
 setcode cfhello $CONTRACTS_DIR/cfhello/cfhello.wasm
 
@@ -236,8 +228,6 @@ cleos push action eosio.token transfer '["bob", "alicer1", "1000000.0000 SYS", "
 cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
 cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
 cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
-
-cleos push action eosio init '[0, "4,SYS"]' -p eosio@active
 
 echo "All done initializing the blockchain"
 
