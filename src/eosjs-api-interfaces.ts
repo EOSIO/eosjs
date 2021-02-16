@@ -5,7 +5,6 @@
 
 import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
 import { Anyvar, Authorization, Action, SerializedAction } from './eosjs-serialize';
-import { ActionBuilder } from './eosjs-api';
 
 /** Arguments to `getRequiredKeys` */
 export interface AuthorityProviderArgs {
@@ -73,11 +72,6 @@ export interface SignatureProvider {
     sign: (args: SignatureProviderArgs) => Promise<PushTransactionArgs>;
 }
 
-export interface Extension {
-    type: number;
-    data: string;
-}
-
 export interface Transaction {
     expiration?: string;
     ref_block_num?: number;
@@ -88,7 +82,7 @@ export interface Transaction {
     context_free_actions?: Action[];
     context_free_data?: Uint8Array[];
     actions: Action[];
-    transaction_extensions?: Extension[];
+    transaction_extensions?: [number, string][];
 }
 
 /** Optional transact configuration object */
@@ -100,6 +94,12 @@ export interface TransactConfig {
     blocksBehind?: number;
     useLastIrreversible?: boolean;
     expireSeconds?: number;
+}
+
+export interface TransactionHeader {
+    expiration: string;
+    ref_block_num: number;
+    ref_block_prefix: number;
 }
 
 export interface AccountDelta {
@@ -117,7 +117,7 @@ export interface ActionReceipt {
     act_digest: string;
     global_sequence: number;
     recv_sequence: number;
-    auth_sequence: AuthSequence[];
+    auth_sequence: [ string, number ][];
     code_sequence: number;
     abi_sequence: number;
 }
@@ -140,10 +140,10 @@ export interface ActionTrace {
     account_disk_deltas: AccountDelta[];
     except: any;
     error_code: number|null;
-    return_value: any;
-    return_value_hex?: string;
+    return_value?: any;
+    return_value_hex_data?: string;
     return_value_data?: any;
-    inline_traces: ActionTrace[];
+    inline_traces?: ActionTrace[];
 }
 
 export interface TransactionReceiptHeader {
