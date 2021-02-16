@@ -8,7 +8,7 @@ jobs:
     name: Build Docker
     runs-on: ubuntu-18.04
     steps:
-    - name: Check for Docker Credentials
+      - name: Check for Docker Credentials
         id: check_token
         run: echo ::set-output name=token_exists::${HAS_SECRET}
         env:
