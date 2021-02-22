@@ -2,7 +2,9 @@
 #### docker build --tag eosjs-ci:test ./.github/eosjs-ci
 #### docker run --publish 8888:8888 eosjs-ci:test
 
-FROM eosio/eosio.cdt:develop as contracts
+ARG EOSBRANCH=develop
+ARG CDTBRANCH=develop
+FROM eosio/eosio.cdt:${CDTBRANCH} as contracts
 WORKDIR /root
 ### base
 RUN apt-get update \
@@ -33,7 +35,7 @@ RUN cd cfhello \
  && eosio-cpp -abigen ./cfhello.cpp -o ./build/cfhello.wasm
 
 
-FROM eosio/eos:develop
+FROM eosio/eos:${EOSBRANCH}
 ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::trace_api_plugin", "--trace-no-abis", "--plugin", "eosio::db_size_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--enable-account-queries=true", "--verbose-http-errors", "--max-transaction-time=100"]
 WORKDIR /root
 RUN mkdir -p "/opt/eosio/bin/contracts"
