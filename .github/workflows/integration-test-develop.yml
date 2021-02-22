@@ -1,12 +1,11 @@
-name: Publish Edge
+name: Integration Test - Develop
 on:
-  push:
-    branches:
-      - develop
+  schedule:
+    - cron: "0 3 * * *"
 
 jobs:
-  publish-edge:
-    name: Publish Edge
+  integration-test:
+    name: Integration Test - Develop
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -14,6 +13,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+        with:
+          ref: develop
+          token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@c6fd00ceb9747fb23ffdf72987450a2664414867
         with:
@@ -22,9 +24,6 @@ jobs:
       - name: Install
         run: |
           yarn --frozen-lockfile
-      - name: Lint
-        run: |
-          yarn lint
       - name: Test
         run: |
           yarn test
@@ -41,17 +40,6 @@ jobs:
         uses: cypress-io/github-action@6e9b583c9652e99b72b042a3957980fc6166efae
         with:
           spec: cypress/integration/index.spec.js
-      - name: Publish Edge
-        run: |
-          . ./scripts/publish-utils.sh
-          setup_git
-          COMMIT=${GITHUB_SHA:0:7}
-          sed -i "s/  \"version\": \"\([0-9]\+\).\([0-9]\+\).\([0-9]\+\)/&-$GITHUB_RUN_NUMBER-$COMMIT/" package.json
-          git commit -a -m "Updating version [skip ci]" --allow-empty
-          npm publish --access public --tag edge
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-
     services:
       nodeos:
         image: eosio/eosjs-ci:develop
