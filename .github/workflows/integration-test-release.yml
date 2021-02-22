@@ -1,0 +1,49 @@
+name: Integration Test - Release
+on:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  integration-test:
+    name: Integration Test - Release
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        node-version: [12.14.1]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+        with:
+          ref: release/22.0.x
+          token: ${{ github.token }}
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@c6fd00ceb9747fb23ffdf72987450a2664414867
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node
+      - name: Test Types
+        run: |
+          yarn test-types
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@6e9b583c9652e99b72b042a3957980fc6166efae
+        with:
+          spec: cypress/integration/index.spec.js
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:release_22.0.x
+
+        ports:
+          - 8888:8888
+          - 9876:9876

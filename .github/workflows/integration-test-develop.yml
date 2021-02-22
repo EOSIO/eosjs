@@ -1,11 +1,11 @@
-name: Integration Test
+name: Integration Test - Develop
 on:
   schedule:
     - cron: "0 3 * * *"
 
 jobs:
   integration-test:
-    name: Integration Test
+    name: Integration Test - Develop
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -42,7 +42,7 @@ jobs:
           spec: cypress/integration/index.spec.js
     services:
       nodeos:
-        image: eosio/eosjs-ci:latest
+        image: eosio/eosjs-ci:develop
 
         ports:
           - 8888:8888
