@@ -29,6 +29,7 @@ jobs:
           file: ./.github/eosjs-ci/Dockerfile
           pull: true
           push: true
+          no-cache: true
           build-args: |
             EOSBRANCH=release_2.1.x
             CDTBRANCH=release_1.8.x
