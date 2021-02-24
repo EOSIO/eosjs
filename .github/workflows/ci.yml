@@ -76,7 +76,7 @@ jobs:
           git push origin ${GITHUB_REF#refs/*/}
     services:
       nodeos:
-        image: eosio/eosjs-ci:latest
+        image: eosio/eosjs-ci:develop
 
         ports:
           - 8888:8888
