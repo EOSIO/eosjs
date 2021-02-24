@@ -1,11 +1,11 @@
-name: Build Docker
+name: Build Docker - Develop
 on:
   schedule:
     - cron: "0 2 * * *"
 
 jobs:
   build-docker:
-    name: Build Docker
+    name: Build Docker - Develop
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -29,6 +29,7 @@ jobs:
           file: ./.github/eosjs-ci/Dockerfile
           pull: true
           push: true
+          no-cache: true
           tags: |
-            eosio/eosjs-ci:latest
+            eosio/eosjs-ci:develop
             eosio/eosjs-ci:${{ github.sha }}
