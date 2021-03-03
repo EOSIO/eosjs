@@ -1,0 +1,7 @@
+printWidth: 110
+trailingComma: 'es5'
+endOfLine: 'lf'
+singleQuote: true
+semi: false
+jsxSingleQuote: true
+arrowParens: 'avoid'

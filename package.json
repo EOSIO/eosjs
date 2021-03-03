@@ -19,7 +19,8 @@
     "docs-init": "sh .docs/scripts/init.sh",
     "docs-build": "sh .docs/scripts/build.sh",
     "docs-serve": "python -m SimpleHTTPServer",
-    "docs-publish": "sh .docs/scripts/publish.sh"
+    "docs-publish": "sh .docs/scripts/publish.sh",
+    "format": "prettier src/ --write"
   },
   "author": "block.one",
   "license": "MIT",
