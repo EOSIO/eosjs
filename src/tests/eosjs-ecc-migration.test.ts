@@ -1,4 +1,4 @@
-const ecc = require('eosjs-ecc')
+import ecc from 'eosjs-ecc'
 import { ecc as eccMigration } from '../eosjs-ecc-migration'
 
 import { PrivateKey } from '../eosjs-key-conversions'
@@ -111,7 +111,7 @@ describe('ecc Migration', () => {
     console.warn = jest.fn()
     const dataAsString = 'some string'
 
-    const eccHash = Buffer.from(ecc.sha256(dataAsString, 'hex', 'utf8'), 'hex')
+    const eccHash = Buffer.from(ecc.sha256(dataAsString, 'hex'), 'hex')
     const eccMigrationHash = Buffer.from(eccMigration.sha256(dataAsString, 'hex', 'utf8') as Buffer)
     expect(console.warn).toBeCalledWith('Argument `encoding` is deprecated')
     expect(console.warn).toBeCalledWith('Argument `resultEncoding` is deprecated')

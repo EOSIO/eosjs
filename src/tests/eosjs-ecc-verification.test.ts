@@ -1,12 +1,11 @@
 // eosjs-ecc stuff
-const ecc = require('eosjs-ecc')
+import ecc from 'eosjs-ecc'
 
-const { ec } = require('elliptic')
+import { ec } from 'elliptic'
 
-const { Signature, PrivateKey, PublicKey } = require('../eosjs-key-conversions')
-const { JsSignatureProvider } = require('../eosjs-jssig')
-const { KeyType } = require('../eosjs-numeric')
-const { SignatureProviderArgs } = require('../eosjs-api-interfaces')
+import { Signature, PrivateKey, PublicKey } from '../eosjs-key-conversions'
+import { JsSignatureProvider } from '../eosjs-jssig'
+import { KeyType } from '../eosjs-numeric'
 
 describe('JsSignatureProvider', () => {
   const privateKeys = [
