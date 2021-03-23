@@ -1,5 +1,6 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
     entry: {
@@ -24,10 +25,17 @@ module.exports = {
         ]
     },
     plugins: [
-        new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['**/*'] })
+        new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: ['**/*'] }),
+        new webpack.ProvidePlugin({
+            Buffer: ["buffer", "Buffer"],
+        })
     ],
     resolve: {
-        extensions: ['.tsx', '.ts', '.js']
+        extensions: ['.tsx', '.ts', '.js'],
+        fallback: {
+            buffer: 'buffer',
+            crypto: 'crypto-browserify'
+        }
     },
     output: {
         filename: x => x.chunk.name.replace('_', '-') + '.min.js',

@@ -1114,7 +1114,7 @@ describe('DB Size API Plugin Endpoints', () => {
 describe('Trace API Plugin Endpoints', () => {
     it('validates return type of get_block', async () => {
         const info: GetInfoResult = await rpc.get_info();
-        const result: any = await rpc.trace_get_block(info.last_irreversible_block_num);
+        const result: TraceApiGetBlockResult = await rpc.trace_get_block(info.last_irreversible_block_num);
         const traceApiGetBlockResult: any = {
             id: 'string',
             number: 'number',
