@@ -58,7 +58,7 @@ export class SerializerState {
  * The short form is more convenient, but it can't be converted back to binary (serialized).
  * Wherever the anyvar would have {type, value}, it has just the value instead.
  */
-export type Anyvar = null | string | number | Anyvar[] | { type: string, value: any } | {};
+export type Anyvar = null | string | number | Anyvar[] | { type: string, value: any } | Record<string, unknown>;
 
 interface AnyvarDef {
     index: number;
