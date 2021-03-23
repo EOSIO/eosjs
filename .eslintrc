@@ -5,6 +5,9 @@
     "semi": ["error", "always"],
     "indent": ["error", 4]
   },
+  "parserOptions": {
+    "requireConfigFile": false
+  },
   "overrides": [
     {
       "files": ["**/*.ts", "**/*.tsx"],
