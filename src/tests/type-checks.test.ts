@@ -553,6 +553,7 @@ describe('Chain API Plugin Endpoints', () => {
             'fork_db_head_block_num?': 'number',
             'fork_db_head_block_id?': 'string',
             'server_full_version_string?': 'string',
+            'first_block_num?': 'number',
         };
         verifyType(result, getInfoResult);
     });
