@@ -8,24 +8,17 @@ jobs:
   publish-edge:
     name: Publish Edge
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        node-version: [12.14.1]
     steps:
       - name: Checkout
         uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
-      - name: Setup Node.js
-        uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@c6fd00ceb9747fb23ffdf72987450a2664414867
         with:
-          node-version: '12.14.1'
+          node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@70655ec8323daeeaa7ef06d7c56e1b9191396cbe
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
       - name: Install
         run: |
           yarn --frozen-lockfile
@@ -42,7 +35,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@8aac1d019734a107e4eaaefe2e26beb3149e5540
+        uses: cypress-io/github-action@6e9b583c9652e99b72b042a3957980fc6166efae
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish Edge
