@@ -114,13 +114,6 @@ describe('Serialize', () => {
             expect(serialBuffer.getName()).toEqual(expectedName);
         });
 
-        it('should not be able to push name with an account name too short', () => {
-            const name = '';
-
-            const shouldFail = () => serialBuffer.pushName(name);
-            expect(shouldFail).toThrowError(invalidNameErrorMessage);
-        });
-
         it('should not be able to push name with an account name too long', () => {
             const name = 'abcdabcdabcdab';
 
