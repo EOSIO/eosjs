@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: Setup Node.js
-        uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
           node-version: '12.14.1'
           registry-url: 'https://registry.npmjs.org'
@@ -72,7 +72,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: Setup Node.js
-        uses: actions/setup-node@1c5c1375b3817ad821719597effe8e3d6f764930
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
           node-version: '12.14.1'
           registry-url: 'https://registry.npmjs.org'
