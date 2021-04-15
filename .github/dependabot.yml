@@ -5,6 +5,25 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    target-branch: "master"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "develop"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "release/21.0.x"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "release/22.0.x"
 
   - package-ecosystem: "npm"
     directory: "/"
