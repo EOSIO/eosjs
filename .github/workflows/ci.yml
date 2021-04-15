@@ -29,7 +29,7 @@ jobs:
         with:
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@c6fd00ceb9747fb23ffdf72987450a2664414867
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
