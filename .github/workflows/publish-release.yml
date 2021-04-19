@@ -13,9 +13,9 @@ jobs:
         node-version: [12.14.1]
     steps:
       - name: Checkout
-        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@c6fd00ceb9747fb23ffdf72987450a2664414867
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -35,7 +35,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@6e9b583c9652e99b72b042a3957980fc6166efae
+        uses: cypress-io/github-action@89161930792c0050baeba2737caa058c395ecfcb
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish Release
@@ -66,9 +66,9 @@ jobs:
         node-version: [12.14.1]
     steps:
       - name: Checkout
-        uses: actions/checkout@f90c7b395dac7c5a277c1a6d93d5057c1cddb74e
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@c6fd00ceb9747fb23ffdf72987450a2664414867
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -88,7 +88,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@6e9b583c9652e99b72b042a3957980fc6166efae
+        uses: cypress-io/github-action@89161930792c0050baeba2737caa058c395ecfcb
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish RC
