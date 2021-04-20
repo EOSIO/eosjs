@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "21.0.3",
+  "version": "21.0.4",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -26,29 +26,29 @@
     "url": "https://github.com/EOSIO/eosjs.git"
   },
   "dependencies": {
-    "elliptic": "6.5.3",
+    "bn.js": "5.2.0",
+    "elliptic": "6.5.4",
     "hash.js": "1.1.7",
-    "pako": "1.0.11"
+    "pako": "2.0.3"
   },
   "devDependencies": {
-    "@blockone/eslint-config-blockone": "^3.0.0",
+    "@blockone/eslint-config-blockone": "^4.0.0",
     "@types/elliptic": "^6.4.12",
-    "@types/jest": "^26.0.9",
-    "@types/node": "^14.0.27",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.41",
     "@types/pako": "^1.0.1",
-    "cypress": "^4.12.1",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "cypress": "^7.1.0",
     "eosjs-ecc": "^4.0.7",
-    "eslint": "^6.8.0",
-    "jest": "^26.3.0",
+    "eslint": "^7.24.0",
+    "jest": "^26.6.3",
     "jest-fetch-mock": "^3.0.3",
-    "ts-jest": "^26.2.0",
-    "ts-loader": "^7.0.5",
-    "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
-  },
-  "resolutions": {
-    "lodash": "4.17.19"
+    "ts-jest": "^26.5.5",
+    "ts-loader": "^8.1.0",
+    "typescript": "^4.2.4",
+    "webpack": "^5.34.0",
+    "webpack-cli": "^4.6.0"
   },
   "jest": {
     "automock": false,
@@ -65,7 +65,7 @@
     },
     "globals": {
       "ts-jest": {
-        "tsConfig": "tsconfig.json"
+        "tsconfig": "tsconfig.json"
       }
     },
     "testRegex": "(/src/.*(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
