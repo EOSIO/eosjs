@@ -4,25 +4,19 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-    target-branch: "master"
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
+      interval: "weekly"
     target-branch: "develop"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     target-branch: "release/21.0.x"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     target-branch: "release/22.0.x"
 
   - package-ecosystem: "npm"
@@ -30,15 +24,24 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "develop"
+    allowed_updates:
+      - match:
+          update_type: "security"
 
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
     target-branch: "release/21.0.x"
+    allowed_updates:
+      - match:
+          update_type: "security"
 
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
     target-branch: "release/22.0.x"
+    allowed_updates:
+      - match:
+          update_type: "security"
