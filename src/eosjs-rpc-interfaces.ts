@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
+import { TransactionReceiptHeader, Transaction, TransactionTrace } from './eosjs-api-interfaces';
 import { Authorization } from './eosjs-serialize';
 
 /** Structured format for abis */
@@ -339,6 +339,17 @@ export interface GetCodeResult {
 export interface GetCodeHashResult {
     account_name: string;
     code_hash: string;
+}
+
+/** Return value of `/v1/chain/get_contract_query` */
+export interface GetContractQueryResult {
+    head_block_num: number;
+    head_block_id: string;
+    last_irreversible_block_num: number;
+    last_irreversible_block_id: string;
+    code_hash: string;
+    pending_transactions: string[];
+    result: TransactionTrace;
 }
 
 /** Return value of `/v1/chain/get_currency_stats` */

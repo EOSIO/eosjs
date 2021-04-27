@@ -198,6 +198,39 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls get_contract_query', async () => {
+        const expPath = '/v1/chain/get_contract_query';
+        const accountName = 'myaccountaaa';
+        const signatures = [
+            'George Washington',
+            'John Hancock',
+            'Abraham Lincoln',
+        ];
+        const serializedTransaction = new Uint8Array([
+            0, 16, 32, 128, 255,
+        ]);
+        const expReturn = { data: '12345' };
+        const expParams = {
+            body: JSON.stringify({
+                account_name: accountName,
+                transaction: {
+                    signatures,
+                    compression: 0,
+                    packed_context_free_data: '',
+                    packed_trx: '00102080ff'
+                }
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_contract_query(accountName, { signatures, serializedTransaction });
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls get_currency_balance with all params', async () => {
         const expPath = '/v1/chain/get_currency_balance';
         const code = 'morse';

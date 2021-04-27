@@ -177,6 +177,23 @@ const transactWithReturnValue = async () => {
     });
 };
 
+const readOnlyQuery = async () => {
+    return await api.readOnlyQuery('readonly', {
+        actions: [{
+            account: 'readonly',
+            name: 'get',
+            authorization: [{
+                actor: 'readonly',
+                permission: 'active',
+            }],
+            data: {},
+        }],
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30
+    });
+};
+
 const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () => await api.transact({
@@ -210,5 +227,6 @@ module.exports = {
     transactWithShorthandTxJsonContextFreeAction,
     transactWithShorthandTxJsonContextFreeData,
     transactWithReturnValue,
+    readOnlyQuery,
     rpcShouldFail
 };

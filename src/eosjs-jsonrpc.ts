@@ -17,6 +17,7 @@ import {
     GetBlockResult,
     GetCodeResult,
     GetCodeHashResult,
+    GetContractQueryResult,
     GetCurrencyStatsResult,
     GetInfoResult,
     GetProducerScheduleResult,
@@ -164,6 +165,20 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     /** Raw call to `/v1/chain/get_code_hash` */
     public async get_code_hash(accountName: string): Promise<GetCodeHashResult> {
         return await this.fetch('/v1/chain/get_code_hash', { account_name: accountName });
+    }
+
+    /** Raw call to `/v1/chain/get_contract_query */
+    public async get_contract_query(accountName: string,
+        { signatures, serializedTransaction }: PushTransactionArgs): Promise<GetContractQueryResult> {
+        return await this.fetch('/v1/chain/get_contract_query', {
+            account_name: accountName,
+            transaction: {
+                signatures,
+                compression: 0,
+                packed_context_free_data: arrayToHex(new Uint8Array(0)),
+                packed_trx: arrayToHex(serializedTransaction),
+            }
+        });
     }
 
     /** Raw call to `/v1/chain/get_currency_balance` */

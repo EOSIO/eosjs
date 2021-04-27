@@ -28,7 +28,8 @@ import {
     PushTransactionArgs,
     GetBlockHeaderStateResult,
     GetBlockInfoResult,
-    GetBlockResult
+    GetBlockResult,
+    GetContractQueryResult,
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
@@ -341,6 +342,30 @@ export class Api {
                 return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
             }
             return this.pushSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
+        }
+        return pushTransactionArgs as PushTransactionArgs;
+    }
+
+    /**
+     * Create and optionally broadcast a read-only query transaction.
+     *
+     * See `transact` for details of configuration options.
+     *
+     * @returns Contract query response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
+     */
+    public async readOnlyQuery(
+        accountName: string,
+        transaction: Transaction,
+        { broadcast = true, sign = true, requiredKeys, blocksBehind, useLastIrreversible, expireSeconds }:
+        TransactConfig = {}): Promise<GetContractQueryResult|PushTransactionArgs>
+    {
+        const pushTransactionArgs = await this.transact(
+            transaction,
+            { broadcast: false, sign, requiredKeys, compression: false, blocksBehind, useLastIrreversible, expireSeconds }
+        ) as PushTransactionArgs;
+
+        if (broadcast) {
+            return this.rpc.get_contract_query(accountName, pushTransactionArgs) as Promise<GetContractQueryResult>;
         }
         return pushTransactionArgs as PushTransactionArgs;
     }
