@@ -3,7 +3,7 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi, TransactResult } from './eosjs-api-interfaces';
+import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
 import {
     AbiBinToJsonResult,
@@ -27,6 +27,7 @@ import {
     GetTableRowsResult,
     PushTransactionArgs,
     PackedTrx,
+    TransactResult,
     GetBlockHeaderStateResult,
     GetTableByScopeResult,
     DBSizeGetResult,

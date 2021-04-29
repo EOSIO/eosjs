@@ -3,7 +3,6 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
 import { Authorization } from './eosjs-serialize';
 
 /** Structured format for abis */
@@ -214,6 +213,27 @@ export interface GetBlockInfoResult {
     ref_block_prefix: number;
 }
 
+/** Returned action from nodeos, data is optional */
+export interface ProcessedAction {
+    account: string;
+    name: string;
+    authorization: Authorization[];
+    data?: any;
+    hex_data?: string;
+}
+export interface ProcessedTransaction {
+    expiration?: string;
+    ref_block_num?: number;
+    ref_block_prefix?: number;
+    max_net_usage_words?: number;
+    max_cpu_usage_ms?: number;
+    delay_sec?: number;
+    context_free_actions?: ProcessedAction[];
+    context_free_data?: Uint8Array[];
+    actions: ProcessedAction[];
+    transaction_extensions?: [number, string][];
+}
+
 export interface PackedTransaction {
     id: string;
     signatures: string[];
@@ -221,7 +241,7 @@ export interface PackedTransaction {
     packed_context_free_data: string;
     context_free_data: string[];
     packed_trx: string;
-    transaction: Transaction;
+    transaction: ProcessedTransaction;
 }
 
 export interface PackedTrx {
@@ -413,7 +433,7 @@ export interface GetRawAbiResult {
     abi: string;
 }
 
-export interface DeferredTransaction extends Transaction {
+export interface DeferredTransaction extends ProcessedTransaction {
     deferred_transaction_generation?: {
         sender_trx_id: string;
         sender_id: string;
@@ -459,6 +479,76 @@ export interface GetTableByScopeResultRow {
 export interface GetTableByScopeResult {
     rows: GetTableByScopeResultRow[];
     more: string;
+}
+
+export interface AccountDelta {
+    account: string;
+    delta: number;
+}
+
+export interface AuthSequence {
+    account: string;
+    sequence: number;
+}
+
+export interface ActionReceipt {
+    receiver: string;
+    act_digest: string;
+    global_sequence: number;
+    recv_sequence: number;
+    auth_sequence: [ string, number ][];
+    code_sequence: number;
+    abi_sequence: number;
+}
+
+export interface ActionTrace {
+    action_ordinal: number;
+    creator_action_ordinal: number;
+    closest_unnotified_ancestor_action_ordinal: number;
+    receipt: ActionReceipt;
+    receiver: string;
+    act: ProcessedAction;
+    context_free: boolean;
+    elapsed: number;
+    console: string;
+    trx_id: string;
+    block_num: number;
+    block_time: string;
+    producer_block_id: string|null;
+    account_ram_deltas: AccountDelta[];
+    account_disk_deltas: AccountDelta[];
+    except: any;
+    error_code: number|null;
+    return_value?: any;
+    return_value_hex_data?: string;
+    return_value_data?: any;
+    inline_traces?: ActionTrace[];
+}
+
+export interface TransactionReceiptHeader {
+    status: string;
+    cpu_usage_us: number;
+    net_usage_words: number;
+}
+
+export interface TransactionTrace {
+    id: string;
+    block_num: number;
+    block_time: string;
+    producer_block_id: string|null;
+    receipt: TransactionReceiptHeader|null;
+    elapsed: number;
+    net_usage: number;
+    scheduled: boolean;
+    action_traces: ActionTrace[];
+    account_ram_delta: AccountDelta|null;
+    except: string|null;
+    error_code: number|null;
+}
+
+export interface TransactResult {
+    transaction_id: string;
+    processed: TransactionTrace;
 }
 
 /** Arguments for `push_transaction` */

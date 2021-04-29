@@ -26,11 +26,12 @@ import {
     GetTableRowsResult,
     GetTableByScopeResult,
     PushTransactionArgs,
+    TransactResult,
     AbiBinToJsonResult,
     TraceApiGetBlockResult,
     DBSizeGetResult,
 } from '../eosjs-rpc-interfaces';
-import { TransactResult } from '../eosjs-api-interfaces';
+import { Transaction } from '../eosjs-api-interfaces';
 import 'jest-extended';
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z';
@@ -405,7 +406,7 @@ describe('Chain API Plugin Endpoints', () => {
                                 actor: 'string',
                                 permission: 'string',
                             },
-                            data: 'any',
+                            'data?': 'any',
                             'hex_data?': 'string',
                         },
                         'context_free_data?': 'number',
@@ -416,7 +417,7 @@ describe('Chain API Plugin Endpoints', () => {
                                 actor: 'string',
                                 permission: 'string',
                             },
-                            data: 'any',
+                            'data?': 'any',
                             'hex_data?': 'string',
                         },
                         'transaction_extensions?': {
@@ -677,7 +678,7 @@ describe('Chain API Plugin Endpoints', () => {
                             actor: 'string',
                             permission: 'string',
                         },
-                        data: 'any',
+                        'data?': 'any',
                         'hex_data?': 'string',
                     },
                     'context_free_data?': 'number',
@@ -688,7 +689,7 @@ describe('Chain API Plugin Endpoints', () => {
                             actor: 'string',
                             permission: 'string',
                         },
-                        data: 'any',
+                        'data?': 'any',
                         'hex_data?': 'string',
                     },
                     'transaction_extensions?': {
@@ -752,7 +753,7 @@ describe('Chain API Plugin Endpoints', () => {
 
     it('validates return type of get_required_keys', async () => {
         const info = await rpc.get_info();
-        let transaction: any = {
+        let transaction: Transaction = {
             actions: [{
                 account: 'eosio.token',
                 name: 'transfer',
@@ -846,7 +847,7 @@ describe('Chain API Plugin Endpoints', () => {
                             actor: 'string',
                             permission: 'string',
                         },
-                        data: 'any',
+                        'data?': 'any',
                         'hex_data?': 'string',
                     },
                     context_free: 'boolean',
@@ -962,7 +963,7 @@ describe('Chain API Plugin Endpoints', () => {
                             actor: 'string',
                             permission: 'string',
                         },
-                        data: 'any',
+                        'data?': 'any',
                         'hex_data?': 'string',
                     },
                     context_free: 'boolean',
@@ -1059,7 +1060,7 @@ describe('Chain API Plugin Endpoints', () => {
                             actor: 'string',
                             permission: 'string',
                         },
-                        data: 'any',
+                        'data?': 'any',
                         'hex_data?': 'string',
                     },
                     context_free: 'boolean',
