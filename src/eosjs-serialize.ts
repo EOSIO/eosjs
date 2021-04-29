@@ -127,7 +127,7 @@ export interface Action {
     account: string;
     name: string;
     authorization: Authorization[];
-    data?: any;
+    data: any;
     hex_data?: string;
 }
 
@@ -136,7 +136,7 @@ export interface SerializedAction {
     account: string;
     name: string;
     authorization: Authorization[];
-    data?: string;
+    data: string;
 }
 
 /** Serialize and deserialize data */
