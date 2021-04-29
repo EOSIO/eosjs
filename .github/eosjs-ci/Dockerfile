@@ -2,8 +2,8 @@
 #### docker build --tag eosjs-ci:test ./.github/eosjs-ci
 #### docker run --publish 8888:8888 eosjs-ci:test
 
-ARG EOSBRANCH=develop
-ARG CDTBRANCH=develop
+ARG EOSBRANCH=read_only_query_EPE-746
+ARG CDTBRANCH=qy-read-only-action
 FROM eosio/eosio.cdt:${CDTBRANCH} as contracts
 WORKDIR /root
 ### base
@@ -13,6 +13,12 @@ RUN apt-get update \
 RUN git clone https://github.com/EOSIO/eos \
  && cd eos \
  && git checkout develop
+
+RUN git clone https://github.com/EOSIO/eosio.cdt \
+ && cd eosio.cdt \
+ && git checkout qy-read-only-action \
+ && mkdir build && cd build && mkdir read_only_query_tests && cd .. \
+ && eosio-cpp -abigen ./tests/unit/test_contracts/read_only_query_tests.cpp -o ./build/read_only_query_tests/read_only_query_tests.wasm
 
 RUN git clone https://github.com/EOSIO/eosio.contracts \
  && cd eosio.contracts \
@@ -41,6 +47,7 @@ WORKDIR /root
 RUN mkdir -p "/opt/eosio/bin/contracts"
 COPY --from=contracts /root/eos/contracts/contracts/eosio.bios/bin/* /opt/eosio/bin/contracts/eosio.bios/
 COPY --from=contracts /root/eos/contracts/contracts/eosio.boot/bin/* /opt/eosio/bin/contracts/eosio.boot/
+COPY --from=contracts /root/eosio.cdt/build/read_only_query_tests/* /opt/eosio/bin/contracts/read_only_query_tests/
 COPY --from=contracts /root/eosio.contracts/build/ /opt/eosio/bin/contracts
 COPY --from=contracts /root/key-value-example-app/contracts/kv_todo/build/* /opt/eosio/bin/contracts/kv_todo/
 COPY --from=contracts /root/return-values-example-app/contracts/action_return_value/build/* /opt/eosio/bin/contracts/action_return_value/

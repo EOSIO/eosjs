@@ -494,14 +494,14 @@
 
             const testWithReadOnlyQuery = async (e) => {
               const expectedValue = [
-                {'age': 25, 'gender': 1, 'id': 1, 'name': 'Bob Smith'},
-                {'age': 42, 'gender': 1, 'id': 3, 'name': 'John Smith'},
-                {'age': 27, 'gender': 1, 'id': 4, 'name': 'Jack Smith'},
-                {'age': 20, 'gender': 0, 'id': 2, 'name': 'Alice Smith'},
-                {'age': 26, 'gender': 0, 'id': 5, 'name': 'Youko Niihara'},
-                {'age': 18, 'gender': 0, 'id': 6, 'name': 'Rose Lee'},
-                {'age': 25, 'gender': 0, 'id': 7, 'name': 'Youko Kawakami'},
-                {'age': 24, 'gender': 0, 'id': 8, 'name': 'Yuu Yamada'}
+                {'id': 1, 'name': 'Bob Smith', 'gender': 1, 'age': 25},
+                {'id': 3, 'name': 'John Smith', 'gender': 1, 'age': 42},
+                {'id': 4, 'name': 'Jack Smith', 'gender': 1, 'age': 27},
+                {'id': 2, 'name': 'Alice Smith', 'gender': 0, 'age': 20,},
+                {'id': 5, 'name': 'Youko Niihara', 'gender': 0, 'age': 26},
+                {'id': 6, 'name': 'Rose Lee', 'gender': 0, 'age': 18},
+                {'id': 7, 'name': 'Youko Kawakami', 'gender': 0, 'age': 25},
+                {'id': 8, 'name': 'Yuu Yamada', 'gender': 0, 'age': 24}
               ];
               resultsLabel = e.target;
               resultsLabel.innerText = EXECUTING;
@@ -515,7 +515,7 @@
                 return false;
               }
 
-              if (transactionResponse.result.action_traces[0].return_value_data === expectedValue) {
+              if (JSON.stringify(transactionResponse.result.action_traces[0].return_value_data) === JSON.stringify(expectedValue)) {
                 resultsLabel.className = "success";
                 resultsLabel.innerText = SUCCESS;
                 return true;
