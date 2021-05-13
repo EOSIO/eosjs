@@ -26,12 +26,11 @@ import {
     GetTableRowsResult,
     GetTableByScopeResult,
     PushTransactionArgs,
-    TransactResult,
     AbiBinToJsonResult,
     TraceApiGetBlockResult,
     DBSizeGetResult,
 } from '../eosjs-rpc-interfaces';
-import { Transaction } from '../eosjs-api-interfaces';
+import { Transaction, TransactResult } from '../eosjs-api-interfaces';
 import 'jest-extended';
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z';

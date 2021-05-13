@@ -18,6 +18,7 @@ import {
     SignatureProvider,
     TransactConfig,
     Transaction,
+    TransactResult,
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
 import {
@@ -28,7 +29,6 @@ import {
     GetBlockHeaderStateResult,
     GetBlockInfoResult,
     GetBlockResult,
-    TransactResult,
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
