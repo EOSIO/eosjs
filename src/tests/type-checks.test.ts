@@ -336,7 +336,11 @@ describe('Chain API Plugin Endpoints', () => {
                     weight: 'number',
                 },
             }],
-            confirm_count: 'number'
+            confirm_count: 'number',
+            state_extensions: {
+                version: 'number',
+                participants: 'string',
+            },
         };
         verifyType(result, getBlockHeaderStateResult);
     });

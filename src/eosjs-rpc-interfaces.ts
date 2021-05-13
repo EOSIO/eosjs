@@ -321,6 +321,11 @@ export interface ProtocolFeatureActivationSet {
     protocol_features: string[]
 }
 
+export interface SecurityGroupInfo {
+    version: number;
+    participants: string[];
+}
+
 /** Return value of `/v1/chain/get_block_header_state` */
 export interface GetBlockHeaderStateResult {
     id: string;
@@ -338,6 +343,7 @@ export interface GetBlockHeaderStateResult {
     // valid_block_signing_authority: BlockSigningAuthority;
     valid_block_signing_authority: any;
     confirm_count: number[];
+    state_extension: SecurityGroupInfo;
 }
 
 /** Subset of `GetBlockHeaderStateResult` used to calculate TAPoS fields in transactions */
