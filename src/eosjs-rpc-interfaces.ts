@@ -3,8 +3,8 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { Authorization } from './eosjs-serialize';
 import { TransactionReceiptHeader } from './eosjs-api-interfaces';
+import { Authorization } from './eosjs-serialize';
 
 /** Structured format for abis */
 export interface Abi {
@@ -326,6 +326,10 @@ export interface SecurityGroupInfo {
     participants: string[];
 }
 
+export interface StateExtension {
+    security_group_info: SecurityGroupInfo
+}
+
 /** Return value of `/v1/chain/get_block_header_state` */
 export interface GetBlockHeaderStateResult {
     id: string;
@@ -343,7 +347,7 @@ export interface GetBlockHeaderStateResult {
     // valid_block_signing_authority: BlockSigningAuthority;
     valid_block_signing_authority: any;
     confirm_count: number[];
-    state_extension: SecurityGroupInfo;
+    state_extension: [number, StateExtension];
 }
 
 /** Subset of `GetBlockHeaderStateResult` used to calculate TAPoS fields in transactions */

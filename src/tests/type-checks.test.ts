@@ -337,10 +337,12 @@ describe('Chain API Plugin Endpoints', () => {
                 },
             }],
             confirm_count: 'number',
-            state_extensions: {
-                version: 'number',
-                participants: 'string',
-            },
+            state_extension: [ 'number', {
+                security_group_info: {
+                    version: 'number',
+                    participants: 'string',
+                },
+            }]
         };
         verifyType(result, getBlockHeaderStateResult);
     });
