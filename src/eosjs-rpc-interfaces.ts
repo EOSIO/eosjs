@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
+import { TransactionReceiptHeader } from './eosjs-api-interfaces';
 import { Authorization } from './eosjs-serialize';
 
 /** Structured format for abis */
@@ -214,6 +214,27 @@ export interface GetBlockInfoResult {
     ref_block_prefix: number;
 }
 
+/** Returned action from nodeos, data is optional */
+export interface ProcessedAction {
+    account: string;
+    name: string;
+    authorization: Authorization[];
+    data?: any;
+    hex_data?: string;
+}
+export interface ProcessedTransaction {
+    expiration?: string;
+    ref_block_num?: number;
+    ref_block_prefix?: number;
+    max_net_usage_words?: number;
+    max_cpu_usage_ms?: number;
+    delay_sec?: number;
+    context_free_actions?: ProcessedAction[];
+    context_free_data?: Uint8Array[];
+    actions: ProcessedAction[];
+    transaction_extensions?: [number, string][];
+}
+
 export interface PackedTransaction {
     id: string;
     signatures: string[];
@@ -221,7 +242,7 @@ export interface PackedTransaction {
     packed_context_free_data: string;
     context_free_data: string[];
     packed_trx: string;
-    transaction: Transaction;
+    transaction: ProcessedTransaction;
 }
 
 export interface PackedTrx {
@@ -300,6 +321,15 @@ export interface ProtocolFeatureActivationSet {
     protocol_features: string[]
 }
 
+export interface SecurityGroupInfo {
+    version: number;
+    participants: string[];
+}
+
+export interface StateExtension {
+    security_group_info: SecurityGroupInfo
+}
+
 /** Return value of `/v1/chain/get_block_header_state` */
 export interface GetBlockHeaderStateResult {
     id: string;
@@ -317,6 +347,7 @@ export interface GetBlockHeaderStateResult {
     // valid_block_signing_authority: BlockSigningAuthority;
     valid_block_signing_authority: any;
     confirm_count: number[];
+    state_extension: [number, StateExtension];
 }
 
 /** Subset of `GetBlockHeaderStateResult` used to calculate TAPoS fields in transactions */
@@ -413,7 +444,7 @@ export interface GetRawAbiResult {
     abi: string;
 }
 
-export interface DeferredTransaction extends Transaction {
+export interface DeferredTransaction extends ProcessedTransaction {
     deferred_transaction_generation?: {
         sender_trx_id: string;
         sender_id: string;

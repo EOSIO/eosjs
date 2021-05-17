@@ -28,7 +28,7 @@ import {
     PushTransactionArgs,
     GetBlockHeaderStateResult,
     GetBlockInfoResult,
-    GetBlockResult
+    GetBlockResult,
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
