@@ -33,7 +33,7 @@
     "pako": "2.0.3"
   },
   "devDependencies": {
-    "@blockone/eslint-config-blockone": "^4.0.0",
+    "@blockone/eslint-config-blockone": "^4.0.1",
     "@types/elliptic": "^6.4.12",
     "@types/jest": "^26.0.23",
     "@types/node": "^14.14.45",
