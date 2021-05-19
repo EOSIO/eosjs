@@ -7,7 +7,7 @@ import {
     signatureToString,
     stringToSignature,
 } from './eosjs-numeric';
-import { constructElliptic, PublicKey } from './eosjs-key-conversions';
+import { constructElliptic, PublicKey, WebCryptoSignatureData } from './eosjs-key-conversions';
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
@@ -23,7 +23,7 @@ export class Signature {
     }
 
     /** Instantiate Signature from an `elliptic`-format Signature */
-    public static fromElliptic(ellipticSig: EC.Signature, keyType: KeyType, ec?: EC): Signature {
+    public static fromElliptic(ellipticSig: EC.Signature | {r: BN, s: BN, recoveryParam: number | null}, keyType: KeyType, ec?: EC): Signature {
         const r = ellipticSig.r.toArray('be', 32);
         const s = ellipticSig.s.toArray('be', 32);
         let eosioRecoveryParam;
@@ -44,6 +44,36 @@ export class Signature {
             data: sigData,
         }, ec);
     }
+
+    /** Instantiate Signature from a Web Crypto Signature */
+    public static async fromWebCrypto(data: WebCryptoSignatureData, webCryptoSig: ArrayBuffer, publicKey: PublicKey, ec?: EC) {
+        if (!ec) {
+            ec = constructElliptic(KeyType.r1);
+        }
+
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        const r = new BN(new Uint8Array(webCryptoSig.slice(0, 32)), 32);
+        const s = new BN(new Uint8Array(webCryptoSig.slice(32)), 32).umod(ec.curve.n);
+        const recoveryParam = this.getRecoveryParam(Buffer.from(hash), {r, s}, publicKey.toString(), ec);
+        return Signature.fromElliptic({r, s, recoveryParam}, KeyType.r1, ec);
+    }
+
+    /** Replaced version of getRecoveryParam from `elliptic` library */
+    private static getRecoveryParam = (digest: BNInput, signature: EC.SignatureOptions, publicKey: string, ec: EC) => {
+        let recoveredKey: any;
+        for (let i = 0; i < 4; i++) {
+            try {
+                const keyPair = ec.recoverPubKey(digest, signature, i);
+                recoveredKey = PublicKey.fromElliptic(ec.keyFromPublic(keyPair), KeyType.r1, ec).toString();
+            } catch (e) {
+                continue;
+            }
+            if (recoveredKey === publicKey) {
+                return i;
+            }
+        }
+        throw new Error('Unable to find valid recovery factor');
+    };
 
     /** Export Signature as `elliptic`-format Signature
      * NOTE: This isn't an actual elliptic-format Signature, as ec.Signature is not exported by the library.
@@ -96,6 +126,22 @@ export class Signature {
         const ellipticSignature = this.toElliptic();
         const ellipticPublicKey = publicKey.toElliptic();
         return this.ec.verify(data, ellipticSignature, ellipticPublicKey, encoding);
+    }
+
+    /** Verify a Web Crypto signature with data (that matches types) and public key */
+    public async webCryptoVerify(data: WebCryptoSignatureData, webCryptoSig: ArrayBuffer, publicKey: PublicKey): Promise<boolean> {
+        const webCryptoPub = await publicKey.toWebCrypto();
+        return await crypto.subtle.verify(
+            {
+                name: 'ECDSA',
+                hash: {
+                    name: 'SHA-256'
+                }
+            },
+            webCryptoPub,
+            webCryptoSig,
+            data
+        );
     }
 
     /** Recover a public key from a message or hashed message digest and signature */
