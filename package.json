@@ -36,7 +36,7 @@
     "@blockone/eslint-config-blockone": "^4.0.1",
     "@types/elliptic": "^6.4.12",
     "@types/jest": "^26.0.23",
-    "@types/node": "^14.14.45",
+    "@types/node": "^14.17.0",
     "@types/node-fetch": "^2.5.10",
     "@types/pako": "^1.0.1",
     "buffer": "^6.0.3",
