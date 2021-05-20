@@ -31,11 +31,14 @@ jobs:
       - name: Test Node
         run: |
           yarn test-node
+      - name: Test Types
+        run: |
+          yarn test-types
       - name: Build
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@89161930792c0050baeba2737caa058c395ecfcb
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish Edge
@@ -51,7 +54,7 @@ jobs:
 
     services:
       nodeos:
-        image: eosio/eosjs-ci:v0.2.1
+        image: eosio/eosjs-ci:develop
 
         ports:
           - 8888:8888

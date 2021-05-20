@@ -4,6 +4,7 @@
 // copyright defined in eosjs/LICENSE.txt
 
 import { SignatureProvider, SignatureProviderArgs } from './eosjs-api-interfaces';
+import { PushTransactionArgs } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 import * as numeric from './eosjs-numeric';
 import { ec } from 'elliptic';
@@ -14,14 +15,14 @@ export class WebAuthnSignatureProvider implements SignatureProvider {
     public keys = new Map<string, string>();
 
     /** Public keys that the `SignatureProvider` holds */
-    public async getAvailableKeys() {
+    public async getAvailableKeys(): Promise<string[]> {
         return Array.from(this.keys.keys());
     }
 
     /** Sign a transaction */
     public async sign(
         { chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs,
-    ) {
+    ): Promise<PushTransactionArgs> {
         const signBuf = new ser.SerialBuffer();
         signBuf.pushArray(ser.hexToUint8Array(chainId));
         signBuf.pushArray(serializedTransaction);
@@ -45,10 +46,10 @@ export class WebAuthnSignatureProvider implements SignatureProvider {
                     challenge: digest.buffer,
                 },
             });
-            const e = new ec('p256') as any;
+            const e = new ec('p256') as any; // https://github.com/indutny/elliptic/pull/232
             const pubKey = e.keyFromPublic(numeric.stringToPublicKey(key).data.subarray(0, 33)).getPublic();
 
-            const fixup = (x: Uint8Array) => {
+            const fixup = (x: Uint8Array): Uint8Array => {
                 const a = Array.from(x);
                 while (a.length < 32) {
                     a.unshift(0);

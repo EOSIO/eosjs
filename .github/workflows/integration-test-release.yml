@@ -37,7 +37,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@89161930792c0050baeba2737caa058c395ecfcb
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
         with:
           spec: cypress/integration/index.spec.js
     services:

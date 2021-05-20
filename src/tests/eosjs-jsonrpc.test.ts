@@ -140,6 +140,25 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls get_block_info', async () => {
+        const expPath = '/v1/chain/get_block_info';
+        const blockNum = 1234;
+        const expReturn = { data: '12345' };
+        const expParams = {
+            body: JSON.stringify({
+                block_num: blockNum,
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_block_info(blockNum);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls get_block', async () => {
         const expPath = '/v1/chain/get_block';
         const blockNumOrId = 1234;
@@ -445,6 +464,85 @@ describe('JSON RPC', () => {
         fetchMock.once(JSON.stringify(expReturn));
 
         const response = await jsonRpc.get_table_rows(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
+    it('calls get_kv_table_rows with all params', async () => {
+        const expPath = '/v1/chain/get_kv_table_rows';
+        const json = false;
+        const code = 'morse';
+        const table = 'coffee';
+        const indexName = 'type';
+        const encodeType = 'bytes';
+        const indexValue = 'minty';
+        const lowerBound = 'zero';
+        const upperBound = 'five';
+        const limit = 10;
+        const reverse = false;
+        const showPayer = false;
+        const expReturn = { data: '12345' };
+
+        const callParams = {
+            json,
+            code,
+            table,
+            index_name: indexName,
+            encode_type: encodeType,
+            index_value: indexValue,
+            lower_bound: lowerBound,
+            upper_bound: upperBound,
+            limit,
+            reverse,
+            show_payer: showPayer,
+        };
+        const expParams = {
+            body: JSON.stringify(callParams),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_kv_table_rows(callParams);
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
+    it('calls get_kv_table_rows with default params', async () => {
+        const expPath = '/v1/chain/get_kv_table_rows';
+        const json = true;
+        const code = 'morse';
+        const table = 'coffee';
+        const indexName = 'type';
+        const encodeType = 'bytes';
+        const limit = 10;
+        const reverse = false;
+        const showPayer = false;
+        const expReturn = { data: '12345' };
+        const callParams = {
+            code,
+            table,
+            index_name: indexName,
+        };
+        const expParams = {
+            body: JSON.stringify({
+                json,
+                code,
+                table,
+                index_name: indexName,
+                encode_type: encodeType,
+                limit,
+                reverse,
+                show_payer: showPayer,
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.get_kv_table_rows(callParams);
 
         expect(response).toEqual(expReturn);
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);

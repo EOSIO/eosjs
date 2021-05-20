@@ -14,6 +14,12 @@ EXAMPLE_ACCOUNT_PUBLIC_KEY="EOS7bxrQUTbQ4mqcoefhWPz1aFieN4fA9RQAiozRz7FrUChHZ7Rb
 R1_EXAMPLE_ACCOUNT_PRIVATE_KEY="PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT"
 R1_EXAMPLE_ACCOUNT_PUBLIC_KEY="PUB_R1_4ztaVy8L9zbmzTdpfq5GcaFYwGwXTNmN3qW7qcgHMmfUZhpzQQ"
 
+CFHELLO_PRIVATE_KEY="5KYjzAywvTnkSDDyvCBoXAiEsjtDEMRzJ3yrXRhyF6VDs9b5RBj"
+CFHELLO_PUBLIC_KEY="EOS6nVrBASwwviMy3CntKsb1cD5Ai2gRZnyrxJDqypL3JLL7KCKrK"
+
+CFACTOR_PRIVATE_KEY="5K8Sm2bB2b7ZC8tJMefrk1GFa4jgtHxxHRcjX49maMk9AEwq8hN"
+CFACTOR_PUBLIC_KEY="EOS8Gyj8LpmSXxGVkGCd1rrroV9K5wtouCuwwABpyVKQno6LbSV3C"
+
 ROOT_DIR="/opt"
 CONTRACTS_DIR="$ROOT_DIR/eosio/bin/contracts"
 BLOCKCHAIN_DATA_DIR=/root/.local/share
@@ -97,14 +103,6 @@ function setabi {
   fi
 }
 
-# $1 - account name
-# $2 - public key
-# $3 - private key
-function create_account {
-  cleos wallet import --private-key $3
-  cleos create account eosio $1 $2
-}
-
 # Move into the executable directory
 cd $ROOT_DIR/bin/
 mkdir -p $CONFIG_DIR
@@ -119,10 +117,14 @@ if [ -z "$NODEOS_RUNNING" ]; then
   --http-validate-host=false \
   --plugin eosio::producer_api_plugin \
   --plugin eosio::chain_api_plugin \
+  --plugin eosio::trace_api_plugin \
+  --trace-no-abis \
+  --plugin eosio::db_size_api_plugin \
   --plugin eosio::http_plugin \
   --http-server-address=0.0.0.0:8888 \
   --access-control-allow-origin=* \
   --contracts-console \
+  --enable-account-queries=true \
   --max-transaction-time=100000 \
   --verbose-http-errors &
 fi
@@ -144,41 +146,88 @@ echo "Creating accounts and deploying contracts"
 
 start_wallet
 
+sleep 1s
+cleos wallet import --private-key $EXAMPLE_ACCOUNT_PRIVATE_KEY
+cleos wallet import --private-key $R1_EXAMPLE_ACCOUNT_PRIVATE_KEY
+cleos wallet import --private-key $CFHELLO_PRIVATE_KEY
+cleos wallet import --private-key $CFACTOR_PRIVATE_KEY
+cleos create account eosio eosio.bpay $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.msig $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.names $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.ram $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.ramfee $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.saving $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.stake $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.vpay $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.rex $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio eosio.token $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio returnvalue $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio todo $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio bob $EXAMPLE_ACCOUNT_PUBLIC_KEY
+cleos create account eosio alice $EXAMPLE_ACCOUNT_PUBLIC_KEY
+cleos create account eosio bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY
+cleos create account eosio alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY
+cleos create account eosio cfhello $CFHELLO_PUBLIC_KEY
+cleos create account cfhello cfactor $CFACTOR_PUBLIC_KEY
+
 # preactivate concensus upgrades
 post_preactivate
 
 sleep 1s
-cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
-setabi eosio $CONTRACTS_DIR/boot/boot.abi
-setcode eosio $CONTRACTS_DIR/boot/boot.wasm
-sleep 2s
-cleos push action eosio boot "[]" -p eosio@active
+setabi eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.abi
+setcode eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.wasm
 
 sleep 1s
-cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
-setcode eosio $CONTRACTS_DIR/system/system.wasm
-setabi eosio $CONTRACTS_DIR/system/system.abi
+activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
+activate_feature "825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"
+activate_feature "c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"
+activate_feature "4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"
+activate_feature "f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"
+activate_feature "2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"
+activate_feature "8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"
+activate_feature "ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"
+activate_feature "68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"
+activate_feature "e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"
+activate_feature "ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"
+activate_feature "4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"
+activate_feature "1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"
+activate_feature "bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"
+activate_feature "5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"
 
-# token
 sleep 1s
-cleos wallet unlock --password $(cat "$CONFIG_DIR"/keys/default_wallet_password.txt) || true
-create_account eosio.token $SYSTEM_ACCOUNT_PUBLIC_KEY $SYSTEM_ACCOUNT_PRIVATE_KEY
-create_account bob $EXAMPLE_ACCOUNT_PUBLIC_KEY $EXAMPLE_ACCOUNT_PRIVATE_KEY
-create_account alice $EXAMPLE_ACCOUNT_PUBLIC_KEY $EXAMPLE_ACCOUNT_PRIVATE_KEY
-create_account bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY $R1_EXAMPLE_ACCOUNT_PRIVATE_KEY
-create_account alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY $R1_EXAMPLE_ACCOUNT_PRIVATE_KEY
+setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
+setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
 
 sleep 1s
-cleos set abi eosio.token $CONTRACTS_DIR/token/token.abi -p eosio.token@active -p eosio@active
-cleos set code eosio.token $CONTRACTS_DIR/token/token.wasm -p eosio.token@active -p eosio@active
+cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":4096, "max_iterators":1024}]' -p eosio@active
+cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
 
+sleep 1s
+setabi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi
+setcode cfhello $CONTRACTS_DIR/cfhello/cfhello.wasm
+
+sleep 1s
+setabi todo $CONTRACTS_DIR/kv_todo/kv_todo.abi
+setcode todo $CONTRACTS_DIR/kv_todo/kv_todo.wasm
+
+sleep 1s
+setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
+setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
+
+sleep 1s
+setabi eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.abi
+setcode eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.wasm
+
+sleep 1s
 cleos push action eosio.token create '["bob", "10000000000.0000 SYS"]' -p eosio.token
 cleos push action eosio.token issue '["bob", "5000000000.0000 SYS", "Half of available supply"]' -p bob
 cleos push action eosio.token transfer '["bob", "alice", "1000000.0000 SYS", "memo"]' -p bob
 cleos push action eosio.token transfer '["bob", "bobr1", "1000000.0000 SYS", "memo"]' -p bob
 cleos push action eosio.token transfer '["bob", "alicer1", "1000000.0000 SYS", "memo"]' -p bob
 
-cleos push action eosio init "[]" -p eosio@active
+cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
+cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
+cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
 
 echo "All done initializing the blockchain"
 

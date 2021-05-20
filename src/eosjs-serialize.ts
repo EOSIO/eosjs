@@ -6,7 +6,9 @@
 /* eslint-disable jsdoc/check-indentation */
 
 import * as numeric from './eosjs-numeric';
-import { Abi, BlockTaposInfo, BlockHeaderStateTaposInfo } from './eosjs-rpc-interfaces';
+import { TransactionHeader } from './eosjs-api-interfaces';
+import { Abi, BlockTaposInfo } from './eosjs-rpc-interfaces';
+import { Query } from './eosjs-api-interfaces';
 
 /** A field in an abi */
 export interface Field {
@@ -35,6 +37,37 @@ export class SerializerState {
     constructor(options: SerializerOptions = {}) {
         this.options = options;
     }
+}
+
+/**
+ * An Anyvar (non-short form) may be any of the following:
+ *  * null
+ *  * string
+ *  * number
+ *    * Caution: assumes number is int32. Use {type, value} form for other numeric types
+ *  * an array of anyvar
+ *  * {type, value}
+ *      * type is a string matching one of the predefined types in anyvarDefs
+ *      * value:
+ *          * If type === 'any_object', then value is an object. The values within the object are anyvar.
+ *          * If type === 'any_array', then value is an array of anyvar.
+ *          * Else, value must be eosjs-compatible with the specified type (e.g. uint64 should be a string
+ *            containing the value in decimal).
+ *  * Other object. The values within the object are anyvar.
+ *
+ * The short form is more convenient, but it can't be converted back to binary (serialized).
+ * Wherever the anyvar would have {type, value}, it has just the value instead.
+ */
+export type Anyvar = null | string | number | Anyvar[] | { type: string, value: any } | Record<string, unknown>;
+
+interface AnyvarDef {
+    index: number;
+    useShortForm: boolean;
+    type: {
+        name: string,
+        serialize(buffer: SerialBuffer, value: any): void,
+        deserialize(buffer: SerialBuffer, state?: SerializerState): any,
+    };
 }
 
 /** A type in an abi */
@@ -95,6 +128,7 @@ export interface Action {
     name: string;
     authorization: Authorization[];
     data: any;
+    hex_data?: string;
 }
 
 /** Action with data in serialized hex form */
@@ -134,7 +168,7 @@ export class SerialBuffer {
     }
 
     /** Resize `array` if needed to have at least `size` bytes free */
-    public reserve(size: number) {
+    public reserve(size: number): void {
         if (this.length + size <= this.array.length) {
             return;
         }
@@ -148,34 +182,34 @@ export class SerialBuffer {
     }
 
     /** Is there data available to read? */
-    public haveReadData() {
+    public haveReadData(): boolean {
         return this.readPos < this.length;
     }
 
     /** Restart reading from the beginning */
-    public restartRead() {
+    public restartRead(): void {
         this.readPos = 0;
     }
 
     /** Return data with excess storage trimmed away */
-    public asUint8Array() {
+    public asUint8Array(): Uint8Array {
         return new Uint8Array(this.array.buffer, this.array.byteOffset, this.length);
     }
 
     /** Append bytes */
-    public pushArray(v: number[] | Uint8Array) {
+    public pushArray(v: number[] | Uint8Array): void {
         this.reserve(v.length);
         this.array.set(v, this.length);
         this.length += v.length;
     }
 
     /** Append bytes */
-    public push(...v: number[]) {
+    public push(...v: number[]): void {
         this.pushArray(v);
     }
 
     /** Get a single byte */
-    public get() {
+    public get(): number {
         if (this.readPos < this.length) {
             return this.array[this.readPos++];
         }
@@ -183,7 +217,7 @@ export class SerialBuffer {
     }
 
     /** Append bytes in `v`. Throws if `len` doesn't match `v.length` */
-    public pushUint8ArrayChecked(v: Uint8Array, len: number) {
+    public pushUint8ArrayChecked(v: Uint8Array, len: number): void {
         if (v.length !== len) {
             throw new Error('Binary data has incorrect size');
         }
@@ -191,7 +225,7 @@ export class SerialBuffer {
     }
 
     /** Get `len` bytes */
-    public getUint8Array(len: number) {
+    public getUint8Array(len: number): Uint8Array {
         if (this.readPos + len > this.length) {
             throw new Error('Read past end of buffer');
         }
@@ -201,7 +235,7 @@ export class SerialBuffer {
     }
 
     /** Skip `len` bytes */
-    public skip(len: number) {
+    public skip(len: number): void {
         if (this.readPos + len > this.length) {
             throw new Error('Read past end of buffer');
         }
@@ -209,12 +243,12 @@ export class SerialBuffer {
     }
 
     /** Append a `uint16` */
-    public pushUint16(v: number) {
+    public pushUint16(v: number): void {
         this.push((v >> 0) & 0xff, (v >> 8) & 0xff);
     }
 
     /** Get a `uint16` */
-    public getUint16() {
+    public getUint16(): number {
         let v = 0;
         v |= this.get() << 0;
         v |= this.get() << 8;
@@ -222,12 +256,12 @@ export class SerialBuffer {
     }
 
     /** Append a `uint32` */
-    public pushUint32(v: number) {
+    public pushUint32(v: number): void {
         this.push((v >> 0) & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff);
     }
 
     /** Get a `uint32` */
-    public getUint32() {
+    public getUint32(): number {
         let v = 0;
         v |= this.get() << 0;
         v |= this.get() << 8;
@@ -237,7 +271,7 @@ export class SerialBuffer {
     }
 
     /** Append a `uint64`. *Caution*: `number` only has 53 bits of precision */
-    public pushNumberAsUint64(v: number) {
+    public pushNumberAsUint64(v: number): void {
         this.pushUint32(v >>> 0);
         this.pushUint32(Math.floor(v / 0x10000_0000) >>> 0);
     }
@@ -246,14 +280,14 @@ export class SerialBuffer {
      * Get a `uint64` as a `number`. *Caution*: `number` only has 53 bits of precision; some values will change.
      * `numeric.binaryToDecimal(serialBuffer.getUint8Array(8))` recommended instead
      */
-    public getUint64AsNumber() {
+    public getUint64AsNumber(): number {
         const low = this.getUint32();
         const high = this.getUint32();
         return (high >>> 0) * 0x10000_0000 + (low >>> 0);
     }
 
     /** Append a `varuint32` */
-    public pushVaruint32(v: number) {
+    public pushVaruint32(v: number): void {
         while (true) {
             if (v >>> 7) {
                 this.push(0x80 | (v & 0x7f));
@@ -266,7 +300,7 @@ export class SerialBuffer {
     }
 
     /** Get a `varuint32` */
-    public getVaruint32() {
+    public getVaruint32(): number {
         let v = 0;
         let bit = 0;
         while (true) {
@@ -281,12 +315,12 @@ export class SerialBuffer {
     }
 
     /** Append a `varint32` */
-    public pushVarint32(v: number) {
+    public pushVarint32(v: number): void {
         this.pushVaruint32((v << 1) ^ (v >> 31));
     }
 
     /** Get a `varint32` */
-    public getVarint32() {
+    public getVarint32(): number {
         const v = this.getVaruint32();
         if (v & 1) {
             return ((~v) >> 1) | 0x8000_0000;
@@ -296,27 +330,27 @@ export class SerialBuffer {
     }
 
     /** Append a `float32` */
-    public pushFloat32(v: number) {
+    public pushFloat32(v: number): void {
         this.pushArray(new Uint8Array((new Float32Array([v])).buffer));
     }
 
     /** Get a `float32` */
-    public getFloat32() {
+    public getFloat32(): number {
         return new Float32Array(this.getUint8Array(4).slice().buffer)[0];
     }
 
     /** Append a `float64` */
-    public pushFloat64(v: number) {
+    public pushFloat64(v: number): void {
         this.pushArray(new Uint8Array((new Float64Array([v])).buffer));
     }
 
     /** Get a `float64` */
-    public getFloat64() {
+    public getFloat64(): number {
         return new Float64Array(this.getUint8Array(8).slice().buffer)[0];
     }
 
     /** Append a `name` */
-    public pushName(s: string) {
+    public pushName(s: string): void {
         if (typeof s !== 'string') {
             throw new Error('Expected string containing name');
         }
@@ -324,7 +358,7 @@ export class SerialBuffer {
         if (!regex.test(s)) {
             throw new Error('Name should be less than 13 characters, or less than 14 if last character is between 1-5 or a-j, and only contain the following symbols .12345abcdefghijklmnopqrstuvwxyz'); // eslint-disable-line
         }
-        const charToSymbol = (c: number) => {
+        const charToSymbol = (c: number): number => {
             if (c >= 'a'.charCodeAt(0) && c <= 'z'.charCodeAt(0)) {
                 return (c - 'a'.charCodeAt(0)) + 6;
             }
@@ -351,7 +385,7 @@ export class SerialBuffer {
     }
 
     /** Get a `name` */
-    public getName() {
+    public getName(): string {
         const a = this.getUint8Array(8);
         let result = '';
         for (let bit = 63; bit >= 0;) {
@@ -377,28 +411,28 @@ export class SerialBuffer {
     }
 
     /** Append length-prefixed binary data */
-    public pushBytes(v: number[] | Uint8Array) {
+    public pushBytes(v: number[] | Uint8Array): void {
         this.pushVaruint32(v.length);
         this.pushArray(v);
     }
 
     /** Get length-prefixed binary data */
-    public getBytes() {
+    public getBytes(): Uint8Array {
         return this.getUint8Array(this.getVaruint32());
     }
 
     /** Append a string */
-    public pushString(v: string) {
+    public pushString(v: string): void {
         this.pushBytes(this.textEncoder.encode(v));
     }
 
     /** Get a string */
-    public getString() {
+    public getString(): string {
         return this.textDecoder.decode(this.getBytes());
     }
 
     /** Append a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision. */
-    public pushSymbolCode(name: string) {
+    public pushSymbolCode(name: string): void {
         if (typeof name !== 'string') {
             throw new Error('Expected string containing symbol_code');
         }
@@ -411,7 +445,7 @@ export class SerialBuffer {
     }
 
     /** Get a `symbol_code`. Unlike `symbol`, `symbol_code` doesn't include a precision. */
-    public getSymbolCode() {
+    public getSymbolCode(): string {
         const a = this.getUint8Array(8);
         let len;
         for (len = 0; len < a.length; ++len) {
@@ -424,7 +458,7 @@ export class SerialBuffer {
     }
 
     /** Append a `symbol` */
-    public pushSymbol({ name, precision }: { name: string, precision: number }) {
+    public pushSymbol({ name, precision }: { name: string, precision: number }): void {
         if (!/^[A-Z]{1,7}$/.test(name)) {
             throw new Error('Expected symbol to be A-Z and between one and seven characters');
         }
@@ -451,7 +485,7 @@ export class SerialBuffer {
     }
 
     /** Append an asset */
-    public pushAsset(s: string) {
+    public pushAsset(s: string): void {
         if (typeof s !== 'string') {
             throw new Error('Expected string containing asset');
         }
@@ -486,7 +520,7 @@ export class SerialBuffer {
     }
 
     /** Get an asset */
-    public getAsset() {
+    public getAsset(): string {
         const amount = this.getUint8Array(8);
         const { name, precision } = this.getSymbol();
         let s = numeric.signedBinaryToDecimal(amount, precision + 1);
@@ -497,14 +531,14 @@ export class SerialBuffer {
     }
 
     /** Append a public key */
-    public pushPublicKey(s: string) {
+    public pushPublicKey(s: string): void {
         const key = numeric.stringToPublicKey(s);
         this.push(key.type);
         this.pushArray(key.data);
     }
 
     /** Get a public key */
-    public getPublicKey() {
+    public getPublicKey(): string {
         const type = this.get();
         let data: Uint8Array;
         if (type === numeric.KeyType.wa) {
@@ -519,28 +553,28 @@ export class SerialBuffer {
     }
 
     /** Append a private key */
-    public pushPrivateKey(s: string) {
+    public pushPrivateKey(s: string): void {
         const key = numeric.stringToPrivateKey(s);
         this.push(key.type);
         this.pushArray(key.data);
     }
 
     /** Get a private key */
-    public getPrivateKey() {
+    public getPrivateKey(): string {
         const type = this.get();
         const data = this.getUint8Array(numeric.privateKeyDataSize);
         return numeric.privateKeyToString({ type, data });
     }
 
     /** Append a signature */
-    public pushSignature(s: string) {
+    public pushSignature(s: string): void {
         const key = numeric.stringToSignature(s);
         this.push(key.type);
         this.pushArray(key.data);
     }
 
     /** Get a signature */
-    public getSignature() {
+    public getSignature(): string {
         const type = this.get();
         let data: Uint8Array;
         if (type === numeric.KeyType.wa) {
@@ -557,11 +591,11 @@ export class SerialBuffer {
 } // SerialBuffer
 
 /** Is this a supported ABI version? */
-export const supportedAbiVersion = (version: string) => {
+export const supportedAbiVersion = (version: string): boolean => {
     return version.startsWith('eosio::abi/1.');
 };
 
-const checkDateParse = (date: string) => {
+const checkDateParse = (date: string): number => {
     const result = Date.parse(date);
     if (Number.isNaN(result)) {
         throw new Error('Invalid time format');
@@ -570,34 +604,34 @@ const checkDateParse = (date: string) => {
 };
 
 /** Convert date in ISO format to `time_point` (miliseconds since epoch) */
-export const dateToTimePoint = (date: string) => {
+export const dateToTimePoint = (date: string): number => {
     return Math.round(checkDateParse(date + 'Z') * 1000);
 };
 
 /** Convert `time_point` (miliseconds since epoch) to date in ISO format */
-export const timePointToDate = (us: number) => {
+export const timePointToDate = (us: number): string => {
     const s = (new Date(us / 1000)).toISOString();
     return s.substr(0, s.length - 1);
 };
 
 /** Convert date in ISO format to `time_point_sec` (seconds since epoch) */
-export const dateToTimePointSec = (date: string) => {
+export const dateToTimePointSec = (date: string): number => {
     return Math.round(checkDateParse(date + 'Z') / 1000);
 };
 
 /** Convert `time_point_sec` (seconds since epoch) to to date in ISO format */
-export const timePointSecToDate = (sec: number) => {
+export const timePointSecToDate = (sec: number): string => {
     const s = (new Date(sec * 1000)).toISOString();
     return s.substr(0, s.length - 1);
 };
 
 /** Convert date in ISO format to `block_timestamp_type` (half-seconds since a different epoch) */
-export const dateToBlockTimestamp = (date: string) => {
+export const dateToBlockTimestamp = (date: string): number => {
     return Math.round((checkDateParse(date + 'Z') - 946684800000) / 500);
 };
 
 /** Convert `block_timestamp_type` (half-seconds since a different epoch) to to date in ISO format */
-export const blockTimestampToDate = (slot: number) => {
+export const blockTimestampToDate = (slot: number): string => {
     const s = (new Date(slot * 500 + 946684800000)).toISOString();
     return s.substr(0, s.length - 1);
 };
@@ -615,12 +649,12 @@ export const stringToSymbol = (s: string): { name: string, precision: number } =
 };
 
 /** Convert `Symbol` to `string`. format: `precision,NAME`. */
-export const symbolToString = ({ name, precision }: { name: string, precision: number }) => {
+export const symbolToString = ({ name, precision }: { name: string, precision: number }): string => {
     return precision + ',' + name;
 };
 
 /** Convert binary data to hex */
-export const arrayToHex = (data: Uint8Array) => {
+export const arrayToHex = (data: Uint8Array): string => {
     let result = '';
     for (const x of data) {
         result += ('00' + x.toString(16)).slice(-2);
@@ -629,7 +663,7 @@ export const arrayToHex = (data: Uint8Array) => {
 };
 
 /** Convert hex to binary data */
-export const hexToUint8Array = (hex: string) => {
+export const hexToUint8Array = (hex: string): Uint8Array => {
     if (typeof hex !== 'string') {
         throw new Error('Expected string containing hex digits');
     }
@@ -658,7 +692,7 @@ function deserializeUnknown(buffer: SerialBuffer): SerialBuffer {
 
 function serializeStruct(
     this: Type, buffer: SerialBuffer, data: any, state = new SerializerState(), allowExtensions = true
-) {
+): void {
     if (typeof data !== 'object') {
         throw new Error('expected object containing data: ' + JSON.stringify(data));
     }
@@ -682,7 +716,7 @@ function serializeStruct(
     }
 }
 
-function deserializeStruct(this: Type, buffer: SerialBuffer, state = new SerializerState(), allowExtensions = true) {
+function deserializeStruct(this: Type, buffer: SerialBuffer, state = new SerializerState(), allowExtensions = true): any {
     let result;
     if (this.base) {
         result = this.base.deserialize(buffer, state, allowExtensions);
@@ -701,7 +735,7 @@ function deserializeStruct(this: Type, buffer: SerialBuffer, state = new Seriali
 
 function serializeVariant(
     this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
-) {
+): void {
     if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== 'string') {
         throw new Error('expected variant: ["type", value]');
     }
@@ -713,7 +747,7 @@ function serializeVariant(
     this.fields[i].type.serialize(buffer, data[1], state, allowExtensions);
 }
 
-function deserializeVariant(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+function deserializeVariant(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any[] {
     const i = buffer.getVaruint32();
     if (i >= this.fields.length) {
         throw new Error(`type index ${i} is not valid for variant`);
@@ -724,14 +758,14 @@ function deserializeVariant(this: Type, buffer: SerialBuffer, state?: Serializer
 
 function serializeArray(
     this: Type, buffer: SerialBuffer, data: any[], state?: SerializerState, allowExtensions?: boolean
-) {
+): void {
     buffer.pushVaruint32(data.length);
     for (const item of data) {
         this.arrayOf.serialize(buffer, item, state, false);
     }
 }
 
-function deserializeArray(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+function deserializeArray(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any[] {
     const len = buffer.getVaruint32();
     const result = [];
     for (let i = 0; i < len; ++i) {
@@ -742,7 +776,7 @@ function deserializeArray(this: Type, buffer: SerialBuffer, state?: SerializerSt
 
 function serializeOptional(
     this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
-) {
+): void {
     if (data === null || data === undefined) {
         buffer.push(0);
     } else {
@@ -751,7 +785,7 @@ function serializeOptional(
     }
 }
 
-function deserializeOptional(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+function deserializeOptional(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
     if (buffer.get()) {
         return this.optionalOf.deserialize(buffer, state, allowExtensions);
     } else {
@@ -761,12 +795,37 @@ function deserializeOptional(this: Type, buffer: SerialBuffer, state?: Serialize
 
 function serializeExtension(
     this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
-) {
+): void {
     this.extensionOf.serialize(buffer, data, state, allowExtensions);
 }
 
-function deserializeExtension(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean) {
+function deserializeExtension(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
     return this.extensionOf.deserialize(buffer, state, allowExtensions);
+}
+
+function serializeObject(
+    this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
+): void {
+    const entries = Object.entries(data);
+    buffer.pushVaruint32(entries.length);
+    for (const [key, value] of entries) {
+        const keyType = this.fields[0].type;
+        const dataType = this.fields[1].type;
+        keyType.serialize(buffer, key, state, allowExtensions);
+        dataType.serialize(buffer, value, state, allowExtensions);
+    }
+}
+
+function deserializeObject(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
+    const len = buffer.getVaruint32();
+    const result = {} as any;
+    for (let i = 0; i < len; ++i) {
+        const keyType = this.fields[0].type;
+        const dataType = this.fields[1].type;
+        const key = keyType.deserialize(buffer, state, allowExtensions);
+        (result as any)[key] = dataType.deserialize(buffer, state, allowExtensions);
+    }
+    return result;
 }
 
 interface CreateTypeArgs {
@@ -798,7 +857,7 @@ const createType = (attrs: CreateTypeArgs): Type => {
     };
 };
 
-const checkRange = (orig: number, converted: number) => {
+const checkRange = (orig: number, converted: number): number => {
     if (Number.isNaN(+orig) || Number.isNaN(+converted) || (typeof orig !== 'number' && typeof orig !== 'string')) {
         throw new Error('Expected number');
     }
@@ -1006,6 +1065,185 @@ export const createInitialTypes = (): Map<string, Type> => {
     return result;
 }; // createInitialTypes()
 
+export const createAbiTypes = (): Map<string, Type> => {
+    const initialTypes = createInitialTypes();
+    initialTypes.set('extensions_entry', createType({
+        name: 'extensions_entry',
+        baseName: '',
+        fields: [
+            { name: 'tag', typeName: 'uint16', type: null },
+            { name: 'value', typeName: 'bytes', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('type_def', createType({
+        name: 'type_def',
+        baseName: '',
+        fields: [
+            { name: 'new_type_name', typeName: 'string', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('field_def', createType({
+        name: 'field_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'string', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('struct_def', createType({
+        name: 'struct_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'string', type: null },
+            { name: 'base', typeName: 'string', type: null },
+            { name: 'fields', typeName: 'field_def[]', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('action_def', createType({
+        name: 'action_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'type', typeName: 'string', type: null },
+            { name: 'ricardian_contract', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('table_def', createType({
+        name: 'table_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'index_type', typeName: 'string', type: null },
+            { name: 'key_names', typeName: 'string[]', type: null },
+            { name: 'key_types', typeName: 'string[]', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('clause_pair', createType({
+        name: 'clause_pair',
+        baseName: '',
+        fields: [
+            { name: 'id', typeName: 'string', type: null },
+            { name: 'body', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('error_message', createType({
+        name: 'error_message',
+        baseName: '',
+        fields: [
+            { name: 'error_code', typeName: 'uint64', type: null },
+            { name: 'error_msg', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('variant_def', createType({
+        name: 'variant_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'string', type: null },
+            { name: 'types', typeName: 'string[]', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('action_result', createType({
+        name: 'action_result',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'result_type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('primary_key_index_def', createType({
+        name: 'primary_key_index_def',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'type', typeName: 'string', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('secondary_index_def', createType({
+        name: 'secondary_index_def',
+        baseName: '',
+        fields: [
+            { name: 'type', typeName: 'string', type: null },
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('secondary_indices', createType({
+        name: 'secondary_indices',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'secondary_index_def', typeName: 'secondary_index_def', type: null }
+        ],
+        serialize: serializeObject,
+        deserialize: deserializeObject,
+    }));
+    initialTypes.set('kv_table_entry_def', createType({
+        name: 'kv_table_entry_def',
+        baseName: '',
+        fields: [
+            { name: 'type', typeName: 'string', type: null },
+            { name: 'primary_index', typeName: 'primary_key_index_def', type: null },
+            { name: 'secondary_indices', typeName: 'secondary_indices', type: null }
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    initialTypes.set('kv_table', createType({
+        name: 'kv_table',
+        baseName: '',
+        fields: [
+            { name: 'name', typeName: 'name', type: null },
+            { name: 'kv_table_entry_def', typeName: 'kv_table_entry_def', type: null }
+        ],
+        serialize: serializeObject,
+        deserialize: deserializeObject
+    }));
+    initialTypes.set('abi_def', createType({
+        name: 'abi_def',
+        baseName: '',
+        fields: [
+            { name: 'version', typeName: 'string', type: null },
+            { name: 'types', typeName: 'type_def[]', type: null },
+            { name: 'structs', typeName: 'struct_def[]', type: null },
+            { name: 'actions', typeName: 'action_def[]', type: null },
+            { name: 'tables', typeName: 'table_def[]', type: null },
+            { name: 'ricardian_clauses', typeName: 'clause_pair[]', type: null },
+            { name: 'error_messages', typeName: 'error_message[]', type: null },
+            { name: 'abi_extensions', typeName: 'extensions_entry[]', type: null },
+            { name: 'variants', typeName: 'variant_def[]$', type: null },
+            { name: 'action_results', typeName: 'action_result[]$', type: null },
+            { name: 'kv_tables', typeName: 'kv_table$', type: null },
+        ],
+        serialize: serializeStruct,
+        deserialize: deserializeStruct,
+    }));
+    return initialTypes;
+};
+
 /** Get type from `types` */
 export const getType = (types: Map<string, Type>, name: string): Type => {
     const type = types.get(name);
@@ -1048,15 +1286,15 @@ export const getType = (types: Map<string, Type>, name: string): Type => {
  * @param initialTypes Set of types to build on.
  * In most cases, it's best to fill this from a fresh call to `getTypesFromAbi()`.
  */
-export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi: Abi) => {
+export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi?: Abi): Map<string, Type> => {
     const types = new Map(initialTypes);
-    if (abi.types) {
+    if (abi && abi.types) {
         for (const { new_type_name, type } of abi.types) {
             types.set(new_type_name,
                 createType({ name: new_type_name, aliasOfName: type }));
         }
     }
-    if (abi.structs) {
+    if (abi && abi.structs) {
         for (const { name, base, fields } of abi.structs) {
             types.set(name, createType({
                 name,
@@ -1067,7 +1305,7 @@ export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi: Abi) => {
             }));
         }
     }
-    if (abi.variants) {
+    if (abi && abi.variants) {
         for (const { name, types: t } of abi.variants) {
             types.set(name, createType({
                 name,
@@ -1088,12 +1326,12 @@ export const getTypesFromAbi = (initialTypes: Map<string, Type>, abi: Abi) => {
     return types;
 }; // getTypesFromAbi
 
-const reverseHex = (h: string) => {
+const reverseHex = (h: string): string => {
     return h.substr(6, 2) + h.substr(4, 2) + h.substr(2, 2) + h.substr(0, 2);
 };
 
 /** TAPoS: Return transaction fields which reference `refBlock` and expire `expireSeconds` after `timestamp` */
-export const transactionHeader = (refBlock: BlockTaposInfo, expireSeconds: number) => {
+export const transactionHeader = (refBlock: BlockTaposInfo, expireSeconds: number): TransactionHeader => {
     const timestamp = refBlock.header ? refBlock.header.timestamp : refBlock.timestamp;
     const prefix = parseInt(reverseHex(refBlock.id.substr(16, 8)), 16);
 
@@ -1158,4 +1396,184 @@ export const deserializeAction = (
         authorization,
         data: deserializeActionData(contract, account, name, data, textEncoder, textDecoder),
     };
+};
+
+export const serializeAnyvar = (buffer: SerialBuffer, anyvar: Anyvar): void => {
+    let def: AnyvarDef;
+    let value: any;
+    if (anyvar === null) {
+        [def, value] = [anyvarDefs.null_t, anyvar];
+    } else if (typeof anyvar === 'string') {
+        [def, value] = [anyvarDefs.string, anyvar];
+    } else if (typeof anyvar === 'number') {
+        [def, value] = [anyvarDefs.int32, anyvar];
+    } else if (anyvar instanceof Uint8Array) {
+        [def, value] = [anyvarDefs.bytes, anyvar];
+    } else if (Array.isArray(anyvar)) {
+        [def, value] = [anyvarDefs.any_array, anyvar];
+    } else if (Object.keys(anyvar).length === 2 && anyvar.hasOwnProperty('type') && anyvar.hasOwnProperty('value')) {
+        [def, value] = [(anyvarDefs as any)[(anyvar as any).type] as AnyvarDef, (anyvar as any).value];
+    } else {
+        [def, value] = [anyvarDefs.any_object, anyvar];
+    }
+    buffer.pushVaruint32(def.index);
+    def.type.serialize(buffer, value);
+};
+
+export const deserializeAnyvar = (buffer: SerialBuffer, state?: SerializerState): any => {
+    const defIndex = buffer.getVaruint32();
+    if (defIndex >= anyvarDefsByIndex.length) {
+        throw new Error('Tried to deserialize unknown anyvar type');
+    }
+    const def = anyvarDefsByIndex[defIndex];
+    const value = def.type.deserialize(buffer, state);
+    if (state && (state.options as any).useShortForm || def.useShortForm) {
+        return value;
+    } else {
+        return { type: def.type.name, value };
+    }
+};
+
+export const deserializeAnyvarShort = (buffer: SerialBuffer): any => {
+    return deserializeAnyvar(buffer, new SerializerState({ useShortForm: true } as any));
+};
+
+export const serializeAnyObject = (buffer: SerialBuffer, obj: any): void => {
+    const entries = Object.entries(obj);
+    buffer.pushVaruint32(entries.length);
+    for (const [key, value] of entries) {
+        buffer.pushString(key);
+        serializeAnyvar(buffer, value as Anyvar);
+    }
+};
+
+export const deserializeAnyObject = (buffer: SerialBuffer, state?: SerializerState): any => {
+    const len = buffer.getVaruint32();
+    const result = {};
+    for (let i = 0; i < len; ++i) {
+        let key = buffer.getString();
+        if (key in result) {
+            let j = 1;
+            while (key + '_' + j in result) {
+                ++j;
+            }
+            key = key + '_' + j;
+        }
+        (result as any)[key] = deserializeAnyvar(buffer, state);
+    }
+    return result;
+};
+
+export const serializeAnyArray = (buffer: SerialBuffer, arr: Anyvar[]): void => {
+    buffer.pushVaruint32(arr.length);
+    for (const x of arr) {
+        serializeAnyvar(buffer, x);
+    }
+};
+
+export const deserializeAnyArray = (buffer: SerialBuffer, state?: SerializerState): any[] => {
+    const len = buffer.getVaruint32();
+    const result = [];
+    for (let i = 0; i < len; ++i) {
+        result.push(deserializeAnyvar(buffer, state));
+    }
+    return result;
+};
+
+const addAdditionalTypes = (): Map<string, Type> => {
+    const initialTypes = createInitialTypes();
+    initialTypes.set('null_t', createType({
+        name: 'null_t',
+        serialize: (buffer: SerialBuffer, anyvar: Anyvar) => {},
+        deserialize: (buffer: SerialBuffer, state?: SerializerState) => {}
+    }));
+    initialTypes.set('any_object', createType({
+        name: 'any_object',
+        serialize: serializeAnyObject,
+        deserialize: deserializeAnyObject
+    }));
+    initialTypes.set('any_array', createType({
+        name: 'any_array',
+        serialize: serializeAnyArray,
+        deserialize: deserializeAnyArray
+    }));
+    return initialTypes;
+};
+
+const additionalTypes = addAdditionalTypes();
+
+const anyvarDefs = {
+    null_t: { index: 0, useShortForm: true, type: additionalTypes.get('null_t') },
+    int64: { index: 1, useShortForm: false, type: additionalTypes.get('int64') },
+    uint64: { index: 2, useShortForm: false, type: additionalTypes.get('uint64') },
+    int32: { index: 3, useShortForm: true, type: additionalTypes.get('int32') },
+    uint32: { index: 4, useShortForm: false, type: additionalTypes.get('uint32') },
+    int16: { index: 5, useShortForm: false, type: additionalTypes.get('int16') },
+    uint16: { index: 6, useShortForm: false, type: additionalTypes.get('uint16') },
+    int8: { index: 7, useShortForm: false, type: additionalTypes.get('int8') },
+    uint8: { index: 8, useShortForm: false, type: additionalTypes.get('uint8') },
+    time_point: { index: 9, useShortForm: false, type: additionalTypes.get('time_point') },
+    checksum256: { index: 10, useShortForm: false, type: additionalTypes.get('checksum256') },
+    float64: { index: 11, useShortForm: false, type: additionalTypes.get('float64') },
+    string: { index: 12, useShortForm: true, type: additionalTypes.get('string') },
+    any_object: { index: 13, useShortForm: true, type: additionalTypes.get('any_object') },
+    any_array: { index: 14, useShortForm: true, type: additionalTypes.get('any_array') },
+    bytes: { index: 15, useShortForm: false, type: additionalTypes.get('bytes') },
+    symbol: { index: 16, useShortForm: false, type: additionalTypes.get('symbol') },
+    symbol_code: { index: 17, useShortForm: false, type: additionalTypes.get('symbol_code') },
+    asset: { index: 18, useShortForm: false, type: additionalTypes.get('asset') },
+};
+
+const anyvarDefsByIndex = [
+    anyvarDefs.null_t,
+    anyvarDefs.int64,
+    anyvarDefs.uint64,
+    anyvarDefs.int32,
+    anyvarDefs.uint32,
+    anyvarDefs.int16,
+    anyvarDefs.uint16,
+    anyvarDefs.int8,
+    anyvarDefs.uint8,
+    anyvarDefs.time_point,
+    anyvarDefs.checksum256,
+    anyvarDefs.float64,
+    anyvarDefs.string,
+    anyvarDefs.any_object,
+    anyvarDefs.any_array,
+    anyvarDefs.bytes,
+    anyvarDefs.symbol,
+    anyvarDefs.symbol_code,
+    anyvarDefs.asset,
+];
+
+export const serializeQuery = (buffer: SerialBuffer, query: Query): void => {
+    let method: string;
+    let arg: Anyvar;
+    let filter: Query[];
+    if (typeof query === 'string') {
+        method = query;
+    } else if (Array.isArray(query) && query.length === 2) {
+        [method, filter] = query;
+    } else if (Array.isArray(query) && query.length === 3) {
+        [method, arg, filter] = query;
+    } else {
+        [method, arg, filter] = [query.method, query.arg, query.filter];
+    }
+    buffer.pushString(method);
+
+    if (arg === undefined) {
+        buffer.push(0);
+    } else {
+        buffer.push(1);
+        serializeAnyvar(buffer, arg);
+    }
+
+    if (filter === undefined) {
+        buffer.push(0);
+    } else {
+        buffer.pushVaruint32(filter.length);
+        for (const q of filter) {
+            serializeQuery(buffer, q);
+        }
+    }
 };

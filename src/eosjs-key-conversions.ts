@@ -11,9 +11,9 @@ export { Signature } from './Signature';
 /** Construct the elliptic curve object based on key type */
 export const constructElliptic = (type: KeyType): EC => {
     if (type === KeyType.k1) {
-        return new EC('secp256k1') as any;
+        return new EC('secp256k1');
     }
-    return new EC('p256') as any;
+    return new EC('p256');
 };
 
 export const generateKeyPair = (
@@ -27,9 +27,9 @@ export const generateKeyPair = (
     }
     let ec;
     if (type === KeyType.k1) {
-        ec = new EC('secp256k1') as any;
+        ec = new EC('secp256k1');
     } else {
-        ec = new EC('p256') as any;
+        ec = new EC('p256');
     }
     const ellipticKeyPair = ec.genKeyPair(options.ecOptions);
     const publicKey = PublicKey.fromElliptic(ellipticKeyPair, type, ec);
@@ -37,6 +37,6 @@ export const generateKeyPair = (
     return {publicKey, privateKey};
 };
 
-export const sha256 = (data: string|Buffer) => {
+export const sha256 = (data: string|Buffer): number[]|string => {
     return hash.sha256().update(data).digest();
 };

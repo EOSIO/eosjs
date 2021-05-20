@@ -1,6 +1,6 @@
 {
   "name": "eosjs",
-  "version": "21.0.4",
+  "version": "22.0.0",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -10,9 +10,10 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src",
     "test": "jest src/tests/*eosjs*",
     "test-node": "jest src/tests/*node*",
-    "test-all": "yarn test && yarn test-node && yarn cypress",
-    "build": "rm -rf dist && tsc -p ./tsconfig.json && node scripts/copy-ripe-md.js",
-    "build-web": "rm -rf dist-web && webpack --config webpack.prod.js && webpack --config webpack.debug.js",
+    "test-types": "jest src/tests/type-checks.test.ts",
+    "test-all": "yarn test && yarn test-node && yarn test-types && yarn cypress",
+    "build": "rimraf dist && tsc -p ./tsconfig.json && node scripts/copy-ripe-md.js",
+    "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",
     "build-production": "yarn build && yarn build-web && yarn test-all",
     "docs-init": "sh .docs/scripts/init.sh",
     "docs-build": "sh .docs/scripts/build.sh",
@@ -32,28 +33,35 @@
     "pako": "2.0.3"
   },
   "devDependencies": {
-    "@blockone/eslint-config-blockone": "^4.0.0",
+    "@blockone/eslint-config-blockone": "^4.0.1",
     "@types/elliptic": "^6.4.12",
-    "@types/jest": "^26.0.22",
-    "@types/node": "^14.14.41",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^14.17.0",
+    "@types/node-fetch": "^2.5.10",
     "@types/pako": "^1.0.1",
     "buffer": "^6.0.3",
+    "clean-webpack-plugin": "^3.0.0",
     "crypto-browserify": "^3.12.0",
-    "cypress": "^7.1.0",
+    "cypress": "^7.3.0",
     "eosjs-ecc": "^4.0.7",
-    "eslint": "^7.24.0",
+    "eslint": "^7.26.0",
     "jest": "^26.6.3",
+    "jest-extended": "^0.11.5",
     "jest-fetch-mock": "^3.0.3",
-    "ts-jest": "^26.5.5",
-    "ts-loader": "^8.1.0",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^26.5.6",
+    "ts-loader": "^9.2.1",
     "typescript": "^4.2.4",
-    "webpack": "^5.34.0",
-    "webpack-cli": "^4.6.0"
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0"
   },
   "jest": {
     "automock": false,
     "setupFiles": [
       "./src/tests/setupJest.js"
+    ],
+    "setupFilesAfterEnv": [
+      "jest-extended"
     ],
     "moduleFileExtensions": [
       "ts",

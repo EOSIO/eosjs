@@ -1,7 +1,8 @@
-To use `eosjs` in a browser run `npm run build-web` or `yarn build-web`.  This will create the `dist-web` folder and web distribution modules.
+To use `eosjs` in a browser run `npm run build-web` or `yarn build-web`.  This will create the `dist-web` folder and web distribution modules.  Ensure that you include `externals.min.js` as it includes external packages that eosjs uses.
 ```html
 <pre style="width: 100%; height: 100%; margin:0px; "></pre>
 
+<script src='dist-web/externals.min.js'></script>
 <script src='dist-web/eosjs-api.min.js'></script>
 <script src='dist-web/eosjs-jsonrpc.min.js'></script>
 <script src='dist-web/eosjs-jssig.min.js'></script>

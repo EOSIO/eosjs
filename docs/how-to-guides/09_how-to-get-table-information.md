@@ -88,3 +88,63 @@ In the example shown below, the `contract` smart contract's table `profiles` is 
   }));
 })();
 ```
+
+## Query Data using the Key-Value API (KV API) 
+The KV API is a new api which allows smart contract developers to create datastore key value tables on-chain. KV tables can have multiple indices, unique indices and non-unique indices. The table must have at least one unique index. If the smart contract uses KV tables use the get_kv_table_rows RPC call to query data.
+
+In the example shown below, the `contract` smart contract's kv table `profiles` is queried via the index named `users` for the row with primary key `testacc`.  The `limit` is **1** which implies that only 1 row with value `testacc` will be returned.
+```javascript
+(async () => {
+  console.log(await rpc.get_kv_table_rows({
+    json: false,               	// Get the response as json
+    code: 'contract',          	// Contract that we target
+    table: 'profiles',         	// Tablename
+    indexName: 'users',     	// The name of the index name
+    indexValue: 'testacc',     	// Table primary key value
+	limit: 1,                  	// Here we limit to 1 to get only the single row with primary key equal to 'testacc'
+    reverse: false,            	// Optional: Get reversed data
+    show_payer: false,         	// Optional: Show ram payer
+  }));
+})();
+```
+Above we console log the response from the EOSIO network.  An example of an expected response is shown below.
+```javascript
+{
+  "rows": [{
+      "user": "testacc",
+      "age": 21,
+      "surname": "Martin"
+    }
+  ],
+  "more": false
+}
+```
+
+If the KV table has an additional indexes these can be used to query the data.  The example shown below, is based on the previous example however in this case an index called `ages` is defined. This index is used to query the table for records where the persons age is 17. 
+```javascript
+(async () => {
+  console.log(await rpc.get_kv_table_rows({
+    json: false,               	// Get the response as json
+    code: 'contract',          	// Contract that we target
+    table: 'profiles',         	// Tablename
+    indexName: 'ages',     		// The name of the index name
+    lowerBound: '17',     		// Table primary key value
+    upperBound: '17',     		// Table primary key value
+	limit: 1,                  	// Here we limit to 1 to get only the single row with primary key equal to 'testacc'
+    reverse: false,            	// Optional: Get reversed data
+    show_payer: false,         	// Optional: Show ram payer
+  }));
+})();
+```
+Above we console log the response from the EOSIO network.  An example of an expected response is shown below.
+```javascript
+{
+  "rows": [{
+      "user": "otheracc",
+      "age": 17,
+      "surname": "Dubious"
+    }
+  ],
+  "more": false
+}
+```

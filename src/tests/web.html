@@ -2,12 +2,14 @@
 <html>
     <head>
         <link rel='stylesheet' type='text/css' href='web.css'>
+        <script src='../../dist-web/externals.min.js'></script>
         <script src='../../dist-web/eosjs-api.min.js'></script>
         <script src='../../dist-web/eosjs-jsonrpc.min.js'></script>
         <script src='../../dist-web/eosjs-jssig.min.js'></script>
         <script>
             const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
             const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT'
+            const cfactorPrivateKey = '5K8Sm2bB2b7ZC8tJMefrk1GFa4jgtHxxHRcjX49maMk9AEwq8hN';
             /* new accounts for testing can be created by unlocking a cleos wallet then calling: 
             * 1) cleos create key --to-console (copy this privateKey & publicKey)
             * 2) cleos wallet import 
@@ -16,7 +18,7 @@
             */
         
             const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
-            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey, r1PrivateKey]);
+            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey, r1PrivateKey, cfactorPrivateKey]);
             const api = new eosjs_api.Api({ rpc, signatureProvider });
         
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
@@ -89,7 +91,7 @@
         
             const transactWithoutConfig = async () => {
                 const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutConfig');
-                const blockInfo = await rpc.get_block(transactionResponse.processed.block_num - 3);
+                const blockInfo = await rpc.get_block_info(transactionResponse.processed.block_num - 3);
                 const currentDate = new Date();
                 const timePlusTen = currentDate.getTime() + 10000;
                 const timeInISOString = (new Date(timePlusTen)).toISOString();
@@ -162,6 +164,80 @@
               resultsLabel.innerText = FAILED;
               return false;
             }
+
+            const transactWithContextFree = async (user, context_free_data) => {
+              return api.transact({
+                actions: [{
+                  account: 'cfhello',
+                  name: 'normal',
+                  authorization: [{
+                    actor: 'cfactor',
+                    permission: 'active'
+                  }],
+                  data: {
+                    user
+                  }
+                }],
+                context_free_actions: [{
+                  account: 'cfhello',
+                  name: 'contextfree',
+                  authorization: [],
+                  data: {}
+                }],
+                context_free_data
+              }, {
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testTransactWithContextFreeAction = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse =
+                  await transactWithContextFree('test', []);
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact With Context Free Action Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
+            const testTransactWithContextFreeData = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse =
+                  await transactWithContextFree('test2', [[ '74657374', '7465737464617461' ]]);
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact With Context Free Data Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
         
             const testTransactWithoutBroadcast = async (e) => {
                 resultsLabel = e.target;
@@ -214,6 +290,134 @@
                 return false;
             }
 
+            const shorthandWithApiJson = async () => {
+              await api.getAbi('eosio.token');
+              return api.transact({
+                actions: [
+                  api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')
+                ]
+              }, {
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testShorthandWithApiJson = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithApiJson();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Api and Json Abi Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
+
+            const shorthandWithTxJson = async () => {
+              await api.getAbi('eosio.token');
+              const tx = api.buildTransaction();
+              tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxJson');
+              return tx.send({
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testShorthandWithTxJson = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithTxJson();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Tx and Json Abi Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            };
+
+            const shorthandWithTxJsonContextFree = async (user, context_free_data) => {
+              await api.getAbi('cfhello');
+              const tx = api.buildTransaction();
+              tx.associateContextFree(() => ({
+                contextFreeAction: tx.with('cfhello').as().contextfree(),
+                action: tx.with('cfhello').as('cfactor').normal(user),
+                context_free_data
+              }));
+              return await tx.send({
+                blocksBehind: 3,
+                expireSeconds: 30
+              });
+            }
+
+            const testShorthandWithTxJsonContextFreeAction = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithTxJsonContextFree('test');
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Tx and Json Abi with Context Free Action: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
+            const testShorthandWithTxJsonContextFreeData = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await shorthandWithTxJsonContextFree('test2', [ '74657374', '7465737464617461' ]);
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact with .with() Using Tx and Json Abi with Context Free Data: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
             const testWithP256EllipticCurve = async (e) => {
               resultsLabel = e.target;
               resultsLabel.innerText = EXECUTING;
@@ -236,6 +440,40 @@
               resultsLabel.innerText = FAILED;
               return false;
             };
+
+            const returnValueTx = async () => {
+              await api.getAbi('returnvalue');
+              const tx = api.buildTransaction();
+              tx.with('returnvalue').as('bob').sum(5, 5);
+              return tx.send({
+                  blocksBehind: 3,
+                  expireSeconds: 30
+              });
+            }
+
+            const testWithReturnValueTx = async (e) => {
+              const expectedValue = 10;
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await returnValueTx();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Return Values Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.processed.action_traces[0].return_value_data === expectedValue) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{
@@ -272,7 +510,7 @@
                 return false;
             }
             
-            const rpcShouldFail = async () => await rpc.get_block(-1);
+            const rpcShouldFail = async () => await rpc.get_block_info(-1);
         
             const testRpcShouldFail = async (e) => {
                 resultsLabel = e.target;
@@ -316,9 +554,16 @@
             <div><h2>Transact with useLastIrreversible Configuration Parameter</h2><button onClick='testTransactWithConfigUseLastIrreversible(event);'>Test</button></div>
             <div><h2>Transact with Manually Configured TAPOS</h2><button onClick='testTransactWithoutConfig(event);'>Test</button></div>
             <div><h2>Transact with Compression</h2><button onClick='testTransactWithCompression(event);'>Test</button></div>
+            <div><h2>Transact with Context Free Action</h2><button onClick='testTransactWithContextFreeAction(event);'>Test</button></div>
+            <div><h2>Transact with Context Free Data</h2><button onClick='testTransactWithContextFreeData(event);'>Test</button></div>
             <div><h2>Transact without Broadcasting</h2><button onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
             <div><h2>Broadcast Transaction</h2><button onClick='testBroadcastResult(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Api and Json Abi</h2><button onClick='testShorthandWithApiJson(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Json Abi</h2><button onClick='testShorthandWithTxJson(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Action</h2><button onClick='testShorthandWithTxJsonContextFreeAction(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Data</h2><button onClick='testShorthandWithTxJsonContextFreeData(event);'>Test</button></div>
             <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button onClick='testWithP256EllipticCurve(event);'>Test</button></div>
+            <div><h2>Transact Return Values</h2><button onClick='testWithReturnValueTx(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>
