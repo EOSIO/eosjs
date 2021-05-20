@@ -35,23 +35,13 @@ const bufferFromSerializedData = (
     return signBuf;
 };
 
-/** Signs transactions using in-process private keys */
+/** Signs transactions using Web Crypto API private keys */
 class WebCryptoSignatureProvider implements SignatureProvider {
-    /** map public to private keys */
-    public keys = new Map<string, PrivateKey>();
+    /** Map public key to private CryptoKey. User must populate this. */
+    public keys = new Map<string, CryptoKey>();
 
     /** public keys */
     public availableKeys = [] as string[];
-
-    /** @param privateKeys private keys to sign with */
-    constructor(privateKeys: string[]) {
-        for (const k of privateKeys) {
-            const privateKey = PrivateKey.fromString(k);
-            const publicKey = privateKey.getPublicKey().toString();
-            this.keys.set(publicKey, privateKey);
-            this.availableKeys.push(publicKey);
-        }
-    }
 
     /** Public keys associated with the private keys that the `SignatureProvider` holds */
     public async getAvailableKeys(): Promise<string[]> {
@@ -66,8 +56,19 @@ class WebCryptoSignatureProvider implements SignatureProvider {
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {
-            const privateKey = this.keys.get(convertLegacyPublicKey(key));
-            const signature = privateKey.webCryptoSign(digest);
+            const publicKey = PublicKey.fromString(convertLegacyPublicKey(key));
+            const privWebCrypto = this.keys.get(convertLegacyPublicKey(key));
+            const webCryptoSig = await crypto.subtle.sign(
+                {
+                    name: 'ECDSA',
+                    hash: {
+                        name: 'SHA-256'
+                    }
+                },
+                privWebCrypto,
+                digest
+            );
+            const signature =  Signature.fromWebCrypto(digest, webCryptoSig, publicKey, defaultEc);
             signatures.push(signature.toString());
         }
 
