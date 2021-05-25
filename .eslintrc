@@ -3,7 +3,7 @@
   "rules": {
     "no-bitwise": "off",
     "semi": ["error", "always"],
-    "indent": ["error", 4]
+    "indent": ["error", 2]
   },
   "parserOptions": {
     "requireConfigFile": false
@@ -11,9 +11,9 @@
   "overrides": [
     {
       "files": ["**/*.ts", "**/*.tsx"],
-      "rules":{
+      "rules": {
         "indent": "off",
-        "@typescript-eslint/indent": ["error", 4],
+        "@typescript-eslint/indent": ["error", 2],
         "@typescript-eslint/no-var-requires": "off",
         "semi": "off",
         "@typescript-eslint/semi": ["error", "always"]

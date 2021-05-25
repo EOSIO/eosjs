@@ -1,25 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "module": "CommonJS",
-        "outDir": "dist",
-        "alwaysStrict": true,
-        "sourceMap": false,
-        "noImplicitAny": true,
-        "moduleResolution": "node",
-        "declaration": false,
-        "downlevelIteration": true,
-        "lib": [
-            "es2017",
-            "dom"
-        ]
-    },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.js"
-    ],
-    "exclude": [
-        "src/**/*.test.ts",
-        "src/tests/"
-    ]
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "es6",
+    "outDir": "dist",
+    "alwaysStrict": true,
+    "sourceMap": false,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "declaration": false,
+    "downlevelIteration": true,
+    "lib": ["es2017", "dom"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.js"],
+  "exclude": ["src/**/*.test.ts", "src/tests/"]
 }

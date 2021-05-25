@@ -11,18 +11,19 @@ body {
 
 button {
   font-family: 'Source Sans Pro', sans-serif;
-  font-size: .9rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-button:active, button:focus {
+button:active,
+button:focus {
   outline: none;
 }
 
 .header-container {
   margin: 0;
-  background-color: #F6F6F8;
+  background-color: #f6f6f8;
 }
 
 .header {
@@ -31,11 +32,11 @@ button:active, button:focus {
   align-items: center;
   text-align: center;
   max-width: 1200px;
-  margin : 0 auto;
+  margin: 0 auto;
   padding: 2rem;
 }
 
-.header > img { 
+.header > img {
   max-width: 8rem;
 }
 
@@ -48,14 +49,14 @@ button:active, button:focus {
 
 .header > button {
   padding: 1rem 6rem;
-  border-radius: .4rem;
+  border-radius: 0.4rem;
   color: white;
-  background: #15087E;
+  background: #15087e;
   letter-spacing: 1px;
 }
 
 .header > button:hover {
-  background: #15089E;
+  background: #15089e;
 }
 
 .tests {
@@ -80,40 +81,42 @@ button:active, button:focus {
 .tests > div > h2 {
   font-weight: normal;
   margin: 1.5rem 0;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
 .tests > div > button {
   width: 6.5rem;
   height: 6.5rem;
-  margin: 1rem;;
+  margin: 1rem;
   padding: 0;
-  border: .15rem solid #15087E;
+  border: 0.15rem solid #15087e;
   border-radius: 5rem;
 }
 
 .tests > div > button:hover {
-  background: #F6F6F8;
+  background: #f6f6f8;
 }
 
 .tests > div > button.success {
-  color: #7ED321;
-  border: .15rem solid #7ED321;
+  color: #7ed321;
+  border: 0.15rem solid #7ed321;
 }
 
 .tests > div > button.failed {
-  color: #FF6363;
-  border: .15rem solid #FF6363;
+  color: #ff6363;
+  border: 0.15rem solid #ff6363;
 }
 
 @media (min-width: 1200px) {
-  html, body {
+  html,
+  body {
     font-size: 20px;
   }
 }
 
 @media (max-width: 800px) {
-  html, body {
+  html,
+  body {
     font-size: 14px;
   }
 }
