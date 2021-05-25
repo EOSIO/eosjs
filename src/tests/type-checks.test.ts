@@ -56,11 +56,7 @@ const api = new Api({
 
 describe('Chain API Plugin Endpoints', () => {
     it('validates return type of abi_bin_to_json', async () => {
-        const result: AbiBinToJsonResult = await rpc.abi_bin_to_json(
-            'returnvalue',
-            'sum',
-            '0500000005000000'
-        );
+        const result: AbiBinToJsonResult = await rpc.abi_bin_to_json('returnvalue', 'sum', '0500000005000000');
         const abiBinToJsonResult: any = {
             args: 'any',
         };
@@ -244,10 +240,7 @@ describe('Chain API Plugin Endpoints', () => {
                 { actor: 'bob', permission: 'active' },
                 { actor: 'cfhello', permission: 'active' },
             ],
-            [
-                'EOS7bxrQUTbQ4mqcoefhWPz1aFieN4fA9RQAiozRz7FrUChHZ7Rb8',
-                'EOS6nVrBASwwviMy3CntKsb1cD5Ai2gRZnyrxJDqypL3JLL7KCKrK',
-            ]
+            ['EOS7bxrQUTbQ4mqcoefhWPz1aFieN4fA9RQAiozRz7FrUChHZ7Rb8', 'EOS6nVrBASwwviMy3CntKsb1cD5Ai2gRZnyrxJDqypL3JLL7KCKrK']
         );
         const getAccountsByAuthorizersResult: any = {
             accounts: {

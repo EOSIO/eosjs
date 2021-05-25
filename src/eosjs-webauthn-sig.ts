@@ -20,25 +20,16 @@ export class WebAuthnSignatureProvider implements SignatureProvider {
     }
 
     /** Sign a transaction */
-    public async sign({
-        chainId,
-        requiredKeys,
-        serializedTransaction,
-        serializedContextFreeData,
-    }: SignatureProviderArgs): Promise<PushTransactionArgs> {
+    public async sign({ chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs): Promise<PushTransactionArgs> {
         const signBuf = new ser.SerialBuffer();
         signBuf.pushArray(ser.hexToUint8Array(chainId));
         signBuf.pushArray(serializedTransaction);
         if (serializedContextFreeData) {
-            signBuf.pushArray(
-                new Uint8Array(await crypto.subtle.digest('SHA-256', serializedContextFreeData.buffer))
-            );
+            signBuf.pushArray(new Uint8Array(await crypto.subtle.digest('SHA-256', serializedContextFreeData.buffer)));
         } else {
             signBuf.pushArray(new Uint8Array(32));
         }
-        const digest = new Uint8Array(
-            await crypto.subtle.digest('SHA-256', signBuf.asUint8Array().slice().buffer)
-        );
+        const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', signBuf.asUint8Array().slice().buffer));
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {
@@ -89,12 +80,8 @@ export class WebAuthnSignatureProvider implements SignatureProvider {
 
             const whatItReallySigned = new ser.SerialBuffer();
             whatItReallySigned.pushArray(new Uint8Array(assertion.response.authenticatorData));
-            whatItReallySigned.pushArray(
-                new Uint8Array(await crypto.subtle.digest('SHA-256', assertion.response.clientDataJSON))
-            );
-            const hash = new Uint8Array(
-                await crypto.subtle.digest('SHA-256', whatItReallySigned.asUint8Array().slice())
-            );
+            whatItReallySigned.pushArray(new Uint8Array(await crypto.subtle.digest('SHA-256', assertion.response.clientDataJSON)));
+            const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', whatItReallySigned.asUint8Array().slice()));
             const recid = e.getKeyRecoveryParam(hash, new Uint8Array(assertion.response.signature), pubKey);
 
             const sigData = new ser.SerialBuffer();

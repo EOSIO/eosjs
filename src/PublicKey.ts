@@ -1,13 +1,5 @@
 import { ec as EC } from 'elliptic';
-import {
-    Key,
-    KeyType,
-    publicKeyToLegacyString,
-    publicKeyToString,
-    stringToPublicKey,
-    arrayToString,
-    stringToArray,
-} from './eosjs-numeric';
+import { Key, KeyType, publicKeyToLegacyString, publicKeyToString, stringToPublicKey, arrayToString, stringToArray } from './eosjs-numeric';
 import { constructElliptic } from './eosjs-key-conversions';
 
 /** Represents/stores a public key and provides easy conversion for use with `elliptic` lib */

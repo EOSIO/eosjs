@@ -186,11 +186,7 @@ export interface QueryConfig {
  * * [string, Anyvar, Query[]]:                        [method, arg, filter]
  * * {method: string, arg?: Anyvar, filter?: Query[]}  explicit form
  */
-export type Query =
-    | string
-    | [string, Query[]]
-    | [string, Anyvar, Query[]]
-    | { method: string; arg?: Anyvar; filter?: Query[] };
+export type Query = string | [string, Query[]] | [string, Anyvar, Query[]] | { method: string; arg?: Anyvar; filter?: Query[] };
 
 export type ContextFreeGroupCallback = (index: {
     cfa: number;

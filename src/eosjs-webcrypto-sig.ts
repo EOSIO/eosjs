@@ -15,20 +15,11 @@ import { convertLegacyPublicKey } from './eosjs-numeric';
 const defaultEc = new ec('p256');
 
 /** Construct the buffer from transaction details, web crypto will sign it */
-export const bufferFromSerializedData = (
-    chainId: string,
-    serializedTransaction: Uint8Array,
-    serializedContextFreeData?: Uint8Array,
-    e = defaultEc
-): Buffer => {
+export const bufferFromSerializedData = (chainId: string, serializedTransaction: Uint8Array, serializedContextFreeData?: Uint8Array, e = defaultEc): Buffer => {
     const signBuf = Buffer.concat([
         Buffer.from(chainId, 'hex'),
         Buffer.from(serializedTransaction),
-        Buffer.from(
-            serializedContextFreeData
-                ? new Uint8Array(e.hash().update(serializedContextFreeData).digest())
-                : new Uint8Array(32)
-        ),
+        Buffer.from(serializedContextFreeData ? new Uint8Array(e.hash().update(serializedContextFreeData).digest()) : new Uint8Array(32)),
     ]);
     return signBuf;
 };
@@ -47,18 +38,8 @@ export class WebCryptoSignatureProvider implements SignatureProvider {
     }
 
     /** Sign a transaction */
-    public async sign({
-        chainId,
-        requiredKeys,
-        serializedTransaction,
-        serializedContextFreeData,
-    }: SignatureProviderArgs): Promise<PushTransactionArgs> {
-        const digest = bufferFromSerializedData(
-            chainId,
-            serializedTransaction,
-            serializedContextFreeData,
-            defaultEc
-        );
+    public async sign({ chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs): Promise<PushTransactionArgs> {
+        const digest = bufferFromSerializedData(chainId, serializedTransaction, serializedContextFreeData, defaultEc);
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {

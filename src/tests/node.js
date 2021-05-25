@@ -50,10 +50,7 @@ const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
 };
 
 const transactWithoutConfig = async () => {
-    const transactionResponse = await transactWithConfig(
-        { blocksBehind: 3, expireSeconds: 30 },
-        'transactWithoutConfig'
-    );
+    const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutConfig');
     const blockInfo = await rpc.get_block_info(transactionResponse.processed.block_num - 3);
     const currentDate = new Date();
     const timePlusTen = currentDate.getTime() + 10000;
@@ -158,12 +155,7 @@ const transactWithShorthandApiJson = async () => {
     await api.getAbi('eosio.token');
     return await api.transact(
         {
-            actions: [
-                api
-                    .with('eosio.token')
-                    .as('bob')
-                    .transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson'),
-            ],
+            actions: [api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')],
         },
         {
             blocksBehind: 3,
@@ -219,8 +211,7 @@ const transactWithReturnValue = async () => {
     });
 };
 
-const broadcastResult = async signaturesAndPackedTransaction =>
-    await api.pushSignedTransaction(signaturesAndPackedTransaction);
+const broadcastResult = async signaturesAndPackedTransaction => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () =>
     await api.transact({

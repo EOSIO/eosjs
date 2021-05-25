@@ -8,10 +8,7 @@ import { KeyType } from './eosjs-numeric';
 export const ecc = {
     initialize: (): void => console.error('Method deprecated'),
     unsafeRandomKey: (): void => console.error('Method deprecated'),
-    randomKey: (
-        cpuEntropyBits?: number,
-        options: { secureEnv?: boolean; ecOptions?: EC.GenKeyPairOptions } = {}
-    ): Promise<string> => {
+    randomKey: (cpuEntropyBits?: number, options: { secureEnv?: boolean; ecOptions?: EC.GenKeyPairOptions } = {}): Promise<string> => {
         if (cpuEntropyBits !== undefined) {
             console.warn('Argument `cpuEntropyBits` is deprecated, ' + 'use the options argument instead');
         }
@@ -22,10 +19,7 @@ export const ecc = {
     seedPrivate: (): void => console.error('Method deprecated'),
     privateToPublic: (key: string, pubkey_prefix?: string): string => {
         if (pubkey_prefix !== undefined) {
-            console.warn(
-                'Argument `pubkey_prefix` is deprecated, ' +
-                    'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward'
-            );
+            console.warn('Argument `pubkey_prefix` is deprecated, ' + 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         }
 
         const privateKey = PrivateKey.fromString(key);
@@ -34,10 +28,7 @@ export const ecc = {
     },
     isValidPublic: (pubkey: string, pubkey_prefix?: string): boolean => {
         if (pubkey_prefix !== undefined) {
-            console.warn(
-                'Argument `pubkey_prefix` is deprecated, ' +
-                    'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward'
-            );
+            console.warn('Argument `pubkey_prefix` is deprecated, ' + 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         }
 
         try {
@@ -55,31 +46,17 @@ export const ecc = {
             return false;
         }
     },
-    sign: (
-        data: string | Buffer,
-        privateKey: string | PrivateKey,
-        encoding: BufferEncoding = 'utf8'
-    ): string => {
+    sign: (data: string | Buffer, privateKey: string | PrivateKey, encoding: BufferEncoding = 'utf8'): string => {
         const privKey = typeof privateKey === 'string' ? PrivateKey.fromString(privateKey) : privateKey;
         const signature = privKey.sign(data, true, encoding);
         return signature.toString();
     },
-    signHash: (
-        dataSha256: string | Buffer,
-        privateKey: string | PrivateKey,
-        encoding: BufferEncoding = 'hex'
-    ): string => {
+    signHash: (dataSha256: string | Buffer, privateKey: string | PrivateKey, encoding: BufferEncoding = 'hex'): string => {
         const privKey = typeof privateKey === 'string' ? PrivateKey.fromString(privateKey) : privateKey;
         const signature = privKey.sign(dataSha256, false, encoding);
         return signature.toString();
     },
-    verify: (
-        signature: string,
-        data: string,
-        pubKey: string | PublicKey,
-        encoding: BufferEncoding = 'utf8',
-        hashData: boolean = true
-    ): boolean => {
+    verify: (signature: string, data: string, pubKey: string | PublicKey, encoding: BufferEncoding = 'utf8', hashData: boolean = true): boolean => {
         const publicKey = typeof pubKey === 'string' ? PublicKey.fromString(pubKey) : pubKey;
         const sig = Signature.fromString(signature);
         return sig.verify(data, publicKey, hashData, encoding);
@@ -89,11 +66,7 @@ export const ecc = {
         const publicKey = sig.recover(data, true, encoding);
         return publicKey.toLegacyString();
     },
-    recoverHash: (
-        signature: string,
-        dataSha256: string | Buffer,
-        encoding: BufferEncoding = 'hex'
-    ): string => {
+    recoverHash: (signature: string, dataSha256: string | Buffer, encoding: BufferEncoding = 'hex'): string => {
         const sig = Signature.fromString(signature);
         const publicKey = sig.recover(dataSha256, false, encoding);
         return publicKey.toLegacyString();

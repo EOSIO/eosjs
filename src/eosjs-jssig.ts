@@ -15,20 +15,11 @@ import { convertLegacyPublicKey } from './eosjs-numeric';
 const defaultEc = new ec('secp256k1');
 
 /** Construct the digest from transaction details */
-export const digestFromSerializedData = (
-    chainId: string,
-    serializedTransaction: Uint8Array,
-    serializedContextFreeData?: Uint8Array,
-    e = defaultEc
-): string => {
+export const digestFromSerializedData = (chainId: string, serializedTransaction: Uint8Array, serializedContextFreeData?: Uint8Array, e = defaultEc): string => {
     const signBuf = Buffer.concat([
         Buffer.from(chainId, 'hex'),
         Buffer.from(serializedTransaction),
-        Buffer.from(
-            serializedContextFreeData
-                ? new Uint8Array(e.hash().update(serializedContextFreeData).digest())
-                : new Uint8Array(32)
-        ),
+        Buffer.from(serializedContextFreeData ? new Uint8Array(e.hash().update(serializedContextFreeData).digest()) : new Uint8Array(32)),
     ]);
     return e.hash().update(signBuf).digest();
 };
@@ -58,18 +49,8 @@ export class JsSignatureProvider implements SignatureProvider {
     }
 
     /** Sign a transaction */
-    public async sign({
-        chainId,
-        requiredKeys,
-        serializedTransaction,
-        serializedContextFreeData,
-    }: SignatureProviderArgs): Promise<PushTransactionArgs> {
-        const digest = digestFromSerializedData(
-            chainId,
-            serializedTransaction,
-            serializedContextFreeData,
-            defaultEc
-        );
+    public async sign({ chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs): Promise<PushTransactionArgs> {
+        const digest = digestFromSerializedData(chainId, serializedTransaction, serializedContextFreeData, defaultEc);
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {

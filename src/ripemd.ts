@@ -157,10 +157,7 @@ export default class RIPEMD160 {
 
         //  `Number.MAX_SAFE_INTEGER` is ((2 ** 53) - 1) and
         // bitwise operation in Javascript is done on 32-bits operands.
-        const divmod = (dividend: number, divisor: number) => [
-            Math.floor(dividend / divisor),
-            dividend % divisor,
-        ];
+        const divmod = (dividend: number, divisor: number) => [Math.floor(dividend / divisor), dividend % divisor];
         /*
 To shift
 
@@ -204,10 +201,7 @@ Method #2
     00000000 ???????? ???????? ????????  ???????? ???????? ???????? ?????000
 
 		*/
-        const [msg_bit_size_most, msg_bit_size_least] = divmod(
-            message_size,
-            536870912 /* (2 ** 29) */
-        ).map((x, index) => (index ? x * 8 : x));
+        const [msg_bit_size_most, msg_bit_size_least] = divmod(message_size, 536870912 /* (2 ** 29) */).map((x, index) => (index ? x * 8 : x));
 
         // `ArrayBuffer.transfer()` is not supported.
         const padded = new Uint8Array(message_size + n_pad + 8);
@@ -689,13 +683,7 @@ Method #2
             let EP = E;
             for (let j = 0; j < 80; ++j) {
                 // Left rounds
-                let T = RIPEMD160.add_modulo32(
-                    RIPEMD160.rol32(
-                        RIPEMD160.add_modulo32(A, RIPEMD160.f(j, B, C, D), X[i](r[j]), RIPEMD160.K(j)),
-                        s[j]
-                    ),
-                    E
-                );
+                let T = RIPEMD160.add_modulo32(RIPEMD160.rol32(RIPEMD160.add_modulo32(A, RIPEMD160.f(j, B, C, D), X[i](r[j]), RIPEMD160.K(j)), s[j]), E);
                 A = E;
                 E = D;
                 D = RIPEMD160.rol32(C, 10);
@@ -704,15 +692,7 @@ Method #2
 
                 // Right rounds
                 T = RIPEMD160.add_modulo32(
-                    RIPEMD160.rol32(
-                        RIPEMD160.add_modulo32(
-                            AP,
-                            RIPEMD160.f(79 - j, BP, CP, DP),
-                            X[i](rP[j]),
-                            RIPEMD160.KP(j)
-                        ),
-                        sP[j]
-                    ),
+                    RIPEMD160.rol32(RIPEMD160.add_modulo32(AP, RIPEMD160.f(79 - j, BP, CP, DP), X[i](rP[j]), RIPEMD160.KP(j)), sP[j]),
                     EP
                 );
                 AP = EP;

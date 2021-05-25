@@ -30,9 +30,7 @@ describe('ecc Migration', () => {
     it('verifies `randomKey` calls generateKeyPair', async () => {
         console.warn = jest.fn();
         const privateKey = await eccMigration.randomKey(0, { secureEnv: true });
-        expect(console.warn).toHaveBeenCalledWith(
-            'Argument `cpuEntropyBits` is deprecated, ' + 'use the options argument instead'
-        );
+        expect(console.warn).toHaveBeenCalledWith('Argument `cpuEntropyBits` is deprecated, ' + 'use the options argument instead');
         expect(typeof privateKey).toEqual('string');
         expect(PrivateKey.fromString(privateKey).isValid()).toBeTruthy();
     });
@@ -47,10 +45,7 @@ describe('ecc Migration', () => {
         console.warn = jest.fn();
         const eccPublicKey = ecc.privateToPublic(privateKeys[0], 'EOS');
         const eccMigrationPublicKey = eccMigration.privateToPublic(privateKeys[0], 'EOS');
-        expect(console.warn).toHaveBeenCalledWith(
-            'Argument `pubkey_prefix` is deprecated, ' +
-                'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward'
-        );
+        expect(console.warn).toHaveBeenCalledWith('Argument `pubkey_prefix` is deprecated, ' + 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         expect(eccPublicKey).toEqual(eccMigrationPublicKey);
     });
 
@@ -58,10 +53,7 @@ describe('ecc Migration', () => {
         console.warn = jest.fn();
         const eccValid = ecc.isValidPublic(legacyPublicKeys[0], 'EOS');
         const eccMigrationValid = eccMigration.isValidPublic(legacyPublicKeys[0], 'EOS');
-        expect(console.warn).toHaveBeenCalledWith(
-            'Argument `pubkey_prefix` is deprecated, ' +
-                'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward'
-        );
+        expect(console.warn).toHaveBeenCalledWith('Argument `pubkey_prefix` is deprecated, ' + 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         expect(eccValid).toEqual(eccMigrationValid);
         expect(eccValid).toBeTruthy();
         expect(eccMigrationValid).toBeTruthy();
@@ -71,10 +63,7 @@ describe('ecc Migration', () => {
         console.warn = jest.fn();
         const eccValid = ecc.isValidPublic('publickey', 'EOS');
         const eccMigrationValid = eccMigration.isValidPublic('publickey', 'EOS');
-        expect(console.warn).toHaveBeenCalledWith(
-            'Argument `pubkey_prefix` is deprecated, ' +
-                'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward'
-        );
+        expect(console.warn).toHaveBeenCalledWith('Argument `pubkey_prefix` is deprecated, ' + 'keys prefixed with PUB_K1_/PUB_R1_/PUB_WA_ going forward');
         expect(eccValid).toEqual(eccMigrationValid);
         expect(eccValid).toBeFalsy();
         expect(eccMigrationValid).toBeFalsy();
@@ -114,10 +103,7 @@ describe('ecc Migration', () => {
         const dataAsString = 'some string';
 
         const eccHash = Buffer.from(ecc.sha256(dataAsString), 'hex');
-        const eccMigrationHash = Buffer.from(
-            eccMigration.sha256(dataAsString, 'hex', 'utf8') as string,
-            'hex'
-        );
+        const eccMigrationHash = Buffer.from(eccMigration.sha256(dataAsString, 'hex', 'utf8') as string, 'hex');
         expect(console.warn).toBeCalledWith('Argument `encoding` is deprecated');
         expect(console.warn).toBeCalledWith('Argument `resultEncoding` is deprecated');
         expect(eccHash).toEqual(eccMigrationHash);

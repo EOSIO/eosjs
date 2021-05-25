@@ -18,11 +18,7 @@
              */
 
             const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
-            const signatureProvider = new eosjs_jssig.JsSignatureProvider([
-                privateKey,
-                r1PrivateKey,
-                cfactorPrivateKey,
-            ]);
+            const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey, r1PrivateKey, cfactorPrivateKey]);
             const api = new eosjs_api.Api({ rpc, signatureProvider });
 
             const EXECUTING = 'Executing Test',
@@ -61,10 +57,7 @@
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionResponse = await transactWithConfig(
-                        { blocksBehind: 3, expireSeconds: 30 },
-                        'transactWithBlocksBehind'
-                    );
+                    transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithBlocksBehind');
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -87,10 +80,7 @@
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionResponse = await transactWithConfig(
-                        { useLastIrreversible: true, expireSeconds: 30 },
-                        'transactWithUseLastIrreversible'
-                    );
+                    transactionResponse = await transactWithConfig({ useLastIrreversible: true, expireSeconds: 30 }, 'transactWithUseLastIrreversible');
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -109,10 +99,7 @@
             };
 
             const transactWithoutConfig = async () => {
-                const transactionResponse = await transactWithConfig(
-                    { blocksBehind: 3, expireSeconds: 30 },
-                    'transactWithoutConfig'
-                );
+                const transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutConfig');
                 const blockInfo = await rpc.get_block_info(transactionResponse.processed.block_num - 3);
                 const currentDate = new Date();
                 const timePlusTen = currentDate.getTime() + 10000;
@@ -172,10 +159,7 @@
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionResponse = await transactWithConfig(
-                        { blocksBehind: 3, expireSeconds: 30, compression: true },
-                        'transactWithCompression'
-                    );
+                    transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30, compression: true }, 'transactWithCompression');
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -256,9 +240,7 @@
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionResponse = await transactWithContextFree('test2', [
-                        ['74657374', '7465737464617461'],
-                    ]);
+                    transactionResponse = await transactWithContextFree('test2', [['74657374', '7465737464617461']]);
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -281,10 +263,7 @@
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionSignatures = await transactWithConfig(
-                        { broadcast: false, blocksBehind: 3, expireSeconds: 30 },
-                        'transactWithoutBroadcast'
-                    );
+                    transactionSignatures = await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutBroadcast');
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
@@ -302,18 +281,14 @@
                 return false;
             };
 
-            const broadcastResult = async signaturesAndPackedTransaction =>
-                await api.pushSignedTransaction(signaturesAndPackedTransaction);
+            const broadcastResult = async signaturesAndPackedTransaction => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
             const testBroadcastResult = async e => {
                 resultsLabel = e.target;
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionSignatures = await transactWithConfig(
-                        { broadcast: false, blocksBehind: 3, expireSeconds: 30 },
-                        'transactWithoutBroadcast2'
-                    );
+                    transactionSignatures = await transactWithConfig({ broadcast: false, blocksBehind: 3, expireSeconds: 30 }, 'transactWithoutBroadcast2');
                     transactionResponse = await broadcastResult(transactionSignatures);
                 } catch (error) {
                     resultsLabel.className = 'failed';
@@ -336,12 +311,7 @@
                 await api.getAbi('eosio.token');
                 return api.transact(
                     {
-                        actions: [
-                            api
-                                .with('eosio.token')
-                                .as('bob')
-                                .transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson'),
-                        ],
+                        actions: [api.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandApiJson')],
                     },
                     {
                         blocksBehind: 3,
@@ -359,10 +329,7 @@
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
-                    console.error(
-                        'Transact with .with() Using Api and Json Abi Test Failure: ',
-                        error.message
-                    );
+                    console.error('Transact with .with() Using Api and Json Abi Test Failure: ', error.message);
                     return false;
                 }
 
@@ -379,9 +346,7 @@
             const shorthandWithTxJson = async () => {
                 await api.getAbi('eosio.token');
                 const tx = api.buildTransaction();
-                tx.with('eosio.token')
-                    .as('bob')
-                    .transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxJson');
+                tx.with('eosio.token').as('bob').transfer('bob', 'alice', '0.0001 SYS', 'transactWithShorthandTxJson');
                 return tx.send({
                     blocksBehind: 3,
                     expireSeconds: 30,
@@ -397,10 +362,7 @@
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
-                    console.error(
-                        'Transact with .with() Using Tx and Json Abi Test Failure: ',
-                        error.message
-                    );
+                    console.error('Transact with .with() Using Tx and Json Abi Test Failure: ', error.message);
                     return false;
                 }
 
@@ -437,10 +399,7 @@
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
-                    console.error(
-                        'Transact with .with() Using Tx and Json Abi with Context Free Action: ',
-                        error.message
-                    );
+                    console.error('Transact with .with() Using Tx and Json Abi with Context Free Action: ', error.message);
                     return false;
                 }
 
@@ -459,17 +418,11 @@
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionResponse = await shorthandWithTxJsonContextFree('test2', [
-                        '74657374',
-                        '7465737464617461',
-                    ]);
+                    transactionResponse = await shorthandWithTxJsonContextFree('test2', ['74657374', '7465737464617461']);
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
-                    console.error(
-                        'Transact with .with() Using Tx and Json Abi with Context Free Data: ',
-                        error.message
-                    );
+                    console.error('Transact with .with() Using Tx and Json Abi with Context Free Data: ', error.message);
                     return false;
                 }
 
@@ -488,19 +441,11 @@
                 resultsLabel.innerText = EXECUTING;
 
                 try {
-                    transactionResponse = await transactWithConfig(
-                        { blocksBehind: 3, expireSeconds: 30 },
-                        'transactWithR1KeySignature',
-                        'bobr1',
-                        'alicer1'
-                    );
+                    transactionResponse = await transactWithConfig({ blocksBehind: 3, expireSeconds: 30 }, 'transactWithR1KeySignature', 'bobr1', 'alicer1');
                 } catch (error) {
                     resultsLabel.className = 'failed';
                     resultsLabel.innerText = FAILED;
-                    console.error(
-                        'Transact elliptic p256/KeyType.r1 Keys and Signatures Test Failure: ',
-                        error.message
-                    );
+                    console.error('Transact elliptic p256/KeyType.r1 Keys and Signatures Test Failure: ', error.message);
                     return false;
                 }
 

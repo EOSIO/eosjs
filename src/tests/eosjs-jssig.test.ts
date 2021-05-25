@@ -19,10 +19,7 @@ describe('JsSignatureProvider', () => {
         'PVT_K1_y19korZcH8hyStRy8bn2G8tgx51zE8nTWGFz7LG3ZDYkaELTY',
         'PVT_K1_2FEybdSLZcyrPh3RR7tJ82M8sG4XLW6uzGDmMw76nv54xk8FLu',
     ];
-    const privateKeysR1 = [
-        'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT',
-        'PVT_R1_wCpPsaY9o8NU9ZsuwaYVQUDkCfj1aWJZGVcmMM6XyYHJVqvqp',
-    ];
+    const privateKeysR1 = ['PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT', 'PVT_R1_wCpPsaY9o8NU9ZsuwaYVQUDkCfj1aWJZGVcmMM6XyYHJVqvqp'];
     const legacyPublicKeys = [
         'EOS7tgwU6E7pAUQJgqEJt66Yi8cWvanTUW8ZfBjeXeJBQvhTU9ypi',
         'EOS8VaY5CiTexYqgQZyPTJkc3qvWuZUi12QrZL9ssjqW2es6aQk2F',
@@ -33,10 +30,7 @@ describe('JsSignatureProvider', () => {
         'PUB_K1_8VaY5CiTexYqgQZyPTJkc3qvWuZUi12QrZL9ssjqW2es7e7bRJ',
         'PUB_K1_7VGhqctkKprW1VUj19DZZiiZLX3YcJqUJCuEcahJmUCw9RT8v2',
     ];
-    const r1FormatPublicKeys = [
-        'PUB_R1_4ztaVy8L9zbmzTdpfq5GcaFYwGwXTNmN3qW7qcgHMmfUZhpzQQ',
-        'PUB_R1_5xawnnr3mWayv2wkiqBGWqu4RQLNJffLSXHiL3BofdY7ortMy4',
-    ];
+    const r1FormatPublicKeys = ['PUB_R1_4ztaVy8L9zbmzTdpfq5GcaFYwGwXTNmN3qW7qcgHMmfUZhpzQQ', 'PUB_R1_5xawnnr3mWayv2wkiqBGWqu4RQLNJffLSXHiL3BofdY7ortMy4'];
     //   const signatures = [
     //     'SIG_K1_HKkqi3zray76i63ZQwAHWMjoLk3wTa1ajZWPcUnrhgmSWQYEHDJsxkny6VDTWEmVdfktxpGoTA81qe6QuCrDmazeQndmxh',
     //     'SIG_K1_HCaY9Y9qdjnkRhE9hokAyp3pFtkMmjpxF6xTd514Vo8vLVSWKek5m5aHfCaka9TqZUbajkhhd4BfBLxSwCwZUEmy8cvt1x',
@@ -124,13 +118,9 @@ describe('JsSignatureProvider', () => {
             } as SignatureProviderArgs);
 
             const signature = Signature.fromString(signOutput.signatures[0]);
-            expect(
-                signature.verify(
-                    digestFromSerializedData(chainId, serializedTransaction),
-                    PublicKey.fromString(k1FormatPublicKeys[0]),
-                    false
-                )
-            ).toEqual(true);
+            expect(signature.verify(digestFromSerializedData(chainId, serializedTransaction), PublicKey.fromString(k1FormatPublicKeys[0]), false)).toEqual(
+                true
+            );
         });
 
         it('ensure public key functions are actual inverses of each other', async () => {
@@ -143,9 +133,7 @@ describe('JsSignatureProvider', () => {
         it('verify that PUB_K1_ and Legacy pub formats are consistent', () => {
             const eosioLegacyPubKey = legacyPublicKeys[0];
             const ellipticPubKey = PublicKey.fromString(eosioLegacyPubKey).toElliptic();
-            expect(PublicKey.fromElliptic(ellipticPubKey, KeyType.k1).toString()).toEqual(
-                k1FormatPublicKeys[0]
-            );
+            expect(PublicKey.fromElliptic(ellipticPubKey, KeyType.k1).toString()).toEqual(k1FormatPublicKeys[0]);
         });
 
         it('verify that privateKey toLegacyString() and toString() are consistent', () => {
@@ -231,16 +219,12 @@ describe('JsSignatureProvider', () => {
 
         it('throws error when attempting a legacy private key from r1 format', () => {
             const privateKey = PrivateKey.fromString(privateKeysR1[0]);
-            expect(() => privateKey.toLegacyString()).toThrowError(
-                'Key format not supported in legacy conversion'
-            );
+            expect(() => privateKey.toLegacyString()).toThrowError('Key format not supported in legacy conversion');
         });
 
         it('throws error when attempting a legacy public key from r1 format', () => {
             const publicKey = PublicKey.fromString(r1FormatPublicKeys[0]);
-            expect(() => publicKey.toLegacyString()).toThrowError(
-                'Key format not supported in legacy conversion'
-            );
+            expect(() => publicKey.toLegacyString()).toThrowError('Key format not supported in legacy conversion');
         });
 
         it('Retrieves the public key from a private key', () => {
@@ -305,13 +289,9 @@ describe('JsSignatureProvider', () => {
             } as SignatureProviderArgs);
 
             const signature = Signature.fromString(signOutput.signatures[0]);
-            expect(
-                signature.verify(
-                    digestFromSerializedData(chainId, serializedTransaction),
-                    PublicKey.fromString(r1FormatPublicKeys[0]),
-                    false
-                )
-            ).toEqual(true);
+            expect(signature.verify(digestFromSerializedData(chainId, serializedTransaction), PublicKey.fromString(r1FormatPublicKeys[0]), false)).toEqual(
+                true
+            );
         });
 
         it('ensure public key functions using p256 format are actual inverses of each other', async () => {

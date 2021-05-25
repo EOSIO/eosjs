@@ -337,12 +337,7 @@ export const stringToPublicKey = (s: string): Key => {
             key.data[i] = whole[i];
         }
         const digest = new Uint8Array(ripemd160.hash(key.data));
-        if (
-            digest[0] !== whole[publicKeyDataSize] ||
-            digest[1] !== whole[34] ||
-            digest[2] !== whole[35] ||
-            digest[3] !== whole[36]
-        ) {
+        if (digest[0] !== whole[publicKeyDataSize] || digest[1] !== whole[34] || digest[2] !== whole[35] || digest[3] !== whole[36]) {
             throw new Error('Checksum does not match');
         }
         return key;
