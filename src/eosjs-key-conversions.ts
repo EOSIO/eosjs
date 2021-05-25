@@ -8,16 +8,6 @@ export { PrivateKey } from './PrivateKey';
 export { PublicKey } from './PublicKey';
 export { Signature } from './Signature';
 
-export type WebCryptoSignatureData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer;
-
-/** Construct the elliptic curve object based on key type */
-export const constructElliptic = (type: KeyType): EC => {
-    if (type === KeyType.k1) {
-        return new EC('secp256k1');
-    }
-    return new EC('p256');
-};
-
 export const generateKeyPair = (
     type: KeyType, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
 ): { publicKey: PublicKey, privateKey: PrivateKey } => {

@@ -1,0 +1,65 @@
+diff --git a/src/PrivateKey.ts b/src/PrivateKey.ts
+index a56c0f51..79287398 100644
+--- a/src/PrivateKey.ts
++++ b/src/PrivateKey.ts
+@@ -9,7 +9,10 @@ import {
+     arrayToString,
+     stringToArray,
+ } from './eosjs-numeric';
+-import { constructElliptic, PublicKey, Signature, WebCryptoSignatureData } from './eosjs-key-conversions';
++import {PublicKey} from './PublicKey';
++import {Signature} from './Signature';
++import {constructElliptic} from './constructElliptic'
++import { WebCryptoSignatureData } from './WebCryptoSignatureData';
+ 
+ /** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
+ export class PrivateKey {
+diff --git a/src/PublicKey.ts b/src/PublicKey.ts
+index 9a3bb03b..4522ab7a 100644
+--- a/src/PublicKey.ts
++++ b/src/PublicKey.ts
+@@ -8,7 +8,7 @@ import {
+     arrayToString,
+     stringToArray,
+ } from './eosjs-numeric';
+-import { constructElliptic } from './eosjs-key-conversions';
++import { constructElliptic } from './constructElliptic';
+ 
+ /** Represents/stores a public key and provides easy conversion for use with `elliptic` lib */
+ export class PublicKey {
+diff --git a/src/Signature.ts b/src/Signature.ts
+index 42242fe3..5689e09d 100644
+--- a/src/Signature.ts
++++ b/src/Signature.ts
+@@ -7,7 +7,9 @@ import {
+     signatureToString,
+     stringToSignature,
+ } from './eosjs-numeric';
+-import { constructElliptic, PublicKey, WebCryptoSignatureData } from './eosjs-key-conversions';
++import { WebCryptoSignatureData } from './WebCryptoSignatureData';
++import { PublicKey } from './PublicKey';
++import { constructElliptic } from './constructElliptic';
+ 
+ /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
+ export class Signature {
+diff --git a/src/eosjs-key-conversions.ts b/src/eosjs-key-conversions.ts
+index bcfcc9c7..b0a02376 100644
+--- a/src/eosjs-key-conversions.ts
++++ b/src/eosjs-key-conversions.ts
+@@ -8,16 +8,6 @@ export { PrivateKey } from './PrivateKey';
+ export { PublicKey } from './PublicKey';
+ export { Signature } from './Signature';
+ 
+-export type WebCryptoSignatureData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer;
+-
+-/** Construct the elliptic curve object based on key type */
+-export const constructElliptic = (type: KeyType): EC => {
+-    if (type === KeyType.k1) {
+-        return new EC('secp256k1');
+-    }
+-    return new EC('p256');
+-};
+-
+ export const generateKeyPair = (
+     type: KeyType, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
+ ): { publicKey: PublicKey, privateKey: PrivateKey } => {

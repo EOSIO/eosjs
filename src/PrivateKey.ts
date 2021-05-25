@@ -9,7 +9,10 @@ import {
     arrayToString,
     stringToArray,
 } from './eosjs-numeric';
-import { constructElliptic, PublicKey, Signature, WebCryptoSignatureData } from './eosjs-key-conversions';
+import {PublicKey} from './PublicKey';
+import {Signature} from './Signature';
+import {constructElliptic} from './constructElliptic'
+import { WebCryptoSignatureData } from './WebCryptoSignatureData';
 
 /** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
 export class PrivateKey {

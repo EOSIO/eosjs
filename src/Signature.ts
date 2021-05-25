@@ -7,7 +7,9 @@ import {
     signatureToString,
     stringToSignature,
 } from './eosjs-numeric';
-import { constructElliptic, PublicKey, WebCryptoSignatureData } from './eosjs-key-conversions';
+import { WebCryptoSignatureData } from './WebCryptoSignatureData';
+import { PublicKey } from './PublicKey';
+import { constructElliptic } from './constructElliptic';
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {

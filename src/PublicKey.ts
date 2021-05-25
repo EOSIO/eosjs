@@ -8,7 +8,7 @@ import {
     arrayToString,
     stringToArray,
 } from './eosjs-numeric';
-import { constructElliptic } from './eosjs-key-conversions';
+import { constructElliptic } from './constructElliptic';
 
 /** Represents/stores a public key and provides easy conversion for use with `elliptic` lib */
 export class PublicKey {
