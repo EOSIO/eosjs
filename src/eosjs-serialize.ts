@@ -697,7 +697,13 @@ function deserializeUnknown(buffer: SerialBuffer): SerialBuffer {
     throw new Error("Don't know how to deserialize " + this.name);
 }
 
-function serializeStruct(this: Type, buffer: SerialBuffer, data: any, state = new SerializerState(), allowExtensions = true): void {
+function serializeStruct(
+    this: Type,
+    buffer: SerialBuffer,
+    data: any,
+    state = new SerializerState(),
+    allowExtensions = true
+): void {
     if (typeof data !== 'object') {
         throw new Error('expected object containing data: ' + JSON.stringify(data));
     }
@@ -709,7 +715,12 @@ function serializeStruct(this: Type, buffer: SerialBuffer, data: any, state = ne
             if (state.skippedBinaryExtension) {
                 throw new Error('unexpected ' + this.name + '.' + field.name);
             }
-            field.type.serialize(buffer, data[field.name], state, allowExtensions && field === this.fields[this.fields.length - 1]);
+            field.type.serialize(
+                buffer,
+                data[field.name],
+                state,
+                allowExtensions && field === this.fields[this.fields.length - 1]
+            );
         } else {
             if (allowExtensions && field.type.extensionOf) {
                 state.skippedBinaryExtension = true;
@@ -720,7 +731,12 @@ function serializeStruct(this: Type, buffer: SerialBuffer, data: any, state = ne
     }
 }
 
-function deserializeStruct(this: Type, buffer: SerialBuffer, state = new SerializerState(), allowExtensions = true): any {
+function deserializeStruct(
+    this: Type,
+    buffer: SerialBuffer,
+    state = new SerializerState(),
+    allowExtensions = true
+): any {
     let result;
     if (this.base) {
         result = this.base.deserialize(buffer, state, allowExtensions);
@@ -737,7 +753,13 @@ function deserializeStruct(this: Type, buffer: SerialBuffer, state = new Seriali
     return result;
 }
 
-function serializeVariant(this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean): void {
+function serializeVariant(
+    this: Type,
+    buffer: SerialBuffer,
+    data: any,
+    state?: SerializerState,
+    allowExtensions?: boolean
+): void {
     if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== 'string') {
         throw new Error('expected variant: ["type", value]');
     }
@@ -749,7 +771,12 @@ function serializeVariant(this: Type, buffer: SerialBuffer, data: any, state?: S
     this.fields[i].type.serialize(buffer, data[1], state, allowExtensions);
 }
 
-function deserializeVariant(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any[] {
+function deserializeVariant(
+    this: Type,
+    buffer: SerialBuffer,
+    state?: SerializerState,
+    allowExtensions?: boolean
+): any[] {
     const i = buffer.getVaruint32();
     if (i >= this.fields.length) {
         throw new Error(`type index ${i} is not valid for variant`);
@@ -758,7 +785,13 @@ function deserializeVariant(this: Type, buffer: SerialBuffer, state?: Serializer
     return [field.name, field.type.deserialize(buffer, state, allowExtensions)];
 }
 
-function serializeArray(this: Type, buffer: SerialBuffer, data: any[], state?: SerializerState, allowExtensions?: boolean): void {
+function serializeArray(
+    this: Type,
+    buffer: SerialBuffer,
+    data: any[],
+    state?: SerializerState,
+    allowExtensions?: boolean
+): void {
     buffer.pushVaruint32(data.length);
     for (const item of data) {
         this.arrayOf.serialize(buffer, item, state, false);
@@ -774,7 +807,13 @@ function deserializeArray(this: Type, buffer: SerialBuffer, state?: SerializerSt
     return result;
 }
 
-function serializeOptional(this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean): void {
+function serializeOptional(
+    this: Type,
+    buffer: SerialBuffer,
+    data: any,
+    state?: SerializerState,
+    allowExtensions?: boolean
+): void {
     if (data === null || data === undefined) {
         buffer.push(0);
     } else {
@@ -783,7 +822,12 @@ function serializeOptional(this: Type, buffer: SerialBuffer, data: any, state?: 
     }
 }
 
-function deserializeOptional(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
+function deserializeOptional(
+    this: Type,
+    buffer: SerialBuffer,
+    state?: SerializerState,
+    allowExtensions?: boolean
+): any {
     if (buffer.get()) {
         return this.optionalOf.deserialize(buffer, state, allowExtensions);
     } else {
@@ -791,15 +835,32 @@ function deserializeOptional(this: Type, buffer: SerialBuffer, state?: Serialize
     }
 }
 
-function serializeExtension(this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean): void {
+function serializeExtension(
+    this: Type,
+    buffer: SerialBuffer,
+    data: any,
+    state?: SerializerState,
+    allowExtensions?: boolean
+): void {
     this.extensionOf.serialize(buffer, data, state, allowExtensions);
 }
 
-function deserializeExtension(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
+function deserializeExtension(
+    this: Type,
+    buffer: SerialBuffer,
+    state?: SerializerState,
+    allowExtensions?: boolean
+): any {
     return this.extensionOf.deserialize(buffer, state, allowExtensions);
 }
 
-function serializeObject(this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean): void {
+function serializeObject(
+    this: Type,
+    buffer: SerialBuffer,
+    data: any,
+    state?: SerializerState,
+    allowExtensions?: boolean
+): void {
     const entries = Object.entries(data);
     buffer.pushVaruint32(entries.length);
     for (const [key, value] of entries) {

@@ -240,7 +240,10 @@ describe('Chain API Plugin Endpoints', () => {
                 { actor: 'bob', permission: 'active' },
                 { actor: 'cfhello', permission: 'active' },
             ],
-            ['EOS7bxrQUTbQ4mqcoefhWPz1aFieN4fA9RQAiozRz7FrUChHZ7Rb8', 'EOS6nVrBASwwviMy3CntKsb1cD5Ai2gRZnyrxJDqypL3JLL7KCKrK']
+            [
+                'EOS7bxrQUTbQ4mqcoefhWPz1aFieN4fA9RQAiozRz7FrUChHZ7Rb8',
+                'EOS6nVrBASwwviMy3CntKsb1cD5Ai2gRZnyrxJDqypL3JLL7KCKrK',
+            ]
         );
         const getAccountsByAuthorizersResult: any = {
             accounts: {

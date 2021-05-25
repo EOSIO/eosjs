@@ -1,4 +1,4 @@
-printWidth: 160
+printWidth: 120
 trailingComma: 'es5'
 endOfLine: 'lf'
 singleQuote: true

@@ -19,7 +19,11 @@ export class Signature {
     }
 
     /** Instantiate Signature from an `elliptic`-format Signature */
-    public static fromElliptic(ellipticSig: EC.Signature | { r: BN; s: BN; recoveryParam: number | null }, keyType: KeyType, ec?: EC): Signature {
+    public static fromElliptic(
+        ellipticSig: EC.Signature | { r: BN; s: BN; recoveryParam: number | null },
+        keyType: KeyType,
+        ec?: EC
+    ): Signature {
         const r = ellipticSig.r.toArray('be', 32);
         const s = ellipticSig.s.toArray('be', 32);
         let eosioRecoveryParam;
@@ -45,7 +49,12 @@ export class Signature {
     }
 
     /** Instantiate Signature from a Web Crypto Signature */
-    public static async fromWebCrypto(data: WebCryptoSignatureData, webCryptoSig: ArrayBuffer, publicKey: PublicKey, ec?: EC) {
+    public static async fromWebCrypto(
+        data: WebCryptoSignatureData,
+        webCryptoSig: ArrayBuffer,
+        publicKey: PublicKey,
+        ec?: EC
+    ) {
         if (!ec) {
             ec = constructElliptic(KeyType.r1);
         }
@@ -115,7 +124,12 @@ export class Signature {
     }
 
     /** Verify a signature with a message or hashed message digest and public key */
-    public verify(data: BNInput, publicKey: PublicKey, shouldHash: boolean = true, encoding: BufferEncoding = 'utf8'): boolean {
+    public verify(
+        data: BNInput,
+        publicKey: PublicKey,
+        shouldHash: boolean = true,
+        encoding: BufferEncoding = 'utf8'
+    ): boolean {
         if (shouldHash) {
             if (typeof data === 'string') {
                 data = Buffer.from(data, encoding);
@@ -128,7 +142,11 @@ export class Signature {
     }
 
     /** Verify a Web Crypto signature with data (that matches types) and public key */
-    public async webCryptoVerify(data: WebCryptoSignatureData, webCryptoSig: ArrayBuffer, publicKey: PublicKey): Promise<boolean> {
+    public async webCryptoVerify(
+        data: WebCryptoSignatureData,
+        webCryptoSig: ArrayBuffer,
+        publicKey: PublicKey
+    ): Promise<boolean> {
         const webCryptoPub = await publicKey.toWebCrypto();
         return await crypto.subtle.verify(
             {
@@ -152,7 +170,12 @@ export class Signature {
             data = this.ec.hash().update(data).digest();
         }
         const ellipticSignature = this.toElliptic();
-        const recoveredPublicKey = this.ec.recoverPubKey(data, ellipticSignature, ellipticSignature.recoveryParam, encoding);
+        const recoveredPublicKey = this.ec.recoverPubKey(
+            data,
+            ellipticSignature,
+            ellipticSignature.recoveryParam,
+            encoding
+        );
         const ellipticKPub = this.ec.keyFromPublic(recoveredPublicKey);
         return PublicKey.fromElliptic(ellipticKPub, this.getType(), this.ec);
     }

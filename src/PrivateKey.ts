@@ -1,6 +1,14 @@
 import { BNInput, ec as EC } from 'elliptic';
 import BN from 'bn.js';
-import { Key, KeyType, privateKeyToLegacyString, privateKeyToString, stringToPrivateKey, arrayToString, stringToArray } from './eosjs-numeric';
+import {
+    Key,
+    KeyType,
+    privateKeyToLegacyString,
+    privateKeyToString,
+    stringToPrivateKey,
+    arrayToString,
+    stringToArray,
+} from './eosjs-numeric';
 import { PublicKey } from './PublicKey';
 import { Signature } from './Signature';
 import { constructElliptic, WebCryptoSignatureData } from './eosjs-key-conversions';
@@ -112,7 +120,10 @@ export class PrivateKey {
         let tries = 0;
         let signature: Signature;
         const isCanonical = (sigData: Uint8Array): boolean =>
-            !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80)) && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
+            !(sigData[1] & 0x80) &&
+            !(sigData[1] === 0 && !(sigData[2] & 0x80)) &&
+            !(sigData[33] & 0x80) &&
+            !(sigData[33] === 0 && !(sigData[34] & 0x80));
         const constructSignature = (options: EC.SignOptions): Signature => {
             const ellipticPrivateKey = this.toElliptic();
             const ellipticSignature = ellipticPrivateKey.sign(data, options);

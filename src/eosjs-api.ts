@@ -21,7 +21,15 @@ import {
     TransactResult,
 } from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
-import { Abi, BlockTaposInfo, GetInfoResult, PushTransactionArgs, GetBlockHeaderStateResult, GetBlockInfoResult, GetBlockResult } from './eosjs-rpc-interfaces';
+import {
+    Abi,
+    BlockTaposInfo,
+    GetInfoResult,
+    PushTransactionArgs,
+    GetBlockHeaderStateResult,
+    GetBlockInfoResult,
+    GetBlockResult,
+} from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
 import transactionAbi from './transaction.abi.json';
@@ -227,7 +235,15 @@ export class Api {
                 if (typeof data !== 'object') {
                     return action;
                 }
-                return ser.serializeAction(contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
+                return ser.serializeAction(
+                    contract,
+                    account,
+                    name,
+                    authorization,
+                    data,
+                    this.textEncoder,
+                    this.textDecoder
+                );
             })
         );
     }
@@ -237,7 +253,15 @@ export class Api {
         return await Promise.all(
             actions.map(async ({ account, name, authorization, data }) => {
                 const contract = await this.getContract(account);
-                return ser.deserializeAction(contract, account, name, authorization, data, this.textEncoder, this.textDecoder);
+                return ser.deserializeAction(
+                    contract,
+                    account,
+                    name,
+                    authorization,
+                    data,
+                    this.textEncoder,
+                    this.textDecoder
+                );
             })
         );
     }
@@ -287,7 +311,15 @@ export class Api {
      */
     public async transact(
         transaction: Transaction,
-        { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }: TransactConfig = {}
+        {
+            broadcast = true,
+            sign = true,
+            requiredKeys,
+            compression,
+            blocksBehind,
+            useLastIrreversible,
+            expireSeconds,
+        }: TransactConfig = {}
     ): Promise<TransactResult | PushTransactionArgs> {
         let info: GetInfoResult;
 
@@ -346,7 +378,12 @@ export class Api {
         return pushTransactionArgs as PushTransactionArgs;
     }
 
-    public async query(account: string, short: boolean, query: Query, { sign, requiredKeys, authorization = [] }: QueryConfig): Promise<any> {
+    public async query(
+        account: string,
+        short: boolean,
+        query: Query,
+        { sign, requiredKeys, authorization = [] }: QueryConfig
+    ): Promise<any> {
         const info = await this.rpc.get_info();
         const refBlock = await this.tryRefBlockFromGetInfo(info);
         const queryBuffer = new ser.SerialBuffer({
@@ -407,7 +444,11 @@ export class Api {
     }
 
     /** Broadcast a signed transaction */
-    public async pushSignedTransaction({ signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs): Promise<TransactResult> {
+    public async pushSignedTransaction({
+        signatures,
+        serializedTransaction,
+        serializedContextFreeData,
+    }: PushTransactionArgs): Promise<TransactResult> {
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
@@ -421,7 +462,9 @@ export class Api {
         serializedContextFreeData,
     }: PushTransactionArgs): Promise<TransactResult> {
         const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
-        const compressedSerializedContextFreeData = this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
+        const compressedSerializedContextFreeData = this.deflateSerializedArray(
+            serializedContextFreeData || new Uint8Array(0)
+        );
 
         return this.rpc.push_transaction({
             signatures,
@@ -461,7 +504,9 @@ export class Api {
         return !!(expiration && typeof ref_block_num === 'number' && typeof ref_block_prefix === 'number');
     }
 
-    private async tryGetBlockHeaderState(taposBlockNumber: number): Promise<GetBlockHeaderStateResult | GetBlockResult | GetBlockInfoResult> {
+    private async tryGetBlockHeaderState(
+        taposBlockNumber: number
+    ): Promise<GetBlockHeaderStateResult | GetBlockResult | GetBlockInfoResult> {
         try {
             return await this.rpc.get_block_header_state(taposBlockNumber);
         } catch (error) {
@@ -477,7 +522,9 @@ export class Api {
         }
     }
 
-    private async tryRefBlockFromGetInfo(info: GetInfoResult): Promise<BlockTaposInfo | GetBlockInfoResult | GetBlockResult> {
+    private async tryRefBlockFromGetInfo(
+        info: GetInfoResult
+    ): Promise<BlockTaposInfo | GetBlockInfoResult | GetBlockResult> {
         if (
             info.hasOwnProperty('last_irreversible_block_id') &&
             info.hasOwnProperty('last_irreversible_block_num') &&
@@ -533,7 +580,9 @@ export class TransactionBuilder {
     public async send(config?: TransactConfig): Promise<PushTransactionArgs | TransactResult> {
         const contextFreeDataSet: Uint8Array[] = [];
         const contextFreeActions: ser.SerializedAction[] = [];
-        const actions: ser.SerializedAction[] = this.actions.map(actionBuilder => actionBuilder.serializedData as ser.SerializedAction);
+        const actions: ser.SerializedAction[] = this.actions.map(
+            actionBuilder => actionBuilder.serializedData as ser.SerializedAction
+        );
         await Promise.all(
             this.contextFreeGroups.map(async (contextFreeCallback: ContextFreeGroupCallback) => {
                 const { action, contextFreeAction, contextFreeData } = contextFreeCallback({
@@ -605,7 +654,15 @@ class ActionSerializer implements ActionSerializerType {
                         const field = type.fields[index];
                         data[field.name] = arg;
                     });
-                    const serializedData = ser.serializeAction({ types, actions }, accountName, name, authorization, data, api.textEncoder, api.textDecoder);
+                    const serializedData = ser.serializeAction(
+                        { types, actions },
+                        accountName,
+                        name,
+                        authorization,
+                        data,
+                        api.textEncoder,
+                        api.textDecoder
+                    );
                     parent.serializedData = serializedData;
                     return serializedData;
                 },

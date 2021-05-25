@@ -3,7 +3,13 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi, TransactResult } from './eosjs-api-interfaces';
+import {
+    AbiProvider,
+    AuthorityProvider,
+    AuthorityProviderArgs,
+    BinaryAbi,
+    TransactResult,
+} from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
 import {
     AbiBinToJsonResult,
@@ -115,7 +121,10 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/chain/get_accounts_by_authorizers` */
-    public async get_accounts_by_authorizers(accounts: Authorization[], keys: string[]): Promise<GetAccountsByAuthorizersResult> {
+    public async get_accounts_by_authorizers(
+        accounts: Authorization[],
+        keys: string[]
+    ): Promise<GetAccountsByAuthorizersResult> {
         return await this.fetch('/v1/chain/get_accounts_by_authorizers', { accounts, keys });
     }
 
@@ -207,7 +216,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/chain/get_scheduled_transactions` */
-    public async get_scheduled_transactions(json = true, lowerBound = '', limit = 50): Promise<GetScheduledTransactionsResult> {
+    public async get_scheduled_transactions(
+        json = true,
+        lowerBound = '',
+        limit = 50
+    ): Promise<GetScheduledTransactionsResult> {
         return await this.fetch('/v1/chain/get_scheduled_transactions', {
             json,
             lower_bound: lowerBound,
@@ -274,7 +287,13 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/chain/get_table_by_scope` */
-    public async get_table_by_scope({ code, table, lower_bound = '', upper_bound = '', limit = 10 }: any): Promise<GetTableByScopeResult> {
+    public async get_table_by_scope({
+        code,
+        table,
+        lower_bound = '',
+        upper_bound = '',
+        limit = 10,
+    }: any): Promise<GetTableByScopeResult> {
         return await this.fetch('/v1/chain/get_table_by_scope', {
             code,
             table,
@@ -313,7 +332,12 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
 
     public async push_transactions(transactions: PushTransactionArgs[]): Promise<TransactResult[]> {
         const packedTrxs: PackedTrx[] = transactions.map(
-            ({ signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs) => {
+            ({
+                signatures,
+                compression = 0,
+                serializedTransaction,
+                serializedContextFreeData,
+            }: PushTransactionArgs) => {
                 return {
                     signatures,
                     compression,
@@ -351,7 +375,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/history/get_actions` */
-    public async history_get_actions(accountName: string, pos: number = null, offset: number = null): Promise<GetActionsResult> {
+    public async history_get_actions(
+        accountName: string,
+        pos: number = null,
+        offset: number = null
+    ): Promise<GetActionsResult> {
         return await this.fetch('/v1/history/get_actions', { account_name: accountName, pos, offset });
     }
 

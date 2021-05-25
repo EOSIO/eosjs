@@ -170,7 +170,8 @@ const serializedActions = [
     {
         account: 'testeostoken',
         authorization: [{ actor: 'thegazelle', permission: 'active' }],
-        data: '00808A517DC354CB6012F557656CA4BA102700000000000004454F530000000014466F72206120736563757265206675747572652E', // eslint-disable-line
+        data:
+            '00808A517DC354CB6012F557656CA4BA102700000000000004454F530000000014466F72206120736563757265206675747572652E', // eslint-disable-line
         name: 'transfer',
     },
     {
@@ -343,7 +344,9 @@ describe('eosjs-api', () => {
     describe('Api shorthand design (JsonAbi)', () => {
         it('errors if abi is not cached', () => {
             const abiCheck = () => {
-                api.with('testeostoken').as('bob').transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
+                api.with('testeostoken')
+                    .as('bob')
+                    .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
             };
             expect(abiCheck).toThrowError('ABI must be cached before using ActionBuilder, run api.getAbi()');
         });
@@ -351,7 +354,10 @@ describe('eosjs-api', () => {
         it('generates a valid serialized action using api.with()', async () => {
             await api.getAbi('testeostoken');
 
-            const serializedAction = api.with('testeostoken').as('thegazelle').transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
+            const serializedAction = api
+                .with('testeostoken')
+                .as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
             expect(serializedAction).toEqual(serializedActions[0]);
         });
 
@@ -369,7 +375,10 @@ describe('eosjs-api', () => {
         it('confirms serializeActions and ActionBuilder return same serialized data', async () => {
             const response = await api.serializeActions(transaction.actions);
 
-            const firstAction = api.with('testeostoken').as('thegazelle').transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
+            const firstAction = api
+                .with('testeostoken')
+                .as('thegazelle')
+                .transfer('thegazelle', 'remasteryoda', '1.0000 EOS', 'For a secure future.');
 
             const secondAction = api
                 .with('testeostoken')
