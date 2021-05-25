@@ -80,7 +80,6 @@ describe('JSON RPC', () => {
         await jsonRpc.get_abi(accountName);
 
         expect(myFetch).toBeCalledWith(endpoint + expPath, expParams);
-
     });
 
     it('calls get_abi', async () => {
@@ -633,14 +632,8 @@ describe('JSON RPC', () => {
 
     it('calls push_transaction', async () => {
         const expPath = '/v1/chain/push_transaction';
-        const signatures = [
-            'George Washington',
-            'John Hancock',
-            'Abraham Lincoln',
-        ];
-        const serializedTransaction = new Uint8Array([
-            0, 16, 32, 128, 255,
-        ]);
+        const signatures = ['George Washington', 'John Hancock', 'Abraham Lincoln'];
+        const serializedTransaction = new Uint8Array([0, 16, 32, 128, 255]);
 
         const limit = 50;
         const expReturn = { data: '12345' };
@@ -668,14 +661,8 @@ describe('JSON RPC', () => {
 
     it('calls send_transaction', async () => {
         const expPath = '/v1/chain/send_transaction';
-        const signatures = [
-            'George Washington',
-            'John Hancock',
-            'Abraham Lincoln',
-        ];
-        const serializedTransaction = new Uint8Array([
-            0, 16, 32, 128, 255,
-        ]);
+        const signatures = ['George Washington', 'John Hancock', 'Abraham Lincoln'];
+        const serializedTransaction = new Uint8Array([0, 16, 32, 128, 255]);
 
         const limit = 50;
         const expReturn = { data: '12345' };
@@ -842,5 +829,4 @@ describe('JSON RPC', () => {
         expect(response).toEqual(expReturn);
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
-
 });

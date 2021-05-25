@@ -3,7 +3,7 @@
   "rules": {
     "no-bitwise": "off",
     "semi": ["error", "always"],
-    "indent": ["error", 2]
+    "indent": ["error", 4]
   },
   "parserOptions": {
     "requireConfigFile": false
@@ -13,7 +13,7 @@
       "files": ["**/*.ts", "**/*.tsx"],
       "rules": {
         "indent": "off",
-        "@typescript-eslint/indent": ["error", 2],
+        "@typescript-eslint/indent": ["error", 4],
         "@typescript-eslint/no-var-requires": "off",
         "semi": "off",
         "@typescript-eslint/semi": ["error", "always"]
