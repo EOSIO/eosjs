@@ -11,7 +11,6 @@
     "test": "jest src/tests/*eosjs*",
     "test-node": "jest src/tests/*node*",
     "test-types": "jest src/tests/type-checks.test.ts",
-    "test-web-crypto": "jest src/tests/web-crypto.test.ts",
     "test-all": "yarn test && yarn test-node && yarn test-types && yarn cypress",
     "build": "rimraf dist && tsc -p ./tsconfig.json && node scripts/copy-ripe-md.js",
     "build-web": "webpack --config webpack.prod.js && webpack --config webpack.debug.js",

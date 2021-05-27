@@ -1,13 +1,15 @@
 import { BNInput, ec as EC } from 'elliptic';
 import BN = require('bn.js');
-
 import {
     Key,
     KeyType,
     signatureToString,
     stringToSignature,
 } from './eosjs-numeric';
-import { constructElliptic, PublicKey, WebCryptoSignatureData } from './eosjs-key-conversions';
+import { PublicKey } from './PublicKey';
+import { constructElliptic, WebCryptoSignatureData } from './KeyUtil';
+
+const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {

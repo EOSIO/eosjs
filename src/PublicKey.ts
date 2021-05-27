@@ -8,7 +8,9 @@ import {
     arrayToString,
     stringToArray,
 } from './eosjs-numeric';
-import { constructElliptic } from './eosjs-key-conversions';
+import { constructElliptic } from './KeyUtil';
+
+const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 
 /** Represents/stores a public key and provides easy conversion for use with `elliptic` lib */
 export class PublicKey {
@@ -37,7 +39,7 @@ export class PublicKey {
     }
 
     /** Instantiate public key from a `CryptoKey`-format public key */
-    public static async fromCryptoKey(publicKey: CryptoKey, ec?: EC): Promise<PublicKey> {
+    public static async fromWebCrypto(publicKey: CryptoKey, ec?: EC): Promise<PublicKey> {
         if (publicKey.extractable === false) {
             throw new Error('Crypto Key is not extractable');
         }
@@ -47,10 +49,9 @@ export class PublicKey {
 
         const extractedArrayBuffer = await crypto.subtle.exportKey('spki', publicKey);
         const extractedDecoded = arrayToString(extractedArrayBuffer);
-        const derBase64 = window.btoa(extractedDecoded);
-        const derHex = Buffer.from(derBase64, 'base64').toString('hex');
+        const derHex = Buffer.from(extractedDecoded, 'binary').toString('hex');
         const publicKeyHex = derHex.replace('3059301306072a8648ce3d020106082a8648ce3d030107034200', '');
-        const publicKeyEc = ec.keyFromPublic(publicKeyHex);
+        const publicKeyEc = ec.keyFromPublic(publicKeyHex, 'hex');
         return PublicKey.fromElliptic(publicKeyEc, KeyType.r1, ec);
     }
 
@@ -77,9 +78,8 @@ export class PublicKey {
         const publicKeyHex = publicKeyEc.getPublic('hex');
 
         const derHex = `3059301306072a8648ce3d020106082a8648ce3d030107034200${publicKeyHex}`;
-        const derBase64 = Buffer.from(derHex, 'hex').toString('base64');
-        const spkiDecoded = window.atob(derBase64);
-        const spkiArrayBuffer = stringToArray(spkiDecoded);
+        const derBase64 = Buffer.from(derHex, 'hex').toString('binary');
+        const spkiArrayBuffer = stringToArray(derBase64);
         return await crypto.subtle.importKey(
             'spki',
             spkiArrayBuffer,

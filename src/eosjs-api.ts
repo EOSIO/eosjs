@@ -336,7 +336,6 @@ export class Api {
             });
         }
         if (broadcast) {
-            let result;
             if (compression) {
                 return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
             }

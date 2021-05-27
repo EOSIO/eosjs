@@ -11,8 +11,11 @@ import {
     PrivateKey,
     PublicKey,
     Signature,
+    generateWebCryptoKeyPair,
 } from './eosjs-key-conversions';
 import { convertLegacyPublicKey } from './eosjs-numeric';
+
+const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 
 /** expensive to construct; so we do it once and reuse it */
 const defaultEc = new ec('p256');
@@ -37,11 +40,20 @@ const bufferFromSerializedData = (
 
 /** Signs transactions using Web Crypto API private keys */
 class WebCryptoSignatureProvider implements SignatureProvider {
-    /** Map public key to private CryptoKey. User must populate this. */
+    /** Map public key to private CryptoKey. User can populate this manually or use addCryptoKeyPair(). */
     public keys = new Map<string, CryptoKey>();
 
-    /** public keys */
+    /** Public keys as string array. User must populate this if not using addCryptoKeyPair() */
     public availableKeys = [] as string[];
+
+    /** Add Web Crypto KeyPair to the `SignatureProvider` */
+    public async addCryptoKeyPair({ privateKey, publicKey }: CryptoKeyPair): Promise<void> {
+        const pubKey = await PublicKey.fromWebCrypto(publicKey);
+        const publicKeyStr = pubKey.toString();
+        this.keys.set(publicKeyStr, privateKey);
+        this.availableKeys.push(publicKeyStr);
+        return;
+    };
 
     /** Public keys associated with the private keys that the `SignatureProvider` holds */
     public async getAvailableKeys(): Promise<string[]> {
@@ -52,7 +64,7 @@ class WebCryptoSignatureProvider implements SignatureProvider {
     public async sign(
         { chainId, requiredKeys, serializedTransaction, serializedContextFreeData }: SignatureProviderArgs,
     ): Promise<PushTransactionArgs> {
-        const digest = bufferFromSerializedData( chainId, serializedTransaction, serializedContextFreeData, defaultEc);
+        const buffer = bufferFromSerializedData( chainId, serializedTransaction, serializedContextFreeData, defaultEc);
 
         const signatures = [] as string[];
         for (const key of requiredKeys) {
@@ -66,9 +78,9 @@ class WebCryptoSignatureProvider implements SignatureProvider {
                     }
                 },
                 privWebCrypto,
-                digest
+                buffer
             );
-            const signature =  Signature.fromWebCrypto(digest, webCryptoSig, publicKey, defaultEc);
+            const signature = await Signature.fromWebCrypto(buffer, webCryptoSig, publicKey, defaultEc);
             signatures.push(signature.toString());
         }
 
@@ -77,6 +89,7 @@ class WebCryptoSignatureProvider implements SignatureProvider {
 }
 
 export {
+    generateWebCryptoKeyPair,
     PrivateKey,
     PublicKey,
     Signature,

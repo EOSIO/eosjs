@@ -1,5 +1,4 @@
 import { BNInput, ec as EC } from 'elliptic';
-import BN = require('bn.js');
 import {
     Key,
     KeyType,
@@ -9,7 +8,11 @@ import {
     arrayToString,
     stringToArray,
 } from './eosjs-numeric';
-import { constructElliptic, PublicKey, Signature, WebCryptoSignatureData } from './eosjs-key-conversions';
+import { PublicKey } from './PublicKey';
+import { Signature } from './Signature';
+import { constructElliptic, WebCryptoSignatureData } from './KeyUtil';
+
+const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 
 /** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
 export class PrivateKey {
@@ -37,8 +40,7 @@ export class PrivateKey {
 
         const extractedArrayBuffer = await crypto.subtle.exportKey('pkcs8', privKey);
         const extractedDecoded = arrayToString(extractedArrayBuffer);
-        const derBase64 = window.btoa(extractedDecoded);
-        const derHex = Buffer.from(derBase64, 'base64').toString('hex');
+        const derHex = Buffer.from(extractedDecoded, 'binary').toString('hex');
         const privateKeyHex = derHex.replace('308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b0201010420', '').substring(0, derHex.indexOf('a144034200'));
         const privateKeyEc = ec.keyFromPrivate(privateKeyHex);
         return PrivateKey.fromElliptic(privateKeyEc, KeyType.r1, ec);
@@ -67,9 +69,8 @@ export class PrivateKey {
         const publicKeyHex = publicKeyEc.getPublic('hex');
 
         const derHex = `308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b0201010420${privateKeyHex}a144034200${publicKeyHex}`;
-        const derBase64 = Buffer.from(derHex, 'hex').toString('base64');
-        const pkcs8Decoded = window.atob(derBase64);
-        const pkcs8ArrayBuffer = stringToArray(pkcs8Decoded);
+        const derBinary = Buffer.from(derHex, 'hex').toString('binary');
+        const pkcs8ArrayBuffer = stringToArray(derBinary);
         return await crypto.subtle.importKey(
             'pkcs8',
             pkcs8ArrayBuffer,
