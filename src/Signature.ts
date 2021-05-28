@@ -55,7 +55,10 @@ export class Signature {
 
         const hash = await crypto.subtle.digest('SHA-256', data);
         const r = new BN(new Uint8Array(webCryptoSig.slice(0, 32)), 32);
-        const s = new BN(new Uint8Array(webCryptoSig.slice(32)), 32).umod(ec.curve.n);
+        let s = new BN(new Uint8Array(webCryptoSig.slice(32)), 32);
+        if (s.gt(ec.curve.n.div(2))) {
+            s = ec.curve.n.sub(s);
+        }
         const recoveryParam = this.getRecoveryParam(Buffer.from(hash), {r, s}, publicKey.toString(), ec);
         return Signature.fromElliptic({r, s, recoveryParam}, KeyType.r1, ec);
     }
