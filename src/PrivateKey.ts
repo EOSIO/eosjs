@@ -41,8 +41,9 @@ export class PrivateKey {
         const extractedArrayBuffer = await crypto.subtle.exportKey('pkcs8', privKey);
         const extractedDecoded = arrayToString(extractedArrayBuffer);
         const derHex = Buffer.from(extractedDecoded, 'binary').toString('hex');
-        const privateKeyHex = derHex.replace('308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b0201010420', '').substring(0, derHex.indexOf('a144034200'));
-        const privateKeyEc = ec.keyFromPrivate(privateKeyHex);
+        let privateKeyHex = derHex.replace('308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b0201010420', '');
+        privateKeyHex = privateKeyHex.substring(0, privateKeyHex.indexOf('a144034200'));
+        const privateKeyEc = ec.keyFromPrivate(privateKeyHex, 'hex');
         return PrivateKey.fromElliptic(privateKeyEc, KeyType.r1, ec);
     }
 

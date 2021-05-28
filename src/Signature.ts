@@ -56,7 +56,7 @@ export class Signature {
         const hash = await crypto.subtle.digest('SHA-256', data);
         const r = new BN(new Uint8Array(webCryptoSig.slice(0, 32)), 32);
         let s = new BN(new Uint8Array(webCryptoSig.slice(32)), 32);
-        const halforder = ec.curve.n.ushrn(1); //shift right 1 bit -- division by two
+        const halforder = ec.curve.n.ushrn(1); // shift right 1 bit -- division by two
         if (s.ucmp(halforder) === 1) {
             s = ec.curve.n.sub(s);
         }
