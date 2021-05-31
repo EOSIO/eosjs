@@ -10,7 +10,6 @@ import {
 } from './eosjs-numeric';
 import { PublicKey } from './PublicKey';
 import { Signature } from './Signature';
-import { constructElliptic } from './eosjs-key-conversions';
 
 const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 type WebCryptoSignatureData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer;
@@ -22,7 +21,11 @@ export class PrivateKey {
     /** Instantiate private key from an `elliptic`-format private key */
     public static fromElliptic(privKey: EC.KeyPair, keyType: KeyType, ec?: EC): PrivateKey {
         if (!ec) {
-            ec = constructElliptic(keyType);
+            if (keyType === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new PrivateKey({
             type: keyType,
@@ -36,7 +39,7 @@ export class PrivateKey {
             throw new Error('Crypto Key is not extractable');
         }
         if (!ec) {
-            ec = constructElliptic(KeyType.r1);
+            ec = new EC('p256');
         }
 
         const extractedArrayBuffer = await crypto.subtle.exportKey('pkcs8', privKey);
@@ -52,7 +55,11 @@ export class PrivateKey {
     public static fromString(keyString: string, ec?: EC): PrivateKey {
         const privateKey = stringToPrivateKey(keyString);
         if (!ec) {
-            ec = constructElliptic(privateKey.type);
+            if (privateKey.type === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new PrivateKey(privateKey, ec);
     }

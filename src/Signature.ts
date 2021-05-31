@@ -7,7 +7,6 @@ import {
     stringToSignature,
 } from './eosjs-numeric';
 import { PublicKey } from './PublicKey';
-import { constructElliptic } from './eosjs-key-conversions';
 
 const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 type WebCryptoSignatureData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer;
@@ -20,7 +19,11 @@ export class Signature {
     public static fromString(sig: string, ec?: EC): Signature {
         const signature = stringToSignature(sig);
         if (!ec) {
-            ec = constructElliptic(signature.type);
+            if (signature.type === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new Signature(signature, ec);
     }
@@ -40,7 +43,11 @@ export class Signature {
         }
         const sigData = new Uint8Array([eosioRecoveryParam].concat(r, s));
         if (!ec) {
-            ec = constructElliptic(keyType);
+            if (keyType === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new Signature({
             type: keyType,
@@ -51,7 +58,7 @@ export class Signature {
     /** Instantiate Signature from a Web Crypto Signature */
     public static async fromWebCrypto(data: WebCryptoSignatureData, webCryptoSig: ArrayBuffer, publicKey: PublicKey, ec?: EC) {
         if (!ec) {
-            ec = constructElliptic(KeyType.r1);
+            ec = new EC('p256');
         }
 
         const hash = await crypto.subtle.digest('SHA-256', data);

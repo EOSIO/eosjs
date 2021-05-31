@@ -8,7 +8,6 @@ import {
     arrayToString,
     stringToArray,
 } from './eosjs-numeric';
-import { constructElliptic } from './eosjs-key-conversions';
 
 const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 
@@ -20,7 +19,11 @@ export class PublicKey {
     public static fromString(publicKeyStr: string, ec?: EC): PublicKey {
         const key = stringToPublicKey(publicKeyStr);
         if (!ec) {
-            ec = constructElliptic(key.type);
+            if (key.type === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new PublicKey(key, ec);
     }
@@ -30,7 +33,11 @@ export class PublicKey {
         const x = publicKey.getPublic().getX().toArray('be', 32);
         const y = publicKey.getPublic().getY().toArray('be', 32);
         if (!ec) {
-            ec = constructElliptic(keyType);
+            if (keyType === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new PublicKey({
             type: keyType,
@@ -44,7 +51,7 @@ export class PublicKey {
             throw new Error('Crypto Key is not extractable');
         }
         if (!ec) {
-            ec = constructElliptic(KeyType.r1);
+            ec = new EC('p256');
         }
 
         const extractedArrayBuffer = await crypto.subtle.exportKey('spki', publicKey);
