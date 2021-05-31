@@ -1,20 +1,9 @@
 import {ec as EC} from 'elliptic';
-import * as hash from 'hash.js';
 import { KeyType } from './eosjs-numeric';
 import { PublicKey } from './PublicKey';
 import { PrivateKey } from './PrivateKey';
 
 const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
-
-export type WebCryptoSignatureData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer;
-
-/** Construct the elliptic curve object based on key type */
-export const constructElliptic = (type: KeyType): EC => {
-    if (type === KeyType.k1) {
-        return new EC('secp256k1');
-    }
-    return new EC('p256');
-};
 
 export const generateKeyPair = (
     type: KeyType, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
@@ -55,8 +44,4 @@ export const generateWebCryptoKeyPair = async (
         false,
         keyUsage
     );
-};
-
-export const sha256 = (data: string|Buffer): number[]|string => {
-    return hash.sha256().update(data).digest();
 };

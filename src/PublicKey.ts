@@ -8,7 +8,7 @@ import {
     arrayToString,
     stringToArray,
 } from './eosjs-numeric';
-import { constructElliptic } from './KeyUtil';
+import { constructElliptic } from './eosjs-key-conversions';
 
 const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 

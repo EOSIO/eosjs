@@ -7,9 +7,10 @@ import {
     stringToSignature,
 } from './eosjs-numeric';
 import { PublicKey } from './PublicKey';
-import { constructElliptic, WebCryptoSignatureData } from './KeyUtil';
+import { constructElliptic } from './eosjs-key-conversions';
 
 const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
+type WebCryptoSignatureData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer;
 
 /** Represents/stores a Signature and provides easy conversion for use with `elliptic` lib */
 export class Signature {
