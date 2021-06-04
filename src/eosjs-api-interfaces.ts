@@ -89,6 +89,8 @@ export interface Transaction {
 export interface TransactConfig {
     broadcast?: boolean;
     sign?: boolean;
+    readOnlyTrx?: boolean;
+    returnFailureTraces?: boolean;
     requiredKeys?: string[];
     compression?: boolean;
     blocksBehind?: number;

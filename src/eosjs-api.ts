@@ -275,6 +275,8 @@ export class Api {
      * `broadcast`: broadcast this transaction?
      * `sign`: sign this transaction?
      * `compression`: compress this transaction?
+     * `readOnlyTrx`: read only transaction?
+     * `returnFailureTraces`: return failure traces? (only available for read only transactions currently)
      *
      * If both `blocksBehind` and `expireSeconds` are present,
      * then fetch the block which is `blocksBehind` behind head block,
@@ -288,8 +290,18 @@ export class Api {
      */
     public async transact(
         transaction: Transaction,
-        { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-        TransactConfig = {}): Promise<TransactResult|PushTransactionArgs>
+        {
+            broadcast = true,
+            sign = true,
+            readOnlyTrx,
+            returnFailureTraces,
+            requiredKeys,
+            compression,
+            blocksBehind,
+            useLastIrreversible,
+            expireSeconds
+        }:
+        TransactConfig = {}): Promise<TransactResult|GetContractQueryResult|PushTransactionArgs>
     {
         let info: GetInfoResult;
 
@@ -338,34 +350,13 @@ export class Api {
         }
         if (broadcast) {
             let result;
+            if (readOnlyTrx) {
+                return this.rpc.push_ro_transaction(pushTransactionArgs, returnFailureTraces) as Promise<GetContractQueryResult>;
+            }
             if (compression) {
                 return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
             }
             return this.pushSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
-        }
-        return pushTransactionArgs as PushTransactionArgs;
-    }
-
-    /**
-     * Create and optionally broadcast a read-only query transaction.
-     *
-     * See `transact` for details of configuration options.
-     *
-     * @returns Contract query response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
-     */
-    public async readOnlyQuery(
-        accountName: string,
-        transaction: Transaction,
-        { broadcast = true, sign = true, requiredKeys, blocksBehind, useLastIrreversible, expireSeconds }:
-        TransactConfig = {}): Promise<GetContractQueryResult|PushTransactionArgs>
-    {
-        const pushTransactionArgs = await this.transact(
-            transaction,
-            { broadcast: false, sign, requiredKeys, compression: false, blocksBehind, useLastIrreversible, expireSeconds }
-        ) as PushTransactionArgs;
-
-        if (broadcast) {
-            return this.rpc.get_contract_query(accountName, pushTransactionArgs) as Promise<GetContractQueryResult>;
         }
         return pushTransactionArgs as PushTransactionArgs;
     }

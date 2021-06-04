@@ -476,7 +476,7 @@
             }
 
             const readOnlyQuery = async () => {
-              return await api.readOnlyQuery('readonly', {
+              return await api.transact({
                   actions: [{
                       account: 'readonly',
                       name: 'get',
@@ -488,7 +488,8 @@
                   }],
               }, {
                   blocksBehind: 3,
-                  expireSeconds: 30
+                  expireSeconds: 30,
+                  readOnlyTrx: true,
               });
             }
 

@@ -2,8 +2,8 @@
 #### docker build --tag eosjs-ci:test ./.github/eosjs-ci
 #### docker run --publish 8888:8888 eosjs-ci:test
 
-ARG EOSBRANCH=read_only_query_EPE-746
-ARG CDTBRANCH=qy-read-only-action
+ARG EOSBRANCH=develop
+ARG CDTBRANCH=develop
 FROM eosio/eosio.cdt:${CDTBRANCH} as contracts
 WORKDIR /root
 ### base
@@ -16,7 +16,7 @@ RUN git clone https://github.com/EOSIO/eos \
 
 RUN git clone https://github.com/EOSIO/eosio.cdt \
  && cd eosio.cdt \
- && git checkout qy-read-only-action \
+ && git checkout develop \
  && mkdir build && cd build && mkdir read_only_query_tests && cd .. \
  && eosio-cpp -abigen ./tests/unit/test_contracts/read_only_query_tests.cpp -o ./build/read_only_query_tests/read_only_query_tests.wasm
 
@@ -39,7 +39,6 @@ COPY ./contracts/cfhello.cpp /root/cfhello
 RUN cd cfhello \
  && mkdir build \
  && eosio-cpp -abigen ./cfhello.cpp -o ./build/cfhello.wasm
-
 
 FROM eosio/eosio:${EOSBRANCH}
 ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::trace_api_plugin", "--trace-no-abis", "--plugin", "eosio::db_size_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--enable-account-queries=true", "--verbose-http-errors", "--max-transaction-time=100"]

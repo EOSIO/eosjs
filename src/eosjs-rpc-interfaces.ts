@@ -341,17 +341,6 @@ export interface GetCodeHashResult {
     code_hash: string;
 }
 
-/** Return value of `/v1/chain/get_contract_query` */
-export interface GetContractQueryResult {
-    head_block_num: number;
-    head_block_id: string;
-    last_irreversible_block_num: number;
-    last_irreversible_block_id: string;
-    code_hash: string;
-    pending_transactions: string[];
-    result: TransactionTrace;
-}
-
 /** Return value of `/v1/chain/get_currency_stats` */
 export interface GetCurrencyStatsResult {
     [key: string]: {
@@ -478,6 +467,17 @@ export interface PushTransactionArgs {
     compression?: number;
     serializedTransaction: Uint8Array;
     serializedContextFreeData?: Uint8Array;
+}
+
+/** Return value of `/v1/chain/push_ro_transaction` */
+export interface ReadOnlyTransactResult {
+    head_block_num: number;
+    head_block_id: string;
+    last_irreversible_block_num: number;
+    last_irreversible_block_id: string;
+    code_hash: string;
+    pending_transactions: string[];
+    result: TransactionTrace;
 }
 
 export interface DBSizeIndexCount {
