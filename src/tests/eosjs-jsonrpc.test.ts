@@ -684,7 +684,8 @@ describe('JSON RPC', () => {
                     compression: 0,
                     packed_context_free_data: '',
                     packed_trx: '00102080ff'
-                }
+                },
+                return_failure_traces: false
             }),
             method: 'POST',
         };

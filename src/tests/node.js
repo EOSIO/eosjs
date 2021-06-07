@@ -192,6 +192,7 @@ const readOnlyQuery = async () => {
         blocksBehind: 3,
         expireSeconds: 30,
         readOnlyTrx: true,
+        returnFailureTraces: true,
     });
 };
 

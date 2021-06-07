@@ -29,7 +29,7 @@ import {
     GetBlockHeaderStateResult,
     GetBlockInfoResult,
     GetBlockResult,
-    GetContractQueryResult,
+    ReadOnlyTransactResult,
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
@@ -301,7 +301,7 @@ export class Api {
             useLastIrreversible,
             expireSeconds
         }:
-        TransactConfig = {}): Promise<TransactResult|GetContractQueryResult|PushTransactionArgs>
+        TransactConfig = {}): Promise<TransactResult|ReadOnlyTransactResult|PushTransactionArgs>
     {
         let info: GetInfoResult;
 
@@ -351,7 +351,7 @@ export class Api {
         if (broadcast) {
             let result;
             if (readOnlyTrx) {
-                return this.rpc.push_ro_transaction(pushTransactionArgs, returnFailureTraces) as Promise<GetContractQueryResult>;
+                return this.rpc.push_ro_transaction(pushTransactionArgs, returnFailureTraces) as Promise<ReadOnlyTransactResult>;
             }
             if (compression) {
                 return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
@@ -545,7 +545,7 @@ export class TransactionBuilder {
         return this;
     }
 
-    public async send(config?: TransactConfig): Promise<PushTransactionArgs|TransactResult> {
+    public async send(config?: TransactConfig): Promise<PushTransactionArgs|ReadOnlyTransactResult|TransactResult> {
         const contextFreeDataSet: Uint8Array[] = [];
         const contextFreeActions: ser.SerializedAction[] = [];
         const actions: ser.SerializedAction[] = this.actions.map((actionBuilder) => actionBuilder.serializedData as ser.SerializedAction);
