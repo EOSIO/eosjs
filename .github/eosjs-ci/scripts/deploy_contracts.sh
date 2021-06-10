@@ -193,6 +193,7 @@ activate_feature "4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc
 activate_feature "1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"
 activate_feature "bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"
 activate_feature "5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"
+activate_feature "808c49387292c34ccb3970e00b08a690b6b3370c1cbcec46d46c19d5dfafab03"
 
 sleep 1s
 setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
@@ -215,6 +216,14 @@ setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
 setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
 
 sleep 1s
+setabi eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.abi
+setcode eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.wasm
+
+sleep 1s
+setabi eosio $CONTRACTS_DIR/eosio.system/eosio.system.abi
+setcode eosio $CONTRACTS_DIR/eosio.system/eosio.system.wasm
+
+sleep 1s
 setabi eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.abi
 setcode eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.wasm
 
@@ -228,6 +237,10 @@ cleos push action eosio.token transfer '["bob", "alicer1", "1000000.0000 SYS", "
 cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
 cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
 cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
+
+cleos push action eosio init '["0", "4,SYS"]' -p eosio@active
+
+cleos system newaccount eosio --transfer payer $EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "100000000.0000 SYS" --stake-cpu "100000000.0000 SYS" --buy-ram-kbytes 8192
 
 echo "All done initializing the blockchain"
 

@@ -883,6 +883,7 @@ describe('Chain API Plugin Endpoints', () => {
                 },
                 'except&': 'string',
                 'error_code&': 'number',
+                bill_to_accounts: 'string',
             },
         };
         verifyType(result, transactResult);
@@ -999,6 +1000,7 @@ describe('Chain API Plugin Endpoints', () => {
                 },
                 'except&': 'string',
                 'error_code&': 'number',
+                bill_to_accounts: 'string',
             },
         };
         result.forEach((transaction: TransactResult) => {
@@ -1096,6 +1098,7 @@ describe('Chain API Plugin Endpoints', () => {
                 },
                 'except&': 'string',
                 'error_code&': 'number',
+                bill_to_accounts: 'string',
             },
         };
         verifyType(result, transactResult);
@@ -1150,7 +1153,8 @@ describe('Trace API Plugin Endpoints', () => {
                 cpu_usage_us: 'number',
                 net_usage_words: 'number',
                 signatures: 'string',
-                transaction_header: 'any'
+                transaction_header: 'any',
+                bill_to_accounts: 'string',
             },
         };
         verifyType(result, traceApiGetBlockResult);

@@ -165,6 +165,7 @@ export interface TransactionTrace {
     account_ram_delta: AccountDelta|null;
     except: string|null;
     error_code: number|null;
+    bill_to_accounts: string[];
 }
 
 export interface TransactResult {

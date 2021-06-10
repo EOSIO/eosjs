@@ -101,6 +101,11 @@ describe('Node JS environment', () => {
         expect(transactionResponse.processed.action_traces[0].return_value_data).toEqual(expectedValue);
     });
 
+    it('transacts with resource payer', async () => {
+        transactionResponse = await tests.transactWithResourcePayer();
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
         try {
             failedAsPlanned = true;

@@ -474,6 +474,60 @@
               resultsLabel.innerText = FAILED;
               return false;
             }
+
+            const resourcePayerTx = async () => {
+              return await api.transact({
+                transaction_extensions: [
+                  {
+                    payer: 'payer',
+                    max_net_bytes: 4096,
+                    max_cpu_us: 250,
+                    max_memory_bytes: 0
+                  }
+                ],
+                actions: [{
+                  account: 'eosio.token',
+                  name: 'transfer',
+                  authorization: [{
+                    actor: 'bob',
+                    permission: 'active',
+                  }],
+                  data: {
+                    from: 'bob',
+                    to: 'alice',
+                    quantity: '0.0001 SYS',
+                    memo: 'resource payer',
+                  },
+                }]
+              }, {
+                  blocksBehind: 3,
+                  expireSeconds: 30
+              });
+
+            }
+
+            const testWithResourcePayerTx = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await resourcePayerTx();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Resource Payer Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{

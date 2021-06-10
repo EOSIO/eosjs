@@ -177,6 +177,36 @@ const transactWithReturnValue = async () => {
     });
 };
 
+const transactWithResourcePayer = async () => {
+    return await api.transact({
+        transaction_extensions: [
+            {
+                payer: 'payer',
+                max_net_bytes: 4096,
+                max_cpu_us: 250,
+                max_memory_bytes: 0
+            }
+        ],
+        actions: [{
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'bob',
+                permission: 'active',
+            }],
+            data: {
+                from: 'bob',
+                to: 'alice',
+                quantity: '0.0001 SYS',
+                memo: 'resource payer',
+            },
+        }]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30
+    });
+};
+
 const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () => await api.transact({
@@ -210,5 +240,6 @@ module.exports = {
     transactWithShorthandTxJsonContextFreeAction,
     transactWithShorthandTxJsonContextFreeData,
     transactWithReturnValue,
+    transactWithResourcePayer,
     rpcShouldFail
 };

@@ -32,8 +32,6 @@ import {
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
-const transactionAbi = require('../src/transaction.abi.json');
-
 export class Api {
     /** Issues RPC calls */
     public rpc: JsonRpc;
@@ -93,7 +91,7 @@ export class Api {
         this.textDecoder = args.textDecoder;
 
         this.abiTypes = ser.getTypesFromAbi(ser.createAbiTypes());
-        this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
+        this.transactionTypes = ser.getTypesFromAbi(ser.createTransactionTypes());
     }
 
     /** Decodes an abi as Uint8Array into json. */
