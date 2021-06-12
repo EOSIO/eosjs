@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import { Abi, PushTransactionArgs, ProcessedAction } from './eosjs-rpc-interfaces';
 import { Anyvar, Authorization, Action, SerializedAction } from './eosjs-serialize';
 
 /** Arguments to `getRequiredKeys` */
@@ -130,7 +130,7 @@ export interface ActionTrace {
     closest_unnotified_ancestor_action_ordinal: number;
     receipt: ActionReceipt;
     receiver: string;
-    act: Action;
+    act: ProcessedAction;
     context_free: boolean;
     elapsed: number;
     console: string;

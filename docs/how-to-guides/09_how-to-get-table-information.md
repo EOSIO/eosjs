@@ -104,7 +104,6 @@ In the example shown below, the `contract` smart contract's kv table `profiles` 
 	limit: 1,                  	// Here we limit to 1 to get only the single row with primary key equal to 'testacc'
     reverse: false,            	// Optional: Get reversed data
     show_payer: false,         	// Optional: Show ram payer
-	expReturn
   }));
 })();
 ```
@@ -134,7 +133,6 @@ If the KV table has an additional indexes these can be used to query the data.  
 	limit: 1,                  	// Here we limit to 1 to get only the single row with primary key equal to 'testacc'
     reverse: false,            	// Optional: Get reversed data
     show_payer: false,         	// Optional: Show ram payer
-	expReturn
   }));
 })();
 ```
