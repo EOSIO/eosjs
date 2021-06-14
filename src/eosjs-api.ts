@@ -220,6 +220,40 @@ export class Api {
         return this.deserialize(buffer, 'transaction');
     }
 
+    private transactionExtensions = [
+        { id: 1, type: 'resource_payer', keys: ['payer', 'max_net_bytes', 'max_cpu_us', 'max_memory_bytes'] },
+    ];
+
+    public serializeTransactionExtensions(data: any[]): [number, string][] {
+        const transaction_extensions = data.map((extensionData: any): [number, string] => {
+            const transactionExtension = this.transactionExtensions.find(extension => {
+                return extension.keys.sort().every((element, index) => element === Object.keys(extensionData).sort()[index]);
+            });
+            if (transactionExtension === undefined) {
+                throw new Error(`Transaction Extension could not be determined: ${extensionData}`);
+            }
+            const extensionBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+            const types = ser.getTypesFromAbi(ser.createTransactionExtensionTypes());
+            types.get(transactionExtension.type).serialize(extensionBuffer, extensionData);
+            return [transactionExtension.id, ser.arrayToHex(extensionBuffer.asUint8Array())];
+        });
+        return transaction_extensions;
+    };
+
+    public deserializeTransactionExtension(data: [number, string][]): any[] {
+        const transaction_extensions = data.map((extensionData: [number, string]) => {
+            const transactionExtension = this.transactionExtensions.find(extension => extension.id === extensionData[0]);
+            if (transactionExtension === undefined) {
+                throw new Error(`Transaction Extension could not be determined: ${extensionData}`);
+            }
+            const types = ser.getTypesFromAbi(ser.createTransactionExtensionTypes());
+            const extensionBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+            extensionBuffer.pushArray(ser.hexToUint8Array(extensionData[1]));
+            return types.get(transactionExtension.type).deserialize(extensionBuffer);
+        });
+        return transaction_extensions;
+    };
+
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
         return await Promise.all(actions.map(async (action) => {
@@ -308,8 +342,10 @@ export class Api {
         }
 
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
+        console.log(this.serializeTransactionExtensions(transaction.transaction_extensions || []));
         transaction = {
             ...transaction,
+            transaction_extensions: await this.serializeTransactionExtensions(transaction.transaction_extensions || []),
             context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
             actions: await this.serializeActions(transaction.actions)
         };

@@ -828,42 +828,20 @@ function deserializeObject(this: Type, buffer: SerialBuffer, state?: SerializerS
     return result;
 }
 
-const transactionExtensions = [
-    { id: 1, type: 'resource_payer', keys: ['payer', 'max_net_bytes', 'max_cpu_us', 'max_memory_bytes'] },
-];
-
-function serializeTransactionExtension(
+function serializeMap(
     this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
 ): void {
-    const transactionExtension = transactionExtensions.find(extension => {
-        return extension.keys.sort().every((element, index) => element === Object.keys(data).sort()[index]);
-    });
-    if (transactionExtension === undefined) {
-        throw new Error(`Transaction Extension could not be determined: ${data}`);
-    }
-    const extensionBuffer = new SerialBuffer({ textEncoder: buffer.textEncoder, textDecoder: buffer.textDecoder});
-    const types = getTypesFromAbi(createTransactionExtensionTypes());
-    types.get(transactionExtension.type).serialize(extensionBuffer, data, state, false);
-
-    buffer.pushVaruint32([transactionExtension.id, arrayToHex(extensionBuffer.asUint8Array())].length);
-    this.fields[0].type.serialize(buffer, transactionExtension.id, state, false);
-    this.fields[1].type.serialize(buffer, arrayToHex(extensionBuffer.asUint8Array()), state, false);
+    buffer.pushVaruint32(data.length);
+    this.fields[0].type.serialize(buffer, data[0], state, allowExtensions);
+    this.fields[1].type.serialize(buffer, data[1], state, allowExtensions);
 }
 
-function deserializeTransactionExtension(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
+function deserializeMap(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
     const result = [] as any;
     const len = buffer.getVaruint32();
-    result.push(this.fields[0].type.deserialize(buffer, state, false));
-    result.push(this.fields[1].type.deserialize(buffer, state, false));
-    const transactionExtension = transactionExtensions.find(extension => extension.id === result[0]);
-    if (transactionExtension === undefined) {
-        throw new Error(`Transaction Extension could not be determined: ${result}`);
-    }
-    const types = getTypesFromAbi(createTransactionExtensionTypes());
-
-    const extensionBuffer = new SerialBuffer({ textEncoder: buffer.textEncoder, textDecoder: buffer.textDecoder });
-    extensionBuffer.pushArray(hexToUint8Array(result[1]));
-    return types.get(transactionExtension.type).deserialize(extensionBuffer, state, false);
+    result.push(this.fields[0].type.deserialize(buffer, state, allowExtensions));
+    result.push(this.fields[1].type.deserialize(buffer, state, allowExtensions));
+    return result;
 }
 
 interface CreateTypeArgs {
@@ -1330,8 +1308,8 @@ export const createTransactionTypes = (): Map<string, Type> => {
             { name: 'type', typeName: 'uint16', type: null },
             { name: 'data', typeName: 'bytes', type: null },
         ],
-        serialize: serializeTransactionExtension,
-        deserialize: deserializeTransactionExtension,
+        serialize: serializeMap,
+        deserialize: deserializeMap,
     }));
     initialTypes.set('transaction_header', createType({
         name: 'transaction_header',
