@@ -133,3 +133,8 @@ By providing that function inside `tx.associateContextFree()`, the transaction o
 
 #### Return Values
 From nodeos version 2.1, the ability to receive return values from smart contracts to eosjs has been introduced.  In the above examples, the `transaction` object will include the values `transaction_id` and the `processed` object.  If your smart contract returns values, you will be able to find the values within the `transaction.processed.action_traces` array.  The order of the `action_traces` array matches the order of actions in your transaction and within those `action_trace` objects, you can find your deserialized return value for your action in the `return_value` field.
+
+### Read-Only Transactions
+Adding `readOnlyTrx` to the `transact` config will send the transaction through the `push_ro_transaction` endpoint in the `chain_api`.  This endpoint will ensure that the transaction will not make any changes despite the actions in the transaction.  It is typically useful for doing queries using actions but normal actions will also work with this endpoint, but they won't make changes.
+
+Adding `returnFailureTraces` to the `transact` config will return a trace of the failure if your transaction fails.  At this time, this is only available for read-only transactions.

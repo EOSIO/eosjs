@@ -86,6 +86,8 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             json = await response.json();
             if (json.processed && json.processed.except) {
                 throw new RpcError(json);
+            } else if (json.result && json.result.except) {
+                throw new RpcError(json);
             }
         } catch (e) {
             e.isFetchError = true;

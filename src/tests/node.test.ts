@@ -116,6 +116,17 @@ describe('Node JS environment', () => {
         expect(transactionResponse.result.action_traces[0].return_value_data).toEqual(expectedValue);
     });
 
+    it('returns failure trace for failed transaction', async () => {
+        let err;
+        try {
+            await tests.readOnlyFailureTrace();
+        } catch (e) {
+            err = e.details;
+        }
+        expect(err.code).toEqual(3050003);
+        expect(err.stack[0].data.s).toEqual('overdrawn balance');
+    });
+
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
         try {
             failedAsPlanned = true;
