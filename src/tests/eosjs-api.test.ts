@@ -317,7 +317,7 @@ describe('eosjs-api', () => {
                 max_memory_bytes: '0'
             };
             const serialized = [1, '0000000080ABBCA90010000000000000FA000000000000000000000000000000'];
-            
+
             const serializedTransactionExtensions = api.serializeTransactionExtensions([deserialized]);
             expect(serializedTransactionExtensions).toEqual([serialized]);
             const deserializedTransactionExtensions = api.deserializeTransactionExtensions([serialized]);
