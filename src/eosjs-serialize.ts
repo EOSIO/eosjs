@@ -831,14 +831,14 @@ function deserializeObject(this: Type, buffer: SerialBuffer, state?: SerializerS
 function serializeMap(
     this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
 ): void {
-    buffer.pushVaruint32(data.length);
+    //buffer.pushVaruint32(data.length);
     this.fields[0].type.serialize(buffer, data[0], state, allowExtensions);
     this.fields[1].type.serialize(buffer, data[1], state, allowExtensions);
 }
 
 function deserializeMap(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
     const result = [] as any;
-    const len = buffer.getVaruint32();
+    //const len = buffer.getVaruint32();
     result.push(this.fields[0].type.deserialize(buffer, state, allowExtensions));
     result.push(this.fields[1].type.deserialize(buffer, state, allowExtensions));
     return result;

@@ -240,7 +240,7 @@ export class Api {
         return transaction_extensions;
     };
 
-    public deserializeTransactionExtension(data: [number, string][]): any[] {
+    public deserializeTransactionExtensions(data: [number, string][]): any[] {
         const transaction_extensions = data.map((extensionData: [number, string]) => {
             const transactionExtension = this.transactionExtensions.find(extension => extension.id === extensionData[0]);
             if (transactionExtension === undefined) {
@@ -342,7 +342,6 @@ export class Api {
         }
 
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
-        console.log(this.serializeTransactionExtensions(transaction.transaction_extensions || []));
         transaction = {
             ...transaction,
             transaction_extensions: await this.serializeTransactionExtensions(transaction.transaction_extensions || []),

@@ -308,5 +308,20 @@ describe('eosjs-api', () => {
 
             expect(firstSerializedAction).toEqual(secondSerializedAction);
         });
+
+        it('confirms the transaction extension serialization is reciprocal', async () => {
+            const deserialized = {
+                "payer": "payer",
+                "max_net_bytes": "4096",
+                "max_cpu_us": "250",
+                "max_memory_bytes": "0"
+            };
+            const serialized = [1, '0000000080ABBCA90010000000000000FA000000000000000000000000000000'];
+            
+            const serializedTransactionExtensions = api.serializeTransactionExtensions([deserialized]);
+            expect(serializedTransactionExtensions).toEqual([serialized]);
+            const deserializedTransactionExtensions = api.deserializeTransactionExtensions([serialized]);
+            expect(deserializedTransactionExtensions).toEqual([deserialized]);
+        });
     });
 });

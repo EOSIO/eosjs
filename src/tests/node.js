@@ -181,7 +181,7 @@ const transactWithResourcePayer = async () => {
     return await api.transact({
         transaction_extensions: [
             {
-                payer: 'payer',
+                payer: 'alice',
                 max_net_bytes: 4096,
                 max_cpu_us: 250,
                 max_memory_bytes: 0
@@ -192,6 +192,9 @@ const transactWithResourcePayer = async () => {
             name: 'transfer',
             authorization: [{
                 actor: 'bob',
+                permission: 'active',
+            }, {
+                actor: 'alice',
                 permission: 'active',
             }],
             data: {

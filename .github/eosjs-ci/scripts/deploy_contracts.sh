@@ -163,10 +163,6 @@ cleos create account eosio eosio.rex $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio eosio.token $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio returnvalue $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio todo $SYSTEM_ACCOUNT_PUBLIC_KEY
-cleos create account eosio bob $EXAMPLE_ACCOUNT_PUBLIC_KEY
-cleos create account eosio alice $EXAMPLE_ACCOUNT_PUBLIC_KEY
-cleos create account eosio bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY
-cleos create account eosio alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY
 cleos create account eosio cfhello $CFHELLO_PUBLIC_KEY
 cleos create account cfhello cfactor $CFACTOR_PUBLIC_KEY
 
@@ -228,19 +224,25 @@ setabi eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.abi
 setcode eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.wasm
 
 sleep 1s
-cleos push action eosio.token create '["bob", "10000000000.0000 SYS"]' -p eosio.token
-cleos push action eosio.token issue '["bob", "5000000000.0000 SYS", "Half of available supply"]' -p bob
-cleos push action eosio.token transfer '["bob", "alice", "1000000.0000 SYS", "memo"]' -p bob
-cleos push action eosio.token transfer '["bob", "bobr1", "1000000.0000 SYS", "memo"]' -p bob
-cleos push action eosio.token transfer '["bob", "alicer1", "1000000.0000 SYS", "memo"]' -p bob
+cleos push action eosio.token create '["eosio", "10000000000.0000 SYS"]' -p eosio.token
+cleos push action eosio.token issue '["eosio", "5000000000.0000 SYS", "Half of available supply"]' -p eosio
+
+cleos push action eosio init '["0", "4,SYS"]' -p eosio@active
+
+cleos system newaccount eosio --transfer bob $EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+cleos system newaccount eosio --transfer alice $EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+cleos system newaccount eosio --transfer bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+cleos system newaccount eosio --transfer alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+
+sleep 1s
+cleos push action eosio.token transfer '["eosio", "bob", "1000.0000 SYS", "memo"]' -p eosio
+cleos push action eosio.token transfer '["eosio", "alice", "1000.0000 SYS", "memo"]' -p eosio
+cleos push action eosio.token transfer '["eosio", "bobr1", "1000.0000 SYS", "memo"]' -p eosio
+cleos push action eosio.token transfer '["eosio", "alicer1", "1000.0000 SYS", "memo"]' -p eosio
 
 cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
 cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
 cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
-
-cleos push action eosio init '["0", "4,SYS"]' -p eosio@active
-
-cleos system newaccount eosio --transfer payer $EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "100000000.0000 SYS" --stake-cpu "100000000.0000 SYS" --buy-ram-kbytes 8192
 
 echo "All done initializing the blockchain"
 
