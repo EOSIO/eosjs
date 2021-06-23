@@ -80,7 +80,7 @@ class WebCryptoSignatureProvider implements SignatureProvider {
                 privWebCrypto,
                 buffer
             );
-            const signature = await Signature.fromWebCrypto(buffer, webCryptoSig, publicKey, defaultEc);
+            const signature = await Signature.fromWebCrypto(buffer, webCryptoSig, publicKey);
             signatures.push(signature.toString());
         }
 

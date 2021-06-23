@@ -46,13 +46,11 @@ export class PublicKey {
     }
 
     /** Instantiate public key from a `CryptoKey`-format public key */
-    public static async fromWebCrypto(publicKey: CryptoKey, ec?: EC): Promise<PublicKey> {
+    public static async fromWebCrypto(publicKey: CryptoKey): Promise<PublicKey> {
         if (publicKey.extractable === false) {
             throw new Error('Crypto Key is not extractable');
         }
-        if (!ec) {
-            ec = new EC('p256');
-        }
+        const ec = new EC('p256');
 
         const extractedArrayBuffer = await crypto.subtle.exportKey('spki', publicKey);
         const extractedDecoded = arrayToString(extractedArrayBuffer);

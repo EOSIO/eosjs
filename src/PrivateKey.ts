@@ -34,13 +34,11 @@ export class PrivateKey {
     }
 
     /** Instantiate private key from a `CryptoKey`-format private key */
-    public static async fromWebCrypto(privKey: CryptoKey, ec?: EC): Promise<PrivateKey> {
+    public static async fromWebCrypto(privKey: CryptoKey): Promise<PrivateKey> {
         if (privKey.extractable === false) {
             throw new Error('Crypto Key is not extractable');
         }
-        if (!ec) {
-            ec = new EC('p256');
-        }
+        const ec = new EC('p256');
 
         const extractedArrayBuffer = await crypto.subtle.exportKey('pkcs8', privKey);
         const extractedDecoded = arrayToString(extractedArrayBuffer);
@@ -156,7 +154,7 @@ export class PrivateKey {
             data
         );
 
-        return Signature.fromWebCrypto(data, webCryptoSig, publicKey, this.ec);
+        return Signature.fromWebCrypto(data, webCryptoSig, publicKey);
     }
 
     /** Validate a private key */

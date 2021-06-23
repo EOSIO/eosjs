@@ -56,10 +56,8 @@ export class Signature {
     }
 
     /** Instantiate Signature from a Web Crypto Signature */
-    public static async fromWebCrypto(data: WebCryptoSignatureData, webCryptoSig: ArrayBuffer, publicKey: PublicKey, ec?: EC) {
-        if (!ec) {
-            ec = new EC('p256');
-        }
+    public static async fromWebCrypto(data: WebCryptoSignatureData, webCryptoSig: ArrayBuffer, publicKey: PublicKey) {
+        const ec = new EC('p256');
 
         const hash = await crypto.subtle.digest('SHA-256', data);
         const r = new BN(new Uint8Array(webCryptoSig.slice(0, 32)), 32);
