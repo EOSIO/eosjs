@@ -96,7 +96,6 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         if (!response.ok) {
             throw new RpcError(json);
         }
-        // check each return value for every action for an error and call `new RpcError`?
         return json;
     }
 
