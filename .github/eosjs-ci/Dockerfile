@@ -14,11 +14,11 @@ RUN git clone https://github.com/EOSIO/eos \
  && cd eos \
  && git checkout develop
 
-RUN git clone https://github.com/EOSIO/eosio.contracts \
- && cd eosio.contracts \
+RUN git clone https://github.com/EOSIO/eosio.cdt \
+ && cd eosio.cdt \
  && git checkout develop \
- && mkdir build && cd build && mkdir eosio.token && cd .. \
- && eosio-cpp -abigen ./contracts/eosio.token/src/eosio.token.cpp -o ./build/eosio.token/eosio.token.wasm -R ./contracts/eosio.token/ricardian/ -I ./contracts/eosio.token/include/
+ && mkdir build && cd build && mkdir read_only_query_tests && cd .. \
+ && eosio-cpp -abigen ./tests/unit/test_contracts/read_only_query_tests.cpp -o ./build/read_only_query_tests/read_only_query_tests.wasm
 
 RUN git clone https://github.com/EOSIO/key-value-example-app.git \
  && cd key-value-example-app \
@@ -36,11 +36,15 @@ RUN cd cfhello \
 
 
 FROM eosio/eosio:${EOSBRANCH}
-ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::trace_api_plugin", "--trace-no-abis", "--plugin", "eosio::db_size_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--enable-account-queries=true", "--verbose-http-errors", "--max-transaction-time=100"]
+ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::producer_api_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::trace_api_plugin", "--trace-no-abis", "--plugin", "eosio::db_size_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--enable-account-queries=true", "--verbose-http-errors", "--max-transaction-time=100"]
 WORKDIR /root
 RUN mkdir -p "/opt/eosio/bin/contracts"
 COPY --from=contracts /root/eos/contracts/contracts/eosio.bios/bin/* /opt/eosio/bin/contracts/eosio.bios/
 COPY --from=contracts /root/eos/contracts/contracts/eosio.boot/bin/* /opt/eosio/bin/contracts/eosio.boot/
+COPY --from=contracts /root/eos/unittests/contracts/eosio.system/* /opt/eosio/bin/contracts/eosio.system/
+COPY --from=contracts /root/eos/unittests/contracts/eosio.msig/* /opt/eosio/bin/contracts/eosio.msig/
+COPY --from=contracts /root/eos/unittests/contracts/eosio.token/* /opt/eosio/bin/contracts/eosio.token/
+COPY --from=contracts /root/eosio.cdt/build/read_only_query_tests/* /opt/eosio/bin/contracts/read_only_query_tests/
 COPY --from=contracts /root/eosio.contracts/build/ /opt/eosio/bin/contracts
 COPY --from=contracts /root/key-value-example-app/contracts/kv_todo/build/* /opt/eosio/bin/contracts/kv_todo/
 COPY --from=contracts /root/return-values-example-app/contracts/action_return_value/build/* /opt/eosio/bin/contracts/action_return_value/
