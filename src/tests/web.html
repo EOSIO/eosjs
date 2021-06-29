@@ -477,14 +477,12 @@
 
             const resourcePayerTx = async () => {
               return await api.transact({
-                transaction_extensions: [
-                    {
-                        payer: 'alice',
-                        max_net_bytes: 4096,
-                        max_cpu_us: 250,
-                        max_memory_bytes: 0
-                    }
-                ],
+                resource_payer: {
+                    payer: 'alice',
+                    max_net_bytes: 4096,
+                    max_cpu_us: 400,
+                    max_memory_bytes: 0
+                },
                 actions: [{
                     account: 'eosio.token',
                     name: 'transfer',

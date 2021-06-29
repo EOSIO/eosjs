@@ -828,19 +828,23 @@ function deserializeObject(this: Type, buffer: SerialBuffer, state?: SerializerS
     return result;
 }
 
-function serializeMap(
+function serializePair(
     this: Type, buffer: SerialBuffer, data: any, state?: SerializerState, allowExtensions?: boolean
 ): void {
-    // buffer.pushVaruint32(data.length);
-    this.fields[0].type.serialize(buffer, data[0], state, allowExtensions);
-    this.fields[1].type.serialize(buffer, data[1], state, allowExtensions);
+    buffer.pushVaruint32(data.length);
+    data.forEach((item: [number, string]) => {
+        this.fields[0].type.serialize(buffer, item[0], state, allowExtensions);
+        this.fields[1].type.serialize(buffer, item[1], state, allowExtensions);
+    });
 }
 
-function deserializeMap(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
+function deserializePair(this: Type, buffer: SerialBuffer, state?: SerializerState, allowExtensions?: boolean): any {
     const result = [] as any;
-    // const len = buffer.getVaruint32();
-    result.push(this.fields[0].type.deserialize(buffer, state, allowExtensions));
-    result.push(this.fields[1].type.deserialize(buffer, state, allowExtensions));
+    const len = buffer.getVaruint32();
+    for (let i = 0; i < len; ++i) {
+        result.push(this.fields[0].type.deserialize(buffer, state, allowExtensions));
+        result.push(this.fields[1].type.deserialize(buffer, state, allowExtensions));
+    }
     return result;
 }
 
@@ -1308,8 +1312,8 @@ export const createTransactionTypes = (): Map<string, Type> => {
             { name: 'type', typeName: 'uint16', type: null },
             { name: 'data', typeName: 'bytes', type: null },
         ],
-        serialize: serializeMap,
-        deserialize: deserializeMap,
+        serialize: serializePair,
+        deserialize: deserializePair,
     }));
     initialTypes.set('transaction_header', createType({
         name: 'transaction_header',
@@ -1331,7 +1335,7 @@ export const createTransactionTypes = (): Map<string, Type> => {
         fields: [
             { name: 'context_free_actions', typeName: 'action[]', type: null },
             { name: 'actions', typeName: 'action[]', type: null },
-            { name: 'transaction_extensions', typeName: 'extension[]', type: null },
+            { name: 'transaction_extensions', typeName: 'extension', type: null }
         ],
         serialize: serializeStruct,
         deserialize: deserializeStruct,

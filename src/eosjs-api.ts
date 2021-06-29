@@ -224,24 +224,22 @@ export class Api {
         { id: 1, type: 'resource_payer', keys: ['payer', 'max_net_bytes', 'max_cpu_us', 'max_memory_bytes'] },
     ];
 
-    public serializeTransactionExtensions(data: any[]): [number, string][] {
-        const transaction_extensions = data.map((extensionData: any): [number, string] => {
-            const transactionExtension = this.transactionExtensions.find(extension => {
-                return extension.keys.sort().every((element, index) => element === Object.keys(extensionData).sort()[index]);
-            });
-            if (transactionExtension === undefined) {
-                throw new Error(`Transaction Extension could not be determined: ${extensionData}`);
-            }
+    // Order of adding to transaction_extension is transaction_extension id ascending
+    public serializeTransactionExtensions(transaction: Transaction): [number, string][] {
+        let transaction_extensions: [number, string][] = [];
+        if (transaction.resource_payer) {
             const extensionBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
             const types = ser.getTypesFromAbi(ser.createTransactionExtensionTypes());
-            types.get(transactionExtension.type).serialize(extensionBuffer, extensionData);
-            return [transactionExtension.id, ser.arrayToHex(extensionBuffer.asUint8Array())];
-        });
+            types.get('resource_payer').serialize(extensionBuffer, transaction.resource_payer);
+            transaction_extensions = [...transaction_extensions, [1, ser.arrayToHex(extensionBuffer.asUint8Array())]];
+        }
         return transaction_extensions;
     };
 
+    // Usage: transaction = {...transaction, ...this.deserializeTransactionExtensions(transaction.transaction_extensions)}
     public deserializeTransactionExtensions(data: [number, string][]): any[] {
-        const transaction_extensions = data.map((extensionData: [number, string]) => {
+        const transaction = {} as any;
+        data.forEach((extensionData: [number, string]) => {
             const transactionExtension = this.transactionExtensions.find(extension => extension.id === extensionData[0]);
             if (transactionExtension === undefined) {
                 throw new Error(`Transaction Extension could not be determined: ${extensionData}`);
@@ -249,10 +247,19 @@ export class Api {
             const types = ser.getTypesFromAbi(ser.createTransactionExtensionTypes());
             const extensionBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
             extensionBuffer.pushArray(ser.hexToUint8Array(extensionData[1]));
-            return types.get(transactionExtension.type).deserialize(extensionBuffer);
+            const deserializedObj = types.get(transactionExtension.type).deserialize(extensionBuffer);
+            if (extensionData[0] === 1) {
+                transaction.resource_payer = deserializedObj;
+            }
         });
-        return transaction_extensions;
+        return transaction;
     };
+
+    // Transaction extensions are serialized and moved to `transaction_extensions`, deserialized objects are not needed on the transaction
+    public deleteTransactionExtensionObjects(transaction: Transaction): Transaction {
+        delete transaction.resource_payer;
+        return transaction;
+    }
 
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
@@ -344,10 +351,11 @@ export class Api {
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = {
             ...transaction,
-            transaction_extensions: await this.serializeTransactionExtensions(transaction.transaction_extensions || []),
+            transaction_extensions: await this.serializeTransactionExtensions(transaction),
             context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
             actions: await this.serializeActions(transaction.actions)
         };
+        transaction = this.deleteTransactionExtensionObjects(transaction);
         const serializedTransaction = this.serializeTransaction(transaction);
         const serializedContextFreeData = this.serializeContextFreeData(transaction.context_free_data);
         let pushTransactionArgs: PushTransactionArgs = {
