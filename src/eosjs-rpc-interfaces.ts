@@ -539,7 +539,8 @@ export interface TraceApiTransaction {
     cpu_usage_us?: number;
     net_usage_words?: number;
     signatures?: string[];
-    transaction_header?: TraceApiTransactionHeader
+    transaction_header?: TraceApiTransactionHeader,
+    bill_to_accounts: string[]
 }
 
 /** Return value of `/v1/trace_api/get_block` */
