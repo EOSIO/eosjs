@@ -949,7 +949,7 @@ describe('Chain API Plugin Endpoints', () => {
                             actor: 'string',
                             permission: 'string',
                         },
-                        data: 'any',
+                        'data?': 'any',
                         'hex_data?': 'string',
                     },
                     context_free: 'boolean',
