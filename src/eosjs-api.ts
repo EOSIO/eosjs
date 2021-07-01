@@ -29,6 +29,7 @@ import {
     GetBlockHeaderStateResult,
     GetBlockInfoResult,
     GetBlockResult,
+    ReadOnlyTransactResult,
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
@@ -274,6 +275,8 @@ export class Api {
      * `broadcast`: broadcast this transaction?
      * `sign`: sign this transaction?
      * `compression`: compress this transaction?
+     * `readOnlyTrx`: read only transaction?
+     * `returnFailureTraces`: return failure traces? (only available for read only transactions currently)
      *
      * If both `blocksBehind` and `expireSeconds` are present,
      * then fetch the block which is `blocksBehind` behind head block,
@@ -287,8 +290,18 @@ export class Api {
      */
     public async transact(
         transaction: Transaction,
-        { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-        TransactConfig = {}): Promise<TransactResult|PushTransactionArgs>
+        {
+            broadcast = true,
+            sign = true,
+            readOnlyTrx,
+            returnFailureTraces,
+            requiredKeys,
+            compression,
+            blocksBehind,
+            useLastIrreversible,
+            expireSeconds
+        }:
+        TransactConfig = {}): Promise<TransactResult|ReadOnlyTransactResult|PushTransactionArgs>
     {
         let info: GetInfoResult;
 
@@ -337,6 +350,9 @@ export class Api {
         }
         if (broadcast) {
             let result;
+            if (readOnlyTrx) {
+                return this.rpc.push_ro_transaction(pushTransactionArgs, returnFailureTraces) as Promise<ReadOnlyTransactResult>;
+            }
             if (compression) {
                 return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
             }
@@ -529,7 +545,7 @@ export class TransactionBuilder {
         return this;
     }
 
-    public async send(config?: TransactConfig): Promise<PushTransactionArgs|TransactResult> {
+    public async send(config?: TransactConfig): Promise<PushTransactionArgs|ReadOnlyTransactResult|TransactResult> {
         const contextFreeDataSet: Uint8Array[] = [];
         const contextFreeActions: ser.SerializedAction[] = [];
         const actions: ser.SerializedAction[] = this.actions.map((actionBuilder) => actionBuilder.serializedData as ser.SerializedAction);

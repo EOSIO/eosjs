@@ -474,6 +474,57 @@
               resultsLabel.innerText = FAILED;
               return false;
             }
+
+            const readOnlyQuery = async () => {
+              return await api.transact({
+                  actions: [{
+                      account: 'readonly',
+                      name: 'get',
+                      authorization: [{
+                          actor: 'readonly',
+                          permission: 'active',
+                      }],
+                      data: {},
+                  }],
+              }, {
+                  blocksBehind: 3,
+                  expireSeconds: 30,
+                  readOnlyTrx: true,
+              });
+            }
+
+            const testWithReadOnlyQuery = async (e) => {
+              const expectedValue = [
+                {'id': 1, 'name': 'Bob Smith', 'gender': 1, 'age': 25},
+                {'id': 3, 'name': 'John Smith', 'gender': 1, 'age': 42},
+                {'id': 4, 'name': 'Jack Smith', 'gender': 1, 'age': 27},
+                {'id': 2, 'name': 'Alice Smith', 'gender': 0, 'age': 20,},
+                {'id': 5, 'name': 'Youko Niihara', 'gender': 0, 'age': 26},
+                {'id': 6, 'name': 'Rose Lee', 'gender': 0, 'age': 18},
+                {'id': 7, 'name': 'Youko Kawakami', 'gender': 0, 'age': 25},
+                {'id': 8, 'name': 'Yuu Yamada', 'gender': 0, 'age': 24}
+              ];
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await readOnlyQuery();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Read Only Query Test Failure: ', error.message);
+                return false;
+              }
+
+              if (JSON.stringify(transactionResponse.result.action_traces[0].return_value_data) === JSON.stringify(expectedValue)) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
         
             const transactShouldFail = async () => await api.transact({
                 actions: [{
@@ -564,6 +615,7 @@
             <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Data</h2><button onClick='testShorthandWithTxJsonContextFreeData(event);'>Test</button></div>
             <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button onClick='testWithP256EllipticCurve(event);'>Test</button></div>
             <div><h2>Transact Return Values</h2><button onClick='testWithReturnValueTx(event);'>Test</button></div>
+            <div><h2>Read Only Query</h2><button onClick='testWithReadOnlyQuery(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>
