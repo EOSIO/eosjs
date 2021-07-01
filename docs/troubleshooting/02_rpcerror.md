@@ -1,8 +1,8 @@
-When a call to the chain_api is performed and fails, it will result in an RPCError object being generated to inform why the transaction failed.
+When a call to the chain_api is performed and fails, it will result in an RPCError object being generated which contains information on why the transaction failed.
 
-The RPCError object will error with the concise message, for instance 'Invalid transaction', but additional details can be found in both the `details` field and the `json` field.  The `json` field holds the entire json response from `nodeos` while the `details` field specifically holds the error object in the `json`.  This is typically in different places of the `json` depending on what endpoint is used in `nodeos` so the `details` field is available to quickly see the error information without needing to search through the `json` object.
+The RPCError object will contain a concise error message, for instance 'Invalid transaction'. However additional details can be found in the `details` field and the `json` field. The `json` field holds the complete json response from nodeos. The `details` field specifically holds the error object in the `json` field. The data content of the `json` and `details` vary depending on the endpoint is used to call nodeos. Use the `details` field to quickly find error information.
 
-As you can see below, the concise error message might not give enough information to really discern the issue.  While the error has `eosio_assert_message assertion failure` as the concise error, in the `details` field the `overdrawn balance` error mentioned.  It's important to note that the format of the `details` object can be different depending on what endpoint is used.
+In the `details` and `json` examples below, you can see that the error message may not contain enough information to discern what caused the action to fail. The error message contains `eosio_assert_message` assertion failure. Looking further at the details you can see an `overdrawn balance` message.
 ```javascript
 RpcError: eosio_assert_message assertion failure
     at new RpcError (eosjs-rpcerror.ts:20:13)
