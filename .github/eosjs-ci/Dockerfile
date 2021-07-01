@@ -14,6 +14,12 @@ RUN git clone https://github.com/EOSIO/eos \
  && cd eos \
  && git checkout develop
 
+RUN git clone https://github.com/EOSIO/eosio.cdt \
+ && cd eosio.cdt \
+ && git checkout develop \
+ && mkdir build && cd build && mkdir read_only_query_tests && cd .. \
+ && eosio-cpp -abigen ./tests/unit/test_contracts/read_only_query_tests.cpp -o ./build/read_only_query_tests/read_only_query_tests.wasm
+
 RUN git clone https://github.com/EOSIO/key-value-example-app.git \
  && cd key-value-example-app \
  && eosio-cpp -abigen ./contracts/kv_todo/src/kv_todo.cpp -o ./contracts/kv_todo/build/kv_todo.wasm -R ./contracts/kv_todo/ricardian/ -I ./contracts/kv_todo/include/
@@ -38,6 +44,7 @@ COPY --from=contracts /root/eos/contracts/contracts/eosio.boot/bin/* /opt/eosio/
 COPY --from=contracts /root/eos/unittests/contracts/eosio.system/* /opt/eosio/bin/contracts/eosio.system/
 COPY --from=contracts /root/eos/unittests/contracts/eosio.msig/* /opt/eosio/bin/contracts/eosio.msig/
 COPY --from=contracts /root/eos/unittests/contracts/eosio.token/* /opt/eosio/bin/contracts/eosio.token/
+COPY --from=contracts /root/eosio.cdt/build/read_only_query_tests/* /opt/eosio/bin/contracts/read_only_query_tests/
 COPY --from=contracts /root/key-value-example-app/contracts/kv_todo/build/* /opt/eosio/bin/contracts/kv_todo/
 COPY --from=contracts /root/return-values-example-app/contracts/action_return_value/build/* /opt/eosio/bin/contracts/action_return_value/
 COPY --from=contracts /root/cfhello/build/* /opt/eosio/bin/contracts/cfhello/

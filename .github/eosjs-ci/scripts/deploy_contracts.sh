@@ -162,6 +162,7 @@ cleos create account eosio eosio.vpay $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio eosio.rex $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio eosio.token $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio returnvalue $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio readonly $EXAMPLE_ACCOUNT_PUBLIC_KEY
 cleos create account eosio todo $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio cfhello $CFHELLO_PUBLIC_KEY
 cleos create account cfhello cfactor $CFACTOR_PUBLIC_KEY
@@ -212,6 +213,10 @@ setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
 setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
 
 sleep 1s
+setabi readonly $CONTRACTS_DIR/read_only_query_tests/read_only_query_tests.abi
+setcode readonly $CONTRACTS_DIR/read_only_query_tests/read_only_query_tests.wasm
+
+sleep 1s
 setabi eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.abi
 setcode eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.wasm
 
@@ -243,6 +248,8 @@ cleos push action eosio.token transfer '["eosio", "alicer1", "1000.0000 SYS", "m
 cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
 cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
 cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
+
+cleos push action readonly setup '[]' -p readonly@active
 
 echo "All done initializing the blockchain"
 
