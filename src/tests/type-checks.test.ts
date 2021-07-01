@@ -426,10 +426,7 @@ describe('Chain API Plugin Endpoints', () => {
                             'data?': 'any',
                             'hex_data?': 'string',
                         },
-                        'transaction_extensions?': {
-                            type: 'number',
-                            data: 'string',
-                        },
+                        'transaction_extensions?': '[number, string]',
                     },
                 },
             },
@@ -698,10 +695,7 @@ describe('Chain API Plugin Endpoints', () => {
                         'data?': 'any',
                         'hex_data?': 'string',
                     },
-                    'transaction_extensions?': {
-                        type: 'number',
-                        data: 'string',
-                    },
+                    'transaction_extensions?': '[number, string]',
                     'deferred_transaction_generation?': {
                         sender_trx_id: 'string',
                         sender_id: 'string',

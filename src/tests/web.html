@@ -475,6 +475,61 @@
               return false;
             }
 
+            const resourcePayerTx = async () => {
+              return await api.transact({
+                resource_payer: {
+                    payer: 'alice',
+                    max_net_bytes: 4096,
+                    max_cpu_us: 400,
+                    max_memory_bytes: 0
+                },
+                actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }, {
+                        actor: 'alice',
+                        permission: 'active',
+                    }],
+                    data: {
+                        from: 'bob',
+                        to: 'alice',
+                        quantity: '0.0001 SYS',
+                        memo: 'resource payer',
+                    },
+                }]
+              }, {
+                  blocksBehind: 3,
+                  expireSeconds: 30
+              });
+
+            }
+
+            const testWithResourcePayerTx = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await resourcePayerTx();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Resource Payer Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
             const readOnlyQuery = async () => {
               return await api.transact({
                   actions: [{
@@ -520,6 +575,50 @@
                 resultsLabel.className = "success";
                 resultsLabel.innerText = SUCCESS;
                 return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
+            const readOnlyFailureTrace = async () => {
+              return await api.transact({
+                  actions: [{
+                      account: 'eosio.token',
+                      name: 'transfer',
+                      authorization: [{
+                          actor: 'alice',
+                          permission: 'active',
+                      }],
+                      data: {
+                          from: 'alice',
+                          to: 'bob',
+                          quantity: '2000000.0000 SYS',
+                          memo: 'failureTrace',
+                      },
+                  }]
+              }, {
+                  blocksBehind: 3,
+                  expireSeconds: 30,
+                  readOnlyTrx: true,
+                  returnFailureTraces: true,
+              });
+            }
+
+            const testWithReadOnlyFailureTrace = async (e) => {
+              let err;
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                await readOnlyFailureTrace();
+              } catch (err) {
+                console.log(err);
+                if (err.details.code === 3050003 && err.details.stack[0].data.s === 'overdrawn balance') {
+                    resultsLabel.className = "success";
+                    resultsLabel.innerText = SUCCESS;
+                    return true;
+                }
               }
               resultsLabel.className = 'failed';
               resultsLabel.innerText = FAILED;
@@ -615,7 +714,9 @@
             <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Data</h2><button onClick='testShorthandWithTxJsonContextFreeData(event);'>Test</button></div>
             <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button onClick='testWithP256EllipticCurve(event);'>Test</button></div>
             <div><h2>Transact Return Values</h2><button onClick='testWithReturnValueTx(event);'>Test</button></div>
+            <div><h2>Resource Payer</h2><button onClick='testWithResourcePayerTx(event);'>Test</button></div> 
             <div><h2>Read Only Query</h2><button onClick='testWithReadOnlyQuery(event);'>Test</button></div>
+            <div><h2>Read Only Failure Trace</h2><button onClick='testWithReadOnlyFailureTrace(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>

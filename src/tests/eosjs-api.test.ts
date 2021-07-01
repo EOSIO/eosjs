@@ -308,5 +308,46 @@ describe('eosjs-api', () => {
 
             expect(firstSerializedAction).toEqual(secondSerializedAction);
         });
+
+        it('confirms the transaction extension serialization is reciprocal', async () => {
+            const resourcePayerTrx = {
+                expiration: '2021-06-28T15:55:37.000',
+                ref_block_num: 2097,
+                ref_block_prefix: 1309445478,
+                actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }, {
+                        actor: 'alice',
+                        permission: 'active',
+                    }],
+                    data: '0000000000000E3D0000000000855C34010000000000000004535953000000000E7265736F75726365207061796572'
+                }],
+                context_free_actions: [] as any,
+                resource_payer: {
+                    payer: 'payer',
+                    max_net_bytes: '4096',
+                    max_cpu_us: '250',
+                    max_memory_bytes: '0'
+                }
+            };
+            const serialized = [[1, '0000000080ABBCA90010000000000000FA000000000000000000000000000000']];
+            const deserialized = {
+                resource_payer: {
+                    payer: 'payer',
+                    max_net_bytes: '4096',
+                    max_cpu_us: '250',
+                    max_memory_bytes: '0'
+                }
+            };
+
+            const serializedTransactionExtensions = api.serializeTransactionExtensions(resourcePayerTrx);
+            expect(serializedTransactionExtensions).toEqual(serialized);
+            const deserializedTransactionExtensions = api.deserializeTransactionExtensions(serialized);
+            expect(deserializedTransactionExtensions).toEqual(deserialized);
+        });
     });
 });

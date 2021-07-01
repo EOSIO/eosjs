@@ -72,6 +72,13 @@ export interface SignatureProvider {
     sign: (args: SignatureProviderArgs) => Promise<PushTransactionArgs>;
 }
 
+export interface ResourcePayer {
+    payer: string;
+    max_net_bytes: number|string;
+    max_cpu_us: number|string;
+    max_memory_bytes: number|string;
+}
+
 export interface Transaction {
     expiration?: string;
     ref_block_num?: number;
@@ -83,6 +90,7 @@ export interface Transaction {
     context_free_data?: Uint8Array[];
     actions: Action[];
     transaction_extensions?: [number, string][];
+    resource_payer?: ResourcePayer;
 }
 
 /** Optional transact configuration object */

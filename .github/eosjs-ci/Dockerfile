@@ -44,7 +44,6 @@ COPY --from=contracts /root/eos/unittests/contracts/eosio.system/* /opt/eosio/bi
 COPY --from=contracts /root/eos/unittests/contracts/eosio.msig/* /opt/eosio/bin/contracts/eosio.msig/
 COPY --from=contracts /root/eos/unittests/contracts/eosio.token/* /opt/eosio/bin/contracts/eosio.token/
 COPY --from=contracts /root/eosio.cdt/build/read_only_query_tests/* /opt/eosio/bin/contracts/read_only_query_tests/
-COPY --from=contracts /root/eosio.contracts/build/ /opt/eosio/bin/contracts
 COPY --from=contracts /root/key-value-example-app/contracts/kv_todo/build/* /opt/eosio/bin/contracts/kv_todo/
 COPY --from=contracts /root/return-values-example-app/contracts/action_return_value/build/* /opt/eosio/bin/contracts/action_return_value/
 COPY --from=contracts /root/cfhello/build/* /opt/eosio/bin/contracts/cfhello/
