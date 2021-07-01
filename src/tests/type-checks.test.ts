@@ -980,6 +980,7 @@ describe('Chain API Plugin Endpoints', () => {
                 },
                 'except&': 'string',
                 'error_code&': 'number',
+                bill_to_accounts: 'string',
             }
         };
         verifyType(result, readOnlyTransactResult);
