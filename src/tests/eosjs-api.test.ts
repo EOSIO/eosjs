@@ -310,7 +310,7 @@ describe('eosjs-api', () => {
         });
 
         it('confirms the transaction extension serialization is reciprocal', async () => {
-            const transaction = {
+            const resourcePayerTrx = {
                 expiration: '2021-06-28T15:55:37.000',
                 ref_block_num: 2097,
                 ref_block_prefix: 1309445478,
@@ -342,9 +342,9 @@ describe('eosjs-api', () => {
                     max_cpu_us: '250',
                     max_memory_bytes: '0'
                 }
-            }
+            };
 
-            const serializedTransactionExtensions = api.serializeTransactionExtensions(transaction);
+            const serializedTransactionExtensions = api.serializeTransactionExtensions(resourcePayerTrx);
             expect(serializedTransactionExtensions).toEqual(serialized);
             const deserializedTransactionExtensions = api.deserializeTransactionExtensions(serialized);
             expect(deserializedTransactionExtensions).toEqual(deserialized);
