@@ -101,6 +101,32 @@ describe('Node JS environment', () => {
         expect(transactionResponse.processed.action_traces[0].return_value_data).toEqual(expectedValue);
     });
 
+    it('confirms the return value of the read-only query', async () => {
+        const expectedValue = [
+            {'age': 25, 'gender': 1, 'id': 1, 'name': 'Bob Smith'},
+            {'age': 42, 'gender': 1, 'id': 3, 'name': 'John Smith'},
+            {'age': 27, 'gender': 1, 'id': 4, 'name': 'Jack Smith'},
+            {'age': 20, 'gender': 0, 'id': 2, 'name': 'Alice Smith'},
+            {'age': 26, 'gender': 0, 'id': 5, 'name': 'Youko Niihara'},
+            {'age': 18, 'gender': 0, 'id': 6, 'name': 'Rose Lee'},
+            {'age': 25, 'gender': 0, 'id': 7, 'name': 'Youko Kawakami'},
+            {'age': 24, 'gender': 0, 'id': 8, 'name': 'Yuu Yamada'}
+        ];
+        transactionResponse = await tests.readOnlyQuery();
+        expect(transactionResponse.result.action_traces[0].return_value_data).toEqual(expectedValue);
+    });
+
+    it('returns failure trace for failed transaction', async () => {
+        let err;
+        try {
+            await tests.readOnlyFailureTrace();
+        } catch (e) {
+            err = e.details;
+        }
+        expect(err.code).toEqual(3050003);
+        expect(err.stack[0].data.s).toEqual('overdrawn balance');
+    });
+
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
         try {
             failedAsPlanned = true;
