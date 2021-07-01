@@ -34,7 +34,6 @@ RUN cd cfhello \
  && mkdir build \
  && eosio-cpp -abigen ./cfhello.cpp -o ./build/cfhello.wasm
 
-
 FROM eosio/eosio:${EOSBRANCH}
 ENTRYPOINT ["nodeos", "--data-dir", "/root/.local/share", "-e", "-p", "eosio", "--replay-blockchain", "--plugin", "eosio::producer_plugin", "--plugin", "eosio::producer_api_plugin", "--plugin", "eosio::chain_api_plugin", "--plugin", "eosio::trace_api_plugin", "--trace-no-abis", "--plugin", "eosio::db_size_api_plugin", "--plugin", "eosio::http_plugin", "--http-server-address=0.0.0.0:8888", "--access-control-allow-origin=*", "--contracts-console", "--http-validate-host=false", "--enable-account-queries=true", "--verbose-http-errors", "--max-transaction-time=100"]
 WORKDIR /root

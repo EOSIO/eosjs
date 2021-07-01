@@ -208,6 +208,49 @@ const transactWithResourcePayer = async () => {
     });
 };
 
+const readOnlyQuery = async () => {
+    return await api.transact({
+        actions: [{
+            account: 'readonly',
+            name: 'get',
+            authorization: [{
+                actor: 'readonly',
+                permission: 'active',
+            }],
+            data: {},
+        }],
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+        readOnlyTrx: true,
+        returnFailureTraces: true,
+    });
+};
+
+const readOnlyFailureTrace = async () => {
+    return await api.transact({
+        actions: [{
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'alice',
+                permission: 'active',
+            }],
+            data: {
+                from: 'alice',
+                to: 'bob',
+                quantity: '2000000.0000 SYS',
+                memo: 'failureTrace',
+            },
+        }]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+        readOnlyTrx: true,
+        returnFailureTraces: true,
+    });
+};
+
 const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () => await api.transact({
@@ -242,5 +285,7 @@ module.exports = {
     transactWithShorthandTxJsonContextFreeData,
     transactWithReturnValue,
     transactWithResourcePayer,
+    readOnlyQuery,
+    readOnlyFailureTrace,
     rpcShouldFail
 };
