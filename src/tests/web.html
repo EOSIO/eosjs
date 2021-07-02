@@ -584,20 +584,18 @@
 
             const readOnlyFailureTrace = async () => {
               return await api.transact({
-                  actions: [{
-                      account: 'eosio.token',
-                      name: 'transfer',
-                      authorization: [{
-                          actor: 'alice',
-                          permission: 'active',
-                      }],
-                      data: {
-                          from: 'alice',
-                          to: 'bob',
-                          quantity: '2000000.0000 SYS',
-                          memo: 'failureTrace',
-                      },
-                  }]
+                actions: [{
+                    account: 'eosio',
+                    name: 'setpriv',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }],
+                    data: {
+                        account: 'bob',
+                        is_priv: '1'
+                    },
+                }]
               }, {
                   blocksBehind: 3,
                   expireSeconds: 30,
@@ -614,7 +612,7 @@
               try {
                 await readOnlyFailureTrace();
               } catch (err) {
-                if (err.details.code === 3050003 && err.details.stack[0].data.s === 'overdrawn balance') {
+                if (err.details.code === 3090004 && err.details.stack[0].format === 'missing authority of ${account}') {
                     resultsLabel.className = "success";
                     resultsLabel.innerText = SUCCESS;
                     return true;
