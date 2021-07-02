@@ -222,8 +222,8 @@ const readOnlyQuery = async () => {
     }, {
         blocksBehind: 3,
         expireSeconds: 30,
+        compression: true,
         readOnlyTrx: true,
-        returnFailureTraces: true,
     });
 };
 
