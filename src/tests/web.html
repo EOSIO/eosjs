@@ -613,7 +613,6 @@
               try {
                 await readOnlyFailureTrace();
               } catch (err) {
-                console.log(err);
                 if (err.details.code === 3050003 && err.details.stack[0].data.s === 'overdrawn balance') {
                     resultsLabel.className = "success";
                     resultsLabel.innerText = SUCCESS;

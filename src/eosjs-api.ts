@@ -250,6 +250,9 @@ export class Api {
             extensionBuffer.pushArray(ser.hexToUint8Array(extensionData[1]));
             const deserializedObj = types.get(transactionExtension.type).deserialize(extensionBuffer);
             if (extensionData[0] === 1) {
+                deserializedObj.max_net_bytes = Number(deserializedObj.max_net_bytes);
+                deserializedObj.max_cpu_us = Number(deserializedObj.max_cpu_us);
+                deserializedObj.max_memory_bytes = Number(deserializedObj.max_memory_bytes);
                 transaction.resource_payer = deserializedObj;
             }
         });
@@ -390,14 +393,18 @@ export class Api {
             });
         }
         if (broadcast) {
-            let result;
-            if (readOnlyTrx) {
-                return this.rpc.push_ro_transaction(pushTransactionArgs, returnFailureTraces) as Promise<ReadOnlyTransactResult>;
-            }
             if (compression) {
-                return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
+                return this.pushCompressedSignedTransaction(
+                    pushTransactionArgs,
+                    readOnlyTrx,
+                    returnFailureTraces,
+                ) as Promise<TransactResult|ReadOnlyTransactResult>;
             }
-            return this.pushSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
+            return this.pushSignedTransaction(
+                pushTransactionArgs,
+                readOnlyTrx,
+                returnFailureTraces,
+            ) as Promise<TransactResult|ReadOnlyTransactResult>;
         }
         return pushTransactionArgs as PushTransactionArgs;
     }
@@ -462,8 +469,17 @@ export class Api {
 
     /** Broadcast a signed transaction */
     public async pushSignedTransaction(
-        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<TransactResult> {
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
+        readOnlyTrx = false,
+        returnFailureTraces = false,
+    ): Promise<TransactResult|ReadOnlyTransactResult> {
+        if (readOnlyTrx) {
+            return this.rpc.push_ro_transaction({
+                signatures,
+                serializedTransaction,
+                serializedContextFreeData,
+            }, returnFailureTraces);
+        }
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
@@ -472,12 +488,22 @@ export class Api {
     }
 
     public async pushCompressedSignedTransaction(
-        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<TransactResult> {
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
+        readOnlyTrx = false,
+        returnFailureTraces = false,
+    ): Promise<TransactResult|ReadOnlyTransactResult> {
         const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
         const compressedSerializedContextFreeData =
             this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
 
+        if (readOnlyTrx) {
+            return this.rpc.push_ro_transaction({
+                signatures,
+                compression: 1,
+                serializedTransaction: compressedSerializedTransaction,
+                serializedContextFreeData: compressedSerializedContextFreeData
+            }, returnFailureTraces);
+        }
         return this.rpc.push_transaction({
             signatures,
             compression: 1,

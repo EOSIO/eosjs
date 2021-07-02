@@ -329,18 +329,18 @@ describe('eosjs-api', () => {
                 context_free_actions: [] as any,
                 resource_payer: {
                     payer: 'payer',
-                    max_net_bytes: '4096',
-                    max_cpu_us: '250',
-                    max_memory_bytes: '0'
+                    max_net_bytes: 4096,
+                    max_cpu_us: 250,
+                    max_memory_bytes: 0
                 }
             };
             const serialized = [[1, '0000000080ABBCA90010000000000000FA000000000000000000000000000000']];
             const deserialized = {
                 resource_payer: {
                     payer: 'payer',
-                    max_net_bytes: '4096',
-                    max_cpu_us: '250',
-                    max_memory_bytes: '0'
+                    max_net_bytes: 4096,
+                    max_cpu_us: 250,
+                    max_memory_bytes: 0
                 }
             };
 

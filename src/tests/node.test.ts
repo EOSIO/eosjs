@@ -126,10 +126,10 @@ describe('Node JS environment', () => {
         try {
             await tests.readOnlyFailureTrace();
         } catch (e) {
-            err = e.details;
+            err = e;
         }
-        expect(err.code).toEqual(3050003);
-        expect(err.stack[0].data.s).toEqual('overdrawn balance');
+        expect(err.details.code).toEqual(3090004);
+        expect(err.details.stack[0].format).toEqual('missing authority of ${account}');
     });
 
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {
