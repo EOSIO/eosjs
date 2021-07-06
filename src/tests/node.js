@@ -222,25 +222,23 @@ const readOnlyQuery = async () => {
     }, {
         blocksBehind: 3,
         expireSeconds: 30,
+        compression: true,
         readOnlyTrx: true,
-        returnFailureTraces: true,
     });
 };
 
 const readOnlyFailureTrace = async () => {
     return await api.transact({
         actions: [{
-            account: 'eosio.token',
-            name: 'transfer',
+            account: 'eosio',
+            name: 'setpriv',
             authorization: [{
-                actor: 'alice',
+                actor: 'bob',
                 permission: 'active',
             }],
             data: {
-                from: 'alice',
-                to: 'bob',
-                quantity: '2000000.0000 SYS',
-                memo: 'failureTrace',
+                account: 'bob',
+                is_priv: '1'
             },
         }]
     }, {

@@ -74,9 +74,9 @@ export interface SignatureProvider {
 
 export interface ResourcePayer {
     payer: string;
-    max_net_bytes: number|string;
-    max_cpu_us: number|string;
-    max_memory_bytes: number|string;
+    max_net_bytes: number;
+    max_cpu_us: number;
+    max_memory_bytes: number;
 }
 
 export interface Transaction {
