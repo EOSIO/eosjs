@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-NODEOS_RUNNING=$1
+EOS_BRANCH=$1
+echo $EOS_BRANCH
 
 set -m
 
@@ -109,9 +110,8 @@ mkdir -p $CONFIG_DIR
 mkdir -p $BLOCKCHAIN_DATA_DIR
 mkdir -p $BLOCKCHAIN_CONFIG_DIR
 
-if [ -z "$NODEOS_RUNNING" ]; then
-  echo "Starting the chain for setup"
-  nodeos -e -p eosio \
+echo "Starting the chain for setup"
+nodeos -e -p eosio \
   --data-dir $BLOCKCHAIN_DATA_DIR \
   --config-dir $BLOCKCHAIN_CONFIG_DIR \
   --http-validate-host=false \
@@ -127,7 +127,6 @@ if [ -z "$NODEOS_RUNNING" ]; then
   --enable-account-queries=true \
   --max-transaction-time=100000 \
   --verbose-http-errors &
-fi
 
 mkdir -p "$CONFIG_DIR"/keys
 
@@ -162,25 +161,44 @@ cleos create account eosio eosio.vpay $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio eosio.rex $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio eosio.token $SYSTEM_ACCOUNT_PUBLIC_KEY
 cleos create account eosio returnvalue $SYSTEM_ACCOUNT_PUBLIC_KEY
+cleos create account eosio readonly $EXAMPLE_ACCOUNT_PUBLIC_KEY
 cleos create account eosio todo $SYSTEM_ACCOUNT_PUBLIC_KEY
-cleos create account eosio bob $EXAMPLE_ACCOUNT_PUBLIC_KEY
-cleos create account eosio alice $EXAMPLE_ACCOUNT_PUBLIC_KEY
-cleos create account eosio bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY
-cleos create account eosio alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY
 cleos create account eosio cfhello $CFHELLO_PUBLIC_KEY
 cleos create account cfhello cfactor $CFACTOR_PUBLIC_KEY
 
 # preactivate concensus upgrades
 post_preactivate
 
-sleep 1s
-setabi eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.abi
-setcode eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.wasm
+if [ $EOSBRANCH = "release_2.0.x" ]; then
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.bios_v1.8.3/eosio.bios.abi
+  setcode eosio $CONTRACTS_DIR/eosio.bios_v1.8.3/eosio.bios.wasm
 
-sleep 1s
-activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
-activate_feature "825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"
-activate_feature "c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"
+  sleep 1s
+  activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
+
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
+  setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
+
+  sleep 1s
+fi
+
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "develop" ]; then
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.abi
+  setcode eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.wasm
+
+  sleep 1s
+  activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
+fi
+
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "develop" ]; then
+  activate_feature "825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"
+  activate_feature "c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"
+  activate_feature "bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"
+  activate_feature "5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"
+fi
 activate_feature "4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"
 activate_feature "f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"
 activate_feature "2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"
@@ -191,49 +209,80 @@ activate_feature "e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff5
 activate_feature "ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"
 activate_feature "4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"
 activate_feature "1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"
-activate_feature "bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"
-activate_feature "5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"
+if [ $EOSBRANCH = "develop" ]; then 
+  activate_feature "808c49387292c34ccb3970e00b08a690b6b3370c1cbcec46d46c19d5dfafab03"
+fi
 
-sleep 1s
-setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
-setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "develop" ]; then
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
+  setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
 
-sleep 1s
-cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":4096, "max_iterators":1024}]' -p eosio@active
-cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
+  sleep 1s
+  cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":4096, "max_iterators":1024}]' -p eosio@active
+  cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
+
+  sleep 1s
+  setabi todo $CONTRACTS_DIR/kv_todo/kv_todo.abi
+  setcode todo $CONTRACTS_DIR/kv_todo/kv_todo.wasm
+
+  sleep 1s
+  setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
+  setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
+fi
 
 sleep 1s
 setabi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi
 setcode cfhello $CONTRACTS_DIR/cfhello/cfhello.wasm
 
-sleep 1s
-setabi todo $CONTRACTS_DIR/kv_todo/kv_todo.abi
-setcode todo $CONTRACTS_DIR/kv_todo/kv_todo.wasm
+if [ $EOSBRANCH = "develop" ]; then
+  sleep 1s
+  setabi readonly $CONTRACTS_DIR/read_only_query_tests/read_only_query_tests.abi
+  setcode readonly $CONTRACTS_DIR/read_only_query_tests/read_only_query_tests.wasm
+fi
 
 sleep 1s
-setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
-setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
+setabi eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.abi
+setcode eosio.msig $CONTRACTS_DIR/eosio.msig/eosio.msig.wasm
+
+sleep 1s
+setabi eosio $CONTRACTS_DIR/eosio.system/eosio.system.abi
+setcode eosio $CONTRACTS_DIR/eosio.system/eosio.system.wasm
 
 sleep 1s
 setabi eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.abi
 setcode eosio.token $CONTRACTS_DIR/eosio.token/eosio.token.wasm
 
 sleep 1s
-cleos push action eosio.token create '["bob", "10000000000.0000 SYS"]' -p eosio.token
-cleos push action eosio.token issue '["bob", "5000000000.0000 SYS", "Half of available supply"]' -p bob
-cleos push action eosio.token transfer '["bob", "alice", "1000000.0000 SYS", "memo"]' -p bob
-cleos push action eosio.token transfer '["bob", "bobr1", "1000000.0000 SYS", "memo"]' -p bob
-cleos push action eosio.token transfer '["bob", "alicer1", "1000000.0000 SYS", "memo"]' -p bob
+cleos push action eosio.token create '["eosio", "10000000000.0000 SYS"]' -p eosio.token
+cleos push action eosio.token issue '["eosio", "5000000000.0000 SYS", "Half of available supply"]' -p eosio
 
-cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
-cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
-cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
+cleos push action eosio init '["0", "4,SYS"]' -p eosio@active
+
+cleos system newaccount eosio --transfer bob $EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+cleos system newaccount eosio --transfer alice $EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+cleos system newaccount eosio --transfer bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+cleos system newaccount eosio --transfer alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
+
+sleep 1s
+cleos push action eosio.token transfer '["eosio", "bob", "1000.0000 SYS", "memo"]' -p eosio
+cleos push action eosio.token transfer '["eosio", "alice", "1000.0000 SYS", "memo"]' -p eosio
+cleos push action eosio.token transfer '["eosio", "bobr1", "1000.0000 SYS", "memo"]' -p eosio
+cleos push action eosio.token transfer '["eosio", "alicer1", "1000.0000 SYS", "memo"]' -p eosio
+
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "develop" ]; then
+  cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
+  cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
+  cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
+fi
+
+if [ $EOSBRANCH = "develop" ]; then
+  cleos push action readonly setup '[]' -p readonly@active
+fi
 
 echo "All done initializing the blockchain"
 
-if [[ -z $NODEOS_RUNNING ]]; then
-  echo "Shut down Nodeos, sleeping for 2 seconds to allow time for at least 4 blocks to be created after deploying contracts"
-  sleep 2s
-  kill %1
-  fg %1
-fi
+echo "Shut down Nodeos, sleeping for 2 seconds to allow time for at least 4 blocks to be created after deploying contracts"
+sleep 2s
+kill %1
+fg %1
