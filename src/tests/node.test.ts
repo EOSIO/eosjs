@@ -22,6 +22,7 @@ describe('Node JS environment', () => {
     });
 
     it('transacts with manually configured TAPOS fields', async () => {
+        if (process.env.NODEOS_VER && process.env.NODEOS_VER === 'release/2.0.x') return;
         transactionResponse = await tests.transactWithoutConfig();
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     }, 10000);
@@ -96,6 +97,7 @@ describe('Node JS environment', () => {
     });
 
     it('confirms an action\'s return value can be verified', async () => {
+        if (process.env.NODEOS_VER && process.env.NODEOS_VER === 'release/2.0.x') return;
         const expectedValue = 10;
         transactionResponse = await tests.transactWithReturnValue();
         expect(transactionResponse.processed.action_traces[0].return_value_data).toEqual(expectedValue);
