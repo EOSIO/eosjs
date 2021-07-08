@@ -59,8 +59,8 @@ jobs:
             EOSBRANCH=release_2.0.x
             CDTBRANCH=release_1.7.x
           tags: |
-            bradlhart/eosjs-ci:release_2.0.x
-            bradlhart/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+            eosio/eosjs-ci:release_2.0.x
+            eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
   build-docker-2_1_x:
     name: Build Docker - nodeos release/2.1.x
     runs-on: ubuntu-18.04
@@ -115,8 +115,8 @@ jobs:
             EOSBRANCH=release_2.1.x
             CDTBRANCH=release_1.8.x
           tags: |
-            bradlhart/eosjs-ci:release_2.1.x
-            bradlhart/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+            eosio/eosjs-ci:release_2.1.x
+            eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
   build-docker-develop:
     name: Build Docker - nodeos develop
     runs-on: ubuntu-18.04
@@ -159,5 +159,5 @@ jobs:
           push: true
           no-cache: true
           tags: |
-            bradlhart/eosjs-ci:develop
-            bradlhart/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+            eosio/eosjs-ci:develop
+            eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}

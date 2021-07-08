@@ -40,7 +40,7 @@ jobs:
           spec: cypress/integration/index.spec.js
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:release_2.0.x
+        image: eosio/eosjs-ci:release_2.0.x
 
         ports:
           - 8888:8888
@@ -80,7 +80,7 @@ jobs:
           spec: cypress/integration/index.spec.js
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:release_2.1.x
+        image: eosio/eosjs-ci:release_2.1.x
 
         ports:
           - 8888:8888
@@ -120,7 +120,7 @@ jobs:
           spec: cypress/integration/index.spec.js
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:develop
+        image: eosio/eosjs-ci:develop
 
         ports:
           - 8888:8888
@@ -164,7 +164,7 @@ jobs:
           CYPRESS_NODEOS_VER: 'release/2.0.x'
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:release_2.0.x
+        image: eosio/eosjs-ci:release_2.0.x
 
         ports:
           - 8888:8888
@@ -207,7 +207,7 @@ jobs:
           spec: cypress/integration/index.spec.js
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:release_2.1.x
+        image: eosio/eosjs-ci:release_2.1.x
 
         ports:
           - 8888:8888
@@ -247,7 +247,7 @@ jobs:
           spec: cypress/integration/index.spec.js
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:develop
+        image: eosio/eosjs-ci:develop
 
         ports:
           - 8888:8888
@@ -291,7 +291,7 @@ jobs:
           CYPRESS_NODEOS_VER: 'release/2.0.x'
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:release_2.0.x
+        image: eosio/eosjs-ci:release_2.0.x
 
         ports:
           - 8888:8888
@@ -335,7 +335,7 @@ jobs:
           CYPRESS_NODEOS_VER: 'release/2.1.x'
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:release_2.1.x
+        image: eosio/eosjs-ci:release_2.1.x
 
         ports:
           - 8888:8888
@@ -378,7 +378,7 @@ jobs:
           spec: cypress/integration/index.spec.js
     services:
       nodeos:
-        image: bradlhart/eosjs-ci:develop
+        image: eosio/eosjs-ci:develop
 
         ports:
           - 8888:8888
