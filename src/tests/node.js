@@ -179,6 +179,78 @@ const transactWithReturnValue = async () => {
     });
 };
 
+const transactWithResourcePayer = async () => {
+    return await api.transact({
+        resource_payer: {
+            payer: 'alice',
+            max_net_bytes: 4096,
+            max_cpu_us: 400,
+            max_memory_bytes: 0
+        },
+        actions: [{
+            account: 'eosio.token',
+            name: 'transfer',
+            authorization: [{
+                actor: 'bob',
+                permission: 'active',
+            }, {
+                actor: 'alice',
+                permission: 'active',
+            }],
+            data: {
+                from: 'bob',
+                to: 'alice',
+                quantity: '0.0001 SYS',
+                memo: 'resource payer',
+            },
+        }]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30
+    });
+};
+
+const readOnlyQuery = async () => {
+    return await api.transact({
+        actions: [{
+            account: 'readonly',
+            name: 'get',
+            authorization: [{
+                actor: 'readonly',
+                permission: 'active',
+            }],
+            data: {},
+        }],
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+        compression: true,
+        readOnlyTrx: true,
+    });
+};
+
+const readOnlyFailureTrace = async () => {
+    return await api.transact({
+        actions: [{
+            account: 'eosio',
+            name: 'setpriv',
+            authorization: [{
+                actor: 'bob',
+                permission: 'active',
+            }],
+            data: {
+                account: 'bob',
+                is_priv: '1'
+            },
+        }]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+        readOnlyTrx: true,
+        returnFailureTraces: true,
+    });
+};
+
 const transactWithWebCrypto = async () => {
     // Required to make a new name each test, otherwise the nodeos would need to be restarted
     const generateRandomName = () => {
@@ -289,6 +361,9 @@ module.exports = {
     transactWithShorthandTxJsonContextFreeAction,
     transactWithShorthandTxJsonContextFreeData,
     transactWithReturnValue,
+    transactWithResourcePayer,
+    readOnlyQuery,
+    readOnlyFailureTrace,
     transactWithWebCrypto,
     rpcShouldFail
 };

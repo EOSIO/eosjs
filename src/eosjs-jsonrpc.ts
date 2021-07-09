@@ -27,6 +27,7 @@ import {
     GetTableRowsResult,
     PushTransactionArgs,
     PackedTrx,
+    ReadOnlyTransactResult,
     GetBlockHeaderStateResult,
     GetTableByScopeResult,
     DBSizeGetResult,
@@ -84,6 +85,8 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             });
             json = await response.json();
             if (json.processed && json.processed.except) {
+                throw new RpcError(json);
+            } else if (json.result && json.result.except) {
                 throw new RpcError(json);
             }
         } catch (e) {
@@ -308,6 +311,20 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             compression,
             packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
             packed_trx: arrayToHex(serializedTransaction),
+        });
+    }
+
+    /** Raw call to `/v1/chain/push_ro_transaction */
+    public async push_ro_transaction({ signatures, compression = 0, serializedTransaction }: PushTransactionArgs,
+        returnFailureTraces: boolean = false): Promise<ReadOnlyTransactResult> {
+        return await this.fetch('/v1/chain/push_ro_transaction', {
+            transaction: {
+                signatures,
+                compression,
+                packed_context_free_data: arrayToHex(new Uint8Array(0)),
+                packed_trx: arrayToHex(serializedTransaction),
+            },
+            return_failure_traces: returnFailureTraces,
         });
     }
 

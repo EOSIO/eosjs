@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { TransactionReceiptHeader } from './eosjs-api-interfaces';
+import { TransactionReceiptHeader, TransactionTrace } from './eosjs-api-interfaces';
 import { Authorization } from './eosjs-serialize';
 
 /** Structured format for abis */
@@ -500,6 +500,17 @@ export interface PushTransactionArgs {
     serializedContextFreeData?: Uint8Array;
 }
 
+/** Return value of `/v1/chain/push_ro_transaction` */
+export interface ReadOnlyTransactResult {
+    head_block_num: number;
+    head_block_id: string;
+    last_irreversible_block_num: number;
+    last_irreversible_block_id: string;
+    code_hash: string;
+    pending_transactions: string[];
+    result: TransactionTrace;
+}
+
 export interface DBSizeIndexCount {
     index: string;
     row_count: number;
@@ -539,7 +550,8 @@ export interface TraceApiTransaction {
     cpu_usage_us?: number;
     net_usage_words?: number;
     signatures?: string[];
-    transaction_header?: TraceApiTransactionHeader
+    transaction_header?: TraceApiTransactionHeader,
+    bill_to_accounts: string[]
 }
 
 /** Return value of `/v1/trace_api/get_block` */

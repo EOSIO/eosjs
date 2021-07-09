@@ -666,6 +666,38 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
+    it('calls push_ro_transaction', async () => {
+        const expPath = '/v1/chain/push_ro_transaction';
+        const signatures = [
+            'George Washington',
+            'John Hancock',
+            'Abraham Lincoln',
+        ];
+        const serializedTransaction = new Uint8Array([
+            0, 16, 32, 128, 255,
+        ]);
+        const expReturn = { data: '12345' };
+        const expParams = {
+            body: JSON.stringify({
+                transaction: {
+                    signatures,
+                    compression: 0,
+                    packed_context_free_data: '',
+                    packed_trx: '00102080ff'
+                },
+                return_failure_traces: false
+            }),
+            method: 'POST',
+        };
+
+        fetchMock.once(JSON.stringify(expReturn));
+
+        const response = await jsonRpc.push_ro_transaction({ signatures, serializedTransaction });
+
+        expect(response).toEqual(expReturn);
+        expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
+    });
+
     it('calls send_transaction', async () => {
         const expPath = '/v1/chain/send_transaction';
         const signatures = [

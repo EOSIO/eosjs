@@ -478,6 +478,155 @@
               return false;
             }
 
+            const resourcePayerTx = async () => {
+              return await api.transact({
+                resource_payer: {
+                    payer: 'alice',
+                    max_net_bytes: 4096,
+                    max_cpu_us: 400,
+                    max_memory_bytes: 0
+                },
+                actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }, {
+                        actor: 'alice',
+                        permission: 'active',
+                    }],
+                    data: {
+                        from: 'bob',
+                        to: 'alice',
+                        quantity: '0.0001 SYS',
+                        memo: 'resource payer',
+                    },
+                }]
+              }, {
+                  blocksBehind: 3,
+                  expireSeconds: 30
+              });
+
+            }
+
+            const testWithResourcePayerTx = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await resourcePayerTx();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Resource Payer Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
+            const readOnlyQuery = async () => {
+              return await api.transact({
+                  actions: [{
+                      account: 'readonly',
+                      name: 'get',
+                      authorization: [{
+                          actor: 'readonly',
+                          permission: 'active',
+                      }],
+                      data: {},
+                  }],
+              }, {
+                  blocksBehind: 3,
+                  expireSeconds: 30,
+                  compression: true,
+                  readOnlyTrx: true,
+              });
+            }
+
+            const testWithReadOnlyQuery = async (e) => {
+              const expectedValue = [
+                {'id': 1, 'name': 'Bob Smith', 'gender': 1, 'age': 25},
+                {'id': 3, 'name': 'John Smith', 'gender': 1, 'age': 42},
+                {'id': 4, 'name': 'Jack Smith', 'gender': 1, 'age': 27},
+                {'id': 2, 'name': 'Alice Smith', 'gender': 0, 'age': 20,},
+                {'id': 5, 'name': 'Youko Niihara', 'gender': 0, 'age': 26},
+                {'id': 6, 'name': 'Rose Lee', 'gender': 0, 'age': 18},
+                {'id': 7, 'name': 'Youko Kawakami', 'gender': 0, 'age': 25},
+                {'id': 8, 'name': 'Yuu Yamada', 'gender': 0, 'age': 24}
+              ];
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await readOnlyQuery();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Read Only Query Test Failure: ', error.message);
+                return false;
+              }
+
+              if (JSON.stringify(transactionResponse.result.action_traces[0].return_value_data) === JSON.stringify(expectedValue)) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
+            const readOnlyFailureTrace = async () => {
+              return await api.transact({
+                actions: [{
+                    account: 'eosio',
+                    name: 'setpriv',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }],
+                    data: {
+                        account: 'bob',
+                        is_priv: '1'
+                    },
+                }]
+              }, {
+                  blocksBehind: 3,
+                  expireSeconds: 30,
+                  readOnlyTrx: true,
+                  returnFailureTraces: true,
+              });
+            }
+
+            const testWithReadOnlyFailureTrace = async (e) => {
+              let err;
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+              
+              try {
+                await readOnlyFailureTrace();
+              } catch (err) {
+                if (err.details.code === 3090004 && err.details.stack[0].format === 'missing authority of ${account}') {
+                    resultsLabel.className = "success";
+                    resultsLabel.innerText = SUCCESS;
+                    return true;
+                }
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+        
+
             const webCryptoTx = async () => {
               // Required to make a new name each test, otherwise the nodeos would need to be restarted
               const generateRandomName = () => {
@@ -653,23 +802,26 @@
             </div>
         </div>
         <div class='tests'>
-            <div><h2>Transact with blocksBehind Configuration Parameter</h2><button onClick='testTransactWithConfigBlocksBehind(event);'>Test</button></div>
-            <div><h2>Transact with useLastIrreversible Configuration Parameter</h2><button onClick='testTransactWithConfigUseLastIrreversible(event);'>Test</button></div>
-            <div><h2>Transact with Manually Configured TAPOS</h2><button onClick='testTransactWithoutConfig(event);'>Test</button></div>
-            <div><h2>Transact with Compression</h2><button onClick='testTransactWithCompression(event);'>Test</button></div>
-            <div><h2>Transact with Context Free Action</h2><button onClick='testTransactWithContextFreeAction(event);'>Test</button></div>
-            <div><h2>Transact with Context Free Data</h2><button onClick='testTransactWithContextFreeData(event);'>Test</button></div>
-            <div><h2>Transact without Broadcasting</h2><button onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
-            <div><h2>Broadcast Transaction</h2><button onClick='testBroadcastResult(event);'>Test</button></div>
-            <div><h2>Transact with .with() Using Api and Json Abi</h2><button onClick='testShorthandWithApiJson(event);'>Test</button></div>
-            <div><h2>Transact with .with() Using Tx and Json Abi</h2><button onClick='testShorthandWithTxJson(event);'>Test</button></div>
-            <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Action</h2><button onClick='testShorthandWithTxJsonContextFreeAction(event);'>Test</button></div>
-            <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Data</h2><button onClick='testShorthandWithTxJsonContextFreeData(event);'>Test</button></div>
-            <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button onClick='testWithP256EllipticCurve(event);'>Test</button></div>
-            <div><h2>Transact Return Values</h2><button onClick='testWithReturnValueTx(event);'>Test</button></div>
-            <div><h2>Transact Web Crypto</h2><button onClick='testWithWebCryptoTx(event);'>Test</button></div>
-            <div><h2>Invalid Transaction Throws Error</h2><button onClick='testTransactShouldFail(event);'>Test</button></div>
-            <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button onClick='testRpcShouldFail(event);'>Test</button></div>
+            <div><h2>Transact with blocksBehind Configuration Parameter</h2><button id='testTransactWithConfigBlocksBehind' onClick='testTransactWithConfigBlocksBehind(event);'>Test</button></div>
+            <div><h2>Transact with useLastIrreversible Configuration Parameter</h2><button id='testTransactWithConfigUseLastIrreversible' onClick='testTransactWithConfigUseLastIrreversible(event);'>Test</button></div>
+            <div><h2>Transact with Manually Configured TAPOS</h2><button id='testTransactWithoutConfig' onClick='testTransactWithoutConfig(event);'>Test</button></div>
+            <div><h2>Transact with Compression</h2><button id='testTransactWithCompression' onClick='testTransactWithCompression(event);'>Test</button></div>
+            <div><h2>Transact with Context Free Action</h2><button id='testTransactWithContextFreeAction' onClick='testTransactWithContextFreeAction(event);'>Test</button></div>
+            <div><h2>Transact with Context Free Data</h2><button id='testTransactWithContextFreeData' onClick='testTransactWithContextFreeData(event);'>Test</button></div>
+            <div><h2>Transact without Broadcasting</h2><button id='testTransactWithoutBroadcast' onClick='testTransactWithoutBroadcast(event);'>Test</button></div>
+            <div><h2>Broadcast Transaction</h2><button id='testBroadcastResult' onClick='testBroadcastResult(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Api and Json Abi</h2><button id='testShorthandWithApiJson' onClick='testShorthandWithApiJson(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Json Abi</h2><button id='testShorthandWithTxJson' onClick='testShorthandWithTxJson(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Action</h2><button id='testShorthandWithTxJsonContextFreeAction' onClick='testShorthandWithTxJsonContextFreeAction(event);'>Test</button></div>
+            <div><h2>Transact with .with() Using Tx and Json Abi with Context Free Data</h2><button id='testShorthandWithTxJsonContextFreeData' onClick='testShorthandWithTxJsonContextFreeData(event);'>Test</button></div>
+            <div><h2>Transact elliptic p256/KeyType.r1 Keys and Signatures</h2><button id='testWithP256EllipticCurve' onClick='testWithP256EllipticCurve(event);'>Test</button></div>
+            <div><h2>Transact Return Values</h2><button id='testWithReturnValueTx' onClick='testWithReturnValueTx(event);'>Test</button></div>
+            <div><h2>Resource Payer</h2><button id='testWithResourcePayerTx' onClick='testWithResourcePayerTx(event);'>Test</button></div> 
+            <div><h2>Read Only Query</h2><button id='testWithReadOnlyQuery' onClick='testWithReadOnlyQuery(event);'>Test</button></div>
+            <div><h2>Read Only Failure Trace</h2><button id='testWithReadOnlyFailureTrace' onClick='testWithReadOnlyFailureTrace(event);'>Test</button></div>
+            <div><h2>Transact Web Crypto</h2><button id='testWithWebCryptoTx' onClick='testWithWebCryptoTx(event);'>Test</button></div>
+            <div><h2>Invalid Transaction Throws Error</h2><button id='testTransactShouldFail' onClick='testTransactShouldFail(event);'>Test</button></div>
+            <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button id='testRpcShouldFail' onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>
     </body>
 </html>

@@ -26,6 +26,7 @@ import {
     GetTableRowsResult,
     GetTableByScopeResult,
     PushTransactionArgs,
+    ReadOnlyTransactResult,
     AbiBinToJsonResult,
     TraceApiGetBlockResult,
     DBSizeGetResult,
@@ -425,10 +426,7 @@ describe('Chain API Plugin Endpoints', () => {
                             'data?': 'any',
                             'hex_data?': 'string',
                         },
-                        'transaction_extensions?': {
-                            type: 'number',
-                            data: 'string',
-                        },
+                        'transaction_extensions?': '[number, string]',
                     },
                 },
             },
@@ -697,10 +695,7 @@ describe('Chain API Plugin Endpoints', () => {
                         'data?': 'any',
                         'hex_data?': 'string',
                     },
-                    'transaction_extensions?': {
-                        type: 'number',
-                        data: 'string',
-                    },
+                    'transaction_extensions?': '[number, string]',
                     'deferred_transaction_generation?': {
                         sender_trx_id: 'string',
                         sender_id: 'string',
@@ -883,9 +878,106 @@ describe('Chain API Plugin Endpoints', () => {
                 },
                 'except&': 'string',
                 'error_code&': 'number',
+                bill_to_accounts: 'string',
             },
         };
         verifyType(result, transactResult);
+    });
+
+    it('validates return type of push_ro_transaction', async () => {
+        const transaction: PushTransactionArgs = await api.transact({
+            actions: [{
+                account: 'readonly',
+                name: 'get',
+                authorization: [{
+                    actor: 'readonly',
+                    permission: 'active',
+                }],
+                data: {},
+            }],
+        }, {
+            sign: true,
+            broadcast: false,
+            useLastIrreversible: true,
+            expireSeconds: 30,
+        }) as PushTransactionArgs;
+        const result: ReadOnlyTransactResult = await rpc.push_ro_transaction(transaction);
+        const readOnlyTransactResult: any = {
+            head_block_num: 'number',
+            head_block_id: 'string',
+            last_irreversible_block_num: 'number',
+            last_irreversible_block_id: 'string',
+            code_hash: 'string',
+            pending_transactions: 'string',
+            result: {
+                id: 'string',
+                block_num: 'number',
+                block_time: 'string',
+                'producer_block_id&': 'string',
+                'receipt&': {
+                    status: 'string',
+                    cpu_usage_us: 'number',
+                    net_usage_words: 'number',
+                },
+                elapsed: 'number',
+                net_usage: 'number',
+                scheduled: 'boolean',
+                action_traces: {
+                    action_ordinal: 'number',
+                    creator_action_ordinal: 'number',
+                    closest_unnotified_ancestor_action_ordinal: 'number',
+                    receipt: {
+                        receiver: 'string',
+                        act_digest: 'string',
+                        global_sequence: 'number',
+                        recv_sequence: 'number',
+                        auth_sequence: [ 'string', 'number' ],
+                        code_sequence: 'number',
+                        abi_sequence: 'number',
+                    },
+                    receiver: 'string',
+                    act: {
+                        account: 'string',
+                        name: 'string',
+                        authorization: {
+                            actor: 'string',
+                            permission: 'string',
+                        },
+                        'data?': 'any',
+                        'hex_data?': 'string',
+                    },
+                    context_free: 'boolean',
+                    elapsed: 'number',
+                    console: 'string',
+                    trx_id: 'string',
+                    block_num: 'number',
+                    block_time: 'string',
+                    'producer_block_id&': 'string',
+                    account_ram_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    account_disk_deltas: {
+                        account: 'string',
+                        delta: 'number',
+                    },
+                    except: 'any',
+                    'error_code&': 'number',
+                    'return_value?': 'any',
+                    'return_value_hex_data?': 'string',
+                    'return_value_data?': 'any',
+                    'inline_traces?': 'any', // ActionTrace, recursive?
+                },
+                'account_ram_delta&': {
+                    account: 'string',
+                    delta: 'number',
+                },
+                'except&': 'string',
+                'error_code&': 'number',
+                bill_to_accounts: 'string',
+            }
+        };
+        verifyType(result, readOnlyTransactResult);
     });
 
     it('validates return type of push_transactions', async () => {
@@ -999,6 +1091,7 @@ describe('Chain API Plugin Endpoints', () => {
                 },
                 'except&': 'string',
                 'error_code&': 'number',
+                bill_to_accounts: 'string',
             },
         };
         result.forEach((transaction: TransactResult) => {
@@ -1096,6 +1189,7 @@ describe('Chain API Plugin Endpoints', () => {
                 },
                 'except&': 'string',
                 'error_code&': 'number',
+                bill_to_accounts: 'string',
             },
         };
         verifyType(result, transactResult);
@@ -1150,7 +1244,8 @@ describe('Trace API Plugin Endpoints', () => {
                 cpu_usage_us: 'number',
                 net_usage_words: 'number',
                 signatures: 'string',
-                transaction_header: 'any'
+                transaction_header: 'any',
+                bill_to_accounts: 'string',
             },
         };
         verifyType(result, traceApiGetBlockResult);
