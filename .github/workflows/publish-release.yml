@@ -53,7 +53,7 @@ jobs:
 
     services:
       nodeos:
-        image: eosio/eosjs-ci:release_22.0.x
+        image: eosio/eosjs-ci:release_2.2.x
 
         ports:
           - 8888:8888
@@ -109,7 +109,7 @@ jobs:
 
     services:
       nodeos:
-        image: eosio/eosjs-ci:release_22.0.x
+        image: eosio/eosjs-ci:release_2.2.x
 
         ports:
           - 8888:8888
