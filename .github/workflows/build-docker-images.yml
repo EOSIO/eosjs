@@ -1,0 +1,161 @@
+name: Build Docker Images
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  build-docker-2_1_x:
+    name: Build Docker - nodeos release/2.1.x
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          token: ${{ github.token }}
+      - name: Get nodeos sha
+        id: nodeos
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const nodeosVersion = 'v2.1.';
+            const releaseList = await github.paginate('GET /repos/eosio/eos/releases');
+            const releases = releaseList.map(release => {
+              return {
+                tag: release.tag_name,
+                published_at: new Date(release.published_at),
+              };
+            })
+            .filter(release => release.tag.startsWith(nodeosVersion))
+            .sort((a, b) => b.published_at - a.published_at);
+            const tagList = await github.paginate('GET /repos/eosio/eos/tags');
+            const tag = tagList.filter(tag => tag.name === releases[0].tag);
+            return tag[0].commit.sha;
+      - name: Nodeos sha
+        id: nodeos-sha
+        run: |
+          SHA=$(echo "${NODEOS_SHA_FROM_JS}" | tr -d '"')
+          echo ::set-output name=NODEOS_SHA::${SHA}
+        env:
+          NODEOS_SHA_FROM_JS: ${{ steps.nodeos.outputs.result }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@0d135e0c2fc0dba0729c1a47ecfcf5a3c7f8579e
+      - name: Login to DockerHub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: ./.github/eosjs-ci
+          file: ./.github/eosjs-ci/Dockerfile
+          pull: true
+          push: true
+          no-cache: true
+          build-args: |
+            EOSBRANCH=release_2.1.x
+            CDTBRANCH=release_1.8.x
+          tags: |
+            eosio/eosjs-ci:release_2.1.x
+            eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+  build-docker-2_2_x:
+    name: Build Docker - nodeos release/2.2.x
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          token: ${{ github.token }}
+      - name: Get nodeos sha
+        id: nodeos
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const nodeosVersion = 'v2.2.';
+            const releaseList = await github.paginate('GET /repos/eosio/eos/releases');
+            const releases = releaseList.map(release => {
+              return {
+                tag: release.tag_name,
+                published_at: new Date(release.published_at),
+              };
+            })
+            .filter(release => release.tag.startsWith(nodeosVersion))
+            .sort((a, b) => b.published_at - a.published_at);
+            const tagList = await github.paginate('GET /repos/eosio/eos/tags');
+            const tag = tagList.filter(tag => tag.name === releases[0].tag);
+            return tag[0].commit.sha;
+      - name: Nodeos sha
+        id: nodeos-sha
+        run: |
+          SHA=$(echo "${NODEOS_SHA_FROM_JS}" | tr -d '"')
+          echo ::set-output name=NODEOS_SHA::${SHA}
+        env:
+          NODEOS_SHA_FROM_JS: ${{ steps.nodeos.outputs.result }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@0d135e0c2fc0dba0729c1a47ecfcf5a3c7f8579e
+      - name: Login to DockerHub
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@e1b7f96249f2e4c8e4ac1519b9608c0d48944a1f
+        with:
+          context: ./.github/eosjs-ci
+          file: ./.github/eosjs-ci/Dockerfile
+          pull: true
+          push: true
+          no-cache: true
+          build-args: |
+            EOSBRANCH=release_2.2.x
+            CDTBRANCH=release_1.8.x
+          tags: |
+            eosio/eosjs-ci:release_2.2.x
+            eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+  build-docker-develop:
+    name: Build Docker - nodeos develop
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          token: ${{ github.token }}
+      - name: Get nodeos sha
+        id: nodeos
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const developRef = await github.request('GET /repos/eosio/eos/git/refs/heads/develop');
+            return developRef.data.object.sha;
+      - name: Nodeos sha
+        id: nodeos-sha
+        run: |
+          SHA=$(echo "${NODEOS_SHA_FROM_JS}" | tr -d '"')
+          echo ::set-output name=NODEOS_SHA::${SHA}
+        env:
+          NODEOS_SHA_FROM_JS: ${{ steps.nodeos.outputs.result }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@0d135e0c2fc0dba0729c1a47ecfcf5a3c7f8579e
+      - name: Login to DockerHub
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@e1b7f96249f2e4c8e4ac1519b9608c0d48944a1f
+        with:
+          context: ./.github/eosjs-ci
+          file: ./.github/eosjs-ci/Dockerfile
+          pull: true
+          push: true
+          no-cache: true
+          tags: |
+            eosio/eosjs-ci:develop
+            eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
