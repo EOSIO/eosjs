@@ -22,6 +22,7 @@ describe('Node JS environment', () => {
     });
 
     it('transacts with manually configured TAPOS fields', async () => {
+        if (process.env.NODEOS_VER && process.env.NODEOS_VER === 'release/2.0.x') return;
         transactionResponse = await tests.transactWithoutConfig();
         expect(Object.keys(transactionResponse)).toContain('transaction_id');
     }, 10000);
@@ -96,9 +97,42 @@ describe('Node JS environment', () => {
     });
 
     it('confirms an action\'s return value can be verified', async () => {
+        if (process.env.NODEOS_VER && process.env.NODEOS_VER === 'release/2.0.x') return;
         const expectedValue = 10;
         transactionResponse = await tests.transactWithReturnValue();
         expect(transactionResponse.processed.action_traces[0].return_value_data).toEqual(expectedValue);
+    });
+
+    it('transacts with resource payer', async () => {
+        if (process.env.NODEOS_VER && (process.env.NODEOS_VER === 'release/2.0.x' || process.env.NODEOS_VER === 'release/2.1.x')) return;
+        transactionResponse = await tests.transactWithResourcePayer();
+        expect(Object.keys(transactionResponse)).toContain('transaction_id');
+    });
+
+    it('confirms the return value of the read-only query', async () => {
+        if (process.env.NODEOS_VER && (process.env.NODEOS_VER === 'release/2.0.x' || process.env.NODEOS_VER === 'release/2.1.x')) return;
+        const expectedValue = [
+            {'age': 25, 'gender': 1, 'id': 1, 'name': 'Bob Smith'},
+            {'age': 42, 'gender': 1, 'id': 3, 'name': 'John Smith'},
+            {'age': 27, 'gender': 1, 'id': 4, 'name': 'Jack Smith'},
+            {'age': 20, 'gender': 0, 'id': 2, 'name': 'Alice Smith'},
+            {'age': 26, 'gender': 0, 'id': 5, 'name': 'Youko Niihara'},
+            {'age': 18, 'gender': 0, 'id': 6, 'name': 'Rose Lee'},
+            {'age': 25, 'gender': 0, 'id': 7, 'name': 'Youko Kawakami'},
+            {'age': 24, 'gender': 0, 'id': 8, 'name': 'Yuu Yamada'}
+        ];
+        transactionResponse = await tests.readOnlyQuery();
+        expect(transactionResponse.result.action_traces[0].return_value_data).toEqual(expectedValue);
+    });
+
+    it('returns failure trace for failed transaction', async () => {
+        if (process.env.NODEOS_VER && (process.env.NODEOS_VER === 'release/2.0.x' || process.env.NODEOS_VER === 'release/2.1.x')) return;
+        try {
+            await tests.readOnlyFailureTrace();
+        } catch (e) {
+            expect(e.details.code).toEqual(3090004);
+            expect(e.details.stack[0].format).toEqual('missing authority of ${account}');
+        }
     });
 
     it('throws appropriate error message without configuration object or TAPOS in place', async () => {

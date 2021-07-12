@@ -29,7 +29,7 @@ jobs:
         with:
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@38d90ce44d5275ad62cc48384b3d8a58c500bb5f
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -58,7 +58,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@6122aa43014e18ec9c2d06fc0bdc5b6759064508
         with:
           spec: cypress/integration/index.spec.js
       - name: Get Protected Status
@@ -76,7 +76,7 @@ jobs:
           git push origin ${GITHUB_REF#refs/*/}
     services:
       nodeos:
-        image: eosio/eosjs-ci:release_22.0.x
+        image: eosio/eosjs-ci:release_2.2.x
 
         ports:
           - 8888:8888

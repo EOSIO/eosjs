@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { TransactionReceiptHeader, Transaction } from './eosjs-api-interfaces';
+import { TransactionReceiptHeader, TransactionTrace } from './eosjs-api-interfaces';
 import { Authorization } from './eosjs-serialize';
 
 /** Structured format for abis */
@@ -214,6 +214,27 @@ export interface GetBlockInfoResult {
     ref_block_prefix: number;
 }
 
+/** Returned action from nodeos, data is optional */
+export interface ProcessedAction {
+    account: string;
+    name: string;
+    authorization: Authorization[];
+    data?: any;
+    hex_data?: string;
+}
+export interface ProcessedTransaction {
+    expiration?: string;
+    ref_block_num?: number;
+    ref_block_prefix?: number;
+    max_net_usage_words?: number;
+    max_cpu_usage_ms?: number;
+    delay_sec?: number;
+    context_free_actions?: ProcessedAction[];
+    context_free_data?: Uint8Array[];
+    actions: ProcessedAction[];
+    transaction_extensions?: [number, string][];
+}
+
 export interface PackedTransaction {
     id: string;
     signatures: string[];
@@ -221,7 +242,7 @@ export interface PackedTransaction {
     packed_context_free_data: string;
     context_free_data: string[];
     packed_trx: string;
-    transaction: Transaction;
+    transaction: ProcessedTransaction;
 }
 
 export interface PackedTrx {
@@ -300,6 +321,15 @@ export interface ProtocolFeatureActivationSet {
     protocol_features: string[]
 }
 
+export interface SecurityGroupInfo {
+    version: number;
+    participants: string[];
+}
+
+export interface StateExtension {
+    security_group_info: SecurityGroupInfo
+}
+
 /** Return value of `/v1/chain/get_block_header_state` */
 export interface GetBlockHeaderStateResult {
     id: string;
@@ -317,6 +347,7 @@ export interface GetBlockHeaderStateResult {
     // valid_block_signing_authority: BlockSigningAuthority;
     valid_block_signing_authority: any;
     confirm_count: number[];
+    state_extension: [number, StateExtension];
 }
 
 /** Subset of `GetBlockHeaderStateResult` used to calculate TAPoS fields in transactions */
@@ -369,6 +400,7 @@ export interface GetInfoResult {
     fork_db_head_block_num?: number;
     fork_db_head_block_id?: string;
     server_full_version_string?: string;
+    first_block_num?: number;
 }
 
 /** Return value of /v1/chain/get_producer_schedule */
@@ -412,7 +444,7 @@ export interface GetRawAbiResult {
     abi: string;
 }
 
-export interface DeferredTransaction extends Transaction {
+export interface DeferredTransaction extends ProcessedTransaction {
     deferred_transaction_generation?: {
         sender_trx_id: string;
         sender_id: string;
@@ -468,6 +500,17 @@ export interface PushTransactionArgs {
     serializedContextFreeData?: Uint8Array;
 }
 
+/** Return value of `/v1/chain/push_ro_transaction` */
+export interface ReadOnlyTransactResult {
+    head_block_num: number;
+    head_block_id: string;
+    last_irreversible_block_num: number;
+    last_irreversible_block_id: string;
+    code_hash: string;
+    pending_transactions: string[];
+    result: TransactionTrace;
+}
+
 export interface DBSizeIndexCount {
     index: string;
     row_count: number;
@@ -507,7 +550,8 @@ export interface TraceApiTransaction {
     cpu_usage_us?: number;
     net_usage_words?: number;
     signatures?: string[];
-    transaction_header?: TraceApiTransactionHeader
+    transaction_header?: TraceApiTransactionHeader,
+    bill_to_accounts: string[]
 }
 
 /** Return value of `/v1/trace_api/get_block` */

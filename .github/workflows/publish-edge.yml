@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@38d90ce44d5275ad62cc48384b3d8a58c500bb5f
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -38,7 +38,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@6122aa43014e18ec9c2d06fc0bdc5b6759064508
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish Edge
@@ -54,7 +54,7 @@ jobs:
 
     services:
       nodeos:
-        image: eosio/eosjs-ci:develop
+        image: eosio/eosjs-ci:release_2.2.x
 
         ports:
           - 8888:8888

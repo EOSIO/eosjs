@@ -28,11 +28,10 @@ import {
     PushTransactionArgs,
     GetBlockHeaderStateResult,
     GetBlockInfoResult,
-    GetBlockResult
+    GetBlockResult,
+    ReadOnlyTransactResult,
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
-
-const transactionAbi = require('../src/transaction.abi.json');
 
 export class Api {
     /** Issues RPC calls */
@@ -93,7 +92,7 @@ export class Api {
         this.textDecoder = args.textDecoder;
 
         this.abiTypes = ser.getTypesFromAbi(ser.createAbiTypes());
-        this.transactionTypes = ser.getTypesFromAbi(ser.createInitialTypes(), transactionAbi);
+        this.transactionTypes = ser.getTypesFromAbi(ser.createTransactionTypes());
     }
 
     /** Decodes an abi as Uint8Array into json. */
@@ -222,6 +221,50 @@ export class Api {
         return this.deserialize(buffer, 'transaction');
     }
 
+    private transactionExtensions = [
+        { id: 1, type: 'resource_payer', keys: ['payer', 'max_net_bytes', 'max_cpu_us', 'max_memory_bytes'] },
+    ];
+
+    // Order of adding to transaction_extension is transaction_extension id ascending
+    public serializeTransactionExtensions(transaction: Transaction): [number, string][] {
+        let transaction_extensions: [number, string][] = [];
+        if (transaction.resource_payer) {
+            const extensionBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+            const types = ser.getTypesFromAbi(ser.createTransactionExtensionTypes());
+            types.get('resource_payer').serialize(extensionBuffer, transaction.resource_payer);
+            transaction_extensions = [...transaction_extensions, [1, ser.arrayToHex(extensionBuffer.asUint8Array())]];
+        }
+        return transaction_extensions;
+    };
+
+    // Usage: transaction = {...transaction, ...this.deserializeTransactionExtensions(transaction.transaction_extensions)}
+    public deserializeTransactionExtensions(data: [number, string][]): any[] {
+        const transaction = {} as any;
+        data.forEach((extensionData: [number, string]) => {
+            const transactionExtension = this.transactionExtensions.find(extension => extension.id === extensionData[0]);
+            if (transactionExtension === undefined) {
+                throw new Error(`Transaction Extension could not be determined: ${extensionData}`);
+            }
+            const types = ser.getTypesFromAbi(ser.createTransactionExtensionTypes());
+            const extensionBuffer = new ser.SerialBuffer({ textEncoder: this.textEncoder, textDecoder: this.textDecoder });
+            extensionBuffer.pushArray(ser.hexToUint8Array(extensionData[1]));
+            const deserializedObj = types.get(transactionExtension.type).deserialize(extensionBuffer);
+            if (extensionData[0] === 1) {
+                deserializedObj.max_net_bytes = Number(deserializedObj.max_net_bytes);
+                deserializedObj.max_cpu_us = Number(deserializedObj.max_cpu_us);
+                deserializedObj.max_memory_bytes = Number(deserializedObj.max_memory_bytes);
+                transaction.resource_payer = deserializedObj;
+            }
+        });
+        return transaction;
+    };
+
+    // Transaction extensions are serialized and moved to `transaction_extensions`, deserialized objects are not needed on the transaction
+    public deleteTransactionExtensionObjects(transaction: Transaction): Transaction {
+        delete transaction.resource_payer;
+        return transaction;
+    }
+
     /** Convert actions to hex */
     public async serializeActions(actions: ser.Action[]): Promise<ser.SerializedAction[]> {
         return await Promise.all(actions.map(async (action) => {
@@ -274,6 +317,8 @@ export class Api {
      * `broadcast`: broadcast this transaction?
      * `sign`: sign this transaction?
      * `compression`: compress this transaction?
+     * `readOnlyTrx`: read only transaction?
+     * `returnFailureTraces`: return failure traces? (only available for read only transactions currently)
      *
      * If both `blocksBehind` and `expireSeconds` are present,
      * then fetch the block which is `blocksBehind` behind head block,
@@ -287,8 +332,18 @@ export class Api {
      */
     public async transact(
         transaction: Transaction,
-        { broadcast = true, sign = true, requiredKeys, compression, blocksBehind, useLastIrreversible, expireSeconds }:
-        TransactConfig = {}): Promise<TransactResult|PushTransactionArgs>
+        {
+            broadcast = true,
+            sign = true,
+            readOnlyTrx,
+            returnFailureTraces,
+            requiredKeys,
+            compression,
+            blocksBehind,
+            useLastIrreversible,
+            expireSeconds
+        }:
+        TransactConfig = {}): Promise<TransactResult|ReadOnlyTransactResult|PushTransactionArgs>
     {
         let info: GetInfoResult;
 
@@ -312,9 +367,11 @@ export class Api {
         const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = {
             ...transaction,
+            transaction_extensions: await this.serializeTransactionExtensions(transaction),
             context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
             actions: await this.serializeActions(transaction.actions)
         };
+        transaction = this.deleteTransactionExtensionObjects(transaction);
         const serializedTransaction = this.serializeTransaction(transaction);
         const serializedContextFreeData = this.serializeContextFreeData(transaction.context_free_data);
         let pushTransactionArgs: PushTransactionArgs = {
@@ -336,11 +393,18 @@ export class Api {
             });
         }
         if (broadcast) {
-            let result;
             if (compression) {
-                return this.pushCompressedSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
+                return this.pushCompressedSignedTransaction(
+                    pushTransactionArgs,
+                    readOnlyTrx,
+                    returnFailureTraces,
+                ) as Promise<TransactResult|ReadOnlyTransactResult>;
             }
-            return this.pushSignedTransaction(pushTransactionArgs) as Promise<TransactResult>;
+            return this.pushSignedTransaction(
+                pushTransactionArgs,
+                readOnlyTrx,
+                returnFailureTraces,
+            ) as Promise<TransactResult|ReadOnlyTransactResult>;
         }
         return pushTransactionArgs as PushTransactionArgs;
     }
@@ -405,8 +469,17 @@ export class Api {
 
     /** Broadcast a signed transaction */
     public async pushSignedTransaction(
-        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<TransactResult> {
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
+        readOnlyTrx = false,
+        returnFailureTraces = false,
+    ): Promise<TransactResult|ReadOnlyTransactResult> {
+        if (readOnlyTrx) {
+            return this.rpc.push_ro_transaction({
+                signatures,
+                serializedTransaction,
+                serializedContextFreeData,
+            }, returnFailureTraces);
+        }
         return this.rpc.push_transaction({
             signatures,
             serializedTransaction,
@@ -415,12 +488,22 @@ export class Api {
     }
 
     public async pushCompressedSignedTransaction(
-        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
-    ): Promise<TransactResult> {
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
+        readOnlyTrx = false,
+        returnFailureTraces = false,
+    ): Promise<TransactResult|ReadOnlyTransactResult> {
         const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
         const compressedSerializedContextFreeData =
             this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
 
+        if (readOnlyTrx) {
+            return this.rpc.push_ro_transaction({
+                signatures,
+                compression: 1,
+                serializedTransaction: compressedSerializedTransaction,
+                serializedContextFreeData: compressedSerializedContextFreeData
+            }, returnFailureTraces);
+        }
         return this.rpc.push_transaction({
             signatures,
             compression: 1,
@@ -529,7 +612,7 @@ export class TransactionBuilder {
         return this;
     }
 
-    public async send(config?: TransactConfig): Promise<PushTransactionArgs|TransactResult> {
+    public async send(config?: TransactConfig): Promise<PushTransactionArgs|ReadOnlyTransactResult|TransactResult> {
         const contextFreeDataSet: Uint8Array[] = [];
         const contextFreeActions: ser.SerializedAction[] = [];
         const actions: ser.SerializedAction[] = this.actions.map((actionBuilder) => actionBuilder.serializedData as ser.SerializedAction);

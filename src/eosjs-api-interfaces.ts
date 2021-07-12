@@ -3,7 +3,7 @@
  * copyright defined in eosjs/LICENSE.txt
  */
 
-import { Abi, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import { Abi, PushTransactionArgs, ProcessedAction } from './eosjs-rpc-interfaces';
 import { Anyvar, Authorization, Action, SerializedAction } from './eosjs-serialize';
 
 /** Arguments to `getRequiredKeys` */
@@ -72,6 +72,13 @@ export interface SignatureProvider {
     sign: (args: SignatureProviderArgs) => Promise<PushTransactionArgs>;
 }
 
+export interface ResourcePayer {
+    payer: string;
+    max_net_bytes: number;
+    max_cpu_us: number;
+    max_memory_bytes: number;
+}
+
 export interface Transaction {
     expiration?: string;
     ref_block_num?: number;
@@ -83,12 +90,15 @@ export interface Transaction {
     context_free_data?: Uint8Array[];
     actions: Action[];
     transaction_extensions?: [number, string][];
+    resource_payer?: ResourcePayer;
 }
 
 /** Optional transact configuration object */
 export interface TransactConfig {
     broadcast?: boolean;
     sign?: boolean;
+    readOnlyTrx?: boolean;
+    returnFailureTraces?: boolean;
     requiredKeys?: string[];
     compression?: boolean;
     blocksBehind?: number;
@@ -128,7 +138,7 @@ export interface ActionTrace {
     closest_unnotified_ancestor_action_ordinal: number;
     receipt: ActionReceipt;
     receiver: string;
-    act: Action;
+    act: ProcessedAction;
     context_free: boolean;
     elapsed: number;
     console: string;
@@ -165,6 +175,7 @@ export interface TransactionTrace {
     account_ram_delta: AccountDelta|null;
     except: string|null;
     error_code: number|null;
+    bill_to_accounts: string[];
 }
 
 export interface TransactResult {
