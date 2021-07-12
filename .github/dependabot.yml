@@ -11,10 +11,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "release/21.0.x"
+    target-branch: "release/22.0.x"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "release/22.0.x"
+    target-branch: "release/22.1.x"

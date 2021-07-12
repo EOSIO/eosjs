@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-docker-2_0_x:
-    name: Build Docker - nodeos release/2.0.x
+  build-docker-2_1_x:
+    name: Build Docker - nodeos release/2.1.x
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -18,7 +18,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            const nodeosVersion = 'v2.0.';
+            const nodeosVersion = 'v2.1.';
             const releaseList = await github.paginate('GET /repos/eosio/eos/releases');
             const releases = releaseList.map(release => {
               return {
@@ -56,13 +56,13 @@ jobs:
           push: true
           no-cache: true
           build-args: |
-            EOSBRANCH=release_2.0.x
-            CDTBRANCH=release_1.7.x
+            EOSBRANCH=release_2.1.x
+            CDTBRANCH=release_1.8.x
           tags: |
-            eosio/eosjs-ci:release_2.0.x
+            eosio/eosjs-ci:release_2.1.x
             eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
-  build-docker-2_1_x:
-    name: Build Docker - nodeos release/2.1.x
+  build-docker-2_2_x:
+    name: Build Docker - nodeos release/2.2.x
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -74,7 +74,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            const nodeosVersion = 'v2.1.';
+            const nodeosVersion = 'v2.2.';
             const releaseList = await github.paginate('GET /repos/eosio/eos/releases');
             const releases = releaseList.map(release => {
               return {
@@ -112,10 +112,10 @@ jobs:
           push: true
           no-cache: true
           build-args: |
-            EOSBRANCH=release_2.1.x
+            EOSBRANCH=release_2.2.x
             CDTBRANCH=release_1.8.x
           tags: |
-            eosio/eosjs-ci:release_2.1.x
+            eosio/eosjs-ci:release_2.2.x
             eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
   build-docker-develop:
     name: Build Docker - nodeos develop
@@ -130,9 +130,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            const nodeosVersion = 'v2.1.';
             const developRef = await github.request('GET /repos/eosio/eos/git/refs/heads/develop');
-            console.log(developRef);
             return developRef.data.object.sha;
       - name: Nodeos sha
         id: nodeos-sha
