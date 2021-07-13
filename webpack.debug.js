@@ -6,6 +6,7 @@ module.exports = {
         eosjs_api: './src/eosjs-api.ts',
         eosjs_jsonrpc: './src/rpc-web.ts',
         eosjs_jssig: './src/eosjs-jssig.ts',
+        eosjs_webcrypto_sig: './src/eosjs-webcrypto-sig.ts',
         eosjs_numeric: './src/eosjs-numeric.ts',
     },
     devtool: 'inline-source-map',
@@ -26,14 +27,14 @@ module.exports = {
     },
     plugins: [
         new webpack.ProvidePlugin({
-            Buffer: ["buffer", "Buffer"],
+            Buffer: ['buffer', 'Buffer'],
         })
     ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
         fallback: {
             buffer: 'buffer',
-            crypto: 'crypto-browserify'
+            crypto: false,
         }
     },
     output: {

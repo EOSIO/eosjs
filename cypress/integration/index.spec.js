@@ -129,6 +129,13 @@ describe('eosjs web test', () => {
         cy.get('#testWithReadOnlyFailureTrace').contains('Success', { timeout: 5000 });
     });
 
+    it('test With Web Crypto Tx', () => {
+        cy.visit(('./src/tests/web.html'));
+        cy.wait(500);
+        cy.get('#testWithWebCryptoTx').click();
+        cy.get('#testWithWebCryptoTx').contains('Success', { timeout: 5000 });
+    });
+
     it('test Transact Should Fail', () => {
         cy.visit(('./src/tests/web.html'));
         cy.wait(500);
