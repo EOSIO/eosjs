@@ -8,19 +8,16 @@ jobs:
   integration-test-release_21_0_x-release_2_0_x:
     name: Integration Test - eosjs release/21.0.x with nodeos release/2.0.x
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: release/21.0.x
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -48,19 +45,16 @@ jobs:
   integration-test-release_21_0_x-release_2_1_x:
     name: Integration Test - eosjs release/21.0.x with nodeos release/2.1.x
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: release/21.0.x
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -88,19 +82,16 @@ jobs:
   integration-test-release_21_0_x-develop:
     name: Integration Test - eosjs release/21.0.x with nodeos develop
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: release/21.0.x
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -128,19 +119,16 @@ jobs:
   integration-test-release_22_0_x-release_2_0_x:
     name: Integration Test - eosjs release/22.0.x with nodeos release/2.0.x
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: release/22.0.x
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -172,19 +160,16 @@ jobs:
   integration-test-release_22_0_x-release_2_1_x:
     name: Integration Test - eosjs release/22.0.x with nodeos release/2.1.x
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: release/22.0.x
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -215,19 +200,16 @@ jobs:
   integration-test-release_22_0_x-develop:
     name: Integration Test - eosjs release/22.0.x with nodeos develop
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: release/22.0.x
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -255,19 +237,16 @@ jobs:
   integration-test-develop-release_2_0_x:
     name: Integration Test - eosjs develop with nodeos release/2.0.x
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: develop
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -299,19 +278,16 @@ jobs:
   integration-test-develop-release_2_1_x:
     name: Integration Test - eosjs develop with nodeos release/2.1.x
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: develop
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
@@ -343,19 +319,16 @@ jobs:
   integration-test-develop-develop:
     name: Integration Test - eosjs develop with nodeos develop
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           ref: develop
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js v16.x.x
         uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: |
