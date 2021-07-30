@@ -15,6 +15,7 @@ import {
     ContextFreeGroupCallback,
     Query,
     QueryConfig,
+    ResourcePayer,
     SignatureProvider,
     TransactConfig,
     Transaction,
@@ -238,7 +239,7 @@ export class Api {
     };
 
     // Usage: transaction = {...transaction, ...this.deserializeTransactionExtensions(transaction.transaction_extensions)}
-    public deserializeTransactionExtensions(data: [number, string][]): any[] {
+    public deserializeTransactionExtensions(data: [number, string][]): { resource_payer?: ResourcePayer } {
         const transaction = {} as any;
         data.forEach((extensionData: [number, string]) => {
             const transactionExtension = this.transactionExtensions.find(extension => extension.id === extensionData[0]);
