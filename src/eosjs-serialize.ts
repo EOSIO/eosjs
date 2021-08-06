@@ -842,8 +842,10 @@ function deserializePair(this: Type, buffer: SerialBuffer, state?: SerializerSta
     const result = [] as any;
     const len = buffer.getVaruint32();
     for (let i = 0; i < len; ++i) {
-        result.push(this.fields[0].type.deserialize(buffer, state, allowExtensions));
-        result.push(this.fields[1].type.deserialize(buffer, state, allowExtensions));
+        result.push([
+            this.fields[0].type.deserialize(buffer, state, allowExtensions),
+            this.fields[1].type.deserialize(buffer, state, allowExtensions),
+        ]);
     }
     return result;
 }

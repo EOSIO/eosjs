@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Action } from '../eosjs-serialize';
 import { base64ToBinary } from '../eosjs-numeric';
+import { Transaction } from '../eosjs-api-interfaces';
 
 const transaction = {
     expiration: '2018-09-04T18:42:49',
@@ -324,7 +325,12 @@ describe('eosjs-api', () => {
                         actor: 'alice',
                         permission: 'active',
                     }],
-                    data: '0000000000000E3D0000000000855C34010000000000000004535953000000000E7265736F75726365207061796572'
+                    data: {
+                        from: 'bob',
+                        to: 'alice',
+                        quantity: '0.0001 SYS',
+                        memo: 'resource payer'
+                    }
                 }],
                 context_free_actions: [] as any,
                 resource_payer: {
@@ -348,6 +354,61 @@ describe('eosjs-api', () => {
             expect(serializedTransactionExtensions).toEqual(serialized);
             const deserializedTransactionExtensions = api.deserializeTransactionExtensions(serialized);
             expect(deserializedTransactionExtensions).toEqual(deserialized);
+        });
+
+        it('confirms that a transaction can be fully serialized and deserialized with resource payer', async () => {
+            const resourcePayerTrx: Transaction = {
+                expiration: '2021-06-28T15:55:37.000',
+                ref_block_num: 2097,
+                ref_block_prefix: 1309445478,
+                delay_sec: 0,
+                max_cpu_usage_ms: 0,
+                max_net_usage_words: 0,
+                actions: [{
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: 'bob',
+                        permission: 'active',
+                    }, {
+                        actor: 'alice',
+                        permission: 'active',
+                    }],
+                    data: {
+                        from: 'bob',
+                        to: 'alice',
+                        quantity: '0.0001 SYS',
+                        memo: 'resource payer'
+                    }
+                }],
+                context_free_actions: [] as any,
+                resource_payer: {
+                    payer: 'payer',
+                    max_net_bytes: 4096,
+                    max_cpu_us: 250,
+                    max_memory_bytes: 0
+                }
+            };
+            let serializedResourcePayerTrx: any;
+            let deserializedResourcePayerTrx: any;
+
+            serializedResourcePayerTrx = {
+                ...resourcePayerTrx,
+                transaction_extensions: await api.serializeTransactionExtensions(resourcePayerTrx),
+                actions: await api.serializeActions(resourcePayerTrx.actions),
+                context_free_actions: await api.serializeActions(resourcePayerTrx.context_free_actions)
+            };
+            delete serializedResourcePayerTrx.resource_payer;
+            serializedResourcePayerTrx = api.serializeTransaction(serializedResourcePayerTrx);
+
+            deserializedResourcePayerTrx = await api.deserializeTransactionWithActions(serializedResourcePayerTrx);
+            deserializedResourcePayerTrx = {
+                ...deserializedResourcePayerTrx,
+                ...api.deserializeTransactionExtensions(deserializedResourcePayerTrx.transaction_extensions),
+            };
+            delete deserializedResourcePayerTrx.transaction_extensions;
+
+            expect(deserializedResourcePayerTrx).toEqual(resourcePayerTrx);
         });
     });
 });
