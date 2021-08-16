@@ -675,6 +675,34 @@
                               waits: []
                           },
                       }
+                  },
+                  {
+                      account: 'eosio',
+                      name: 'buyrambytes',
+                      authorization: [{
+                          actor: 'bobr1',
+                          permission: 'active',
+                      }],
+                      data: {
+                          payer: 'bobr1',
+                          receiver: accountName,
+                          bytes: 8192,
+                      },
+                  },
+                  {
+                      account: 'eosio',
+                      name: 'delegatebw',
+                      authorization: [{
+                          actor: 'bobr1',
+                          permission: 'active',
+                      }],
+                      data: {
+                          from: 'bobr1',
+                          receiver: accountName,
+                          stake_net_quantity: '100.0000 SYS',
+                          stake_cpu_quantity: '100.0000 SYS',
+                          transfer: true,
+                      }
                   }]
               }, {
                   broadcast: true,
