@@ -18,7 +18,7 @@ jobs:
           ref: release/21.0.x
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -58,7 +58,7 @@ jobs:
           ref: release/21.0.x
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -98,7 +98,7 @@ jobs:
           ref: release/21.0.x
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -138,7 +138,7 @@ jobs:
           ref: release/22.0.x
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -182,7 +182,7 @@ jobs:
           ref: release/22.0.x
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -225,7 +225,7 @@ jobs:
           ref: release/22.0.x
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -265,7 +265,7 @@ jobs:
           ref: develop
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -309,7 +309,7 @@ jobs:
           ref: develop
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
@@ -353,7 +353,7 @@ jobs:
           ref: develop
           token: ${{ github.token }}
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
