@@ -9,9 +9,6 @@ jobs:
   ci:
     name: CI
     runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        node-version: [15.14.0]
     steps:
       - name: Check for GIT_API_KEY
         id: check_token
@@ -28,10 +25,10 @@ jobs:
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
         with:
           token: ${{ github.token }}
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@38d90ce44d5275ad62cc48384b3d8a58c500bb5f
+      - name: Setup Node.js v16.x.x
+        uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
           registry-url: 'https://registry.npmjs.org'
       - name: Update
         run: |
