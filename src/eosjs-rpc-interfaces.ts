@@ -500,7 +500,7 @@ export interface PushTransactionArgs {
     serializedContextFreeData?: Uint8Array;
 }
 
-/** Return value of `/v1/chain/push_ro_transaction` */
+/** Return value of `/v1/chain/send_ro_transaction` */
 export interface ReadOnlyTransactResult {
     head_block_num: number;
     head_block_id: string;
