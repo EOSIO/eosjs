@@ -666,8 +666,8 @@ describe('JSON RPC', () => {
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);
     });
 
-    it('calls push_ro_transaction', async () => {
-        const expPath = '/v1/chain/push_ro_transaction';
+    it('calls send_ro_transaction', async () => {
+        const expPath = '/v1/chain/send_ro_transaction';
         const signatures = [
             'George Washington',
             'John Hancock',
@@ -692,7 +692,7 @@ describe('JSON RPC', () => {
 
         fetchMock.once(JSON.stringify(expReturn));
 
-        const response = await jsonRpc.push_ro_transaction({ signatures, serializedTransaction });
+        const response = await jsonRpc.send_ro_transaction({ signatures, serializedTransaction });
 
         expect(response).toEqual(expReturn);
         expect(fetch).toBeCalledWith(endpoint + expPath, expParams);

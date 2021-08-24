@@ -314,10 +314,10 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         });
     }
 
-    /** Raw call to `/v1/chain/push_ro_transaction */
-    public async push_ro_transaction({ signatures, compression = 0, serializedTransaction }: PushTransactionArgs,
+    /** Raw call to `/v1/chain/send_ro_transaction */
+    public async send_ro_transaction({ signatures, compression = 0, serializedTransaction }: PushTransactionArgs,
         returnFailureTraces: boolean = false): Promise<ReadOnlyTransactResult> {
-        return await this.fetch('/v1/chain/push_ro_transaction', {
+        return await this.fetch('/v1/chain/send_ro_transaction', {
             transaction: {
                 signatures,
                 compression,
