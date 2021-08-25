@@ -35,7 +35,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
     services:
@@ -75,7 +75,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
     services:
@@ -115,7 +115,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
     services:
@@ -157,7 +157,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
         env:
@@ -202,7 +202,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
     services:
@@ -242,7 +242,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
     services:
@@ -284,7 +284,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
         env:
@@ -328,7 +328,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
         env:
@@ -373,7 +373,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
     services:
