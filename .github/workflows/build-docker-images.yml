@@ -15,7 +15,7 @@ jobs:
           token: ${{ github.token }}
       - name: Get nodeos sha
         id: nodeos
-        uses: actions/github-script@v4.0.2
+        uses: actions/github-script@v4.1
         with:
           script: |
             const nodeosVersion = 'v2.1.';
@@ -71,7 +71,7 @@ jobs:
           token: ${{ github.token }}
       - name: Get nodeos sha
         id: nodeos
-        uses: actions/github-script@v4.0.2
+        uses: actions/github-script@v4.1
         with:
           script: |
             const nodeosVersion = 'v2.2.';
@@ -127,7 +127,7 @@ jobs:
           token: ${{ github.token }}
       - name: Get nodeos sha
         id: nodeos
-        uses: actions/github-script@v4.0.2
+        uses: actions/github-script@v4.1
         with:
           script: |
             const developRef = await github.request('GET /repos/eosio/eos/git/refs/heads/develop');
