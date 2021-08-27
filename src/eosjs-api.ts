@@ -475,7 +475,7 @@ export class Api {
         returnFailureTraces = false,
     ): Promise<TransactResult|ReadOnlyTransactResult> {
         if (readOnlyTrx) {
-            return this.rpc.push_ro_transaction({
+            return this.rpc.send_ro_transaction({
                 signatures,
                 serializedTransaction,
                 serializedContextFreeData,
@@ -498,7 +498,7 @@ export class Api {
             this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
 
         if (readOnlyTrx) {
-            return this.rpc.push_ro_transaction({
+            return this.rpc.send_ro_transaction({
                 signatures,
                 compression: 1,
                 serializedTransaction: compressedSerializedTransaction,
