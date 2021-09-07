@@ -40,6 +40,8 @@
     "@types/node": "^14.17.15",
     "@types/node-fetch": "^2.5.12",
     "@types/pako": "^1.0.2",
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
     "buffer": "^6.0.3",
     "clean-webpack-plugin": "^3.0.0",
     "crypto-browserify": "^3.12.0",
