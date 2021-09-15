@@ -12,6 +12,7 @@ import {
     PublicKey,
     Signature,
     generateWebCryptoKeyPair,
+    CryptoKeyPair,
 } from './eosjs-key-conversions';
 import { convertLegacyPublicKey } from './eosjs-numeric';
 

@@ -5,6 +5,11 @@ import { PrivateKey } from './PrivateKey';
 
 const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
 
+export interface CryptoKeyPair {
+    privateKey: CryptoKey;
+    publicKey: CryptoKey;
+}
+
 export const generateKeyPair = (
     type: KeyType, options: { secureEnv?: boolean, ecOptions?: EC.GenKeyPairOptions } = {}
 ): { publicKey: PublicKey, privateKey: PrivateKey } => {
