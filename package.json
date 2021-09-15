@@ -37,7 +37,7 @@
     "@cypress/skip-test": "^2.6.1",
     "@types/elliptic": "^6.4.13",
     "@types/jest": "^26.0.24",
-    "@types/node": "^14.17.15",
+    "@types/node": "^14.17.16",
     "@types/node-fetch": "^2.5.12",
     "@types/pako": "^1.0.2",
     "buffer": "^6.0.3",
@@ -52,8 +52,8 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^26.5.6",
     "ts-loader": "^9.2.5",
-    "typescript": "^4.4.2",
-    "webpack": "^5.52.0",
+    "typescript": "^4.4.3",
+    "webpack": "^5.52.1",
     "webpack-cli": "^4.8.0"
   },
   "jest": {
