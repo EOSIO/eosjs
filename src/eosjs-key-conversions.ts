@@ -6,6 +6,7 @@ export { Signature } from './Signature';
 export {
     generateKeyPair,
     generateWebCryptoKeyPair,
+    CryptoKeyPair,
 } from './KeyUtil';
 
 export const sha256 = (data: string|Buffer): number[]|string => {
