@@ -10,7 +10,7 @@ The requests made by the `JsonRpc` object will either use a built-in `fetch` lib
 ## Api
 The `Api` object is typically used when transacting on an EOSIO-based blockchain.  Some examples include [staking](how-to-guides/03_how-to-stake.md), [creating an account](how-to-guides/05_how-to-create-an-account.md), or [proposing multi-sig transactions](how-to-guides/13_how-to-propose-a-multisig-transaction.md).
 
-The typical use of the `Api` object is to call its [`transact` method](https://github.com/EOSIO/eosjs/blob/release/22.1.x/src/eosjs-api.ts#L334).  This method performs a number of steps depending on the input passed to it:
+The typical use of the `Api` object is to call its [`transact` method](https://github.com/EOSIO/eosjs/blob/4b3413d6170c07682be06e8400c668688d115c0c/src/eosjs-api.ts#L334).  This method performs a number of steps depending on the input passed to it:
 
 * The `transact` method first checks if the **chainId** was set in the `Api` constructor, and if not, uses the [`JsonRpc` object's](#jsonrpc) [`get_info`](https://github.com/EOSIO/eosjs/blob/4b3413d6170c07682be06e8400c668688d115c0c/src/eosjs-jsonrpc.ts#L183) method to retrieve the **chainId**.  
 * The `transact` method then checks if the `expireSeconds` and either `blocksBehind` or `useLastIrreversible` fields are set and well-formed in the [optional configuration object, as specified in *How to Submit a Transaction*](how-to-guides/01_how-to-submit-a-transaction.md#).
