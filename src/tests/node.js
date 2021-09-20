@@ -1,9 +1,27 @@
-const { JsonRpc, Api } = require('../../dist');
-const { JsSignatureProvider } = require('../../dist/eosjs-jssig');
-const { WebCryptoSignatureProvider } = require('../../dist/eosjs-webcrypto-sig');
-const { generateWebCryptoKeyPair, PublicKey } = require('../../dist/eosjs-key-conversions');
 const fetch = require('node-fetch');
 const { TextEncoder, TextDecoder } = require('util');
+
+// Code for gathering coverage for src/ not dist/, otherwise tests should test the built files in dist/
+let eosjs;
+let eosjs_jssig;
+let eosjs_key_conversions;
+let eosjs_webcrypto_sig;
+if (process.env.COVERAGE_TESTING === 'true') {
+    eosjs = require('../');
+    eosjs_jssig = require('../eosjs-jssig');
+    eosjs_key_conversions = require('../eosjs-key-conversions');
+    eosjs_webcrypto_sig = require('../eosjs-webcrypto-sig');
+} else {
+    eosjs = require('../../dist');
+    eosjs_jssig = require('../../dist/eosjs-jssig');
+    eosjs_key_conversions = require('../../dist/eosjs-key-conversions');
+    eosjs_webcrypto_sig = require('../../dist/eosjs-webcrypto-sig');
+}
+
+const { JsonRpc, Api } = eosjs;
+const { JsSignatureProvider } = eosjs_jssig;
+const { generateWebCryptoKeyPair, PublicKey } = eosjs_key_conversions;
+const { WebCryptoSignatureProvider } = eosjs_webcrypto_sig;
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
 const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT';
