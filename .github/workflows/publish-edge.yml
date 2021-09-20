@@ -26,6 +26,7 @@ jobs:
         with:
           script: |
             core.setFailed('Failure: No NPM_AUTH_TOKEN present in repository secrets.');
+
   publish-edge:
     name: Publish Edge
     runs-on: ubuntu-18.04

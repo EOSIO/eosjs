@@ -5,117 +5,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  integration-test-release_21_0_x-release_2_0_x:
-    name: Integration Test - eosjs release/21.0.x with nodeos release/2.0.x
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-        with:
-          ref: release/21.0.x
-          token: ${{ github.token }}
-      - name: Setup Node.js v16.x.x
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
-        with:
-          node-version: '16'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Install
-        run: |
-          yarn --frozen-lockfile
-      - name: Test
-        run: |
-          yarn test
-      - name: Test Node
-        run: |
-          yarn test-node
-      - name: Build
-        run: |
-          yarn build-web
-      - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
-        with:
-          spec: cypress/integration/index.spec.js
-    services:
-      nodeos:
-        image: eosio/eosjs-ci:release_2.0.x
-
-        ports:
-          - 8888:8888
-          - 9876:9876
-  integration-test-release_21_0_x-release_2_1_x:
-    name: Integration Test - eosjs release/21.0.x with nodeos release/2.1.x
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-        with:
-          ref: release/21.0.x
-          token: ${{ github.token }}
-      - name: Setup Node.js v16.x.x
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
-        with:
-          node-version: '16'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Install
-        run: |
-          yarn --frozen-lockfile
-      - name: Test
-        run: |
-          yarn test
-      - name: Test Node
-        run: |
-          yarn test-node
-      - name: Build
-        run: |
-          yarn build-web
-      - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
-        with:
-          spec: cypress/integration/index.spec.js
-    services:
-      nodeos:
-        image: eosio/eosjs-ci:release_2.1.x
-
-        ports:
-          - 8888:8888
-          - 9876:9876
-  integration-test-release_21_0_x-develop:
-    name: Integration Test - eosjs release/21.0.x with nodeos develop
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-        with:
-          ref: release/21.0.x
-          token: ${{ github.token }}
-      - name: Setup Node.js v16.x.x
-        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
-        with:
-          node-version: '16'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Install
-        run: |
-          yarn --frozen-lockfile
-      - name: Test
-        run: |
-          yarn test
-      - name: Test Node
-        run: |
-          yarn test-node
-      - name: Build
-        run: |
-          yarn build-web
-      - name: Test Web
-        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
-        with:
-          spec: cypress/integration/index.spec.js
-    services:
-      nodeos:
-        image: eosio/eosjs-ci:develop
-
-        ports:
-          - 8888:8888
-          - 9876:9876
   integration-test-release_22_0_x-release_2_0_x:
     name: Integration Test - eosjs release/22.0.x with nodeos release/2.0.x
     runs-on: ubuntu-18.04
@@ -138,9 +27,17 @@ jobs:
           yarn test
       - name: Test Node
         run: |
-          yarn test-node
+          yarn test-node-coverage
         env:
           NODEOS_VER: 'release/2.0.x'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
       - name: Build
         run: |
           yarn build-web
@@ -150,6 +47,11 @@ jobs:
           spec: cypress/integration/index.spec.js
         env:
           CYPRESS_NODEOS_VER: 'release/2.0.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.0.x-eosjs-release_22.0.x-coverage
+          path: coverage/merged-report
     services:
       nodeos:
         image: eosio/eosjs-ci:release_2.0.x
@@ -157,6 +59,7 @@ jobs:
         ports:
           - 8888:8888
           - 9876:9876
+
   integration-test-release_22_0_x-release_2_1_x:
     name: Integration Test - eosjs release/22.0.x with nodeos release/2.1.x
     runs-on: ubuntu-18.04
@@ -179,10 +82,17 @@ jobs:
           yarn test
       - name: Test Node
         run: |
-          yarn test-node
-      - name: Test Types
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'release/2.1.x'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
         run: |
-          yarn test-types
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
       - name: Build
         run: |
           yarn build-web
@@ -190,6 +100,13 @@ jobs:
         uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
         with:
           spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'release/2.1.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.1.x-eosjs-release_22.0.x-coverage
+          path: coverage/merged-report
     services:
       nodeos:
         image: eosio/eosjs-ci:release_2.1.x
@@ -197,6 +114,62 @@ jobs:
         ports:
           - 8888:8888
           - 9876:9876
+
+  integration-test-release_22_0_x-release_2_2_x:
+    name: Integration Test - eosjs release/22.0.x with nodeos release/2.2.x
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          ref: release/22.0.x
+          token: ${{ github.token }}
+      - name: Setup Node.js v16.x.x
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'release/2.2.x'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        with:
+          spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'release/2.2.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.2.x-eosjs-release_22.0.x-coverage
+          path: coverage/merged-report
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:release_2.2.x
+
+        ports:
+          - 8888:8888
+          - 9876:9876
+
   integration-test-release_22_0_x-develop:
     name: Integration Test - eosjs release/22.0.x with nodeos develop
     runs-on: ubuntu-18.04
@@ -219,7 +192,17 @@ jobs:
           yarn test
       - name: Test Node
         run: |
-          yarn test-node
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'develop'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
       - name: Build
         run: |
           yarn build-web
@@ -227,6 +210,13 @@ jobs:
         uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
         with:
           spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'develop'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-develop-eosjs-release_22.0.x-coverage
+          path: coverage/merged-report
     services:
       nodeos:
         image: eosio/eosjs-ci:develop
@@ -234,6 +224,235 @@ jobs:
         ports:
           - 8888:8888
           - 9876:9876
+
+  integration-test-release_22_1_x-release_2_0_x:
+    name: Integration Test - eosjs release/22.1.x with nodeos release/2.0.x
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          ref: release/22.1.x
+          token: ${{ github.token }}
+      - name: Setup Node.js v16.x.x
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'release/2.0.x'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        with:
+          spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'release/2.0.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.0.x-eosjs-release_22.1.x-coverage
+          path: coverage/merged-report
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:release_2.0.x
+
+        ports:
+          - 8888:8888
+          - 9876:9876
+
+  integration-test-release_22_1_x-release_2_1_x:
+    name: Integration Test - eosjs release/22.1.x with nodeos release/2.1.x
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          ref: release/22.1.x
+          token: ${{ github.token }}
+      - name: Setup Node.js v16.x.x
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'release/2.1.x'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        with:
+          spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'release/2.1.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.1.x-eosjs-release_22.1.x-coverage
+          path: coverage/merged-report
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:release_2.1.x
+
+        ports:
+          - 8888:8888
+          - 9876:9876
+
+  integration-test-release_22_1_x-release_2_2_x:
+    name: Integration Test - eosjs release/22.1.x with nodeos release/2.2.x
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          ref: release/22.1.x
+          token: ${{ github.token }}
+      - name: Setup Node.js v16.x.x
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'release/2.2.x'
+          COVERAGE_TESTING: true
+      - name: Test Types
+        run: |
+          yarn test-types
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          cp ./coverage/test-types/coverage-final.json ./coverage/multiple-sources/test-types.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        with:
+          spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'release/2.2.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.2.x-eosjs-release_22.1.x-coverage
+          path: coverage/merged-report
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:release_2.2.x
+
+        ports:
+          - 8888:8888
+          - 9876:9876
+
+  integration-test-release_22_1_x-develop:
+    name: Integration Test - eosjs release/22.1.x with nodeos develop
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          ref: release/22.1.x
+          token: ${{ github.token }}
+      - name: Setup Node.js v16.x.x
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'develop'
+          COVERAGE_TESTING: true
+      - name: Test Types
+        run: |
+          yarn test-types
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          cp ./coverage/test-types/coverage-final.json ./coverage/multiple-sources/test-types.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        with:
+          spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'develop'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-develop-eosjs-release_22.1.x-coverage
+          path: coverage/merged-report
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:develop
+
+        ports:
+          - 8888:8888
+          - 9876:9876
+
   integration-test-develop-release_2_0_x:
     name: Integration Test - eosjs develop with nodeos release/2.0.x
     runs-on: ubuntu-18.04
@@ -256,9 +475,17 @@ jobs:
           yarn test
       - name: Test Node
         run: |
-          yarn test-node
+          yarn test-node-coverage
         env:
           NODEOS_VER: 'release/2.0.x'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
       - name: Build
         run: |
           yarn build-web
@@ -268,6 +495,11 @@ jobs:
           spec: cypress/integration/index.spec.js
         env:
           CYPRESS_NODEOS_VER: 'release/2.0.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.0.x-eosjs-develop-coverage
+          path: coverage/merged-report
     services:
       nodeos:
         image: eosio/eosjs-ci:release_2.0.x
@@ -275,6 +507,7 @@ jobs:
         ports:
           - 8888:8888
           - 9876:9876
+
   integration-test-develop-release_2_1_x:
     name: Integration Test - eosjs develop with nodeos release/2.1.x
     runs-on: ubuntu-18.04
@@ -297,9 +530,17 @@ jobs:
           yarn test
       - name: Test Node
         run: |
-          yarn test-node
+          yarn test-node-coverage
         env:
           NODEOS_VER: 'release/2.1.x'
+          COVERAGE_TESTING: true
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
       - name: Build
         run: |
           yarn build-web
@@ -309,6 +550,11 @@ jobs:
           spec: cypress/integration/index.spec.js
         env:
           CYPRESS_NODEOS_VER: 'release/2.1.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.1.x-eosjs-develop-coverage
+          path: coverage/merged-report
     services:
       nodeos:
         image: eosio/eosjs-ci:release_2.1.x
@@ -316,6 +562,66 @@ jobs:
         ports:
           - 8888:8888
           - 9876:9876
+
+  integration-test-develop-release_2_2_x:
+    name: Integration Test - eosjs develop with nodeos release/2.2.x
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          ref: develop
+          token: ${{ github.token }}
+      - name: Setup Node.js v16.x.x
+        uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        with:
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          yarn --frozen-lockfile
+      - name: Test
+        run: |
+          yarn test
+      - name: Test Node
+        run: |
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'release/2.2.x'
+          COVERAGE_TESTING: true
+      - name: Test Types
+        run: |
+          yarn test-types
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          cp ./coverage/test-types/coverage-final.json ./coverage/multiple-sources/test-types.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
+      - name: Build
+        run: |
+          yarn build-web
+      - name: Test Web
+        uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
+        with:
+          spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'release/2.2.x'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-release_2.2.x-eosjs-develop-coverage
+          path: coverage/merged-report
+    services:
+      nodeos:
+        image: eosio/eosjs-ci:release_2.2.x
+
+        ports:
+          - 8888:8888
+          - 9876:9876
+
   integration-test-develop-develop:
     name: Integration Test - eosjs develop with nodeos develop
     runs-on: ubuntu-18.04
@@ -338,10 +644,21 @@ jobs:
           yarn test
       - name: Test Node
         run: |
-          yarn test-node
+          yarn test-node-coverage
+        env:
+          NODEOS_VER: 'develop'
+          COVERAGE_TESTING: true 
       - name: Test Types
         run: |
           yarn test-types
+      - name: Copy Coverage Files
+        run: |
+          mkdir -p ./coverage/multiple-sources
+          cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
+          cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          cp ./coverage/test-types/coverage-final.json ./coverage/multiple-sources/test-types.json
+          ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
+          ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
       - name: Build
         run: |
           yarn build-web
@@ -349,6 +666,13 @@ jobs:
         uses: cypress-io/github-action@1db146275576798796bc39ef83d739924145298a
         with:
           spec: cypress/integration/index.spec.js
+        env:
+          CYPRESS_NODEOS_VER: 'develop'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: nodeos-develop-eosjs-develop-coverage
+          path: coverage/merged-report
     services:
       nodeos:
         image: eosio/eosjs-ci:develop
