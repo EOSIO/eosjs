@@ -11,3 +11,5 @@ docs-build/
 #cypress artifacts
 cypress/screenshots/
 cypress/videos/
+
+coverage/

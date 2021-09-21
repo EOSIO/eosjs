@@ -65,7 +65,7 @@ jobs:
           PROTECTED=$(curl "https://api.github.com/repos/${{ github.repository }}/branches/${GITHUB_REF#refs/*/}" 2>/dev/null | jq -r '.protected')
           echo ::set-output name=protected::$PROTECTED
       - name: Commit/Push
-        if: github.event_name == 'push' && steps.protected_step.outputs.protected == 'false'
+        if: github.event_name == 'push' && steps.protected_step.outputs.protected == 'false' && github.actor != 'dependabot[bot]'
         run: |
           git config --global user.name 'Block.one DevOps'
           git config --global user.email 'blockone-devops@users.noreply.github.com'
@@ -73,7 +73,7 @@ jobs:
           git push origin ${GITHUB_REF#refs/*/}
     services:
       nodeos:
-        image: eosio/eosjs-ci:release_22.0.x
+        image: eosio/eosjs-ci:release_2.1.x
 
         ports:
           - 8888:8888
