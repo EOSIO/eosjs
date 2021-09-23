@@ -394,15 +394,9 @@ export class Api {
             });
         }
         if (broadcast) {
-            if (compression) {
-                return this.pushCompressedSignedTransaction(
-                    pushTransactionArgs,
-                    readOnlyTrx,
-                    returnFailureTraces,
-                ) as Promise<TransactResult|ReadOnlyTransactResult>;
-            }
-            return this.pushSignedTransaction(
+            return this.sendSignedTransaction(
                 pushTransactionArgs,
+                compression,
                 readOnlyTrx,
                 returnFailureTraces,
             ) as Promise<TransactResult|ReadOnlyTransactResult>;
@@ -469,47 +463,41 @@ export class Api {
     }
 
     /** Broadcast a signed transaction */
-    public async pushSignedTransaction(
+    public async sendSignedTransaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
+        compression = false,
         readOnlyTrx = false,
         returnFailureTraces = false,
     ): Promise<TransactResult|ReadOnlyTransactResult> {
+        if (compression) {
+            serializedTransaction = this.deflateSerializedArray(serializedTransaction);
+            serializedContextFreeData =
+            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
+        }
+
+        const { apis } = await this.rpc.get_supported_apis();
+
         if (readOnlyTrx) {
             return this.rpc.send_ro_transaction({
                 signatures,
+                compression: compression ? 1 : 0,
                 serializedTransaction,
                 serializedContextFreeData,
             }, returnFailureTraces);
         }
-        return this.rpc.push_transaction({
-            signatures,
-            serializedTransaction,
-            serializedContextFreeData
-        });
-    }
-
-    public async pushCompressedSignedTransaction(
-        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
-        readOnlyTrx = false,
-        returnFailureTraces = false,
-    ): Promise<TransactResult|ReadOnlyTransactResult> {
-        const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
-        const compressedSerializedContextFreeData =
-            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
-
-        if (readOnlyTrx) {
-            return this.rpc.send_ro_transaction({
+        if (apis.includes('/v2/chain/send_transaction')) {
+            return this.rpc.send_transaction_v2({
                 signatures,
-                compression: 1,
-                serializedTransaction: compressedSerializedTransaction,
-                serializedContextFreeData: compressedSerializedContextFreeData
+                compression: compression ? 1 : 0,
+                serializedTransaction,
+                serializedContextFreeData,
             }, returnFailureTraces);
         }
-        return this.rpc.push_transaction({
+        return this.rpc.send_transaction({
             signatures,
-            compression: 1,
-            serializedTransaction: compressedSerializedTransaction,
-            serializedContextFreeData: compressedSerializedContextFreeData
+            compression: compression ? 1 : 0,
+            serializedTransaction,
+            serializedContextFreeData,
         });
     }
 
