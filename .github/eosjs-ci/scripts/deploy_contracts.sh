@@ -169,16 +169,35 @@ cleos create account cfhello cfactor $CFACTOR_PUBLIC_KEY
 # preactivate concensus upgrades
 post_preactivate
 
-sleep 1s
-setabi eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.abi
-setcode eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.wasm
+if [ $EOSBRANCH = "release_2.0.x" ]; then
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.bios_v1.8.3/eosio.bios.abi
+  setcode eosio $CONTRACTS_DIR/eosio.bios_v1.8.3/eosio.bios.wasm
 
-sleep 1s
-activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
-activate_feature "825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"
-activate_feature "c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"
-activate_feature "bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"
-activate_feature "5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"
+  sleep 1s
+  activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
+
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
+  setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
+
+  sleep 1s
+fi
+
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "release_2.2.x" ] || [ $EOSBRANCH = "develop" ]; then
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.abi
+  setcode eosio $CONTRACTS_DIR/eosio.boot/eosio.boot.wasm
+  sleep 1s
+  activate_feature "299dcb6af692324b899b39f16d5a530a33062804e41f09dc97e9f156b4476707"
+fi
+
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "release_2.2.x" ] || [ $EOSBRANCH = "develop" ]; then
+  activate_feature "825ee6288fb1373eab1b5187ec2f04f6eacb39cb3a97f356a07c91622dd61d16"
+  activate_feature "c3a6138c5061cf291310887c0b5c71fcaffeab90d5deb50d3b9e687cead45071"
+  activate_feature "bf61537fd21c61a60e542a5d66c3f6a78da0589336868307f94a82bccea84e88"
+  activate_feature "5443fcf88330c586bc0e5f3dee10e7f63c76c00249c87fe4fbf7f38c082006b4"
+fi
 activate_feature "4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"
 activate_feature "f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"
 activate_feature "2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"
@@ -193,21 +212,23 @@ if [ $EOSBRANCH = "release_2.2.x" ] || [ $EOSBRANCH = "develop" ]; then
   activate_feature "808c49387292c34ccb3970e00b08a690b6b3370c1cbcec46d46c19d5dfafab03"
 fi
 
-sleep 1s
-setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
-setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "release_2.2.x" ] || [ $EOSBRANCH = "develop" ]; then
+  sleep 1s
+  setabi eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.abi
+  setcode eosio $CONTRACTS_DIR/eosio.bios/eosio.bios.wasm
 
-sleep 1s
-cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":4096, "max_iterators":1024}]' -p eosio@active
-cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
+  sleep 1s
+  cleos push action eosio setkvparams '[{"max_key_size":1024, "max_value_size":4096, "max_iterators":1024}]' -p eosio@active
+  cleos push action eosio setpparams '["01110000400100000000"]' -p eosio@active
 
-sleep 1s
-setabi todo $CONTRACTS_DIR/kv_todo/kv_todo.abi
-setcode todo $CONTRACTS_DIR/kv_todo/kv_todo.wasm
+  sleep 1s
+  setabi todo $CONTRACTS_DIR/kv_todo/kv_todo.abi
+  setcode todo $CONTRACTS_DIR/kv_todo/kv_todo.wasm
 
-sleep 1s
-setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
-setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
+  sleep 1s
+  setabi returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.abi
+  setcode returnvalue $CONTRACTS_DIR/action_return_value/action_return_value.wasm
+fi
 
 sleep 1s
 setabi cfhello $CONTRACTS_DIR/cfhello/cfhello.abi
@@ -248,9 +269,11 @@ cleos push action eosio.token transfer '["eosio", "alice", "1000.0000 SYS", "mem
 cleos push action eosio.token transfer '["eosio", "bobr1", "1000.0000 SYS", "memo"]' -p eosio
 cleos push action eosio.token transfer '["eosio", "alicer1", "1000.0000 SYS", "memo"]' -p eosio
 
-cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
-cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
-cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
+if [ $EOSBRANCH = "release_2.1.x" ] || [ $EOSBRANCH = "release_2.2.x" ] || [ $EOSBRANCH = "develop" ]; then
+  cleos push action todo upsert '["bf581bee-9f2c-447b-94ad-78e4984b6f51", "todo", "Write Hello World Contract", false]' -p todo@active
+  cleos push action todo upsert '["b7b0d09d-a82b-44d9-b067-3bae2d02917e", "todo", "Start Blockchain", false]' -p todo@active
+  cleos push action todo upsert '["ac8acfe7-cd4e-4d22-8400-218b697a4517", "todo", "Deploy Hello World Contract", false]' -p todo@active
+fi
 
 if [ $EOSBRANCH = "release_2.2.x" ] || [ $EOSBRANCH = "develop" ]; then
   cleos push action readonly setup '[]' -p readonly@active

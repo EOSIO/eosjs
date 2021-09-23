@@ -26,6 +26,65 @@ jobs:
         with:
           script: |
             core.setFailed('Failure: No DOCKERHUB_TOKEN present in repository secrets.');
+
+  build-docker-2_0_x:
+    name: Build Docker - nodeos release/2.0.x
+    runs-on: ubuntu-18.04
+    needs: check-tokens
+    steps:
+      - name: Checkout
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        with:
+          token: ${{ github.token }}
+      - name: Get nodeos sha
+        id: nodeos
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const nodeosVersion = 'v2.0.';
+            const releaseList = await github.paginate('GET /repos/eosio/eos/releases');
+            const releases = releaseList.map(release => {
+              return {
+                tag: release.tag_name,
+                published_at: new Date(release.published_at),
+              };
+            })
+            .filter(release => release.tag.startsWith(nodeosVersion))
+            .sort((a, b) => b.published_at - a.published_at);
+            const tagList = await github.paginate('GET /repos/eosio/eos/tags');
+            const tag = tagList.filter(tag => tag.name === releases[0].tag);
+            return tag[0].commit.sha;
+      - name: Nodeos sha
+        id: nodeos-sha
+        run: |
+          SHA=$(echo "${NODEOS_SHA_FROM_JS}" | tr -d '"')
+          echo ::set-output name=NODEOS_SHA::${SHA}
+        env:
+          NODEOS_SHA_FROM_JS: ${{ steps.nodeos.outputs.result }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@0d135e0c2fc0dba0729c1a47ecfcf5a3c7f8579e
+      - name: Login to DockerHub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: ./.github/eosjs-ci
+          file: ./.github/eosjs-ci/Dockerfile
+          pull: true
+          push: true
+          no-cache: true
+          build-args: |
+            EOSBRANCH=release_2.0.x
+            CDTBRANCH=release_1.7.x
+          tags: |
+            eosio/eosjs-ci:release_2.0.x
+            eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+
   build-docker-2_1_x:
     name: Build Docker - nodeos release/2.1.x
     runs-on: ubuntu-18.04
@@ -83,6 +142,7 @@ jobs:
           tags: |
             eosio/eosjs-ci:release_2.1.x
             eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+
   build-docker-2_2_x:
     name: Build Docker - nodeos release/2.2.x
     runs-on: ubuntu-18.04
@@ -140,6 +200,7 @@ jobs:
           tags: |
             eosio/eosjs-ci:release_2.2.x
             eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
+
   build-docker-develop:
     name: Build Docker - nodeos develop
     runs-on: ubuntu-18.04
@@ -180,6 +241,9 @@ jobs:
           pull: true
           push: true
           no-cache: true
+          build-args: |
+            EOSBRANCH=develop
+            CDTBRANCH=develop
           tags: |
             eosio/eosjs-ci:develop
             eosio/eosjs-ci:${{ steps.nodeos-sha.outputs.NODEOS_SHA }}
