@@ -1,9 +1,19 @@
-const fs = require('fs');
-const path = require('path');
-const { JsonRpc, RpcError, Api } = require('../../dist');
-const { JsSignatureProvider } = require('../../dist/eosjs-jssig');
 const fetch = require('node-fetch');
 const { TextEncoder, TextDecoder } = require('util');
+
+// Code for gathering coverage for src/ not dist/, otherwise tests should test the built files in dist/
+let eosjs;
+let eosjs_jssig;
+if (process.env.COVERAGE_TESTING === 'true') {
+    eosjs = require('../');
+    eosjs_jssig = require('../eosjs-jssig');
+} else {
+    eosjs = require('../../dist');
+    eosjs_jssig = require('../../dist/eosjs-jssig');
+}
+
+const { JsonRpc, Api } = eosjs;
+const { JsSignatureProvider } = eosjs_jssig;
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
 const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT';
