@@ -4,10 +4,33 @@ on:
     types: [published]
 
 jobs:
+  check-tokens:
+    name: "Check NPM Token"
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check for NPM_AUTH_TOKEN
+        id: check_token
+        run: echo ::set-output name=token_exists::${HAS_SECRET}
+        env:
+          HAS_SECRET: ${{ secrets.NPM_AUTH_TOKEN != null }}
+      - name: Succeed job on existing NPM_AUTH_TOKEN
+        if: ${{ steps.check_token.outputs.token_exists == 'true' }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setOutput('Success. NPM_AUTH_TOKEN is present in repository secrets.');
+      - name: Fail on missing NPM_AUTH_TOKEN
+        if: ${{ steps.check_token.outputs.token_exists == 'false' }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Failure: No NPM_AUTH_TOKEN present in repository secrets.');
+
   publish-release:
     if: "!github.event.release.prerelease"
     name: Publish Release
     runs-on: ubuntu-18.04
+    needs: check-tokens
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
@@ -56,11 +79,11 @@ jobs:
           - 8888:8888
           - 9876:9876
 
-
   publish-rc:
     if: "github.event.release.prerelease"
     name: Publish RC
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
+    needs: check-tokens
     steps:
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
