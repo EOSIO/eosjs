@@ -397,8 +397,8 @@ export class Api {
             return this.sendSignedTransaction(
                 pushTransactionArgs,
                 returnFailureTraces,
-                compression,
                 readOnlyTrx,
+                compression,
             ) as Promise<TransactResult|ReadOnlyTransactResult>;
         }
         return pushTransactionArgs as PushTransactionArgs;
@@ -489,7 +489,7 @@ export class Api {
     ): Promise<TransactResult|ReadOnlyTransactResult> {
         const compressedSerializedTransaction = this.deflateSerializedArray(serializedTransaction);
         const compressedSerializedContextFreeData =
-                this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
+            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
 
         if (readOnlyTrx) {
             return this.rpc.send_ro_transaction({
@@ -511,8 +511,8 @@ export class Api {
     public async sendSignedTransaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
         returnFailureTraces = false,
-        compression = false,
         readOnlyTrx = false,
+        compression = false,
     ): Promise<TransactResult|ReadOnlyTransactResult> {
         if (compression) {
             serializedTransaction = this.deflateSerializedArray(serializedTransaction);
