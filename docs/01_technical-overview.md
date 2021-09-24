@@ -21,4 +21,4 @@ The typical use of the `Api` object is to call its [`transact` method](https://g
 * The entire transaction is then [serialized](https://github.com/EOSIO/eosjs/blob/master/src/eosjs-api.ts#L154-L166), also using the `eosjs-serialize` `ser` object.
 * The transaction is then optionally signed, using the `signatureProvider`, the previously retrieved `abi`s, the private keys of the `signatureProvider`, and the `chainId`.
 * The transaction is then optionally compressed, using the `deflate` function of a Javascript zlib library.
-* The transaction is then optionally broadcasted using `JsonRpc`'s [`push_transaction`](https://github.com/EOSIO/eosjs/blob/master/src/eosjs-jsonrpc.ts#L187).
+* The transaction is then optionally broadcasted using either `JsonRpc`'s [`send_transaction`](https://github.com/EOSIO/eosjs/blob/master/src/eosjs-jsonrpc.ts#L350) or[`send_transaction_v2`](https://github.com/EOSIO/eosjs/blob/master/src/eosjs-jsonrpc.ts#L362) depending on the nodeos version or [`send_ro_transaction`](https://github.com/EOSIO/eosjs/blob/master/src/eosjs-jsonrpc.ts#L324) if the transaction is read-only.
