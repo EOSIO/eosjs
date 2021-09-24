@@ -498,7 +498,7 @@ describe('eosjs-api', () => {
                 textEncoder: new TextEncoder()
             });
 
-            const result = await api.sendSignedTransaction({ signatures: [], serializedTransaction: serializedTx}, true, false, true);
+            const result = await api.sendSignedTransaction({ signatures: [], serializedTransaction: serializedTx}, true, true);
             expect(result).toEqual('Success');
         });
     });
