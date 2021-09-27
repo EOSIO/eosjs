@@ -394,17 +394,11 @@ export class Api {
             });
         }
         if (broadcast) {
-            if (compression) {
-                return this.pushCompressedSignedTransaction(
-                    pushTransactionArgs,
-                    readOnlyTrx,
-                    returnFailureTraces,
-                ) as Promise<TransactResult|ReadOnlyTransactResult>;
-            }
-            return this.pushSignedTransaction(
+            return this.sendSignedTransaction(
                 pushTransactionArgs,
-                readOnlyTrx,
                 returnFailureTraces,
+                readOnlyTrx,
+                compression,
             ) as Promise<TransactResult|ReadOnlyTransactResult>;
         }
         return pushTransactionArgs as PushTransactionArgs;
@@ -510,6 +504,45 @@ export class Api {
             compression: 1,
             serializedTransaction: compressedSerializedTransaction,
             serializedContextFreeData: compressedSerializedContextFreeData
+        });
+    }
+
+    /** Broadcast a signed transaction */
+    public async sendSignedTransaction(
+        { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
+        returnFailureTraces = false,
+        readOnlyTrx = false,
+        compression = false,
+    ): Promise<TransactResult|ReadOnlyTransactResult> {
+        if (compression) {
+            serializedTransaction = this.deflateSerializedArray(serializedTransaction);
+            serializedContextFreeData =
+            this.deflateSerializedArray(serializedContextFreeData || new Uint8Array(0));
+        }
+
+        const { apis } = await this.rpc.get_supported_apis();
+
+        if (readOnlyTrx) {
+            return this.rpc.send_ro_transaction({
+                signatures,
+                compression: compression ? 1 : 0,
+                serializedTransaction,
+                serializedContextFreeData,
+            }, returnFailureTraces);
+        }
+        if (apis.includes('/v2/chain/send_transaction')) {
+            return this.rpc.send_transaction_v2({
+                signatures,
+                compression: compression ? 1 : 0,
+                serializedTransaction,
+                serializedContextFreeData,
+            }, returnFailureTraces);
+        }
+        return this.rpc.send_transaction({
+            signatures,
+            compression: compression ? 1 : 0,
+            serializedTransaction,
+            serializedContextFreeData,
         });
     }
 

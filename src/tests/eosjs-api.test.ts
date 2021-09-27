@@ -133,7 +133,7 @@ const deserializedActions = [
 describe('eosjs-api', () => {
     let api: any;
     let rpc: any;
-    const fetch = async (input: any, init: any): Promise<any> => ({
+    let fetch = async (input: any, init: any): Promise<any> => ({
         ok: true,
         json: async () => {
             if (input === '/v1/chain/get_raw_abi') {
@@ -309,7 +309,9 @@ describe('eosjs-api', () => {
 
             expect(firstSerializedAction).toEqual(secondSerializedAction);
         });
+    });
 
+    describe('Transaction Extensions', () => {
         it('confirms the transaction extension serialization is reciprocal', async () => {
             const resourcePayerTrx = {
                 expiration: '2021-06-28T15:55:37.000',
@@ -409,6 +411,95 @@ describe('eosjs-api', () => {
             delete deserializedResourcePayerTrx.transaction_extensions;
 
             expect(deserializedResourcePayerTrx).toEqual(resourcePayerTrx);
+        });
+    });
+
+    describe('sendSignedTransaction', () => {
+        it('should use v1 send_transaction', async () => {
+            fetch = async (input: any, init: any): Promise<any> => ({
+                ok: true,
+                json: async () => {
+                    if (input === '/v1/chain/send_transaction') {
+                        return 'Success';
+                    }
+                    if (input === '/v1/node/get_supported_apis') {
+                        return { apis: ['/v1/chain/send_transaction'] };
+                    }
+
+                    return 'Failure';
+                },
+            });
+            rpc = new JsonRpc('', { fetch });
+            const signatureProvider = new JsSignatureProvider(['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr']);
+            const chainId = '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca';
+            api = new Api({
+                rpc,
+                signatureProvider,
+                chainId,
+                textDecoder: new TextDecoder(),
+                textEncoder: new TextEncoder()
+            });
+
+            const result = await api.sendSignedTransaction({ signatures: [], serializedTransaction: serializedTx});
+            expect(result).toEqual('Success');
+        });
+
+        it('should use v2 send_transaction', async () => {
+            fetch = async (input: any, init: any): Promise<any> => ({
+                ok: true,
+                json: async () => {
+                    if (input === '/v2/chain/send_transaction') {
+                        return 'Success';
+                    }
+                    if (input === '/v1/node/get_supported_apis') {
+                        return { apis: ['/v2/chain/send_transaction'] };
+                    }
+
+                    return 'Failure';
+                },
+            });
+            rpc = new JsonRpc('', { fetch });
+            const signatureProvider = new JsSignatureProvider(['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr']);
+            const chainId = '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca';
+            api = new Api({
+                rpc,
+                signatureProvider,
+                chainId,
+                textDecoder: new TextDecoder(),
+                textEncoder: new TextEncoder()
+            });
+
+            const result = await api.sendSignedTransaction({ signatures: [], serializedTransaction: serializedTx});
+            expect(result).toEqual('Success');
+        });
+
+        it('should use send_ro_transaction', async () => {
+            fetch = async (input: any, init: any): Promise<any> => ({
+                ok: true,
+                json: async () => {
+                    if (input === '/v1/chain/send_ro_transaction') {
+                        return 'Success';
+                    }
+                    if (input === '/v1/node/get_supported_apis') {
+                        return { apis: ['/v2/chain/send_transaction'] };
+                    }
+
+                    return 'Failure';
+                },
+            });
+            rpc = new JsonRpc('', { fetch });
+            const signatureProvider = new JsSignatureProvider(['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr']);
+            const chainId = '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca';
+            api = new Api({
+                rpc,
+                signatureProvider,
+                chainId,
+                textDecoder: new TextDecoder(),
+                textEncoder: new TextEncoder()
+            });
+
+            const result = await api.sendSignedTransaction({ signatures: [], serializedTransaction: serializedTx}, true, true);
+            expect(result).toEqual('Success');
         });
     });
 });

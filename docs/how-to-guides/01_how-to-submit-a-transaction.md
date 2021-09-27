@@ -137,4 +137,5 @@ From nodeos version 2.1, the ability to receive return values from smart contrac
 ### Read-Only Transactions
 From nodeos version 2.2, read-only queries have been introduced to eosjs. Adding `readOnlyTrx` to the `transact` config will send the transaction through the `send_ro_transaction` endpoint in the `chain_api`.  The `send_ro_transaction` endpoint does not allow the transaction to make any data changes despite the actions in the transaction. The `send_ro_transaction` endpoint may also be used to call normal actions, but any data changes that action will make will be rolled back.
 
-Adding returnFailureTraces to the transact config enables the return of a trace message if your transaction fails. At this time, this is only available for the `send_ro_transaction` endpoint.
+### Return Failure Traces
+From nodeos version 2.2, adding returnFailureTraces to the transact config enables the return of a trace message if your transaction fails. This is available for both send_ro_transaction and the v2 version of send_transaction.

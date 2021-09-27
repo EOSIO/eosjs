@@ -492,6 +492,10 @@ export interface GetTableByScopeResult {
     more: string;
 }
 
+export interface GetSupportedApisResult {
+    apis: string[]
+}
+
 /** Arguments for `push_transaction` */
 export interface PushTransactionArgs {
     signatures: string[];
