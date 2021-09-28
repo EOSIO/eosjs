@@ -374,7 +374,7 @@ const transactWithWebCrypto = async () => {
     });
 };
 
-const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
+const broadcastResult = async (signaturesAndPackedTransaction) => await api.sendSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () => await api.transact({
     actions: [{

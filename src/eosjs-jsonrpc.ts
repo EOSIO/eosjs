@@ -25,6 +25,7 @@ import {
     GetRawAbiResult,
     GetScheduledTransactionsResult,
     GetTableRowsResult,
+    GetSupportedApisResult,
     PushTransactionArgs,
     PackedTrx,
     ReadOnlyTransactResult,
@@ -302,6 +303,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         })).required_keys);
     }
 
+    /** Get supported api endpoints for the node */
+    public async get_supported_apis(): Promise<GetSupportedApisResult> {
+        return await this.fetch('/v1/node/get_supported_apis', {});
+    }
+
     /** Push a serialized transaction (replaced by send_transaction, but returned format has changed) */
     public async push_transaction(
         { signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
@@ -349,6 +355,21 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             compression,
             packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
             packed_trx: arrayToHex(serializedTransaction),
+        });
+    }
+
+    /** Send a serialized transaction through /v2/chain/send_transaction */
+    public async send_transaction_v2(
+        { signatures, compression = 0, serializedTransaction, serializedContextFreeData }: PushTransactionArgs,
+        returnFailureTraces: boolean = false): Promise<TransactResult> {
+        return await this.fetch('/v2/chain/send_transaction', {
+            transaction: {
+                signatures,
+                compression,
+                packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
+                packed_trx: arrayToHex(serializedTransaction),
+            },
+            return_failure_traces: returnFailureTraces,
         });
     }
 

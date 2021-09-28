@@ -266,7 +266,7 @@
                 return false;
             };
         
-            const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
+            const broadcastResult = async (signaturesAndPackedTransaction) => await api.sendSignedTransaction(signaturesAndPackedTransaction);
         
             const testBroadcastResult = async (e) => {
                 resultsLabel = e.target;
