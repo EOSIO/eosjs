@@ -1228,6 +1228,9 @@ describe('Trace API Plugin Endpoints', () => {
             schedule_version: 'number',
             transactions: {
                 id: 'string',
+                block_num: 'number',
+                block_time: 'string',
+                'producer_block_id&': 'string',
                 actions: {
                     global_sequence: 'number',
                     receiver: 'string',

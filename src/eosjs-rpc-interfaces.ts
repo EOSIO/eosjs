@@ -549,6 +549,9 @@ export interface TraceApiTransactionHeader {
 
 export interface TraceApiTransaction {
     id: string;
+    block_num: number;
+    block_time: string;
+    producer_block_id: string|null;
     actions: TraceApiAction[];
     status?: string;
     cpu_usage_us?: number;
