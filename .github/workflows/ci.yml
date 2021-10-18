@@ -17,12 +17,12 @@ jobs:
           HAS_SECRET: ${{ secrets.GIT_API_KEY != null }}
       - name: Checkout (with GIT_API_KEY)
         if: ${{ steps.check_token.outputs.token_exists == 'true' }}
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97
         with:
           token: ${{ secrets.GIT_API_KEY }}
       - name: Checkout (with GitHub Token)
         if: ${{ steps.check_token.outputs.token_exists == 'false' }}
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97
         with:
           token: ${{ github.token }}
       - name: Setup Node.js v16.x.x
