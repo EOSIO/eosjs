@@ -420,9 +420,6 @@ jobs:
         env:
           NODEOS_VER: 'develop'
           COVERAGE_TESTING: true
-      - name: Test Types
-        run: |
-          yarn test-types
       - name: Copy Coverage Files
         run: |
           mkdir -p ./coverage/multiple-sources
@@ -589,9 +586,6 @@ jobs:
         env:
           NODEOS_VER: 'release/2.2.x'
           COVERAGE_TESTING: true
-      - name: Test Types
-        run: |
-          yarn test-types
       - name: Copy Coverage Files
         run: |
           mkdir -p ./coverage/multiple-sources
