@@ -5,8 +5,14 @@ import {
     privateKeyToLegacyString,
     privateKeyToString,
     stringToPrivateKey,
+    arrayToString,
+    stringToArray,
 } from './eosjs-numeric';
-import { constructElliptic, PublicKey, Signature } from './eosjs-key-conversions';
+import { PublicKey } from './PublicKey';
+import { Signature } from './Signature';
+
+const crypto = (typeof(window) !== 'undefined' ? window.crypto : require('crypto').webcrypto);
+type WebCryptoSignatureData = Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | ArrayBuffer;
 
 /** Represents/stores a private key and provides easy conversion for use with `elliptic` lib */
 export class PrivateKey {
@@ -15,7 +21,11 @@ export class PrivateKey {
     /** Instantiate private key from an `elliptic`-format private key */
     public static fromElliptic(privKey: EC.KeyPair, keyType: KeyType, ec?: EC): PrivateKey {
         if (!ec) {
-            ec = constructElliptic(keyType);
+            if (keyType === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new PrivateKey({
             type: keyType,
@@ -23,11 +33,31 @@ export class PrivateKey {
         }, ec);
     }
 
+    /** Instantiate private key from a `CryptoKey`-format private key */
+    public static async fromWebCrypto(privKey: CryptoKey): Promise<PrivateKey> {
+        if (privKey.extractable === false) {
+            throw new Error('Crypto Key is not extractable');
+        }
+        const ec = new EC('p256');
+
+        const extractedArrayBuffer = await crypto.subtle.exportKey('pkcs8', privKey);
+        const extractedDecoded = arrayToString(extractedArrayBuffer);
+        const derHex = Buffer.from(extractedDecoded, 'binary').toString('hex');
+        let privateKeyHex = derHex.replace('308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b0201010420', '');
+        privateKeyHex = privateKeyHex.substring(0, privateKeyHex.indexOf('a144034200'));
+        const privateKeyEc = ec.keyFromPrivate(privateKeyHex, 'hex');
+        return PrivateKey.fromElliptic(privateKeyEc, KeyType.r1, ec);
+    }
+
     /** Instantiate private key from an EOSIO-format private key */
     public static fromString(keyString: string, ec?: EC): PrivateKey {
         const privateKey = stringToPrivateKey(keyString);
         if (!ec) {
-            ec = constructElliptic(privateKey.type);
+            if (privateKey.type === KeyType.k1) {
+                ec = new EC('secp256k1');
+            } else {
+                ec = new EC('p256');
+            }
         }
         return new PrivateKey(privateKey, ec);
     }
@@ -35,6 +65,29 @@ export class PrivateKey {
     /** Export private key as `elliptic`-format private key */
     public toElliptic(): EC.KeyPair {
         return this.ec.keyFromPrivate(this.key.data);
+    }
+
+    /** Export private key as `CryptoKey`-format private key */
+    public async toWebCrypto(extractable: boolean = false): Promise<CryptoKey> {
+        const privateKeyEc = this.toElliptic();
+        const privateKeyHex = privateKeyEc.getPrivate('hex');
+        const publicKey = this.getPublicKey();
+        const publicKeyEc = publicKey.toElliptic();
+        const publicKeyHex = publicKeyEc.getPublic('hex');
+
+        const derHex = `308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b0201010420${privateKeyHex}a144034200${publicKeyHex}`;
+        const derBinary = Buffer.from(derHex, 'hex').toString('binary');
+        const pkcs8ArrayBuffer = stringToArray(derBinary);
+        return await crypto.subtle.importKey(
+            'pkcs8',
+            pkcs8ArrayBuffer,
+            {
+                name: 'ECDSA',
+                namedCurve: 'P-256'
+            },
+            extractable,
+            ['sign']
+        );
     }
 
     public toLegacyString(): string {
@@ -84,6 +137,24 @@ export class PrivateKey {
             signature = constructSignature({canonical: true});
         }
         return signature;
+    }
+
+    /** Use Web Crypto to sign data (that matches types) with private CryptoKey */
+    public async webCryptoSign(data: WebCryptoSignatureData): Promise<Signature> {
+        const publicKey = this.getPublicKey();
+        const privWebCrypto = await this.toWebCrypto();
+        const webCryptoSig = await crypto.subtle.sign(
+            {
+                name: 'ECDSA',
+                hash: {
+                    name: 'SHA-256'
+                }
+            },
+            privWebCrypto,
+            data
+        );
+
+        return Signature.fromWebCrypto(data, webCryptoSig, publicKey);
     }
 
     /** Validate a private key */

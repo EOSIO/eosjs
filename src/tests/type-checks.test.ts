@@ -884,7 +884,7 @@ describe('Chain API Plugin Endpoints', () => {
         verifyType(result, transactResult);
     });
 
-    it('validates return type of push_ro_transaction', async () => {
+    it('validates return type of send_ro_transaction', async () => {
         const transaction: PushTransactionArgs = await api.transact({
             actions: [{
                 account: 'readonly',
@@ -901,7 +901,7 @@ describe('Chain API Plugin Endpoints', () => {
             useLastIrreversible: true,
             expireSeconds: 30,
         }) as PushTransactionArgs;
-        const result: ReadOnlyTransactResult = await rpc.push_ro_transaction(transaction);
+        const result: ReadOnlyTransactResult = await rpc.send_ro_transaction(transaction);
         const readOnlyTransactResult: any = {
             head_block_num: 'number',
             head_block_id: 'string',
@@ -1228,6 +1228,9 @@ describe('Trace API Plugin Endpoints', () => {
             schedule_version: 'number',
             transactions: {
                 id: 'string',
+                block_num: 'number',
+                block_time: 'string',
+                'producer_block_id&': 'string',
                 actions: {
                     global_sequence: 'number',
                     receiver: 'string',

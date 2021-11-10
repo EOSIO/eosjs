@@ -5,6 +5,7 @@
         <script src='../../dist-web/externals.min.js'></script>
         <script src='../../dist-web/eosjs-api.min.js'></script>
         <script src='../../dist-web/eosjs-jsonrpc.min.js'></script>
+        <script src='../../dist-web/eosjs-webcrypto_sig.min.js'></script>
         <script src='../../dist-web/eosjs-jssig.min.js'></script>
         <script>
             const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with 'bob' account private key
@@ -19,7 +20,9 @@
         
             const rpc = new eosjs_jsonrpc.JsonRpc('http://localhost:8888');
             const signatureProvider = new eosjs_jssig.JsSignatureProvider([privateKey, r1PrivateKey, cfactorPrivateKey]);
+            const webCryptoSignatureProvider = new eosjs_webcrypto_sig.WebCryptoSignatureProvider();
             const api = new eosjs_api.Api({ rpc, signatureProvider });
+            const apiWebCrypto = new eosjs_api.Api({ rpc, signatureProvider: webCryptoSignatureProvider });
         
             const EXECUTING = 'Executing Test', SUCCESS = 'Success', FAILED = 'Failed';
             let resultsLabel, transactionResponse, transactionSignatures, failedAsPlanned;
@@ -263,7 +266,7 @@
                 return false;
             };
         
-            const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
+            const broadcastResult = async (signaturesAndPackedTransaction) => await api.sendSignedTransaction(signaturesAndPackedTransaction);
         
             const testBroadcastResult = async (e) => {
                 resultsLabel = e.target;
@@ -623,6 +626,135 @@
               return false;
             }
         
+
+            const webCryptoTx = async () => {
+              // Required to make a new name each test, otherwise the nodeos would need to be restarted
+              const generateRandomName = () => {
+                  const charset = '12345abcdefghijklmnopqrstuvwxyz';
+                  let result = '';
+                  for (let i = 0; i < 12; i++) {
+                      result += charset.charAt(Math.floor(Math.random() * charset.length));
+                  }
+                  return result;
+              };
+              const accountName = generateRandomName();
+
+              const { privateKey: priv, publicKey: pub } = await eosjs_webcrypto_sig.generateWebCryptoKeyPair();
+              await webCryptoSignatureProvider.addCryptoKeyPair({ privateKey: priv, publicKey: pub });
+              const publicKey = await eosjs_webcrypto_sig.PublicKey.fromWebCrypto(pub);
+              const publicKeyStr = publicKey.toString();
+
+              // Need to create the account with the new key first
+              await api.transact({
+                  actions: [{
+                      account: 'eosio',
+                      name: 'newaccount',
+                      authorization: [{
+                          actor: 'bobr1',
+                          permission: 'active',
+                      }],
+                      data: {
+                          creator: 'bobr1',
+                          name: accountName,
+                          owner: {
+                              threshold: 1,
+                              keys: [{
+                                  key: publicKeyStr,
+                                  weight: 1
+                              }],
+                              accounts: [],
+                              waits: []
+                          },
+                          active: {
+                              threshold: 1,
+                              keys: [{
+                                  key: publicKeyStr,
+                                  weight: 1
+                              }],
+                              accounts: [],
+                              waits: []
+                          },
+                      }
+                  },
+                  {
+                      account: 'eosio',
+                      name: 'buyrambytes',
+                      authorization: [{
+                          actor: 'bobr1',
+                          permission: 'active',
+                      }],
+                      data: {
+                          payer: 'bobr1',
+                          receiver: accountName,
+                          bytes: 8192,
+                      },
+                  },
+                  {
+                      account: 'eosio',
+                      name: 'delegatebw',
+                      authorization: [{
+                          actor: 'bobr1',
+                          permission: 'active',
+                      }],
+                      data: {
+                          from: 'bobr1',
+                          receiver: accountName,
+                          stake_net_quantity: '100.0000 SYS',
+                          stake_cpu_quantity: '100.0000 SYS',
+                          transfer: true,
+                      }
+                  }]
+              }, {
+                  broadcast: true,
+                  sign: true,
+                  useLastIrreversible: true,
+                  expireSeconds: 30
+              });
+
+              return await apiWebCrypto.transact({
+                  actions: [{
+                      account: 'returnvalue',
+                      name: 'sum',
+                      authorization: [{
+                          actor: accountName,
+                          permission: 'active',
+                      }],
+                      data: {
+                          valueA: 5,
+                          valueB: 10,
+                      },
+                  }]
+              }, {
+                  broadcast: true,
+                  sign: true,
+                  useLastIrreversible: true,
+                  expireSeconds: 30
+              });
+            }
+
+            const testWithWebCryptoTx = async (e) => {
+              resultsLabel = e.target;
+              resultsLabel.innerText = EXECUTING;
+
+              try {
+                transactionResponse = await webCryptoTx();
+              } catch (error) {
+                resultsLabel.className = 'failed';
+                resultsLabel.innerText = FAILED;
+                console.error('Transact Web Crypto Test Failure: ', error.message);
+                return false;
+              }
+
+              if (transactionResponse.transaction_id) {
+                resultsLabel.className = "success";
+                resultsLabel.innerText = SUCCESS;
+                return true;
+              }
+              resultsLabel.className = 'failed';
+              resultsLabel.innerText = FAILED;
+              return false;
+            }
+
             const transactShouldFail = async () => await api.transact({
                 actions: [{
                     account: 'eosio.token',
@@ -715,6 +847,7 @@
             <div><h2>Resource Payer</h2><button id='testWithResourcePayerTx' onClick='testWithResourcePayerTx(event);'>Test</button></div> 
             <div><h2>Read Only Query</h2><button id='testWithReadOnlyQuery' onClick='testWithReadOnlyQuery(event);'>Test</button></div>
             <div><h2>Read Only Failure Trace</h2><button id='testWithReadOnlyFailureTrace' onClick='testWithReadOnlyFailureTrace(event);'>Test</button></div>
+            <div><h2>Transact Web Crypto</h2><button id='testWithWebCryptoTx' onClick='testWithWebCryptoTx(event);'>Test</button></div>
             <div><h2>Invalid Transaction Throws Error</h2><button id='testTransactShouldFail' onClick='testTransactShouldFail(event);'>Test</button></div>
             <div><h2>Invalid Rpc Call Throws Rpc Error</h2><button id='testRpcShouldFail' onClick='testRpcShouldFail(event);'>Test</button></div>
         </div>

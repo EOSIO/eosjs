@@ -1,9 +1,27 @@
-const fs = require('fs');
-const path = require('path');
-const { JsonRpc, RpcError, Api } = require('../../dist');
-const { JsSignatureProvider } = require('../../dist/eosjs-jssig');
 const fetch = require('node-fetch');
 const { TextEncoder, TextDecoder } = require('util');
+
+// Code for gathering coverage for src/ not dist/, otherwise tests should test the built files in dist/
+let eosjs;
+let eosjs_jssig;
+let eosjs_key_conversions;
+let eosjs_webcrypto_sig;
+if (process.env.COVERAGE_TESTING === 'true') {
+    eosjs = require('../');
+    eosjs_jssig = require('../eosjs-jssig');
+    eosjs_key_conversions = require('../eosjs-key-conversions');
+    eosjs_webcrypto_sig = require('../eosjs-webcrypto-sig');
+} else {
+    eosjs = require('../../dist');
+    eosjs_jssig = require('../../dist/eosjs-jssig');
+    eosjs_key_conversions = require('../../dist/eosjs-key-conversions');
+    eosjs_webcrypto_sig = require('../../dist/eosjs-webcrypto-sig');
+}
+
+const { JsonRpc, Api } = eosjs;
+const { JsSignatureProvider } = eosjs_jssig;
+const { generateWebCryptoKeyPair, PublicKey } = eosjs_key_conversions;
+const { WebCryptoSignatureProvider } = eosjs_webcrypto_sig;
 
 const privateKey = '5JuH9fCXmU3xbj8nRmhPZaVrxxXrdPaRmZLW1cznNTmTQR2Kg5Z'; // replace with "bob" account private key
 const r1PrivateKey = 'PVT_R1_GrfEfbv5at9kbeHcGagQmvbFLdm6jqEpgE1wsGbrfbZNjpVgT';
@@ -17,7 +35,9 @@ const cfactorPrivateKey = '5K8Sm2bB2b7ZC8tJMefrk1GFa4jgtHxxHRcjX49maMk9AEwq8hN';
 
 const rpc = new JsonRpc('http://localhost:8888', { fetch });
 const signatureProvider = new JsSignatureProvider([privateKey, r1PrivateKey, cfactorPrivateKey]);
+const webCryptoSignatureProvider = new WebCryptoSignatureProvider();
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+const apiWebCrypto = new Api({ rpc, signatureProvider: webCryptoSignatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
 const transactWithConfig = async (config, memo, from = 'bob', to = 'alice') => {
     return await api.transact({
@@ -249,7 +269,112 @@ const readOnlyFailureTrace = async () => {
     });
 };
 
-const broadcastResult = async (signaturesAndPackedTransaction) => await api.pushSignedTransaction(signaturesAndPackedTransaction);
+const transactWithWebCrypto = async () => {
+    // Required to make a new name each test, otherwise the nodeos would need to be restarted
+    const generateRandomName = () => {
+        const charset = '12345abcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        for (let i = 0; i < 12; i++) {
+            result += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        return result;
+    };
+    const accountName = generateRandomName();
+
+    const { privateKey: priv, publicKey: pub } = await generateWebCryptoKeyPair();
+    await webCryptoSignatureProvider.addCryptoKeyPair({ privateKey: priv, publicKey: pub });
+    const publicKey = await PublicKey.fromWebCrypto(pub);
+    const publicKeyStr = publicKey.toString();
+
+    // Need to create the account with the new key first
+    await api.transact({
+        actions: [{
+            account: 'eosio',
+            name: 'newaccount',
+            authorization: [{
+                actor: 'bobr1',
+                permission: 'active',
+            }],
+            data: {
+                creator: 'bobr1',
+                name: accountName,
+                owner: {
+                    threshold: 1,
+                    keys: [{
+                        key: publicKeyStr,
+                        weight: 1
+                    }],
+                    accounts: [],
+                    waits: []
+                },
+                active: {
+                    threshold: 1,
+                    keys: [{
+                        key: publicKeyStr,
+                        weight: 1
+                    }],
+                    accounts: [],
+                    waits: []
+                },
+            }
+        },
+        {
+            account: 'eosio',
+            name: 'buyrambytes',
+            authorization: [{
+                actor: 'bobr1',
+                permission: 'active',
+            }],
+            data: {
+                payer: 'bobr1',
+                receiver: accountName,
+                bytes: 8192,
+            },
+        },
+        {
+            account: 'eosio',
+            name: 'delegatebw',
+            authorization: [{
+                actor: 'bobr1',
+                permission: 'active',
+            }],
+            data: {
+                from: 'bobr1',
+                receiver: accountName,
+                stake_net_quantity: '100.0000 SYS',
+                stake_cpu_quantity: '100.0000 SYS',
+                transfer: true,
+            }
+        }]
+    }, {
+        broadcast: true,
+        sign: true,
+        useLastIrreversible: true,
+        expireSeconds: 30
+    });
+
+    return await apiWebCrypto.transact({
+        actions: [{
+            account: 'returnvalue',
+            name: 'sum',
+            authorization: [{
+                actor: accountName,
+                permission: 'active',
+            }],
+            data: {
+                valueA: 5,
+                valueB: 10,
+            },
+        }]
+    }, {
+        broadcast: true,
+        sign: true,
+        useLastIrreversible: true,
+        expireSeconds: 30
+    });
+};
+
+const broadcastResult = async (signaturesAndPackedTransaction) => await api.sendSignedTransaction(signaturesAndPackedTransaction);
 
 const transactShouldFail = async () => await api.transact({
     actions: [{
@@ -285,5 +410,6 @@ module.exports = {
     transactWithResourcePayer,
     readOnlyQuery,
     readOnlyFailureTrace,
+    transactWithWebCrypto,
     rpcShouldFail
 };

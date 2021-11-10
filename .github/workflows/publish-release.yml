@@ -4,15 +4,38 @@ on:
     types: [published]
 
 jobs:
+  check-tokens:
+    name: "Check NPM Token"
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check for NPM_AUTH_TOKEN
+        id: check_token
+        run: echo ::set-output name=token_exists::${HAS_SECRET}
+        env:
+          HAS_SECRET: ${{ secrets.NPM_AUTH_TOKEN != null }}
+      - name: Succeed job on existing NPM_AUTH_TOKEN
+        if: ${{ steps.check_token.outputs.token_exists == 'true' }}
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.setOutput('Success. NPM_AUTH_TOKEN is present in repository secrets.');
+      - name: Fail on missing NPM_AUTH_TOKEN
+        if: ${{ steps.check_token.outputs.token_exists == 'false' }}
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.setFailed('Failure: No NPM_AUTH_TOKEN present in repository secrets.');
+
   publish-release:
     if: "!github.event.release.prerelease"
     name: Publish Release
     runs-on: ubuntu-18.04
+    needs: check-tokens
     steps:
       - name: Checkout
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
       - name: Setup Node.js v16.x.x
-        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c
         with:
           node-version: '16'
           registry-url: 'https://registry.npmjs.org'
@@ -35,7 +58,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@6122aa43014e18ec9c2d06fc0bdc5b6759064508
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish Release
@@ -50,22 +73,22 @@ jobs:
 
     services:
       nodeos:
-        image: eosio/eosjs-ci:release_22.0.x
+        image: eosio/eosjs-ci:release_2.2.x
 
         ports:
           - 8888:8888
           - 9876:9876
 
-
   publish-rc:
     if: "github.event.release.prerelease"
     name: Publish RC
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
+    needs: check-tokens
     steps:
       - name: Checkout
-        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
       - name: Setup Node.js v16.x.x
-        uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c
         with:
           node-version: '16'
           registry-url: 'https://registry.npmjs.org'
@@ -88,7 +111,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@6122aa43014e18ec9c2d06fc0bdc5b6759064508
+        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish RC
@@ -103,7 +126,7 @@ jobs:
 
     services:
       nodeos:
-        image: eosio/eosjs-ci:release_22.0.x
+        image: eosio/eosjs-ci:release_2.2.x
 
         ports:
           - 8888:8888

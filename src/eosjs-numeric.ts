@@ -2,10 +2,9 @@
  * @module Numeric
  */
 import { sha256 } from 'hash.js';
+import RIPEMD160 = require('ripemd160');
 
 // copyright defined in eosjs/LICENSE.txt
-
-const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
 
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -251,6 +250,22 @@ export const base64ToBinary = (s: string): Uint8Array => {
     return result;
 };
 
+/** Convert ArrayBuffer to string where characters in string are represented as bytes */
+export const arrayToString = (data: ArrayBuffer): string => {
+    return String.fromCharCode.apply(null, new Uint8Array(data));
+};
+
+/** Convert string where characters in string are represented as bytes to an ArrayBuffer */
+export const stringToArray = (str: string): ArrayBuffer => {
+    const buf = new ArrayBuffer(str.length);
+    const bufView = new Uint8Array(buf);
+    for (let i = 0, strLen = str.length; i < strLen; i++) {
+        bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+};
+
+
 /** Key types this library supports */
 export enum KeyType {
     k1 = 0,
@@ -281,7 +296,7 @@ const digestSuffixRipemd160 = (data: Uint8Array, suffix: string): ArrayBuffer =>
     for (let i = 0; i < suffix.length; ++i) {
         d[data.length + i] = suffix.charCodeAt(i);
     }
-    return ripemd160(d);
+    return new RIPEMD160().update(Buffer.from(d)).digest();
 };
 
 const stringToKey = (s: string, type: KeyType, size: number, suffix: string): Key => {
@@ -318,7 +333,7 @@ export const stringToPublicKey = (s: string): Key => {
         for (let i = 0; i < publicKeyDataSize; ++i) {
             key.data[i] = whole[i];
         }
-        const digest = new Uint8Array(ripemd160(key.data));
+        const digest = new Uint8Array(new RIPEMD160().update(Buffer.from(key.data)).digest());
         if (digest[0] !== whole[publicKeyDataSize] || digest[1] !== whole[34]
             || digest[2] !== whole[35] || digest[3] !== whole[36]) {
             throw new Error('checksum doesn\'t match');

@@ -492,6 +492,10 @@ export interface GetTableByScopeResult {
     more: string;
 }
 
+export interface GetSupportedApisResult {
+    apis: string[]
+}
+
 /** Arguments for `push_transaction` */
 export interface PushTransactionArgs {
     signatures: string[];
@@ -500,7 +504,7 @@ export interface PushTransactionArgs {
     serializedContextFreeData?: Uint8Array;
 }
 
-/** Return value of `/v1/chain/push_ro_transaction` */
+/** Return value of `/v1/chain/send_ro_transaction` */
 export interface ReadOnlyTransactResult {
     head_block_num: number;
     head_block_id: string;
@@ -545,6 +549,9 @@ export interface TraceApiTransactionHeader {
 
 export interface TraceApiTransaction {
     id: string;
+    block_num: number;
+    block_time: string;
+    producer_block_id: string|null;
     actions: TraceApiAction[];
     status?: string;
     cpu_usage_us?: number;
