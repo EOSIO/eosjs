@@ -54,6 +54,9 @@ jobs:
       - name: Test Types
         run: |
           yarn test-types
+      - name: Test Nested Containers
+        run: |
+          yarn test-nested-containers
       - name: Build
         run: |
           yarn build-web
