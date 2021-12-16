@@ -401,6 +401,8 @@ export interface GetInfoResult {
     fork_db_head_block_id?: string;
     server_full_version_string?: string;
     first_block_num?: number;
+    total_cpu_weight?: number;
+    total_net_weight?: number;
 }
 
 /** Return value of /v1/chain/get_producer_schedule */
@@ -545,6 +547,9 @@ export interface TraceApiTransactionHeader {
 
 export interface TraceApiTransaction {
     id: string;
+    block_num: number;
+    block_time: string;
+    producer_block_id: string|null;
     actions: TraceApiAction[];
     status?: string;
     cpu_usage_us?: number;
