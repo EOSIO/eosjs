@@ -263,6 +263,23 @@ cleos system newaccount eosio --transfer alice $EXAMPLE_ACCOUNT_PUBLIC_KEY --sta
 cleos system newaccount eosio --transfer bobr1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
 cleos system newaccount eosio --transfer alicer1 $R1_EXAMPLE_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 8192
 
+if [ $EOSBRANCH = "develop" ]; then
+  cleos system newaccount eosio --transfer nestcontn2kv $SYSTEM_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 7000000
+  cleos system newaccount eosio --transfer nestcontnmi $SYSTEM_ACCOUNT_PUBLIC_KEY --stake-net "10000.0000 SYS" --stake-cpu "10000.0000 SYS" --buy-ram-kbytes 7000000
+
+  sleep 1s
+  cleos push action eosio setpriv '["nestcontn2kv", 1]' -p eosio
+  cleos push action eosio setpriv '["nestcontnmi", 1]' -p eosio
+
+  sleep 1s
+  setabi nestcontn2kv $CONTRACTS_DIR/nested_container_kv/nested_container_kv.abi
+  setcode nestcontn2kv $CONTRACTS_DIR/nested_container_kv/nested_container_kv.wasm
+
+  sleep 1s
+  setabi nestcontnmi $CONTRACTS_DIR/nested_container_multi_index/nested_container_multi_index.abi
+  setcode nestcontnmi $CONTRACTS_DIR/nested_container_multi_index/nested_container_multi_index.wasm
+fi
+
 sleep 1s
 cleos push action eosio.token transfer '["eosio", "bob", "1000.0000 SYS", "memo"]' -p eosio
 cleos push action eosio.token transfer '["eosio", "alice", "1000.0000 SYS", "memo"]' -p eosio

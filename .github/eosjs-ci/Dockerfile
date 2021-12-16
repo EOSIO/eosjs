@@ -32,6 +32,8 @@ RUN if [ "$CDTBRANCH" = "release_1.8.x" ] || [ "$CDTBRANCH" = "develop" ]; then 
  && mkdir -p /root/contracts/eosio.system/ && mv ./unittests/contracts/eosio.system/* /root/contracts/eosio.system/ \
  && mkdir -p /root/contracts/eosio.msig/ && mv ./unittests/contracts/eosio.msig/* /root/contracts/eosio.msig/ \
  && mkdir -p /root/contracts/eosio.token/ && mv ./unittests/contracts/eosio.token/* /root/contracts/eosio.token/ \
+ && mkdir -p /root/contracts/nested_container_kv/ && mv ./unittests/test-contracts/nested_container_kv/* /root/contracts/nested_container_kv \
+ && mkdir -p /root/contracts/nested_container_multi_index/ && mv ./unittests/test-contracts/nested_container_multi_index/* /root/contracts/nested_container_multi_index \
  ; fi
 
 RUN if [ "$CDTBRANCH" = "release_1.8.x" ] || [ "$CDTBRANCH" = "develop" ]; then \
