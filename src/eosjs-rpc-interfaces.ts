@@ -369,6 +369,8 @@ export interface GetInfoResult {
     fork_db_head_block_num?: number;
     fork_db_head_block_id?: string;
     server_full_version_string?: string;
+    total_cpu_weight?: number;
+    total_net_weight?: number;
 }
 
 /** Return value of /v1/chain/get_producer_schedule */
