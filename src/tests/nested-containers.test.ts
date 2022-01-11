@@ -50,7 +50,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for set< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setstp('alice', [{'key': 69, 'value': 129}, {'key': 69, 'value': 129}]) ]
+            actions: [ api.with('nestcontnmi').as('alice').setstp('alice', [{'first': 69, 'second': 129}, {'first': 69, 'second': 129}]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for set< tuple< uint16_t, uint16_t >>
@@ -80,7 +80,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for vector< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setvp('alice', [{'key': 69, 'value': 129}, {'key': 69, 'value': 129}]) ]
+            actions: [ api.with('nestcontnmi').as('alice').setvp('alice', [{'first': 69, 'second': 129}, {'first': 69, 'second': 129}]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for vector< tuple< uint16_t, uint16_t >>
@@ -122,7 +122,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for optional< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setop('alice', {'key': 60, 'value': 61}) ]
+            actions: [ api.with('nestcontnmi').as('alice').setop('alice', {'first': 60, 'second': 61}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
         await api.transact({
             actions: [ api.with('nestcontnmi').as('bob').setop('bob', null) ]
@@ -158,7 +158,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for map< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setmp('alice', [{'key': 36, 'value': {'key': 300, 'value': 301}}, {'key': 37, 'value': {'key': 600, 'value': 601}} ]) ]
+            actions: [ api.with('nestcontnmi').as('alice').setmp('alice', [{'key': 36, 'value': {'first': 300, 'second': 301}}, {'key': 37, 'value': {'first': 600, 'second': 601}} ]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for map< tuple< uint16_t, uint16_t >>
@@ -168,35 +168,35 @@ describe('eosjs-nested-container', () => {
 
         // Test action for pair< set< uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setpst('alice', {'key': 20, 'value': [200, 200, 202]}) ]
+            actions: [ api.with('nestcontnmi').as('alice').setpst('alice', {'first': 20, 'second': [200, 200, 202]}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< vector< uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setpv('alice', {'key': 10, 'value': [100, 100, 102]}) ]
+            actions: [ api.with('nestcontnmi').as('alice').setpv('alice', {'first': 10, 'second': [100, 100, 102]}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< optional< uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setpo('alice', {'key': 70, 'value': 71}) ]
+            actions: [ api.with('nestcontnmi').as('alice').setpo('alice', {'first': 70, 'second': 71}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('bob').setpo('bob', {'key': 70, 'value': null}) ]
+            actions: [ api.with('nestcontnmi').as('bob').setpo('bob', {'first': 70, 'second': null}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< map< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setpm('alice', {'key': 6, 'value': [{'key': 20, 'value': 300}, {'key': 21,'value': 301}] }) ]
+            actions: [ api.with('nestcontnmi').as('alice').setpm('alice', {'first': 6, 'second': [{'key': 20, 'value': 300}, {'key': 21,'value': 301}] }) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setpp('alice', {'key': 30, 'value': {'key': 301, 'value': 302} }) ]
+            actions: [ api.with('nestcontnmi').as('alice').setpp('alice', {'first': 30, 'second': {'first': 301, 'second': 302} }) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< tuple< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').setpt('alice', {'key':10, 'value':[100,101]}) ]
+            actions: [ api.with('nestcontnmi').as('alice').setpt('alice', {'first':10, 'second':[100,101]}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for tuple< uint16_t, set< uint16_t >, set< uint16_t >>
@@ -224,7 +224,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for tuple< uint16_t, pair< uint16_t, uint16_t >, pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontnmi').as('alice').settp('alice', [127, {'key':18, 'value':28}, {'key':19, 'value':29}]) ]
+            actions: [ api.with('nestcontnmi').as('alice').settp('alice', [127, {'first':18, 'second':28}, {'first':19, 'second':29}]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for tuple< tuple< uint16_t, uint16_t >, tuple< uint16_t, uint16_t >, tuple< uint16_t, uint16_t >>
@@ -257,7 +257,7 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].stm).toEqual([[{'key': 30, 'value': 300}], [{'key': 60, 'value': 600}]]);
 
-        expect(transaction.rows[0].stp).toEqual([{'key': 69, 'value': 129}]);
+        expect(transaction.rows[0].stp).toEqual([{'first': 69, 'second': 129}]);
 
         expect(transaction.rows[0].stt).toEqual([{'field_0': 1, 'field_1': 2}, {'field_0': 36, 'field_1': 46}, {'field_0': 56, 'field_1': 66}]);
 
@@ -269,7 +269,7 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].vm).toEqual([[{'key': 30, 'value': 300}], [{'key': 60, 'value': 600}]]);
 
-        expect(transaction.rows[0].vp).toEqual([{'key': 69, 'value': 129}, {'key': 69, 'value': 129}]);
+        expect(transaction.rows[0].vp).toEqual([{'first': 69, 'second': 129}, {'first': 69, 'second': 129}]);
 
         expect(transaction.rows[0].vt).toEqual([{'field_0': 10, 'field_1': 20}, {'field_0': 30, 'field_1': 40}, {'field_0': 50, 'field_1': 60}]);
 
@@ -285,7 +285,7 @@ describe('eosjs-nested-container', () => {
         expect(transaction.rows[0].om).toEqual([{'key': 10, 'value': 1000}, {'key': 11, 'value': 1001}]);
         expect(transaction.rows[1].om).toEqual(null);
 
-        expect(transaction.rows[0].op).toEqual({'key': 60, 'value': 61});
+        expect(transaction.rows[0].op).toEqual({'first': 60, 'second': 61});
         expect(transaction.rows[1].op).toEqual(null);
 
         expect(transaction.rows[0].ot).toEqual({'field_0': 1001, 'field_1': 2001});
@@ -299,22 +299,22 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].mm).toEqual([{'key': 10, 'value': [{'key': 200, 'value': 2000}, {'key': 201, 'value': 2001}]}, {'key': 11, 'value': [{'key': 300, 'value': 3000}, {'key': 301, 'value': 3001}]}]);
 
-        expect(transaction.rows[0].mp).toEqual([{'key': 36, 'value': {'key': 300, 'value': 301}}, {'key': 37, 'value': {'key': 600, 'value': 601}}]);
+        expect(transaction.rows[0].mp).toEqual([{'key': 36, 'value': {'first': 300, 'second': 301}}, {'key': 37, 'value': {'first': 600, 'second': 601}}]);
 
         expect(transaction.rows[0].mt).toEqual([{'key': 1, 'value': {'field_0': 10, 'field_1': 11}}, {'key': 2, 'value': {'field_0': 200, 'field_1': 300}}]);
 
-        expect(transaction.rows[0].pst).toEqual({'key': 20, 'value': [200, 202]});
+        expect(transaction.rows[0].pst).toEqual({'first': 20, 'second': [200, 202]});
 
-        expect(transaction.rows[0].pv).toEqual({'key': 10, 'value': [100, 100, 102]});
+        expect(transaction.rows[0].pv).toEqual({'first': 10, 'second': [100, 100, 102]});
 
-        expect(transaction.rows[0].po).toEqual({'key': 70, 'value': 71});
-        expect(transaction.rows[1].po).toEqual({'key': 70, 'value': null});
+        expect(transaction.rows[0].po).toEqual({'first': 70, 'second': 71});
+        expect(transaction.rows[1].po).toEqual({'first': 70, 'second': null});
 
-        expect(transaction.rows[0].pm).toEqual({'key': 6, 'value': [{'key': 20, 'value': 300}, {'key': 21, 'value': 301}]});
+        expect(transaction.rows[0].pm).toEqual({'first': 6, 'second': [{'key': 20, 'value': 300}, {'key': 21, 'value': 301}]});
 
-        expect(transaction.rows[0].pp).toEqual({'key': 30, 'value': {'key': 301, 'value': 302}});
+        expect(transaction.rows[0].pp).toEqual({'first': 30, 'second': {'first': 301, 'second': 302}});
 
-        expect(transaction.rows[0].pt).toEqual({'key': 10, 'value': {'field_0': 100, 'field_1': 101}});
+        expect(transaction.rows[0].pt).toEqual({'first': 10, 'second': {'field_0': 100, 'field_1': 101}});
 
         expect(transaction.rows[0].tst).toEqual({'field_0': 10, 'field_1': [21, 31], 'field_2': [41, 51, 61]});
 
@@ -325,7 +325,7 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].tm).toEqual({'field_0': 126, 'field_1': [{'key': 10, 'value': 100}, {'key': 11, 'value': 101}], 'field_2': [{'key': 80, 'value': 800}, {'key': 81, 'value': 9009}]});
 
-        expect(transaction.rows[0].tp).toEqual({'field_0': 127, 'field_1': {'key': 18, 'value': 28}, 'field_2': {'key': 19, 'value': 29}});
+        expect(transaction.rows[0].tp).toEqual({'field_0': 127, 'field_1': {'first': 18, 'second': 28}, 'field_2': {'first': 19, 'second': 29}});
 
         expect(transaction.rows[0].tt).toEqual({'field_0': {'field_0': 1, 'field_1': 2}, 'field_1': {'field_0': 30, 'field_1': 40}, 'field_2': {'field_0': 50, 'field_1': 60}});
 
@@ -361,7 +361,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for set< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setstp(1, [{'key': 69, 'value': 129}, {'key': 69, 'value': 129}]) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setstp(1, [{'first': 69, 'second': 129}, {'first': 69, 'second': 129}]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for set< tuple< uint16_t, uint16_t >>
@@ -391,7 +391,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for vector< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setvp(1, [{'key': 69, 'value': 129}, {'key': 69, 'value': 129}]) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setvp(1, [{'first': 69, 'second': 129}, {'first': 69, 'second': 129}]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for vector< tuple< uint16_t, uint16_t >>
@@ -433,7 +433,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for optional< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setop(1, {'key': 60, 'value': 61}) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setop(1, {'first': 60, 'second': 61}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
         await api.transact({
             actions: [ api.with('nestcontn2kv').as('bob').setop(2, null) ]
@@ -469,7 +469,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for map< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setmp(1, [{'key': 36, 'value': {'key': 300, 'value': 301}}, {'key': 37, 'value': {'key': 600, 'value': 601}} ]) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setmp(1, [{'key': 36, 'value': {'first': 300, 'second': 301}}, {'key': 37, 'value': {'first': 600, 'second': 601}} ]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for map< tuple< uint16_t, uint16_t >>
@@ -479,35 +479,35 @@ describe('eosjs-nested-container', () => {
 
         // Test action for pair< set< uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setpst(1, {'key': 20, 'value': [200, 200, 202]}) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setpst(1, {'first': 20, 'second': [200, 200, 202]}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< vector< uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setpv(1, {'key': 10, 'value': [100, 100, 102]}) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setpv(1, {'first': 10, 'second': [100, 100, 102]}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< optional< uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setpo(1, {'key': 70, 'value': 71}) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setpo(1, {'first': 70, 'second': 71}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('bob').setpo(2, {'key': 70, 'value': null}) ]
+            actions: [ api.with('nestcontn2kv').as('bob').setpo(2, {'first': 70, 'second': null}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< map< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setpm(1, {'key': 6, 'value': [{'key': 20, 'value': 300}, {'key': 21,'value': 301}] }) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setpm(1, {'first': 6, 'second': [{'key': 20, 'value': 300}, {'key': 21,'value': 301}] }) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setpp(1, {'key': 30, 'value': {'key': 301, 'value': 302} }) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setpp(1, {'first': 30, 'second': {'first': 301, 'second': 302} }) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for pair< tuple< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').setpt(1, {'key':10, 'value':[100,101]}) ]
+            actions: [ api.with('nestcontn2kv').as('alice').setpt(1, {'first':10, 'second':[100,101]}) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for tuple< uint16_t, set< uint16_t >, set< uint16_t >>
@@ -535,7 +535,7 @@ describe('eosjs-nested-container', () => {
 
         // Test action for tuple< uint16_t, pair< uint16_t, uint16_t >, pair< uint16_t, uint16_t >>
         await api.transact({
-            actions: [ api.with('nestcontn2kv').as('alice').settp(1, [127, {'key':18, 'value':28}, {'key':19, 'value':29}]) ]
+            actions: [ api.with('nestcontn2kv').as('alice').settp(1, [127, {'first':18, 'second':28}, {'first':19, 'second':29}]) ]
         }, { blocksBehind: 3, expireSeconds: 30 });
 
         // Test action for tuple< tuple< uint16_t, uint16_t >, tuple< uint16_t, uint16_t >, tuple< uint16_t, uint16_t >>
@@ -570,7 +570,7 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].stm).toEqual([[{'key': 30, 'value': 300}], [{'key': 60, 'value': 600}]]);
 
-        expect(transaction.rows[0].stp).toEqual([{'key': 69, 'value': 129}]);
+        expect(transaction.rows[0].stp).toEqual([{'first': 69, 'second': 129}]);
 
         expect(transaction.rows[0].stt).toEqual([{'field_0': 1, 'field_1': 2}, {'field_0': 36, 'field_1': 46}, {'field_0': 56, 'field_1': 66}]);
 
@@ -582,7 +582,7 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].vm).toEqual([[{'key': 30, 'value': 300}], [{'key': 60, 'value': 600}]]);
 
-        expect(transaction.rows[0].vp).toEqual([{'key': 69, 'value': 129}, {'key': 69, 'value': 129}]);
+        expect(transaction.rows[0].vp).toEqual([{'first': 69, 'second': 129}, {'first': 69, 'second': 129}]);
 
         expect(transaction.rows[0].vt).toEqual([{'field_0': 10, 'field_1': 20}, {'field_0': 30, 'field_1': 40}, {'field_0': 50, 'field_1': 60}]);
 
@@ -598,7 +598,7 @@ describe('eosjs-nested-container', () => {
         expect(transaction.rows[0].om).toEqual([{'key': 10, 'value': 1000}, {'key': 11, 'value': 1001}]);
         expect(transaction.rows[1].om).toEqual(null);
 
-        expect(transaction.rows[0].op).toEqual({'key': 60, 'value': 61});
+        expect(transaction.rows[0].op).toEqual({'first': 60, 'second': 61});
         expect(transaction.rows[1].op).toEqual(null);
 
         expect(transaction.rows[0].ot).toEqual({'field_0': 1001, 'field_1': 2001});
@@ -612,22 +612,22 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].mm).toEqual([{'key': 10, 'value': [{'key': 200, 'value': 2000}, {'key': 201, 'value': 2001}]}, {'key': 11, 'value': [{'key': 300, 'value': 3000}, {'key': 301, 'value': 3001}]}]);
 
-        expect(transaction.rows[0].mp).toEqual([{'key': 36, 'value': {'key': 300, 'value': 301}}, {'key': 37, 'value': {'key': 600, 'value': 601}}]);
+        expect(transaction.rows[0].mp).toEqual([{'key': 36, 'value': {'first': 300, 'second': 301}}, {'key': 37, 'value': {'first': 600, 'second': 601}}]);
 
         expect(transaction.rows[0].mt).toEqual([{'key': 1, 'value': {'field_0': 10, 'field_1': 11}}, {'key': 2, 'value': {'field_0': 200, 'field_1': 300}}]);
 
-        expect(transaction.rows[0].pst).toEqual({'key': 20, 'value': [200, 202]});
+        expect(transaction.rows[0].pst).toEqual({'first': 20, 'second': [200, 202]});
 
-        expect(transaction.rows[0].pv).toEqual({'key': 10, 'value': [100, 100, 102]});
+        expect(transaction.rows[0].pv).toEqual({'first': 10, 'second': [100, 100, 102]});
 
-        expect(transaction.rows[0].po).toEqual({'key': 70, 'value': 71});
-        expect(transaction.rows[1].po).toEqual({'key': 70, 'value': null});
+        expect(transaction.rows[0].po).toEqual({'first': 70, 'second': 71});
+        expect(transaction.rows[1].po).toEqual({'first': 70, 'second': null});
 
-        expect(transaction.rows[0].pm).toEqual({'key': 6, 'value': [{'key': 20, 'value': 300}, {'key': 21, 'value': 301}]});
+        expect(transaction.rows[0].pm).toEqual({'first': 6, 'second': [{'key': 20, 'value': 300}, {'key': 21, 'value': 301}]});
 
-        expect(transaction.rows[0].pp).toEqual({'key': 30, 'value': {'key': 301, 'value': 302}});
+        expect(transaction.rows[0].pp).toEqual({'first': 30, 'second': {'first': 301, 'second': 302}});
 
-        expect(transaction.rows[0].pt).toEqual({'key': 10, 'value': {'field_0': 100, 'field_1': 101}});
+        expect(transaction.rows[0].pt).toEqual({'first': 10, 'second': {'field_0': 100, 'field_1': 101}});
 
         expect(transaction.rows[0].tst).toEqual({'field_0': 10, 'field_1': [21, 31], 'field_2': [41, 51, 61]});
 
@@ -639,7 +639,7 @@ describe('eosjs-nested-container', () => {
 
         expect(transaction.rows[0].tm).toEqual({'field_0': 126, 'field_1': [{'key': 10, 'value': 100}, {'key': 11, 'value': 101}], 'field_2': [{'key': 80, 'value': 800}, {'key': 81, 'value': 9009}]});
 
-        expect(transaction.rows[0].tp).toEqual({'field_0': 127, 'field_1': {'key': 18, 'value': 28}, 'field_2': {'key': 19, 'value': 29}});
+        expect(transaction.rows[0].tp).toEqual({'field_0': 127, 'field_1': {'first': 18, 'second': 28}, 'field_2': {'first': 19, 'second': 29}});
 
         expect(transaction.rows[0].tt).toEqual({'field_0': {'field_0': 1, 'field_1': 2}, 'field_1': {'field_0': 30, 'field_1': 40}, 'field_2': {'field_0': 50, 'field_1': 60}});
 
