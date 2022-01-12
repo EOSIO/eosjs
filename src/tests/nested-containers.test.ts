@@ -26,6 +26,8 @@ describe('eosjs-nested-container', () => {
     it('should test Multi Index nested containers', async () => {
         jest.setTimeout(30000);
 
+        // Tests from https://github.com/EOSIO/eos/blob/develop/tests/nested_container_multi_index_test.py
+        // Contract from https://github.com/EOSIO/eos/tree/develop/unittests/test-contracts/nested_container_multi_index
         await api.getAbi('nestcontnmi');
 
         // Test action for set< set< uint16_t >>
@@ -337,6 +339,8 @@ describe('eosjs-nested-container', () => {
     it('should test Key-Value nested containers', async () => {
         jest.setTimeout(30000);
 
+        // Tests from https://github.com/EOSIO/eos/blob/develop/tests/nested_container_kv_test.py
+        // Contract from https://github.com/EOSIO/eos/tree/develop/unittests/test-contracts/nested_container_kv
         await api.getAbi('nestcontn2kv');
 
         // Test action for set< set< uint16_t >>
