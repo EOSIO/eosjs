@@ -699,6 +699,12 @@ function serializeStruct(
     if (this.base) {
         this.base.serialize(buffer, data, state, allowExtensions);
     }
+    if (Array.isArray(data)) { // Tuple
+        this.fields.forEach((field: Field, index: number) => {
+            field.type.serialize(buffer, data[index], state, allowExtensions);
+        });
+        return;
+    }
     for (const field of this.fields) {
         if (field.name in data) {
             if (state.skippedBinaryExtension) {
