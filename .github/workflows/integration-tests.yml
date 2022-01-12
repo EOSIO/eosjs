@@ -86,11 +86,15 @@ jobs:
         env:
           NODEOS_VER: 'release/2.1.x'
           COVERAGE_TESTING: true
+      - name: Test Types
+        run: |
+          yarn test-types
       - name: Copy Coverage Files
         run: |
           mkdir -p ./coverage/multiple-sources
           cp ./coverage/test/coverage-final.json ./coverage/multiple-sources/test.json
           cp ./coverage/test-node/coverage-final.json ./coverage/multiple-sources/test-node.json
+          cp ./coverage/test-types/coverage-final.json ./coverage/multiple-sources/test-types.json
           ./node_modules/nyc/bin/nyc.js merge ./coverage/multiple-sources ./coverage/merged-output/coverage.json
           ./node_modules/nyc/bin/nyc.js report -t ./coverage/merged-output --report-dir ./coverage/merged-report --reporter=html
       - name: Build
