@@ -33,6 +33,7 @@ import {
     ReadOnlyTransactResult,
 } from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
+import { abiEosioNull } from './static-abi';
 
 export class Api {
     /** Issues RPC calls */
@@ -63,7 +64,7 @@ export class Api {
     public contracts = new Map<string, ser.Contract>();
 
     /** Fetched abis */
-    public cachedAbis = new Map<string, CachedAbi>();
+    public cachedAbis = new Map<string, CachedAbi>([abiEosioNull]);
 
     /**
      * @param args
