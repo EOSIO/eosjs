@@ -15,13 +15,13 @@ jobs:
           HAS_SECRET: ${{ secrets.NPM_AUTH_TOKEN != null }}
       - name: Succeed job on existing NPM_AUTH_TOKEN
         if: ${{ steps.check_token.outputs.token_exists == 'true' }}
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           script: |
             core.setOutput('Success. NPM_AUTH_TOKEN is present in repository secrets.');
       - name: Fail on missing NPM_AUTH_TOKEN
         if: ${{ steps.check_token.outputs.token_exists == 'false' }}
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           script: |
             core.setFailed('Failure: No NPM_AUTH_TOKEN present in repository secrets.');
