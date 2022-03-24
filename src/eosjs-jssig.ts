@@ -4,6 +4,7 @@
 // copyright defined in eosjs/LICENSE.txt
 
 import { ec } from 'elliptic';
+import { Buffer } from 'buffer';
 
 import { SignatureProvider, SignatureProviderArgs } from './eosjs-api-interfaces';
 import { PushTransactionArgs } from './eosjs-rpc-interfaces';

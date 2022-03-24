@@ -1,4 +1,5 @@
 import { ec as EC } from 'elliptic';
+import { Buffer } from 'buffer';
 import {
     Key,
     KeyType,
