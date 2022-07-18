@@ -26,7 +26,7 @@ jobs:
         with:
           token: ${{ github.token }}
       - name: Setup Node.js v16.x.x
-        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
         with:
           node-version: '16'
           registry-url: 'https://registry.npmjs.org'
