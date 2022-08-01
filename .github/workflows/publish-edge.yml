@@ -58,7 +58,7 @@ jobs:
         run: |
           yarn build-web
       - name: Test Web
-        uses: cypress-io/github-action@2113e5bc19c45979ba123df6e07256d2aaba9a33
+        uses: cypress-io/github-action@30008f1458a5a2c97054bfe118fe33d75976c482
         with:
           spec: cypress/integration/index.spec.js
       - name: Publish Edge
